@@ -77,15 +77,42 @@ networkx_mcp_server.log
 cache/
 temp/
 *.tmp
+redis-data/
+dumps/
+backups/
 
-# Visualization outputs
+# Visualization outputs (keep examples)
 *.png
 *.svg
 *.pdf
-*.html
+visualization_outputs/
+output/
 
 # Data files (examples)
 examples/data/*.csv
 examples/data/*.json
 examples/output/
-EOF < /dev/null
+
+# Documentation build artifacts
+docs/_build/
+site/
+
+# Test artifacts
+test-reports/
+.coverage.*
+
+# Security & secrets
+.secrets
+.env.local
+.env.production
+*.pem
+*.key
+*.crt
+
+# Monitoring data
+monitoring-data/
+metrics/
+
+# Package distribution
+MANIFEST.in
+twine.log
