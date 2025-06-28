@@ -1,7 +1,13 @@
 """Core graph operations for NetworkX MCP server."""
 
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Tuple, Union
+from datetime import datetime
+from datetime import timezone
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
+from typing import Union
 
 import networkx as nx
 
@@ -20,17 +26,18 @@ class GraphManager:
         **kwargs
     ) -> Dict[str, Any]:
         """Create a new graph instance.
-        
+
         Args:
             graph_id: Unique identifier for the graph
             graph_type: Type of graph (Graph, DiGraph, MultiGraph, MultiDiGraph)
             **kwargs: Additional graph attributes
-            
+
         Returns:
             Dict containing graph info and creation status
         """
         if graph_id in self.graphs:
-            raise ValueError(f"Graph with id '{graph_id}' already exists")
+            msg = f"Graph with id '{graph_id}' already exists"
+            raise ValueError(msg)
 
         graph_classes = {
             "Graph": nx.Graph,
@@ -40,7 +47,8 @@ class GraphManager:
         }
 
         if graph_type not in graph_classes:
-            raise ValueError(f"Invalid graph type: {graph_type}")
+            msg = f"Invalid graph type: {graph_type}"
+            raise ValueError(msg)
 
         self.graphs[graph_id] = graph_classes[graph_type](**kwargs)
         self.metadata[graph_id] = {
@@ -59,13 +67,15 @@ class GraphManager:
     def get_graph(self, graph_id: str) -> nx.Graph:
         """Get a graph by ID."""
         if graph_id not in self.graphs:
-            raise KeyError(f"Graph '{graph_id}' not found")
+            msg = f"Graph '{graph_id}' not found"
+            raise KeyError(msg)
         return self.graphs[graph_id]
 
     def delete_graph(self, graph_id: str) -> Dict[str, Any]:
         """Delete a graph by ID."""
         if graph_id not in self.graphs:
-            raise KeyError(f"Graph '{graph_id}' not found")
+            msg = f"Graph '{graph_id}' not found"
+            raise KeyError(msg)
 
         del self.graphs[graph_id]
         del self.metadata[graph_id]
@@ -154,7 +164,8 @@ class GraphManager:
         """Remove a node from a graph."""
         graph = self.get_graph(graph_id)
         if node_id not in graph:
-            raise ValueError(f"Node '{node_id}' not in graph")
+            msg = f"Node '{node_id}' not in graph"
+            raise ValueError(msg)
 
         graph.remove_node(node_id)
 
@@ -173,7 +184,8 @@ class GraphManager:
         """Remove an edge from a graph."""
         graph = self.get_graph(graph_id)
         if not graph.has_edge(source, target):
-            raise ValueError(f"Edge ({source}, {target}) not in graph")
+            msg = f"Edge ({source}, {target}) not in graph"
+            raise ValueError(msg)
 
         graph.remove_edge(source, target)
 
@@ -215,7 +227,8 @@ class GraphManager:
         """Get neighbors of a node."""
         graph = self.get_graph(graph_id)
         if node_id not in graph:
-            raise ValueError(f"Node '{node_id}' not in graph")
+            msg = f"Node '{node_id}' not in graph"
+            raise ValueError(msg)
 
         return list(graph.neighbors(node_id))
 
@@ -230,7 +243,8 @@ class GraphManager:
 
         if node_id is not None:
             if node_id not in graph:
-                raise ValueError(f"Node '{node_id}' not in graph")
+                msg = f"Node '{node_id}' not in graph"
+                raise ValueError(msg)
             return graph.nodes[node_id]
 
         if attribute is not None:
@@ -249,7 +263,8 @@ class GraphManager:
 
         if edge is not None:
             if not graph.has_edge(*edge):
-                raise ValueError(f"Edge {edge} not in graph")
+                msg = f"Edge {edge} not in graph"
+                raise ValueError(msg)
             return graph.edges[edge]
 
         if attribute is not None:

@@ -2,10 +2,16 @@
 
 import logging
 import random
-from typing import Any, Dict, List, Optional, Tuple
+
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
 
 import networkx as nx
 import numpy as np
+
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +31,7 @@ class GraphGenerators:
     ) -> Tuple[nx.Graph, Dict[str, Any]]:
         """
         Generate random graphs using various models.
-        
+
         Parameters:
         -----------
         n : int
@@ -40,7 +46,7 @@ class GraphGenerators:
             Random seed
         directed : bool
             Whether to create directed graph
-            
+
         Returns:
         --------
         Tuple of (graph, metadata)
@@ -92,7 +98,8 @@ class GraphGenerators:
             }
 
         else:
-            raise ValueError(f"Unknown random graph type: {graph_type}")
+            msg = f"Unknown random graph type: {graph_type}"
+            raise ValueError(msg)
 
         # Add node attributes
         for i, node in enumerate(G.nodes()):
@@ -117,7 +124,7 @@ class GraphGenerators:
     ) -> Tuple[nx.Graph, Dict[str, Any]]:
         """
         Generate scale-free graphs using various models.
-        
+
         Parameters:
         -----------
         n : int
@@ -130,7 +137,7 @@ class GraphGenerators:
             Parameters for extended BA model
         model : str
             Model type: 'barabasi_albert', 'extended_ba', 'powerlaw_cluster'
-            
+
         Returns:
         --------
         Tuple of (graph, metadata)
@@ -206,7 +213,8 @@ class GraphGenerators:
             }
 
         else:
-            raise ValueError(f"Unknown scale-free model: {model}")
+            msg = f"Unknown scale-free model: {model}"
+            raise ValueError(msg)
 
         # Calculate power-law exponent estimate
         degrees = [d for n, d in G.degree()]
@@ -235,7 +243,7 @@ class GraphGenerators:
     ) -> Tuple[nx.Graph, Dict[str, Any]]:
         """
         Generate small-world graphs.
-        
+
         Parameters:
         -----------
         n : int
@@ -246,7 +254,7 @@ class GraphGenerators:
             Probability of rewiring each edge
         model : str
             Model type: 'watts_strogatz', 'newman_watts_strogatz', 'connected_watts_strogatz'
-            
+
         Returns:
         --------
         Tuple of (graph, metadata)
@@ -295,7 +303,8 @@ class GraphGenerators:
             }
 
         else:
-            raise ValueError(f"Unknown small-world model: {model}")
+            msg = f"Unknown small-world model: {model}"
+            raise ValueError(msg)
 
         # Calculate small-world metrics
         if n < 1000:  # Only for smaller graphs
@@ -332,7 +341,7 @@ class GraphGenerators:
     ) -> Tuple[nx.Graph, Dict[str, Any]]:
         """
         Generate regular graphs where every node has the same degree.
-        
+
         Parameters:
         -----------
         n : int
@@ -341,7 +350,7 @@ class GraphGenerators:
             Degree of each node
         graph_type : str
             Type: 'random_regular', 'circulant', 'cycle', 'complete'
-            
+
         Returns:
         --------
         Tuple of (graph, metadata)
@@ -353,7 +362,8 @@ class GraphGenerators:
         if graph_type == "random_regular":
             # Random d-regular graph
             if n * d % 2 != 0:
-                raise ValueError("n * d must be even for regular graphs")
+                msg = "n * d must be even for regular graphs"
+                raise ValueError(msg)
 
             G = nx.random_regular_graph(d, n, seed=seed)
 
@@ -412,7 +422,8 @@ class GraphGenerators:
             }
 
         else:
-            raise ValueError(f"Unknown regular graph type: {graph_type}")
+            msg = f"Unknown regular graph type: {graph_type}"
+            raise ValueError(msg)
 
         return G, metadata
 
@@ -426,7 +437,7 @@ class GraphGenerators:
     ) -> Tuple[nx.Graph, Dict[str, Any]]:
         """
         Generate tree graphs.
-        
+
         Parameters:
         -----------
         n : int
@@ -435,7 +446,7 @@ class GraphGenerators:
             Type: 'random', 'balanced', 'star', 'path', 'caterpillar'
         branching : int
             Branching factor for balanced trees
-            
+
         Returns:
         --------
         Tuple of (graph, metadata)
@@ -524,7 +535,8 @@ class GraphGenerators:
             }
 
         else:
-            raise ValueError(f"Unknown tree type: {tree_type}")
+            msg = f"Unknown tree type: {tree_type}"
+            raise ValueError(msg)
 
         # Add tree-specific metrics
         if n > 0 and nx.is_tree(G):
@@ -542,7 +554,7 @@ class GraphGenerators:
     @staticmethod
     def geometric_graph(
         n: int,
-        radius: float = None,
+        radius: Optional[float] = None,
         dim: int = 2,
         pos: Optional[Dict] = None,
         p: float = 2,
@@ -552,7 +564,7 @@ class GraphGenerators:
     ) -> Tuple[nx.Graph, Dict[str, Any]]:
         """
         Generate geometric graphs.
-        
+
         Parameters:
         -----------
         n : int
@@ -565,7 +577,7 @@ class GraphGenerators:
             Minkowski distance metric parameter
         graph_type : str
             Type: 'random_geometric', 'soft_random_geometric', 'geographical_threshold'
-            
+
         Returns:
         --------
         Tuple of (graph, metadata)
@@ -664,10 +676,11 @@ class GraphGenerators:
             }
 
         else:
-            raise ValueError(f"Unknown geometric graph type: {graph_type}")
+            msg = f"Unknown geometric graph type: {graph_type}"
+            raise ValueError(msg)
 
         # Store positions if not already stored
-        if "pos" not in G.nodes[list(G.nodes())[0]]:
+        if "pos" not in G.nodes[next(iter(G.nodes()))]:
             if pos is None:
                 pos = {i: np.random.rand(dim) for i in G.nodes()}
             nx.set_node_attributes(G, pos, "pos")
@@ -705,7 +718,7 @@ class GraphGenerators:
     ) -> Tuple[nx.Graph, Dict[str, Any]]:
         """
         Generate social network models.
-        
+
         Parameters:
         -----------
         n : int
@@ -722,7 +735,7 @@ class GraphGenerators:
             Power-law exponents for LFR model
         mu : float
             Mixing parameter for LFR model
-            
+
         Returns:
         --------
         Tuple of (graph, metadata)
@@ -846,10 +859,11 @@ class GraphGenerators:
             }
 
         else:
-            raise ValueError(f"Unknown social network model: {model}")
+            msg = f"Unknown social network model: {model}"
+            raise ValueError(msg)
 
         # Calculate community statistics
-        if "community" in G.nodes[list(G.nodes())[0]]:
+        if "community" in G.nodes[next(iter(G.nodes()))]:
             comm_nodes = {}
             for node in G.nodes():
                 comm = G.nodes[node].get("community")
@@ -890,7 +904,7 @@ class GraphGenerators:
     ) -> Tuple[nx.Graph, Dict[str, Any]]:
         """
         Generate graph from a given degree sequence.
-        
+
         Parameters:
         -----------
         degree_sequence : List[int]
@@ -899,7 +913,7 @@ class GraphGenerators:
             Method: 'configuration', 'expected_degree', 'havel_hakimi'
         create_using : nx.Graph
             Graph type to create
-            
+
         Returns:
         --------
         Tuple of (graph, metadata)
@@ -910,7 +924,8 @@ class GraphGenerators:
 
         # Validate degree sequence
         if sum(degree_sequence) % 2 != 0:
-            raise ValueError("Sum of degree sequence must be even")
+            msg = "Sum of degree sequence must be even"
+            raise ValueError(msg)
 
         n = len(degree_sequence)
 
@@ -918,7 +933,8 @@ class GraphGenerators:
         is_graphical = nx.is_graphical(degree_sequence)
 
         if not is_graphical and method == "havel_hakimi":
-            raise ValueError("Degree sequence is not graphical")
+            msg = "Degree sequence is not graphical"
+            raise ValueError(msg)
 
         if method == "configuration":
             # Configuration model (may have multi-edges and self-loops)
@@ -964,7 +980,8 @@ class GraphGenerators:
             }
 
         else:
-            raise ValueError(f"Unknown method: {method}")
+            msg = f"Unknown method: {method}"
+            raise ValueError(msg)
 
         # Add degree sequence statistics
         metadata.update({

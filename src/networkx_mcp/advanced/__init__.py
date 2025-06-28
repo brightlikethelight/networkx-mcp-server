@@ -1,21 +1,22 @@
 """Advanced analytics modules for NetworkX MCP server."""
 
-from .bipartite_analysis import BipartiteAnalysis
-from .community_detection import CommunityDetection
-from .directed_analysis import DirectedAnalysis
-from .generators import GraphGenerators
-from .ml_integration import MLIntegration
-from .network_flow import NetworkFlow
-from .robustness import RobustnessAnalysis
-from .specialized import SpecializedAlgorithms
+from networkx_mcp.advanced.bipartite_analysis import BipartiteAnalysis
+from networkx_mcp.advanced.community_detection import CommunityDetection
+from networkx_mcp.advanced.directed_analysis import DirectedAnalysis
+from networkx_mcp.advanced.generators import GraphGenerators
+from networkx_mcp.advanced.ml_integration import MLIntegration
+from networkx_mcp.advanced.network_flow import NetworkFlow
+from networkx_mcp.advanced.robustness import RobustnessAnalysis
+from networkx_mcp.advanced.specialized import SpecializedAlgorithms
+
 
 __all__ = [
-    "CommunityDetection",
-    "NetworkFlow",
-    "GraphGenerators",
     "BipartiteAnalysis",
+    "CommunityDetection",
     "DirectedAnalysis",
-    "SpecializedAlgorithms",
+    "GraphGenerators",
     "MLIntegration",
-    "RobustnessAnalysis"
+    "NetworkFlow",
+    "RobustnessAnalysis",
+    "SpecializedAlgorithms",
 ]

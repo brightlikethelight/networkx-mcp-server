@@ -8,25 +8,33 @@ import logging
 import multiprocessing as mp
 import threading
 import time
+
 from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any
+from typing import Callable
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
+from typing import Union
 
 import networkx as nx
 import schedule
+
 from jinja2 import Template
 from reportlab.lib.pagesizes import letter
-from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
-from reportlab.platypus import (
-    Image,
-    PageBreak,
-    Paragraph,
-    SimpleDocTemplate,
-    Spacer,
-    Table,
-)
+from reportlab.platypus import Image
+from reportlab.platypus import PageBreak
+from reportlab.platypus import Paragraph
+from reportlab.platypus import SimpleDocTemplate
+from reportlab.platypus import Spacer
+from reportlab.platypus import Table
+
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +42,7 @@ logger = logging.getLogger(__name__)
 class EnterpriseFeatures:
     """Enterprise-grade features for production deployments."""
 
-    def __init__(self, cache_dir: str = "./cache", max_workers: int = None):
+    def __init__(self, cache_dir: str = "./cache", max_workers: Optional[int] = None):
         """Initialize enterprise features with caching and worker pool."""
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(exist_ok=True)
@@ -53,7 +61,7 @@ class EnterpriseFeatures:
     ) -> Dict[str, Any]:
         """
         Process multiple graphs in parallel with batching.
-        
+
         Parameters:
         -----------
         graphs : list
@@ -66,7 +74,7 @@ class EnterpriseFeatures:
             Batch size for processing
         progress_callback : callable
             Progress notification callback
-        
+
         Returns:
         --------
         Dict containing results for all graphs
@@ -135,7 +143,7 @@ class EnterpriseFeatures:
     ) -> Dict[str, Any]:
         """
         Chain operations with intermediate caching.
-        
+
         Parameters:
         -----------
         graph : nx.Graph
@@ -144,7 +152,7 @@ class EnterpriseFeatures:
             List of workflow steps
         cache_intermediate : bool
             Cache intermediate results
-        
+
         Returns:
         --------
         Dict containing workflow results
@@ -202,7 +210,7 @@ class EnterpriseFeatures:
     ) -> Union[bytes, str]:
         """
         Generate automated PDF/HTML reports.
-        
+
         Parameters:
         -----------
         graph_analysis : dict
@@ -213,7 +221,7 @@ class EnterpriseFeatures:
             Output format: 'pdf' or 'html'
         include_visualizations : bool
             Include graph visualizations
-        
+
         Returns:
         --------
         Report content (bytes for PDF, string for HTML)
@@ -229,7 +237,8 @@ class EnterpriseFeatures:
                 graph_analysis, template, timestamp, include_visualizations, **kwargs
             )
         else:
-            raise ValueError(f"Unsupported format: {format}")
+            msg = f"Unsupported format: {format}"
+            raise ValueError(msg)
 
     def alert_system(
         self,
@@ -239,7 +248,7 @@ class EnterpriseFeatures:
     ) -> List[Dict[str, Any]]:
         """
         Anomaly detection and alerting system.
-        
+
         Parameters:
         -----------
         graph : nx.Graph
@@ -248,7 +257,7 @@ class EnterpriseFeatures:
             List of alert rule configurations
         notification_callback : callable
             Function to call for notifications
-        
+
         Returns:
         --------
         List of triggered alerts
@@ -276,7 +285,7 @@ class EnterpriseFeatures:
                     if nx.is_connected(graph):
                         value = nx.diameter(graph)
                     else:
-                        value = float('inf')
+                        value = float("inf")
                 else:
                     continue
 
@@ -360,14 +369,14 @@ class EnterpriseFeatures:
     ) -> str:
         """
         Schedule periodic analysis execution.
-        
+
         Parameters:
         -----------
         job_config : dict
             Job configuration including schedule and operation
         start_immediately : bool
             Start scheduler immediately
-        
+
         Returns:
         --------
         Job ID
@@ -441,7 +450,7 @@ class EnterpriseFeatures:
     ) -> str:
         """
         Graph version control.
-        
+
         Parameters:
         -----------
         graph : nx.Graph
@@ -450,7 +459,7 @@ class EnterpriseFeatures:
             Version name/tag
         metadata : dict, optional
             Additional metadata
-        
+
         Returns:
         --------
         Version ID
@@ -620,7 +629,8 @@ class EnterpriseFeatures:
         if operation in operations:
             return operations[operation](graph, **params)
         else:
-            raise ValueError(f"Unknown operation: {operation}")
+            msg = f"Unknown operation: {operation}"
+            raise ValueError(msg)
 
     def _evaluate_condition(self, result: Dict[str, Any], condition: Dict[str, Any]) -> bool:
         """Evaluate workflow condition."""
@@ -685,14 +695,14 @@ class EnterpriseFeatures:
         <body>
             <h1>Network Analysis Report</h1>
             <p>Generated: {{ timestamp }}</p>
-            
+
             <h2>Summary</h2>
             <div class="metric">
                 <p>Nodes: {{ num_nodes }}</p>
                 <p>Edges: {{ num_edges }}</p>
                 <p>Density: {{ density }}</p>
             </div>
-            
+
             {% if visualizations %}
             <h2>Visualizations</h2>
             {% for viz in visualizations %}
@@ -702,7 +712,7 @@ class EnterpriseFeatures:
             </div>
             {% endfor %}
             {% endif %}
-            
+
             <h2>Detailed Results</h2>
             {{ detailed_results }}
         </body>
@@ -742,20 +752,20 @@ class EnterpriseFeatures:
 
         # Title
         title_style = ParagraphStyle(
-            'CustomTitle',
-            parent=styles['Heading1'],
+            "CustomTitle",
+            parent=styles["Heading1"],
             fontSize=24,
-            textColor='HexColor(0x333333)'
+            textColor="HexColor(0x333333)"
         )
         story.append(Paragraph("Network Analysis Report", title_style))
         story.append(Spacer(1, 12))
 
         # Timestamp
-        story.append(Paragraph(f"Generated: {timestamp}", styles['Normal']))
+        story.append(Paragraph(f"Generated: {timestamp}", styles["Normal"]))
         story.append(Spacer(1, 12))
 
         # Summary section
-        story.append(Paragraph("Summary", styles['Heading2']))
+        story.append(Paragraph("Summary", styles["Heading2"]))
         summary_data = [
             ["Metric", "Value"],
             ["Number of Nodes", str(analysis.get("num_nodes", 0))],
@@ -766,19 +776,19 @@ class EnterpriseFeatures:
 
         summary_table = Table(summary_data)
         summary_table.setStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), 'HexColor(0xCCCCCC)'),
-            ('GRID', (0, 0), (-1, -1), 1, 'HexColor(0x000000)'),
-            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, -1), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+            ("BACKGROUND", (0, 0), (-1, 0), "HexColor(0xCCCCCC)"),
+            ("GRID", (0, 0), (-1, -1), 1, "HexColor(0x000000)"),
+            ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+            ("FONTSIZE", (0, 0), (-1, -1), 10),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
         ])
         story.append(summary_table)
         story.append(Spacer(1, 20))
 
         # Visualizations
         if include_viz and "visualizations" in analysis:
-            story.append(Paragraph("Visualizations", styles['Heading2']))
+            story.append(Paragraph("Visualizations", styles["Heading2"]))
             for viz in analysis["visualizations"]:
                 if viz.get("type") == "image" and viz.get("data"):
                     # Decode base64 image
@@ -789,8 +799,8 @@ class EnterpriseFeatures:
 
         # Detailed results
         story.append(PageBreak())
-        story.append(Paragraph("Detailed Results", styles['Heading2']))
-        story.append(Paragraph(self._format_detailed_results(analysis), styles['Normal']))
+        story.append(Paragraph("Detailed Results", styles["Heading2"]))
+        story.append(Paragraph(self._format_detailed_results(analysis), styles["Normal"]))
 
         # Build PDF
         doc.build(story)
@@ -836,7 +846,7 @@ class EnterpriseFeatures:
         historical = []
         base_value = current_value * 0.9
 
-        for i in range(periods - 1):
+        for _i in range(periods - 1):
             noise = np.random.normal(0, current_value * 0.1)
             historical.append(max(0, base_value + noise))
 

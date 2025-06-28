@@ -2,6 +2,7 @@
 
 import argparse
 import asyncio
+
 from pathlib import Path
 from typing import Optional
 
@@ -9,10 +10,12 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from .core.algorithms import GraphAlgorithms
-from .core.graph_operations import GraphManager
-from .core.io_handlers import GraphIOHandler
-from .utils.monitoring import OperationCounter, PerformanceMonitor
+from networkx_mcp.core.algorithms import GraphAlgorithms
+from networkx_mcp.core.graph_operations import GraphManager
+from networkx_mcp.core.io_handlers import GraphIOHandler
+from networkx_mcp.utils.monitoring import OperationCounter
+from networkx_mcp.utils.monitoring import PerformanceMonitor
+
 
 console = Console()
 
@@ -82,7 +85,7 @@ class NetworkXCLI:
         graph_type = args[1] if len(args) > 1 else "Graph"
 
         try:
-            result = self.graph_manager.create_graph(graph_id, graph_type)
+            self.graph_manager.create_graph(graph_id, graph_type)
             console.print(f"[green]✓ Created graph '{graph_id}' (type: {graph_type})[/green]")
             self.current_graph = graph_id
         except Exception as e:
@@ -140,8 +143,8 @@ Directed: {info['is_directed']}
 MultiGraph: {info['is_multigraph']}
             """
 
-            if 'degree_stats' in info:
-                stats = info['degree_stats']
+            if "degree_stats" in info:
+                stats = info["degree_stats"]
                 info_text += f"""
 Degree Stats:
   Average: {stats['average']:.2f}
@@ -184,7 +187,7 @@ Degree Stats:
         attrs = {"weight": float(args[2])} if len(args) > 2 else {}
 
         try:
-            result = self.graph_manager.add_edge(self.current_graph, source, target, **attrs)
+            self.graph_manager.add_edge(self.current_graph, source, target, **attrs)
             console.print(f"[green]✓ Added edge {source} -> {target}[/green]")
         except Exception as e:
             console.print(f"[red]✗ Error: {e}[/red]")
@@ -241,8 +244,8 @@ Degree Stats:
                 console.print(f"[green]Connected components: {result['num_components']}[/green]")
                 console.print(f"Is connected: {result.get('is_connected', 'N/A')}")
 
-                if result['num_components'] > 1:
-                    sizes = [len(comp) for comp in result['connected_components']]
+                if result["num_components"] > 1:
+                    sizes = [len(comp) for comp in result["connected_components"]]
                     console.print(f"Component sizes: {sizes[:10]}...")
 
             elif analysis_type == "metrics":
@@ -257,7 +260,7 @@ Max Degree: {stats['degree_stats']['max']}
 Min Degree: {stats['degree_stats']['min']}
                 """
 
-                if 'diameter' in stats:
+                if "diameter" in stats:
                     metrics_text += f"""
 Diameter: {stats['diameter']}
 Radius: {stats['radius']}
@@ -271,7 +274,7 @@ Radius: {stats['radius']}
                 console.print(f"Modularity: {result.get('modularity', 'N/A'):.4f}")
 
                 # Show community sizes
-                sizes = result.get('community_sizes', [])
+                sizes = result.get("community_sizes", [])
                 if sizes:
                     console.print(f"Community sizes: {sizes[:10]}...")
 
@@ -423,7 +426,7 @@ Total: {(node_time + edge_time + centrality_time + component_time)*1000:.2f} ms
                 cmd = parts[0].lower()
                 args = parts[1:]
 
-                if cmd == "exit" or cmd == "quit":
+                if cmd in {"exit", "quit"}:
                     console.print("[yellow]Goodbye![/yellow]")
                     break
 

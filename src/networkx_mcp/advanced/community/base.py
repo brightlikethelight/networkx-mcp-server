@@ -1,9 +1,16 @@
 """Base interfaces for community detection algorithms."""
 
-from abc import ABC, abstractmethod
-from typing import Dict, List, Set, Any, Optional, Union
+from abc import ABC
+from abc import abstractmethod
 from dataclasses import dataclass
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Set
+
 import networkx as nx
+
 
 @dataclass
 class CommunityResult:
@@ -16,16 +23,16 @@ class CommunityResult:
 
 class CommunityDetector(ABC):
     """Base class for community detection algorithms."""
-    
+
     def __init__(self, graph: nx.Graph):
         self.graph = graph
         self.name = self.__class__.__name__
-    
+
     @abstractmethod
     async def detect_communities(self, **params) -> CommunityResult:
         """Detect communities in the graph."""
         pass
-    
+
     def validate_graph(self) -> bool:
         """Validate graph is suitable for community detection."""
         if self.graph.number_of_nodes() < 2:
@@ -41,7 +48,7 @@ def validate_communities(communities: List[Set[str]], graph: nx.Graph) -> bool:
         if not community:  # Empty community
             return False
         all_nodes.update(community)
-    
+
     # Check all nodes are covered
     return all_nodes == set(graph.nodes())
 

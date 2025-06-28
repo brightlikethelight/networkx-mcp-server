@@ -5,14 +5,21 @@ import json
 import logging
 import sqlite3
 import time
+
 from collections.abc import Iterator
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
+from typing import Union
 
 import aiohttp
 import networkx as nx
 import numpy as np
 import pandas as pd
+
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +40,7 @@ class DataPipelines:
     ) -> Dict[str, Any]:
         """
         Intelligent CSV parsing with type inference.
-        
+
         Parameters:
         -----------
         filepath : str
@@ -46,7 +53,7 @@ class DataPipelines:
             Columns to use as edge attributes
         type_inference : bool
             Automatically infer data types
-        
+
         Returns:
         --------
         Dict containing graph and metadata
@@ -59,8 +66,8 @@ class DataPipelines:
         # Auto-detect edge columns if not provided
         if edge_columns is None:
             # Look for common patterns
-            possible_source = ['source', 'from', 'sender', 'origin', 'start']
-            possible_target = ['target', 'to', 'receiver', 'destination', 'end']
+            possible_source = ["source", "from", "sender", "origin", "start"]
+            possible_target = ["target", "to", "receiver", "destination", "end"]
 
             source_col = None
             target_col = None
@@ -79,7 +86,7 @@ class DataPipelines:
                 logger.warning(f"Auto-detected edge columns: {edge_columns}")
 
         # Create graph
-        graph = nx.DiGraph() if kwargs.get('directed', True) else nx.Graph()
+        graph = nx.DiGraph() if kwargs.get("directed", True) else nx.Graph()
 
         # Type inference
         if type_inference:
@@ -149,7 +156,7 @@ class DataPipelines:
     ) -> Dict[str, Any]:
         """
         Convert nested JSON to graph.
-        
+
         Parameters:
         -----------
         filepath : str
@@ -160,14 +167,14 @@ class DataPipelines:
             JSONPath to nodes (for custom format)
         edge_path : str, optional
             JSONPath to edges (for custom format)
-        
+
         Returns:
         --------
         Dict containing graph and metadata
         """
         start_time = time.time()
 
-        with open(filepath, encoding='utf-8') as f:
+        with open(filepath, encoding="utf-8") as f:
             data = json.load(f)
 
         # Auto-detect format
@@ -196,7 +203,7 @@ class DataPipelines:
             DataPipelines._json_tree_to_graph(data, graph)
 
         elif format_type == "edge_list":
-            graph = nx.DiGraph() if kwargs.get('directed', True) else nx.Graph()
+            graph = nx.DiGraph() if kwargs.get("directed", True) else nx.Graph()
             for item in data:
                 graph.add_edge(
                     item["source"],
@@ -209,7 +216,8 @@ class DataPipelines:
             graph = DataPipelines._parse_custom_json(data, node_path, edge_path, **kwargs)
 
         else:
-            raise ValueError(f"Unknown format type: {format_type}")
+            msg = f"Unknown format type: {format_type}"
+            raise ValueError(msg)
 
         processing_time = time.time() - start_time
 
@@ -232,7 +240,7 @@ class DataPipelines:
     ) -> Dict[str, Any]:
         """
         SQL to graph conversion.
-        
+
         Parameters:
         -----------
         connection_string : str
@@ -243,7 +251,7 @@ class DataPipelines:
             Database type: 'sqlite', 'postgresql', 'mysql'
         edge_columns : tuple, optional
             Column names for (source, target)
-        
+
         Returns:
         --------
         Dict containing graph and metadata
@@ -271,7 +279,8 @@ class DataPipelines:
             conn.close()
 
         else:
-            raise ValueError(f"Unsupported database type: {db_type}")
+            msg = f"Unsupported database type: {db_type}"
+            raise ValueError(msg)
 
         # Convert DataFrame to graph
         result = DataPipelines._dataframe_to_graph(df, edge_columns, **kwargs)
@@ -292,7 +301,7 @@ class DataPipelines:
     ) -> Dict[str, Any]:
         """
         REST API pagination and rate limiting.
-        
+
         Parameters:
         -----------
         base_url : str
@@ -303,13 +312,13 @@ class DataPipelines:
             Seconds between requests
         max_retries : int
             Maximum retry attempts
-        
+
         Returns:
         --------
         Dict containing graph and metadata
         """
         start_time = time.time()
-        graph = nx.DiGraph() if kwargs.get('directed', True) else nx.Graph()
+        graph = nx.DiGraph() if kwargs.get("directed", True) else nx.Graph()
 
         async with aiohttp.ClientSession() as session:
             total_requests = 0
@@ -395,7 +404,7 @@ class DataPipelines:
     ) -> Iterator[Dict[str, Any]]:
         """
         Real-time data ingestion from streaming sources.
-        
+
         Parameters:
         -----------
         stream_generator : Iterator
@@ -404,12 +413,12 @@ class DataPipelines:
             Sliding window size (None for cumulative)
         update_interval : float
             Minimum seconds between updates
-        
+
         Yields:
         -------
         Dict containing current graph state
         """
-        graph = nx.DiGraph() if kwargs.get('directed', True) else nx.Graph()
+        graph = nx.DiGraph() if kwargs.get("directed", True) else nx.Graph()
 
         window = []
         last_update = time.time()
@@ -462,7 +471,7 @@ class DataPipelines:
     ) -> Dict[str, Any]:
         """
         Multi-sheet Excel processing.
-        
+
         Parameters:
         -----------
         filepath : str
@@ -470,7 +479,7 @@ class DataPipelines:
         sheet_mapping : dict, optional
             Mapping of sheet names to data types
             e.g., {"Nodes": "nodes", "Edges": "edges"}
-        
+
         Returns:
         --------
         Dict containing graph and metadata
@@ -493,7 +502,7 @@ class DataPipelines:
                     sheet_mapping[sheet] = "attributes"
 
         # Create graph
-        graph = nx.DiGraph() if kwargs.get('directed', True) else nx.Graph()
+        graph = nx.DiGraph() if kwargs.get("directed", True) else nx.Graph()
 
         # Process sheets
         for sheet_name, data_type in sheet_mapping.items():
@@ -589,7 +598,7 @@ class DataPipelines:
         if edge_columns is None:
             edge_columns = (df.columns[0], df.columns[1])
 
-        graph = nx.DiGraph() if kwargs.get('directed', True) else nx.Graph()
+        graph = nx.DiGraph() if kwargs.get("directed", True) else nx.Graph()
 
         # Add edges with attributes
         edge_attrs = [col for col in df.columns if col not in edge_columns]
@@ -616,7 +625,7 @@ class DataPipelines:
         """Parse custom JSON format using JSONPath-like expressions."""
         # Simplified JSONPath implementation
         # In production, use jsonpath-ng or similar
-        graph = nx.DiGraph() if kwargs.get('directed', True) else nx.Graph()
+        graph = nx.DiGraph() if kwargs.get("directed", True) else nx.Graph()
 
         # Extract nodes
         if node_path:

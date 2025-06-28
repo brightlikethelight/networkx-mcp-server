@@ -4,10 +4,17 @@ import json
 import logging
 import os
 import tempfile
-from typing import Any, Dict, List, Optional, Union
+
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Union
 
 import networkx as nx
+
 from pyvis.network import Network
+
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +61,7 @@ class PyvisVisualizer:
     ) -> Dict[str, Any]:
         """
         Create an interactive network visualization with physics simulation.
-        
+
         Parameters:
         -----------
         graph : nx.Graph or nx.DiGraph
@@ -71,7 +78,7 @@ class PyvisVisualizer:
             Physics configuration ('barnes_hut', 'force_atlas', 'repulsion', or custom)
         hierarchical : bool
             Use hierarchical layout
-        
+
         Returns:
         --------
         Dict containing the visualization HTML and metadata
@@ -128,10 +135,10 @@ class PyvisVisualizer:
 
         # Set additional options
         if kwargs.get("show_buttons", True):
-            net.show_buttons(filter_=['physics', 'layout', 'interaction'])
+            net.show_buttons(filter_=["physics", "layout", "interaction"])
 
         # Generate HTML
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".html", delete=False) as f:
             net.save_graph(f.name)
             temp_filename = f.name
 
@@ -158,14 +165,14 @@ class PyvisVisualizer:
     ) -> Dict[str, Any]:
         """
         Visualize graph with community coloring.
-        
+
         Parameters:
         -----------
         graph : nx.Graph or nx.DiGraph
             The graph to visualize
         communities : dict
             Community assignments {community_id: [node_list]}
-        
+
         Returns:
         --------
         Dict containing the visualization
@@ -190,8 +197,8 @@ class PyvisVisualizer:
 
         # Create color palette for communities
         colors = [
-            '#e41a1c', '#377eb8', '#4daf4a', '#984ea3', '#ff7f00',
-            '#ffff33', '#a65628', '#f781bf', '#999999', '#66c2a5'
+            "#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00",
+            "#ffff33", "#a65628", "#f781bf", "#999999", "#66c2a5"
         ]
 
         # Create node to community mapping
@@ -203,7 +210,7 @@ class PyvisVisualizer:
         # Add nodes with community colors
         for node in graph.nodes():
             comm_id = node_to_community.get(node, -1)
-            color = colors[comm_id % len(colors)] if comm_id >= 0 else '#cccccc'
+            color = colors[comm_id % len(colors)] if comm_id >= 0 else "#cccccc"
 
             net.add_node(
                 str(node),
@@ -218,7 +225,7 @@ class PyvisVisualizer:
             net.add_edge(
                 str(edge[0]),
                 str(edge[1]),
-                weight=edge[2].get('weight', 1.0)
+                weight=edge[2].get("weight", 1.0)
             )
 
         # Enable community grouping
@@ -240,7 +247,7 @@ class PyvisVisualizer:
         """)
 
         # Generate HTML
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".html", delete=False) as f:
             net.save_graph(f.name)
             temp_filename = f.name
 
@@ -264,14 +271,16 @@ class PyvisVisualizer:
     ) -> Dict[str, Any]:
         """Create hierarchical visualization for tree structures."""
         if not nx.is_tree(tree):
-            raise ValueError("Graph must be a tree")
+            msg = "Graph must be a tree"
+            raise ValueError(msg)
 
         # Find root if not specified
         if root is None:
             # Find node with no predecessors
             roots = [n for n in tree.nodes() if tree.in_degree(n) == 0]
             if not roots:
-                raise ValueError("No root node found")
+                msg = "No root node found"
+                raise ValueError(msg)
             root = roots[0]
 
         # Create network with hierarchical layout
@@ -332,7 +341,7 @@ class PyvisVisualizer:
         """)
 
         # Generate HTML
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".html", delete=False) as f:
             net.save_graph(f.name)
             temp_filename = f.name
 
@@ -420,7 +429,7 @@ class PyvisVisualizer:
             if edge_width_attr and edge_width_attr in edge_data:
                 width = edge_data[edge_width_attr]
             else:
-                width = edge_data.get('weight', default_width)
+                width = edge_data.get("weight", default_width)
 
             # Determine color
             if edge_color_attr and edge_color_attr in edge_data:

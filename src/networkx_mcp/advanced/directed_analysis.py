@@ -2,11 +2,17 @@
 
 import logging
 import time
+
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
 
 import networkx as nx
 import numpy as np
+
 
 logger = logging.getLogger(__name__)
 
@@ -21,12 +27,12 @@ class DirectedAnalysis:
     ) -> Dict[str, Any]:
         """
         Analyze Directed Acyclic Graph (DAG) properties.
-        
+
         Parameters:
         -----------
         graph : nx.DiGraph
             Input directed graph
-            
+
         Returns:
         --------
         Dict containing DAG analysis results
@@ -74,7 +80,7 @@ class DirectedAnalysis:
 
             # Level statistics
             level_counts = defaultdict(int)
-            for node, level in levels.items():
+            for _node, level in levels.items():
                 level_counts[level] += 1
             results["nodes_per_level"] = dict(level_counts)
 
@@ -179,7 +185,7 @@ class DirectedAnalysis:
     ) -> Dict[str, Any]:
         """
         Find strongly connected components using various algorithms.
-        
+
         Parameters:
         -----------
         graph : nx.DiGraph
@@ -188,7 +194,7 @@ class DirectedAnalysis:
             Algorithm: 'tarjan', 'kosaraju'
         return_condensation : bool
             Whether to return the condensation graph
-            
+
         Returns:
         --------
         Dict containing SCC analysis
@@ -204,7 +210,8 @@ class DirectedAnalysis:
             sccs = list(nx.kosaraju_strongly_connected_components(graph))
 
         else:
-            raise ValueError(f"Unknown algorithm: {algorithm}")
+            msg = f"Unknown algorithm: {algorithm}"
+            raise ValueError(msg)
 
         # Sort by size
         sccs = sorted(sccs, key=len, reverse=True)
@@ -259,12 +266,12 @@ class DirectedAnalysis:
     ) -> Tuple[nx.DiGraph, Dict[str, Any]]:
         """
         Create and analyze the condensation graph (SCC condensation).
-        
+
         Parameters:
         -----------
         graph : nx.DiGraph
             Input directed graph
-            
+
         Returns:
         --------
         Tuple of (condensation graph, metadata)
@@ -324,12 +331,12 @@ class DirectedAnalysis:
     ) -> Dict[str, Any]:
         """
         Analyze tournament graph properties.
-        
+
         Parameters:
         -----------
         graph : nx.DiGraph
             Input directed graph
-            
+
         Returns:
         --------
         Dict containing tournament analysis
@@ -413,7 +420,7 @@ class DirectedAnalysis:
         for i in range(3):
             for j in range(3):
                 for k in range(3):
-                    if i != j and j != k and i != k:
+                    if j not in (i, k) and i != k:
                         if (graph.has_edge(triple[i], triple[j]) and
                             graph.has_edge(triple[j], triple[k]) and
                             not graph.has_edge(triple[i], triple[k])):
@@ -457,14 +464,14 @@ class DirectedAnalysis:
     ) -> Dict[str, Any]:
         """
         Find minimum feedback arc set.
-        
+
         Parameters:
         -----------
         graph : nx.DiGraph
             Input directed graph
         method : str
             Method: 'greedy', 'exact' (for small graphs)
-            
+
         Returns:
         --------
         Dict containing feedback arc set
@@ -521,7 +528,7 @@ class DirectedAnalysis:
                 break
 
             # Find node with maximum out-degree - in-degree
-            max_diff = -float('inf')
+            max_diff = -float("inf")
             max_node = None
 
             for node in G.nodes():
@@ -606,14 +613,14 @@ class DirectedAnalysis:
     ) -> Dict[str, Any]:
         """
         Analyze bow-tie structure of directed graph (common in web graphs).
-        
+
         Parameters:
         -----------
         graph : nx.DiGraph
             Input directed graph
         largest_scc_only : bool
             Whether to analyze only the largest SCC
-            
+
         Returns:
         --------
         Dict containing bow-tie decomposition
@@ -714,14 +721,14 @@ class DirectedAnalysis:
     ) -> Tuple[nx.DiGraph, Dict[str, Any]]:
         """
         Import temporal graph from time-stamped edge list.
-        
+
         Parameters:
         -----------
         edge_list : List[Tuple[source, target, timestamp]]
             Time-stamped edges
         time_window : Tuple[float, float], optional
             Time window to filter edges
-            
+
         Returns:
         --------
         Tuple of (graph, metadata)
@@ -744,11 +751,10 @@ class DirectedAnalysis:
             if G.has_edge(u, v):
                 # Multiple edges - keep earliest/latest based on param
                 if params.get("keep", "earliest") == "earliest":
-                    if t < G[u][v].get("timestamp", float('inf')):
+                    if t < G[u][v].get("timestamp", float("inf")):
                         G[u][v]["timestamp"] = t
-                else:  # latest
-                    if t > G[u][v].get("timestamp", -float('inf')):
-                        G[u][v]["timestamp"] = t
+                elif t > G[u][v].get("timestamp", -float("inf")):
+                    G[u][v]["timestamp"] = t
             else:
                 G.add_edge(u, v, timestamp=t)
 
@@ -776,7 +782,7 @@ class DirectedAnalysis:
     ) -> Dict[str, Any]:
         """
         Calculate time-dependent centrality measures.
-        
+
         Parameters:
         -----------
         temporal_edges : List[Tuple[source, target, timestamp]]
@@ -785,7 +791,7 @@ class DirectedAnalysis:
             Type of centrality
         time_slices : int
             Number of time slices
-            
+
         Returns:
         --------
         Dict containing temporal centrality evolution
@@ -874,7 +880,7 @@ class DirectedAnalysis:
     ) -> Dict[str, Any]:
         """
         Find time-respecting paths in temporal graph.
-        
+
         Parameters:
         -----------
         temporal_edges : List[Tuple[source, target, timestamp]]
@@ -883,7 +889,7 @@ class DirectedAnalysis:
             Source node
         target : node
             Target node
-            
+
         Returns:
         --------
         Dict containing temporal paths
@@ -910,13 +916,13 @@ class DirectedAnalysis:
                         path.pop()
 
         # Start search
-        find_temporal_paths(source, target, -float('inf'), [(source, -float('inf'))])
+        find_temporal_paths(source, target, -float("inf"), [(source, -float("inf"))])
 
         # Process paths
         valid_paths = []
         for path in paths:
             # Remove dummy first timestamp
-            clean_path = [(path[0][0], None)] + path[1:]
+            clean_path = [(path[0][0], None), *path[1:]]
 
             # Calculate path duration
             if len(clean_path) > 1:
@@ -954,7 +960,7 @@ class DirectedAnalysis:
     ) -> Dict[str, Any]:
         """
         Detect dynamic communities in temporal networks.
-        
+
         Parameters:
         -----------
         temporal_edges : List[Tuple[source, target, timestamp]]
@@ -963,12 +969,12 @@ class DirectedAnalysis:
             Method: 'snapshots', 'evolutionary'
         time_slices : int
             Number of time slices
-            
+
         Returns:
         --------
         Dict containing temporal community evolution
         """
-        from ..community_detection import CommunityDetection
+        from networkx_mcp.community_detection import CommunityDetection
 
         if not temporal_edges:
             return {"error": "No temporal edges provided"}

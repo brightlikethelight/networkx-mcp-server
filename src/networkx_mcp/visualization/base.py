@@ -1,9 +1,16 @@
 """Base interfaces for graph visualization."""
 
-from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional, List, Tuple
+from abc import ABC
+from abc import abstractmethod
 from dataclasses import dataclass
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
+
 import networkx as nx
+
 
 @dataclass
 class VisualizationResult:
@@ -16,21 +23,21 @@ class VisualizationResult:
 
 class BaseVisualizer(ABC):
     """Base class for all visualization backends."""
-    
+
     def __init__(self, name: str, output_format: str):
         self.name = name
         self.output_format = output_format
         self.default_options = {}
-    
+
     @abstractmethod
     async def render(self, graph: nx.Graph, layout: str = "spring", **options) -> VisualizationResult:
         """Render a graph visualization."""
         pass
-    
+
     def get_supported_layouts(self) -> List[str]:
         """Get list of supported layout algorithms."""
         return ["spring", "circular", "random"]
-    
+
     def validate_options(self, options: Dict[str, Any]) -> bool:
         """Validate visualization options."""
         return True
@@ -45,10 +52,10 @@ def calculate_layout(graph: nx.Graph, layout: str, **params) -> Dict[str, Tuple[
         "spectral": lambda g, **p: nx.spectral_layout(g, **p),
         "planar": lambda g, **p: nx.planar_layout(g, **p) if nx.is_planar(g) else nx.spring_layout(g, **p)
     }
-    
+
     if layout not in layout_funcs:
         layout = "spring"  # fallback
-    
+
     try:
         return layout_funcs[layout](graph, **params)
     except Exception:
@@ -68,7 +75,7 @@ def prepare_graph_data(graph: nx.Graph, pos: Dict[str, Tuple[float, float]]) -> 
             **graph.nodes[node]  # Include node attributes
         }
         nodes.append(node_data)
-    
+
     edges = []
     for source, target in graph.edges():
         edge_data = {
@@ -77,7 +84,7 @@ def prepare_graph_data(graph: nx.Graph, pos: Dict[str, Tuple[float, float]]) -> 
             **graph.edges[source, target]  # Include edge attributes
         }
         edges.append(edge_data)
-    
+
     return {
         "nodes": nodes,
         "edges": edges,

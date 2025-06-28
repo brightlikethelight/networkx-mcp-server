@@ -3,10 +3,17 @@
 import logging
 import random
 import time
-from typing import Any, Dict, List, Optional, Tuple, Union
+
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
+from typing import Union
 
 import networkx as nx
 import numpy as np
+
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +31,7 @@ class RobustnessAnalysis:
     ) -> Dict[str, Any]:
         """
         Simulate node/edge removal attacks on the network.
-        
+
         Parameters:
         -----------
         graph : nx.Graph or nx.DiGraph
@@ -35,7 +42,7 @@ class RobustnessAnalysis:
             Fraction of nodes/edges to remove
         measure : str
             Robustness measure: 'connectivity', 'largest_component', 'efficiency'
-            
+
         Returns:
         --------
         Dict containing attack simulation results
@@ -100,7 +107,8 @@ class RobustnessAnalysis:
                 )[:num_nodes]
 
         else:
-            raise ValueError(f"Unknown attack type: {attack_type}")
+            msg = f"Unknown attack type: {attack_type}"
+            raise ValueError(msg)
 
         # Track metrics during attack
         removal_sequence = []
@@ -123,7 +131,7 @@ class RobustnessAnalysis:
             })
 
             # Early stopping if network is destroyed
-            if measure == "connectivity" and current_metrics.get("is_connected", True) == False:
+            if measure == "connectivity" and not current_metrics.get("is_connected", True):
                 if i < len(nodes_to_remove) - 1:
                     logger.info(f"Network disconnected after removing {i+1} nodes")
 
@@ -166,7 +174,7 @@ class RobustnessAnalysis:
                 "efficiency": 0
             }
 
-        if measure == "connectivity" or measure == "all":
+        if measure in {"connectivity", "all"}:
             # Connectivity metrics
             if graph.is_directed():
                 metrics["is_strongly_connected"] = nx.is_strongly_connected(graph)
@@ -176,7 +184,7 @@ class RobustnessAnalysis:
             else:
                 metrics["is_connected"] = nx.is_connected(graph)
 
-        if measure == "largest_component" or measure == "all":
+        if measure in {"largest_component", "all"}:
             # Largest component size
             if graph.is_directed():
                 sccs = list(nx.strongly_connected_components(graph))
@@ -196,7 +204,7 @@ class RobustnessAnalysis:
                 if graph.number_of_nodes() > 0 else 0
             )
 
-        if measure == "efficiency" or measure == "all":
+        if measure in {"efficiency", "all"}:
             # Global efficiency
             if graph.number_of_nodes() < 1000:
                 metrics["global_efficiency"] = nx.global_efficiency(graph)
@@ -247,7 +255,7 @@ class RobustnessAnalysis:
                 pass
 
         # Scale to full graph
-        n = graph.number_of_nodes()
+        graph.number_of_nodes()
         if valid_pairs > 0:
             avg_inv_dist = total_inv_dist / valid_pairs
             # Approximate total efficiency
@@ -346,7 +354,7 @@ class RobustnessAnalysis:
     ) -> Dict[str, Any]:
         """
         Analyze percolation threshold of the network.
-        
+
         Parameters:
         -----------
         graph : nx.Graph or nx.DiGraph
@@ -359,7 +367,7 @@ class RobustnessAnalysis:
             Number of probability values to test
         num_trials : int
             Number of trials per probability
-            
+
         Returns:
         --------
         Dict containing percolation analysis
@@ -377,7 +385,7 @@ class RobustnessAnalysis:
         for p in probabilities:
             trial_results = []
 
-            for trial in range(num_trials):
+            for _trial in range(num_trials):
                 G = graph.copy()
 
                 if percolation_type == "site":
@@ -398,7 +406,8 @@ class RobustnessAnalysis:
                     G.remove_edges_from(edges_to_remove)
 
                 else:
-                    raise ValueError(f"Unknown percolation type: {percolation_type}")
+                    msg = f"Unknown percolation type: {percolation_type}"
+                    raise ValueError(msg)
 
                 # Calculate metrics
                 if G.number_of_nodes() > 0:
@@ -521,7 +530,7 @@ class RobustnessAnalysis:
     ) -> Dict[str, Any]:
         """
         Simulate cascading failures in the network.
-        
+
         Parameters:
         -----------
         graph : nx.Graph or nx.DiGraph
@@ -530,7 +539,7 @@ class RobustnessAnalysis:
             Initial failed nodes
         failure_model : str
             Model: 'threshold', 'load_redistribution', 'epidemic'
-            
+
         Returns:
         --------
         Dict containing cascade simulation results
@@ -673,7 +682,8 @@ class RobustnessAnalysis:
                 })
 
         else:
-            raise ValueError(f"Unknown failure model: {failure_model}")
+            msg = f"Unknown failure model: {failure_model}"
+            raise ValueError(msg)
 
         # Calculate cascade size statistics
         cascade_size = len(failed_nodes) - len(initial_failures)
@@ -698,19 +708,19 @@ class RobustnessAnalysis:
     @staticmethod
     def network_resilience(
         graph: Union[nx.Graph, nx.DiGraph],
-        resilience_metrics: List[str] = None,
+        resilience_metrics: Optional[List[str]] = None,
         **params
     ) -> Dict[str, Any]:
         """
         Calculate comprehensive network resilience metrics.
-        
+
         Parameters:
         -----------
         graph : nx.Graph or nx.DiGraph
             Input graph
         resilience_metrics : List[str]
             Metrics to calculate
-            
+
         Returns:
         --------
         Dict containing resilience metrics
@@ -865,7 +875,7 @@ class RobustnessAnalysis:
         # Connectivity score
         if "connectivity" in metrics:
             conn = metrics["connectivity"]
-            if "algebraic_connectivity" in conn and conn["algebraic_connectivity"]:
+            if conn.get("algebraic_connectivity"):
                 # Normalize to [0, 1]
                 scores.append(min(1.0, conn["algebraic_connectivity"] / 2.0))
 

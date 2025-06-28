@@ -1,11 +1,17 @@
 """Plotly-based interactive graph visualization."""
 
 import logging
-from typing import Any, Dict, List, Optional, Union
+
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Union
 
 import networkx as nx
 import numpy as np
 import plotly.graph_objects as go
+
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +36,7 @@ class PlotlyVisualizer:
     ) -> Dict[str, Any]:
         """
         Create an interactive graph visualization with zoom, pan, and hover.
-        
+
         Parameters:
         -----------
         graph : nx.Graph or nx.DiGraph
@@ -43,7 +49,7 @@ class PlotlyVisualizer:
             Node colors (can be 'degree', 'betweenness', etc.)
         hover_data : list
             Node attributes to show on hover
-        
+
         Returns:
         --------
         Dict containing the interactive plot and metadata
@@ -70,15 +76,15 @@ class PlotlyVisualizer:
 
         # Create figure
         fig = go.Figure(
-            data=edge_traces + [node_trace],
+            data=[*edge_traces, node_trace],
             layout=go.Layout(
-                title=dict(text=title or "Interactive Network Graph", font=dict(size=16)),
+                title={"text": title or "Interactive Network Graph", "font": {"size": 16}},
                 showlegend=False,
-                hovermode='closest',
-                margin=dict(b=20, l=5, r=5, t=40),
+                hovermode="closest",
+                margin={"b": 20, "l": 5, "r": 5, "t": 40},
                 annotations=[],
-                xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                xaxis={"showgrid": False, "zeroline": False, "showticklabels": False},
+                yaxis={"showgrid": False, "zeroline": False, "showticklabels": False},
                 height=height,
                 width=width
             )
@@ -86,13 +92,13 @@ class PlotlyVisualizer:
 
         # Add interactivity options
         fig.update_layout(
-            dragmode='pan',
-            modebar_add=['select2d', 'lasso2d'],
-            modebar_remove=['pan2d', 'zoomIn2d', 'zoomOut2d']
+            dragmode="pan",
+            modebar_add=["select2d", "lasso2d"],
+            modebar_remove=["pan2d", "zoomIn2d", "zoomOut2d"]
         )
 
         # Generate HTML
-        html_str = fig.to_html(include_plotlyjs='cdn')
+        html_str = fig.to_html(include_plotlyjs="cdn")
 
         return {
             "figure": fig.to_dict(),
@@ -134,9 +140,9 @@ class PlotlyVisualizer:
 
             edge_trace = go.Scatter3d(
                 x=x_edge, y=y_edge, z=z_edge,
-                mode='lines',
-                line=dict(color='rgba(125,125,125,0.5)', width=1),
-                hoverinfo='none'
+                mode="lines",
+                line={"color": "rgba(125,125,125,0.5)", "width": 1},
+                hoverinfo="none"
             )
             edge_traces.append(edge_trace)
 
@@ -151,44 +157,44 @@ class PlotlyVisualizer:
         # Create node trace
         node_trace = go.Scatter3d(
             x=x_nodes, y=y_nodes, z=z_nodes,
-            mode='markers+text',
-            marker=dict(
-                size=10,
-                color=node_colors,
-                colorscale='Viridis',
-                showscale=True,
-                colorbar=dict(
-                    title=node_color if isinstance(node_color, str) else "Value",
-                    tickmode='linear'
-                )
-            ),
+            mode="markers+text",
+            marker={
+                "size": 10,
+                "color": node_colors,
+                "colorscale": "Viridis",
+                "showscale": True,
+                "colorbar": {
+                    "title": node_color if isinstance(node_color, str) else "Value",
+                    "tickmode": "linear"
+                }
+            },
             text=[str(node) for node in graph.nodes()],
             textposition="top center",
-            hoverinfo='text',
+            hoverinfo="text",
             hovertext=[f"Node: {node}<br>Degree: {graph.degree(node)}"
                       for node in graph.nodes()]
         )
 
         # Create figure
-        fig = go.Figure(data=edge_traces + [node_trace])
+        fig = go.Figure(data=[*edge_traces, node_trace])
 
         fig.update_layout(
             title=title or "3D Network Visualization",
             width=width,
             height=height,
             showlegend=False,
-            scene=dict(
-                xaxis=dict(showgrid=False, showticklabels=False, title=''),
-                yaxis=dict(showgrid=False, showticklabels=False, title=''),
-                zaxis=dict(showgrid=False, showticklabels=False, title=''),
-                bgcolor='rgba(0,0,0,0)'
-            ),
-            margin=dict(l=0, r=0, b=0, t=30)
+            scene={
+                "xaxis": {"showgrid": False, "showticklabels": False, "title": ""},
+                "yaxis": {"showgrid": False, "showticklabels": False, "title": ""},
+                "zaxis": {"showgrid": False, "showticklabels": False, "title": ""},
+                "bgcolor": "rgba(0,0,0,0)"
+            },
+            margin={"l": 0, "r": 0, "b": 0, "t": 30}
         )
 
         return {
             "figure": fig.to_dict(),
-            "html": fig.to_html(include_plotlyjs='cdn'),
+            "html": fig.to_html(include_plotlyjs="cdn"),
             "layout_type": "3d"
         }
 
@@ -219,7 +225,7 @@ class PlotlyVisualizer:
 
         # Create frames
         frames = []
-        for i, (graph, timestamp) in enumerate(zip(graphs, timestamps)):
+        for _i, (graph, timestamp) in enumerate(zip(graphs, timestamps)):
             # Create traces for this frame
             edge_traces = PlotlyVisualizer._create_edge_traces(
                 graph, base_pos, edge_width=1.0, edge_color="gray"
@@ -230,7 +236,7 @@ class PlotlyVisualizer:
             )
 
             frame = go.Frame(
-                data=edge_traces + [node_trace],
+                data=[*edge_traces, node_trace],
                 name=str(timestamp)
             )
             frames.append(frame)
@@ -288,7 +294,7 @@ class PlotlyVisualizer:
 
         return {
             "figure": fig.to_dict(),
-            "html": fig.to_html(include_plotlyjs='cdn'),
+            "html": fig.to_html(include_plotlyjs="cdn"),
             "num_frames": len(frames),
             "timestamps": timestamps
         }
@@ -326,23 +332,23 @@ class PlotlyVisualizer:
             edge_trace = go.Scatter(
                 x=[x0, x1, None],
                 y=[y0, y1, None],
-                mode='lines',
-                line=dict(width=width, color=color),
-                hoverinfo='none'
+                mode="lines",
+                line={"width": width, "color": color},
+                hoverinfo="none"
             )
             edge_traces.append(edge_trace)
 
             # Add edge labels if requested
-            if show_labels and 'weight' in graph.edges[edge]:
+            if show_labels and "weight" in graph.edges[edge]:
                 mid_x = (x0 + x1) / 2
                 mid_y = (y0 + y1) / 2
                 edge_label = go.Scatter(
                     x=[mid_x],
                     y=[mid_y],
-                    mode='text',
-                    text=[str(graph.edges[edge]['weight'])],
-                    textposition='middle center',
-                    hoverinfo='none'
+                    mode="text",
+                    text=[str(graph.edges[edge]["weight"])],
+                    textposition="middle center",
+                    hoverinfo="none"
                 )
                 edge_traces.append(edge_label)
 
@@ -406,21 +412,21 @@ class PlotlyVisualizer:
         node_trace = go.Scatter(
             x=x_nodes,
             y=y_nodes,
-            mode='markers+text',
-            marker=dict(
-                size=sizes,
-                color=colors,
-                colorscale='Viridis',
-                showscale=True,
-                colorbar=dict(
-                    title=colorbar_title,
-                    tickmode='linear'
-                ),
-                line=dict(width=2, color='white')
-            ),
+            mode="markers+text",
+            marker={
+                "size": sizes,
+                "color": colors,
+                "colorscale": "Viridis",
+                "showscale": True,
+                "colorbar": {
+                    "title": colorbar_title,
+                    "tickmode": "linear"
+                },
+                "line": {"width": 2, "color": "white"}
+            },
             text=[str(node) for node in graph.nodes()],
             textposition="top center",
-            hoverinfo='text',
+            hoverinfo="text",
             hovertext=hover_texts
         )
 
@@ -430,15 +436,15 @@ class PlotlyVisualizer:
     def export_interactive_html(
         figure: Dict[str, Any],
         filename: str,
-        include_plotlyjs: str = 'cdn',
+        include_plotlyjs: str = "cdn",
         config: Optional[Dict[str, Any]] = None
     ) -> str:
         """Export interactive plot as standalone HTML."""
         if config is None:
             config = {
-                'displayModeBar': True,
-                'displaylogo': False,
-                'modeBarButtonsToRemove': ['pan2d', 'lasso2d']
+                "displayModeBar": True,
+                "displaylogo": False,
+                "modeBarButtonsToRemove": ["pan2d", "lasso2d"]
             }
 
         # Convert dict back to figure if needed
@@ -455,7 +461,7 @@ class PlotlyVisualizer:
         )
 
         # Save to file
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             f.write(html_str)
 
         return filename

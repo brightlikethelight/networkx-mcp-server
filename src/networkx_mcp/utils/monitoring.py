@@ -2,9 +2,15 @@
 
 import json
 import time
-from collections import defaultdict, deque
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+
+from collections import defaultdict
+from collections import deque
+from datetime import datetime
+from datetime import timezone
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
 
 
 class PerformanceMonitor:
@@ -12,7 +18,7 @@ class PerformanceMonitor:
 
     def __init__(self, max_history: int = 1000):
         """Initialize performance monitor.
-        
+
         Args:
             max_history: Maximum number of operations to keep in history
         """
@@ -22,7 +28,7 @@ class PerformanceMonitor:
 
     def record_operation(self, operation: str, duration: float, metadata: Optional[Dict] = None):
         """Record an operation's performance metrics.
-        
+
         Args:
             operation: Name of the operation
             duration: Duration in seconds
@@ -37,10 +43,10 @@ class PerformanceMonitor:
 
     def get_statistics(self, operation: Optional[str] = None) -> Dict[str, Any]:
         """Get performance statistics.
-        
+
         Args:
             operation: Specific operation to get stats for, or None for all
-            
+
         Returns:
             Dictionary of performance statistics
         """
@@ -81,10 +87,10 @@ class PerformanceMonitor:
 
     def get_slow_operations(self, threshold_ms: float = 1000) -> List[Dict[str, Any]]:
         """Get operations that exceeded a duration threshold.
-        
+
         Args:
             threshold_ms: Threshold in milliseconds
-            
+
         Returns:
             List of slow operations
         """
@@ -103,7 +109,7 @@ class PerformanceMonitor:
 
     def clear_history(self, operation: Optional[str] = None):
         """Clear performance history.
-        
+
         Args:
             operation: Specific operation to clear, or None for all
         """
@@ -126,7 +132,7 @@ class OperationCounter:
 
     def increment(self, operation: str, count: int = 1):
         """Increment operation count.
-        
+
         Args:
             operation: Name of the operation
             count: Number to increment by
@@ -137,7 +143,7 @@ class OperationCounter:
 
     def increment_error(self, operation: str, error_type: str):
         """Increment error count for an operation.
-        
+
         Args:
             operation: Name of the operation
             error_type: Type of error
@@ -147,7 +153,7 @@ class OperationCounter:
 
     def get_counts(self) -> Dict[str, Any]:
         """Get operation counts and statistics.
-        
+
         Returns:
             Dictionary of operation counts and statistics
         """
@@ -207,14 +213,14 @@ class OperationCounter:
 
     def export_stats(self, filepath: str):
         """Export statistics to a JSON file.
-        
+
         Args:
             filepath: Path to save the statistics
         """
         stats = self.get_counts()
         stats["exported_at"] = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
 
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             json.dump(stats, f, indent=2)
 
 
@@ -224,10 +230,10 @@ class MemoryMonitor:
     @staticmethod
     def estimate_graph_memory(graph) -> Dict[str, Any]:
         """Estimate memory usage of a graph.
-        
+
         Args:
             graph: NetworkX graph object
-            
+
         Returns:
             Dictionary with memory estimates
         """
@@ -239,11 +245,11 @@ class MemoryMonitor:
 
         # Calculate attribute sizes
         node_attr_size = 0
-        for node, attrs in graph.nodes(data=True):
+        for _node, attrs in graph.nodes(data=True):
             node_attr_size += sys.getsizeof(attrs)
 
         edge_attr_size = 0
-        for u, v, attrs in graph.edges(data=True):
+        for _u, _v, attrs in graph.edges(data=True):
             edge_attr_size += sys.getsizeof(attrs)
 
         # Total estimates

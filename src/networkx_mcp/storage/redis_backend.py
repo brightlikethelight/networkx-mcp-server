@@ -1,64 +1,77 @@
 """Production Redis backend with compression and transactions."""
 
+import asyncio
+import json
 import pickle
 import zlib
-import json
-import asyncio
-from datetime import datetime, timezone
-from typing import Dict, List, Optional, Any
+
 from contextlib import asynccontextmanager
+from datetime import datetime
+from datetime import timezone
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
 
 import networkx as nx
+
 
 try:
     import redis.asyncio as redis
 except ImportError:
     import aioredis as redis  # Fallback for older versions
 
-from .base import (
-    StorageBackend, Transaction, StorageError, 
-    GraphNotFoundError, StorageQuotaExceededError, TransactionError
-)
 from ..security.validator import SecurityValidator
+from .base import GraphNotFoundError
+from .base import StorageBackend
+from .base import StorageError
+from .base import StorageQuotaExceededError
+from .base import Transaction
+from .base import TransactionError
 
 
 class RedisTransaction(Transaction):
     """Redis transaction implementation."""
-    
+
     def __init__(self, pipeline):
         self.pipeline = pipeline
         self._committed = False
         self._rolled_back = False
-    
+
     async def commit(self) -> None:
         """Execute all commands in the transaction."""
         if self._committed:
-            raise TransactionError("Transaction already committed")
+            msg = "Transaction already committed"
+            raise TransactionError(msg)
         if self._rolled_back:
-            raise TransactionError("Transaction already rolled back")
-        
+            msg = "Transaction already rolled back"
+            raise TransactionError(msg)
+
         try:
             await self.pipeline.execute()
             self._committed = True
         except Exception as e:
-            raise TransactionError(f"Failed to commit transaction: {e}")
-    
+            msg = f"Failed to commit transaction: {e}"
+            raise TransactionError(msg)
+
     async def rollback(self) -> None:
         """Discard all commands in the transaction."""
         if self._committed:
-            raise TransactionError("Cannot rollback committed transaction")
+            msg = "Cannot rollback committed transaction"
+            raise TransactionError(msg)
         if self._rolled_back:
-            raise TransactionError("Transaction already rolled back")
-        
+            msg = "Transaction already rolled back"
+            raise TransactionError(msg)
+
         await self.pipeline.reset()
         self._rolled_back = True
 
 
 class RedisBackend(StorageBackend):
     """Production Redis backend with compression and metadata."""
-    
+
     def __init__(
-        self, 
+        self,
         redis_url: str = "redis://localhost:6379",
         max_graph_size_mb: int = 100,
         compression_level: int = 6,
@@ -70,7 +83,7 @@ class RedisBackend(StorageBackend):
         self.key_prefix = key_prefix
         self.pool = None
         self._client = None
-    
+
     async def initialize(self) -> None:
         """Create connection pool."""
         self.pool = redis.ConnectionPool.from_url(
@@ -85,17 +98,17 @@ class RedisBackend(StorageBackend):
             }
         )
         self._client = redis.Redis(connection_pool=self.pool)
-        
+
         # Test connection
         await self._client.ping()
-    
+
     async def close(self) -> None:
         """Close Redis connections."""
         if self._client:
             await self._client.close()
         if self.pool:
             await self.pool.disconnect()
-    
+
     @asynccontextmanager
     async def transaction(self):
         """Create a Redis transaction."""
@@ -109,21 +122,22 @@ class RedisBackend(StorageBackend):
                 if not tx._rolled_back:
                     await tx.rollback()
                 raise
-    
+
     def _make_key(self, *parts: str) -> str:
         """Create a namespaced Redis key."""
         safe_parts = [self.key_prefix]
         for part in parts:
             # Validate parts to prevent injection
-            if ':' in part or '\n' in part or '\r' in part:
-                raise ValueError(f"Invalid key part: {part}")
+            if ":" in part or "\n" in part or "\r" in part:
+                msg = f"Invalid key part: {part}"
+                raise ValueError(msg)
             safe_parts.append(part)
-        return ':'.join(safe_parts)
-    
+        return ":".join(safe_parts)
+
     async def save_graph(
-        self, 
-        user_id: str, 
-        graph_id: str, 
+        self,
+        user_id: str,
+        graph_id: str,
         graph: nx.Graph,
         metadata: Optional[Dict[str, Any]] = None,
         tx: Optional[Transaction] = None
@@ -132,23 +146,27 @@ class RedisBackend(StorageBackend):
         # Validate inputs
         user_id = SecurityValidator.validate_user_id(user_id)
         graph_id = SecurityValidator.validate_graph_id(graph_id)
-        
+
         # Serialize graph
         try:
             graph_data = pickle.dumps(graph, protocol=5)
         except Exception as e:
-            raise StorageError(f"Failed to serialize graph: {e}")
-        
+            msg = f"Failed to serialize graph: {e}"
+            raise StorageError(msg)
+
         # Compress
         compressed = zlib.compress(graph_data, level=self.compression_level)
-        
+
         # Check size limit
         if len(compressed) > self.max_size_bytes:
-            raise StorageQuotaExceededError(
+            msg = (
                 f"Graph exceeds size limit: {len(compressed)/1024/1024:.1f}MB "
                 f"(max {self.max_size_bytes/1024/1024:.1f}MB)"
             )
-        
+            raise StorageQuotaExceededError(
+                msg
+            )
+
         # Prepare metadata
         now = datetime.now(timezone.utc).isoformat()
         graph_metadata = {
@@ -165,38 +183,38 @@ class RedisBackend(StorageBackend):
             "is_directed": graph.is_directed(),
             "is_multigraph": graph.is_multigraph(),
         }
-        
+
         # Add custom metadata
         if metadata:
             graph_metadata["custom"] = SecurityValidator.sanitize_attributes(metadata)
-        
+
         # Keys
         data_key = self._make_key("graph_data", user_id, graph_id)
         meta_key = self._make_key("graph_meta", user_id, graph_id)
         user_graphs_key = self._make_key("user_graphs", user_id)
         user_stats_key = self._make_key("user_stats", user_id)
-        
+
         # Use transaction
         client = tx.pipeline if tx else self._client
-        
+
         # Save atomically
         if not tx:
             async with self._client.pipeline(transaction=True) as pipe:
                 # Check if exists (for update vs create)
                 exists = await self._client.exists(data_key)
-                
+
                 # Save data and metadata
                 await pipe.set(data_key, compressed)
                 await pipe.set(meta_key, json.dumps(graph_metadata))
-                
+
                 # Add to user's graph list
                 if not exists:
                     await pipe.sadd(user_graphs_key, graph_id)
                     await pipe.hincrby(user_stats_key, "graph_count", 1)
-                
+
                 # Update storage stats
                 await pipe.hincrby(user_stats_key, "total_bytes", len(compressed))
-                
+
                 await pipe.execute()
         else:
             # Within existing transaction
@@ -205,12 +223,12 @@ class RedisBackend(StorageBackend):
             await client.sadd(user_graphs_key, graph_id)
             await client.hincrby(user_stats_key, "graph_count", 1)
             await client.hincrby(user_stats_key, "total_bytes", len(compressed))
-        
+
         return True
-    
+
     async def load_graph(
-        self, 
-        user_id: str, 
+        self,
+        user_id: str,
         graph_id: str,
         tx: Optional[Transaction] = None
     ) -> Optional[nx.Graph]:
@@ -218,39 +236,41 @@ class RedisBackend(StorageBackend):
         # Validate inputs
         user_id = SecurityValidator.validate_user_id(user_id)
         graph_id = SecurityValidator.validate_graph_id(graph_id)
-        
+
         # Get data
         data_key = self._make_key("graph_data", user_id, graph_id)
-        
+
         client = tx.pipeline if tx else self._client
         compressed = await client.get(data_key)
-        
+
         if compressed is None:
             return None
-        
+
         # Decompress
         try:
             graph_data = zlib.decompress(compressed)
         except Exception as e:
-            raise StorageError(f"Failed to decompress graph: {e}")
-        
+            msg = f"Failed to decompress graph: {e}"
+            raise StorageError(msg)
+
         # Deserialize
         try:
             graph = pickle.loads(graph_data)
         except Exception as e:
-            raise StorageError(f"Failed to deserialize graph: {e}")
-        
+            msg = f"Failed to deserialize graph: {e}"
+            raise StorageError(msg)
+
         # Update access time
         if not tx:
             meta_key = self._make_key("graph_meta", user_id, graph_id)
             await self._client.hset(
-                meta_key, 
-                "last_accessed_at", 
+                meta_key,
+                "last_accessed_at",
                 datetime.now(timezone.utc).isoformat()
             )
-        
+
         return graph
-    
+
     async def delete_graph(
         self,
         user_id: str,
@@ -261,15 +281,15 @@ class RedisBackend(StorageBackend):
         # Validate inputs
         user_id = SecurityValidator.validate_user_id(user_id)
         graph_id = SecurityValidator.validate_graph_id(graph_id)
-        
+
         # Keys
         data_key = self._make_key("graph_data", user_id, graph_id)
         meta_key = self._make_key("graph_meta", user_id, graph_id)
         user_graphs_key = self._make_key("user_graphs", user_id)
         user_stats_key = self._make_key("user_stats", user_id)
-        
+
         client = tx.pipeline if tx else self._client
-        
+
         if not tx:
             async with self._client.pipeline(transaction=True) as pipe:
                 # Get size for stats update
@@ -279,15 +299,15 @@ class RedisBackend(StorageBackend):
                     size_bytes = meta_dict.get("size_bytes", 0)
                 else:
                     size_bytes = 0
-                
+
                 # Delete atomically
                 deleted = await pipe.delete(data_key, meta_key)
                 await pipe.srem(user_graphs_key, graph_id)
-                
+
                 if deleted > 0:
                     await pipe.hincrby(user_stats_key, "graph_count", -1)
                     await pipe.hincrby(user_stats_key, "total_bytes", -size_bytes)
-                
+
                 result = await pipe.execute()
                 return result[0] > 0  # True if anything was deleted
         else:
@@ -296,9 +316,9 @@ class RedisBackend(StorageBackend):
             await client.srem(user_graphs_key, graph_id)
             await client.hincrby(user_stats_key, "graph_count", -1)
             return True
-    
+
     async def list_graphs(
-        self, 
+        self,
         user_id: str,
         limit: int = 100,
         offset: int = 0,
@@ -309,36 +329,36 @@ class RedisBackend(StorageBackend):
         user_id = SecurityValidator.validate_user_id(user_id)
         limit = min(max(1, limit), 1000)  # Cap at 1000
         offset = max(0, offset)
-        
+
         # Get graph IDs
         user_graphs_key = self._make_key("user_graphs", user_id)
         client = tx.pipeline if tx else self._client
-        
+
         graph_ids = await client.smembers(user_graphs_key)
-        
+
         if not graph_ids:
             return []
-        
+
         # Sort for consistent pagination
         sorted_ids = sorted(graph_ids)
         paginated_ids = sorted_ids[offset:offset + limit]
-        
+
         # Get metadata for each graph
         graphs = []
         for graph_id_bytes in paginated_ids:
-            graph_id = graph_id_bytes.decode('utf-8') if isinstance(graph_id_bytes, bytes) else graph_id_bytes
+            graph_id = graph_id_bytes.decode("utf-8") if isinstance(graph_id_bytes, bytes) else graph_id_bytes
             meta_key = self._make_key("graph_meta", user_id, graph_id)
-            
+
             metadata = await client.get(meta_key)
             if metadata:
                 meta_dict = json.loads(metadata)
                 graphs.append(meta_dict)
-        
+
         # Sort by updated time (newest first)
-        graphs.sort(key=lambda x: x.get('updated_at', ''), reverse=True)
-        
+        graphs.sort(key=lambda x: x.get("updated_at", ""), reverse=True)
+
         return graphs
-    
+
     async def get_graph_metadata(
         self,
         user_id: str,
@@ -349,15 +369,15 @@ class RedisBackend(StorageBackend):
         # Validate inputs
         user_id = SecurityValidator.validate_user_id(user_id)
         graph_id = SecurityValidator.validate_graph_id(graph_id)
-        
+
         meta_key = self._make_key("graph_meta", user_id, graph_id)
         client = tx.pipeline if tx else self._client
-        
+
         metadata = await client.get(meta_key)
         if metadata:
             return json.loads(metadata)
         return None
-    
+
     async def update_graph_metadata(
         self,
         user_id: str,
@@ -369,33 +389,34 @@ class RedisBackend(StorageBackend):
         # Validate inputs
         user_id = SecurityValidator.validate_user_id(user_id)
         graph_id = SecurityValidator.validate_graph_id(graph_id)
-        
+
         # Get existing metadata
         existing = await self.get_graph_metadata(user_id, graph_id, tx)
         if not existing:
-            raise GraphNotFoundError(f"Graph '{graph_id}' not found")
-        
+            msg = f"Graph '{graph_id}' not found"
+            raise GraphNotFoundError(msg)
+
         # Update metadata
         existing["updated_at"] = datetime.now(timezone.utc).isoformat()
         existing["custom"] = SecurityValidator.sanitize_attributes(
             metadata.get("custom", {})
         )
-        
+
         # Save
         meta_key = self._make_key("graph_meta", user_id, graph_id)
         client = tx.pipeline if tx else self._client
-        
+
         await client.set(meta_key, json.dumps(existing))
         return True
-    
+
     async def get_storage_stats(self, user_id: str) -> Dict[str, Any]:
         """Get storage usage statistics for a user."""
         # Validate input
         user_id = SecurityValidator.validate_user_id(user_id)
-        
+
         user_stats_key = self._make_key("user_stats", user_id)
         stats = await self._client.hgetall(user_stats_key)
-        
+
         # Convert and provide defaults
         return {
             "user_id": user_id,
@@ -407,7 +428,7 @@ class RedisBackend(StorageBackend):
                 int(stats.get(b"total_bytes", 0)) / self.max_size_bytes * 100, 2
             ) if self.max_size_bytes > 0 else 0
         }
-    
+
     async def check_health(self) -> Dict[str, Any]:
         """Check Redis backend health."""
         try:
@@ -415,10 +436,10 @@ class RedisBackend(StorageBackend):
             start = asyncio.get_event_loop().time()
             await self._client.ping()
             latency = (asyncio.get_event_loop().time() - start) * 1000
-            
+
             # Get Redis info
             info = await self._client.info()
-            
+
             return {
                 "status": "healthy",
                 "backend": "redis",
@@ -437,7 +458,7 @@ class RedisBackend(StorageBackend):
                 "error": str(e),
                 "error_type": type(e).__name__
             }
-    
+
     async def cleanup_expired(self, days: int = 30) -> int:
         """Clean up graphs not accessed for specified days."""
         # This would be called by a scheduled job

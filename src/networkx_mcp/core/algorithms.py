@@ -1,7 +1,11 @@
 """Graph algorithms implementation for NetworkX MCP server."""
 
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Union
 
 import networkx as nx
 import numpy as np
@@ -20,10 +24,12 @@ class GraphAlgorithms:
     ) -> Dict[str, Any]:
         """Find shortest path(s) in a graph."""
         if source not in graph:
-            raise ValueError(f"Source node '{source}' not in graph")
+            msg = f"Source node '{source}' not in graph"
+            raise ValueError(msg)
 
         if target is not None and target not in graph:
-            raise ValueError(f"Target node '{target}' not in graph")
+            msg = f"Target node '{target}' not in graph"
+            raise ValueError(msg)
 
         result = {}
 
@@ -63,7 +69,8 @@ class GraphAlgorithms:
                     "source": source
                 }
         else:
-            raise ValueError(f"Unknown method: {method}")
+            msg = f"Unknown method: {method}"
+            raise ValueError(msg)
 
         return result
 
@@ -173,14 +180,16 @@ class GraphAlgorithms:
     ) -> Dict[str, Any]:
         """Find minimum spanning tree."""
         if graph.is_directed():
-            raise ValueError("Minimum spanning tree requires undirected graph")
+            msg = "Minimum spanning tree requires undirected graph"
+            raise ValueError(msg)
 
         if algorithm == "kruskal":
             mst = nx.minimum_spanning_tree(graph, weight=weight, algorithm="kruskal")
         elif algorithm == "prim":
             mst = nx.minimum_spanning_tree(graph, weight=weight, algorithm="prim")
         else:
-            raise ValueError(f"Unknown algorithm: {algorithm}")
+            msg = f"Unknown algorithm: {algorithm}"
+            raise ValueError(msg)
 
         total_weight = sum(data.get(weight, 1) for _, _, data in mst.edges(data=True))
 
@@ -200,7 +209,8 @@ class GraphAlgorithms:
     ) -> Dict[str, Any]:
         """Calculate maximum flow."""
         if not graph.is_directed():
-            raise ValueError("Maximum flow requires directed graph")
+            msg = "Maximum flow requires directed graph"
+            raise ValueError(msg)
 
         flow_value, flow_dict = nx.maximum_flow(graph, source, sink, capacity=capacity)
 
@@ -247,7 +257,8 @@ class GraphAlgorithms:
             import networkx.algorithms.community as nx_comm
             communities = list(nx_comm.greedy_modularity_communities(graph))
         else:
-            raise ValueError(f"Unknown method: {method}")
+            msg = f"Unknown method: {method}"
+            raise ValueError(msg)
 
         # Convert communities to list format
         communities_list = [list(comm) for comm in communities]
@@ -363,9 +374,8 @@ class GraphAlgorithms:
                 if nx.is_strongly_connected(graph):
                     stats["diameter"] = nx.diameter(graph)
                     stats["radius"] = nx.radius(graph)
-            else:
-                if nx.is_connected(graph):
-                    stats["diameter"] = nx.diameter(graph)
-                    stats["radius"] = nx.radius(graph)
+            elif nx.is_connected(graph):
+                stats["diameter"] = nx.diameter(graph)
+                stats["radius"] = nx.radius(graph)
 
         return stats

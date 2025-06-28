@@ -4,48 +4,53 @@ import json
 import logging
 import time
 import traceback
+
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
+from typing import Union
 
 import networkx as nx
 import numpy as np
+
 from fastmcp import FastMCP
 from mcp.types import TextContent
 
 # Phase 2 Advanced Analytics imports
-from .advanced import (
-    BipartiteAnalysis,
-    CommunityDetection,
-    DirectedAnalysis,
-    GraphGenerators,
-    MLIntegration,
-    NetworkFlow,
-    RobustnessAnalysis,
-    SpecializedAlgorithms,
-)
-from .advanced.enterprise import EnterpriseFeatures
-from .core.algorithms import GraphAlgorithms
-from .core.graph_operations import GraphManager
-from .core.io_handlers import GraphIOHandler
-from .integration import DataPipelines
-from .utils.formatters import GraphFormatter
-from .utils.monitoring import OperationCounter, PerformanceMonitor
-from .utils.validators import GraphValidator
+from networkx_mcp.advanced import BipartiteAnalysis
+from networkx_mcp.advanced import CommunityDetection
+from networkx_mcp.advanced import DirectedAnalysis
+from networkx_mcp.advanced import GraphGenerators
+from networkx_mcp.advanced import MLIntegration
+from networkx_mcp.advanced import NetworkFlow
+from networkx_mcp.advanced import RobustnessAnalysis
+from networkx_mcp.advanced import SpecializedAlgorithms
+from networkx_mcp.advanced.enterprise import EnterpriseFeatures
+from networkx_mcp.core.algorithms import GraphAlgorithms
+from networkx_mcp.core.graph_operations import GraphManager
+from networkx_mcp.core.io_handlers import GraphIOHandler
+from networkx_mcp.integration import DataPipelines
+from networkx_mcp.utils.formatters import GraphFormatter
+from networkx_mcp.utils.monitoring import OperationCounter
+from networkx_mcp.utils.monitoring import PerformanceMonitor
+from networkx_mcp.utils.validators import GraphValidator
 
 # Phase 3 Visualization & Integration imports
-from .visualization import (
-    MatplotlibVisualizer,
-    PlotlyVisualizer,
-    PyvisVisualizer,
-    SpecializedVisualizations,
-)
+from networkx_mcp.visualization import MatplotlibVisualizer
+from networkx_mcp.visualization import PlotlyVisualizer
+from networkx_mcp.visualization import PyvisVisualizer
+from networkx_mcp.visualization import SpecializedVisualizations
+
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
-        logging.FileHandler('networkx_mcp_server.log'),
+        logging.FileHandler("networkx_mcp_server.log"),
         logging.StreamHandler()
     ]
 )
@@ -71,7 +76,7 @@ async def create_graph(
 ) -> Dict[str, Any]:
     """
     Create a new NetworkX graph with comprehensive initialization options.
-    
+
     Args:
         graph_id: Unique identifier for the graph
         graph_type: Type of graph - 'undirected', 'directed', 'multigraph', 'multidigraph'
@@ -80,7 +85,7 @@ async def create_graph(
             - adjacency_matrix: 2D list representing adjacency matrix
             - node_labels: Optional labels for adjacency matrix nodes
         attributes: Additional graph attributes
-    
+
     Returns:
         Graph creation status with metadata including:
         - graph_id: The created graph ID
@@ -133,14 +138,15 @@ async def create_graph(
                 node_labels = from_data.get("node_labels")
 
                 if node_labels and len(node_labels) != matrix.shape[0]:
-                    raise ValueError("Node labels length must match matrix dimensions")
+                    msg = "Node labels length must match matrix dimensions"
+                    raise ValueError(msg)
 
                 # Create graph from adjacency matrix
                 temp_graph = nx.from_numpy_array(matrix, create_using=graph.__class__)
 
                 # Relabel nodes if labels provided
                 if node_labels:
-                    mapping = {i: label for i, label in enumerate(node_labels)}
+                    mapping = dict(enumerate(node_labels))
                     temp_graph = nx.relabel_nodes(temp_graph, mapping)
 
                 # Copy to our graph
@@ -171,7 +177,7 @@ async def create_graph(
         return GraphFormatter.format_success("create_graph", "Graph created successfully", result)
 
     except Exception as e:
-        logger.error(f"Error creating graph '{graph_id}': {str(e)}")
+        logger.error(f"Error creating graph '{graph_id}': {e!s}")
         logger.debug(traceback.format_exc())
         return GraphFormatter.format_error("GraphCreationError", str(e))
 
@@ -180,10 +186,10 @@ async def create_graph(
 async def delete_graph(graph_id: str) -> Dict[str, Any]:
     """
     Delete a graph by ID.
-    
+
     Args:
         graph_id: ID of the graph to delete
-    
+
     Returns:
         Deletion status
     """
@@ -198,7 +204,7 @@ async def delete_graph(graph_id: str) -> Dict[str, Any]:
 async def list_graphs() -> Dict[str, Any]:
     """
     List all available graphs.
-    
+
     Returns:
         List of graphs with their metadata
     """
@@ -217,10 +223,10 @@ async def list_graphs() -> Dict[str, Any]:
 async def get_graph_info(graph_id: str) -> Dict[str, Any]:
     """
     Get comprehensive information about a graph.
-    
+
     Args:
         graph_id: ID of the graph to analyze
-    
+
     Returns:
         Detailed graph information including:
         - Basic properties: nodes, edges, density, type
@@ -284,7 +290,7 @@ async def get_graph_info(graph_id: str) -> Dict[str, Any]:
         logger.error(error_msg)
         return GraphFormatter.format_error("GraphNotFoundError", error_msg)
     except Exception as e:
-        logger.error(f"Error getting info for graph '{graph_id}': {str(e)}")
+        logger.error(f"Error getting info for graph '{graph_id}': {e!s}")
         logger.debug(traceback.format_exc())
         return GraphFormatter.format_error("GraphInfoError", str(e))
 
@@ -297,14 +303,14 @@ async def add_nodes(
 ) -> Dict[str, Any]:
     """
     Add nodes to a graph with support for bulk operations and attributes.
-    
+
     Args:
         graph_id: ID of the graph to add nodes to
         nodes: Either:
             - List of node IDs: ['node1', 'node2', ...]
             - List of dicts with 'id' and attributes: [{'id': 'node1', 'color': 'red'}, ...]
         node_attributes: Optional default attributes to apply to all nodes
-    
+
     Returns:
         Operation status including:
         - nodes_added: Number of nodes added
@@ -327,11 +333,13 @@ async def add_nodes(
         for i, node in enumerate(nodes):
             if isinstance(node, dict):
                 if "id" not in node:
-                    raise ValueError(f"Node at index {i} is missing 'id' field")
+                    msg = f"Node at index {i} is missing 'id' field"
+                    raise ValueError(msg)
 
                 node_id = node["id"]
                 if not GraphValidator.validate_node_id(node_id):
-                    raise ValueError(f"Invalid node ID at index {i}: {node_id}")
+                    msg = f"Invalid node ID at index {i}: {node_id}"
+                    raise ValueError(msg)
 
                 # Merge node-specific attributes with default attributes
                 attrs = {k: v for k, v in node.items() if k != "id"}
@@ -346,7 +354,8 @@ async def add_nodes(
             else:
                 # Simple node ID
                 if not GraphValidator.validate_node_id(node):
-                    raise ValueError(f"Invalid node ID at index {i}: {node}")
+                    msg = f"Invalid node ID at index {i}: {node}"
+                    raise ValueError(msg)
 
                 if node_attributes:
                     processed_nodes.append((node, node_attributes))
@@ -376,7 +385,7 @@ async def add_nodes(
         logger.error(error_msg)
         return GraphFormatter.format_error("GraphNotFoundError", error_msg)
     except Exception as e:
-        logger.error(f"Error adding nodes to graph '{graph_id}': {str(e)}")
+        logger.error(f"Error adding nodes to graph '{graph_id}': {e!s}")
         logger.debug(traceback.format_exc())
         return GraphFormatter.format_error("AddNodesError", str(e))
 
@@ -389,14 +398,14 @@ async def add_edges(
 ) -> Dict[str, Any]:
     """
     Add edges to a graph with support for bulk operations, weights, and attributes.
-    
+
     Args:
         graph_id: ID of the graph to add edges to
         edges: List of edges in any of these formats:
             - Tuples: [(source, target), ...] or [(source, target, weight), ...]
             - Dicts: [{'source': 'A', 'target': 'B', 'weight': 1.5, ...}, ...]
         edge_attributes: Optional default attributes to apply to all edges
-    
+
     Returns:
         Operation status including:
         - edges_added: Number of edges added
@@ -423,7 +432,8 @@ async def add_edges(
         for i, edge in enumerate(edges):
             if isinstance(edge, dict):
                 if "source" not in edge or "target" not in edge:
-                    raise ValueError(f"Edge at index {i} missing 'source' or 'target'")
+                    msg = f"Edge at index {i} missing 'source' or 'target'"
+                    raise ValueError(msg)
 
                 source, target = edge["source"], edge["target"]
 
@@ -442,7 +452,8 @@ async def add_edges(
 
             elif isinstance(edge, (tuple, list)):
                 if len(edge) < 2:
-                    raise ValueError(f"Edge at index {i} must have at least source and target")
+                    msg = f"Edge at index {i} must have at least source and target"
+                    raise ValueError(msg)
 
                 source, target = edge[0], edge[1]
 
@@ -464,7 +475,8 @@ async def add_edges(
                 else:
                     processed_edges.append((source, target))
             else:
-                raise ValueError(f"Invalid edge format at index {i}")
+                msg = f"Invalid edge format at index {i}"
+                raise ValueError(msg)
 
         # Validate nodes exist
         for edge in processed_edges:
@@ -505,7 +517,7 @@ async def add_edges(
         logger.error(error_msg)
         return GraphFormatter.format_error("GraphNotFoundError", error_msg)
     except Exception as e:
-        logger.error(f"Error adding edges to graph '{graph_id}': {str(e)}")
+        logger.error(f"Error adding edges to graph '{graph_id}': {e!s}")
         logger.debug(traceback.format_exc())
         return GraphFormatter.format_error("AddEdgesError", str(e))
 
@@ -521,7 +533,7 @@ async def shortest_path(
 ) -> Dict[str, Any]:
     """
     Find shortest path(s) in a graph with multiple algorithm support.
-    
+
     Args:
         graph_id: ID of the graph
         source: Source node
@@ -529,7 +541,7 @@ async def shortest_path(
         weight: Edge weight attribute name (None for unweighted)
         method: Algorithm - 'dijkstra', 'bellman-ford', 'floyd-warshall', 'astar'
         k_paths: Number of shortest paths to find (for k-shortest paths)
-    
+
     Returns:
         Path information including:
         - path(s): Node sequence(s)
@@ -586,7 +598,7 @@ async def shortest_path(
                     result["distance"] = dist[source][target]
                 else:
                     result["path"] = None
-                    result["distance"] = float('inf')
+                    result["distance"] = float("inf")
 
             result["algorithm"] = "floyd-warshall"
 
@@ -669,7 +681,7 @@ async def shortest_path(
             str(e)
         )
     except Exception as e:
-        logger.error(f"Error in shortest path: {str(e)}")
+        logger.error(f"Error in shortest path: {e!s}")
         logger.debug(traceback.format_exc())
         return GraphFormatter.format_error("ShortestPathError", str(e))
 
@@ -684,15 +696,15 @@ async def calculate_centrality(
 ) -> Dict[str, Any]:
     """
     Calculate various centrality measures for nodes in a graph.
-    
+
     Args:
         graph_id: ID of the graph
-        centrality_type: Type(s) of centrality - 'degree', 'betweenness', 'closeness', 
+        centrality_type: Type(s) of centrality - 'degree', 'betweenness', 'closeness',
                         'eigenvector', 'pagerank', 'katz', 'harmonic'
         top_n: Number of top central nodes to highlight
         include_statistics: Whether to include mean, std, min, max statistics
         weight: Edge attribute to use as weight (for weighted centralities)
-    
+
     Returns:
         Centrality results including:
         - centrality_scores: Dict of node -> centrality value
@@ -873,7 +885,7 @@ async def calculate_centrality(
         logger.error(error_msg)
         return GraphFormatter.format_error("GraphNotFoundError", error_msg)
     except Exception as e:
-        logger.error(f"Error calculating centrality: {str(e)}")
+        logger.error(f"Error calculating centrality: {e!s}")
         logger.debug(traceback.format_exc())
         return GraphFormatter.format_error("CentralityError", str(e))
 
@@ -885,11 +897,11 @@ async def community_detection(
 ) -> Dict[str, Any]:
     """
     Detect communities in a graph.
-    
+
     Args:
         graph_id: ID of the graph
         method: Community detection algorithm
-    
+
     Returns:
         Detected communities
     """
@@ -916,10 +928,10 @@ async def community_detection(
 async def graph_statistics(graph_id: str) -> Dict[str, Any]:
     """
     Calculate comprehensive graph statistics.
-    
+
     Args:
         graph_id: ID of the graph
-    
+
     Returns:
         Various graph statistics
     """
@@ -945,13 +957,13 @@ async def export_graph(
 ) -> Dict[str, Any]:
     """
     Export a graph to various formats.
-    
+
     Args:
         graph_id: ID of the graph
         format: Export format (json, graphml, gexf, etc.)
         path: Output file path (optional for some formats)
         options: Format-specific options
-    
+
     Returns:
         Export status or data
     """
@@ -985,14 +997,14 @@ async def import_graph(
 ) -> Dict[str, Any]:
     """
     Import a graph from various formats.
-    
+
     Args:
         graph_id: ID for the imported graph
         format: Import format (json, graphml, gexf, etc.)
         data: Graph data (for formats that support direct data)
         path: Input file path (for file-based formats)
         options: Format-specific options
-    
+
     Returns:
         Import status
     """
@@ -1036,13 +1048,13 @@ async def visualize_graph_simple(
 ) -> Dict[str, Any]:
     """
     Generate visualization data for a graph.
-    
+
     Args:
         graph_id: ID of the graph
         layout: Layout algorithm
         output_format: Visualization format (pyvis, plotly, matplotlib)
         options: Visualization options
-    
+
     Returns:
         Visualization data or file path
     """
@@ -1102,11 +1114,11 @@ async def graph_metrics(
 ) -> Dict[str, Any]:
     """
     Calculate comprehensive graph metrics and statistics.
-    
+
     Args:
         graph_id: ID of the graph to analyze
         include_distributions: Whether to include degree/distance distributions
-    
+
     Returns:
         Comprehensive metrics including:
         - Basic metrics: density, sparsity, order, size
@@ -1300,7 +1312,7 @@ async def graph_metrics(
         logger.error(error_msg)
         return GraphFormatter.format_error("GraphNotFoundError", error_msg)
     except Exception as e:
-        logger.error(f"Error calculating metrics for graph '{graph_id}': {str(e)}")
+        logger.error(f"Error calculating metrics for graph '{graph_id}': {e!s}")
         logger.debug(traceback.format_exc())
         return GraphFormatter.format_error("MetricsError", str(e))
 
@@ -1309,7 +1321,7 @@ async def graph_metrics(
 async def monitoring_stats() -> Dict[str, Any]:
     """
     Get server monitoring statistics and performance metrics.
-    
+
     Returns:
         Server statistics including:
         - Operation counts and distribution
@@ -1358,7 +1370,7 @@ async def monitoring_stats() -> Dict[str, Any]:
         return GraphFormatter.format_success("monitoring_stats", "Statistics retrieved", stats)
 
     except Exception as e:
-        logger.error(f"Error getting monitoring stats: {str(e)}")
+        logger.error(f"Error getting monitoring stats: {e!s}")
         return GraphFormatter.format_error("MonitoringError", str(e))
 
 
@@ -1370,12 +1382,12 @@ async def clustering_analysis(
 ) -> Dict[str, Any]:
     """
     Analyze clustering coefficients and triangles in a graph.
-    
+
     Args:
         graph_id: ID of the graph
         include_triangles: Whether to count triangles
         nodes: Specific nodes to analyze (None for all nodes)
-    
+
     Returns:
         Clustering analysis including:
         - local_clustering: Clustering coefficient for each node
@@ -1473,7 +1485,7 @@ async def clustering_analysis(
         logger.error(error_msg)
         return GraphFormatter.format_error("GraphNotFoundError", error_msg)
     except Exception as e:
-        logger.error(f"Error in clustering analysis: {str(e)}")
+        logger.error(f"Error in clustering analysis: {e!s}")
         logger.debug(traceback.format_exc())
         return GraphFormatter.format_error("ClusteringError", str(e))
 
@@ -1487,13 +1499,13 @@ async def connected_components(
 ) -> Dict[str, Any]:
     """
     Find connected components in a graph.
-    
+
     Args:
         graph_id: ID of the graph
         component_type: For directed graphs - 'weakly' or 'strongly' connected
         return_sizes: Whether to return component size distribution
         largest_only: Return only the largest component
-    
+
     Returns:
         Component analysis including:
         - components: List of components (each component is a list of nodes)
@@ -1577,7 +1589,7 @@ async def connected_components(
             ]
 
             # Identify isolated nodes (components of size 1)
-            isolated_nodes = [list(comp)[0] for comp in components if len(comp) == 1]
+            isolated_nodes = [next(iter(comp)) for comp in components if len(comp) == 1]
             if isolated_nodes:
                 result["isolated_nodes"] = isolated_nodes
                 result["num_isolated_nodes"] = len(isolated_nodes)
@@ -1612,7 +1624,7 @@ async def connected_components(
         logger.error(error_msg)
         return GraphFormatter.format_error("GraphNotFoundError", error_msg)
     except Exception as e:
-        logger.error(f"Error finding components: {str(e)}")
+        logger.error(f"Error finding components: {e!s}")
         logger.debug(traceback.format_exc())
         return GraphFormatter.format_error("ComponentError", str(e))
 
@@ -1627,14 +1639,14 @@ async def find_all_paths(
 ) -> Dict[str, Any]:
     """
     Find all simple paths between two nodes with constraints.
-    
+
     Args:
         graph_id: ID of the graph
         source: Source node
         target: Target node
         max_length: Maximum path length (None for no limit)
         max_paths: Maximum number of paths to return (default 100)
-    
+
     Returns:
         Path information including:
         - paths: List of all paths found
@@ -1723,7 +1735,7 @@ async def find_all_paths(
         logger.error(error_msg)
         return GraphFormatter.format_error("GraphNotFoundError", error_msg)
     except Exception as e:
-        logger.error(f"Error finding paths: {str(e)}")
+        logger.error(f"Error finding paths: {e!s}")
         logger.debug(traceback.format_exc())
         return GraphFormatter.format_error("PathFindingError", str(e))
 
@@ -1735,11 +1747,11 @@ async def path_analysis(
 ) -> Dict[str, Any]:
     """
     Analyze path properties of a graph including diameter, radius, and eccentricity.
-    
+
     Args:
         graph_id: ID of the graph
         sample_size: Number of node pairs to sample for large graphs
-    
+
     Returns:
         Path analysis including:
         - average_shortest_path_length: Average distance between all node pairs
@@ -1871,7 +1883,7 @@ async def path_analysis(
         logger.error(error_msg)
         return GraphFormatter.format_error("GraphNotFoundError", error_msg)
     except Exception as e:
-        logger.error(f"Error in path analysis: {str(e)}")
+        logger.error(f"Error in path analysis: {e!s}")
         logger.debug(traceback.format_exc())
         return GraphFormatter.format_error("PathAnalysisError", str(e))
 
@@ -1884,12 +1896,12 @@ async def cycle_detection(
 ) -> Dict[str, Any]:
     """
     Detect cycles in a graph with detailed analysis.
-    
+
     Args:
         graph_id: ID of the graph
         max_cycle_length: Maximum length of cycles to find (None for no limit)
         limit: Maximum number of cycles to return
-    
+
     Returns:
         Cycle analysis including:
         - has_cycles: Whether graph contains cycles
@@ -2017,7 +2029,7 @@ async def cycle_detection(
         logger.error(error_msg)
         return GraphFormatter.format_error("GraphNotFoundError", error_msg)
     except Exception as e:
-        logger.error(f"Error in cycle detection: {str(e)}")
+        logger.error(f"Error in cycle detection: {e!s}")
         logger.debug(traceback.format_exc())
         return GraphFormatter.format_error("CycleDetectionError", str(e))
 
@@ -2032,14 +2044,14 @@ async def flow_paths(
 ) -> Dict[str, Any]:
     """
     Analyze flow paths in a directed graph including max flow and edge-disjoint paths.
-    
+
     Args:
         graph_id: ID of the graph (must be directed)
         source: Source node
-        target: Target (sink) node  
+        target: Target (sink) node
         capacity: Edge attribute name for capacity (default 'capacity')
         flow_type: Type of flow analysis - 'maximum', 'edge_disjoint', 'node_disjoint'
-    
+
     Returns:
         Flow analysis including:
         - flow_value: Maximum flow value
@@ -2070,7 +2082,7 @@ async def flow_paths(
 
         result = {}
 
-        if flow_type == "maximum" or flow_type == "all":
+        if flow_type in {"maximum", "all"}:
             # Maximum flow
             try:
                 flow_value, flow_dict = nx.maximum_flow(graph, source, target, capacity=capacity)
@@ -2097,7 +2109,7 @@ async def flow_paths(
             except nx.NetworkXError as e:
                 result["flow_error"] = str(e)
 
-        if flow_type == "edge_disjoint" or flow_type == "all":
+        if flow_type in {"edge_disjoint", "all"}:
             # Edge-disjoint paths
             try:
                 edge_disjoint = list(nx.edge_disjoint_paths(graph, source, target))
@@ -2111,19 +2123,19 @@ async def flow_paths(
                 if any(capacity in data for _, _, data in graph.edges(data=True)):
                     path_capacities = []
                     for path in edge_disjoint:
-                        min_capacity = float('inf')
+                        min_capacity = float("inf")
                         for i in range(len(path) - 1):
                             edge_data = graph[path[i]][path[i+1]]
                             if capacity in edge_data:
                                 min_capacity = min(min_capacity, edge_data[capacity])
-                        path_capacities.append(min_capacity if min_capacity != float('inf') else None)
+                        path_capacities.append(min_capacity if min_capacity != float("inf") else None)
 
                     result["edge_disjoint_paths"]["path_capacities"] = path_capacities
 
             except nx.NetworkXError as e:
                 result["edge_disjoint_error"] = str(e)
 
-        if flow_type == "node_disjoint" or flow_type == "all":
+        if flow_type in {"node_disjoint", "all"}:
             # Node-disjoint paths
             try:
                 node_disjoint = list(nx.node_disjoint_paths(graph, source, target))
@@ -2162,7 +2174,7 @@ async def flow_paths(
         logger.error(error_msg)
         return GraphFormatter.format_error("GraphNotFoundError", error_msg)
     except Exception as e:
-        logger.error(f"Error in flow analysis: {str(e)}")
+        logger.error(f"Error in flow analysis: {e!s}")
         logger.debug(traceback.format_exc())
         return GraphFormatter.format_error("FlowAnalysisError", str(e))
 
@@ -2171,10 +2183,10 @@ async def flow_paths(
 async def clear_graph(graph_id: str) -> Dict[str, Any]:
     """
     Clear all nodes and edges from a graph while preserving the graph instance.
-    
+
     Args:
         graph_id: ID of the graph to clear
-    
+
     Returns:
         Clear operation status
     """
@@ -2196,7 +2208,7 @@ async def clear_graph(graph_id: str) -> Dict[str, Any]:
         logger.error(error_msg)
         return GraphFormatter.format_error("GraphNotFoundError", error_msg)
     except Exception as e:
-        logger.error(f"Error clearing graph '{graph_id}': {str(e)}")
+        logger.error(f"Error clearing graph '{graph_id}': {e!s}")
         return GraphFormatter.format_error("ClearGraphError", str(e))
 
 
@@ -2214,7 +2226,7 @@ async def subgraph_extraction(
 ) -> Dict[str, Any]:
     """
     Extract subgraphs based on various criteria.
-    
+
     Args:
         graph_id: ID of the source graph
         method: Extraction method - 'nodes', 'edges', 'k_hop', 'largest_component', 'condition'
@@ -2225,7 +2237,7 @@ async def subgraph_extraction(
         condition: Node/edge attribute condition (e.g., "weight > 0.5")
         create_new: Whether to create a new graph or return subgraph data
         new_graph_id: ID for the new graph (auto-generated if not provided)
-    
+
     Returns:
         Subgraph information including:
         - subgraph_id: ID of created subgraph (if create_new=True)
@@ -2348,7 +2360,8 @@ async def subgraph_extraction(
             try:
                 parts = condition.split()
                 if len(parts) != 3:
-                    raise ValueError("Condition must be in format: 'attribute operator value'")
+                    msg = "Condition must be in format: 'attribute operator value'"
+                    raise ValueError(msg)
 
                 attr, op, value = parts
 
@@ -2404,14 +2417,14 @@ async def subgraph_extraction(
 
                 result["extraction_info"] = {
                     "condition": condition,
-                    "nodes_matching": len(valid_nodes) if 'valid_nodes' in locals() else 0,
-                    "edges_matching": len(valid_edges) if 'valid_edges' in locals() else 0
+                    "nodes_matching": len(valid_nodes) if "valid_nodes" in locals() else 0,
+                    "edges_matching": len(valid_edges) if "valid_edges" in locals() else 0
                 }
 
             except Exception as e:
                 return GraphFormatter.format_error(
                     "ConditionError",
-                    f"Error parsing condition: {str(e)}"
+                    f"Error parsing condition: {e!s}"
                 )
 
         else:
@@ -2466,7 +2479,7 @@ async def subgraph_extraction(
         logger.error(error_msg)
         return GraphFormatter.format_error("GraphNotFoundError", error_msg)
     except Exception as e:
-        logger.error(f"Error in subgraph extraction: {str(e)}")
+        logger.error(f"Error in subgraph extraction: {e!s}")
         logger.debug(traceback.format_exc())
         return GraphFormatter.format_error("SubgraphExtractionError", str(e))
 
@@ -2483,15 +2496,15 @@ async def advanced_community_detection(
 ) -> Dict[str, Any]:
     """
     Detect communities using advanced algorithms with auto-selection.
-    
+
     Args:
         graph_id: ID of the graph
-        algorithm: Algorithm - 'auto', 'louvain', 'girvan_newman', 'spectral', 
+        algorithm: Algorithm - 'auto', 'louvain', 'girvan_newman', 'spectral',
                    'label_propagation', 'modularity_max'
         resolution: Resolution parameter (for resolution-based methods)
         seed: Random seed for reproducibility
         params: Additional algorithm-specific parameters
-    
+
     Returns:
         Community structure with quality metrics
     """
@@ -2517,7 +2530,7 @@ async def advanced_community_detection(
         )
 
     except Exception as e:
-        logger.error(f"Error in advanced community detection: {str(e)}")
+        logger.error(f"Error in advanced community detection: {e!s}")
         return GraphFormatter.format_error("CommunityDetectionError", str(e))
 
 
@@ -2532,7 +2545,7 @@ async def network_flow_analysis(
 ) -> Dict[str, Any]:
     """
     Analyze network flow with multiple algorithms.
-    
+
     Args:
         graph_id: ID of the graph
         source: Source node
@@ -2540,7 +2553,7 @@ async def network_flow_analysis(
         capacity: Edge attribute for capacities
         algorithm: Algorithm - 'auto', 'ford_fulkerson', 'edmonds_karp', 'dinic', 'preflow_push'
         flow_type: Analysis type - 'max_flow', 'min_cut', 'multi_commodity'
-    
+
     Returns:
         Flow analysis results including flow value, flow dict, and cut sets
     """
@@ -2570,7 +2583,7 @@ async def network_flow_analysis(
         return GraphFormatter.format_success("network_flow", "Flow analysis completed", result)
 
     except Exception as e:
-        logger.error(f"Error in network flow analysis: {str(e)}")
+        logger.error(f"Error in network flow analysis: {e!s}")
         return GraphFormatter.format_error("NetworkFlowError", str(e))
 
 
@@ -2583,14 +2596,14 @@ async def generate_graph(
 ) -> Dict[str, Any]:
     """
     Generate synthetic graphs using various models.
-    
+
     Args:
-        graph_type: Type - 'random', 'scale_free', 'small_world', 'regular', 
+        graph_type: Type - 'random', 'scale_free', 'small_world', 'regular',
                     'tree', 'geometric', 'social'
         n: Number of nodes
         graph_id: ID for the generated graph (auto-generated if not provided)
         params: Model-specific parameters (e.g., m for BA model, p for ER model)
-    
+
     Returns:
         Generated graph information and statistics
     """
@@ -2642,7 +2655,7 @@ async def generate_graph(
         )
 
     except Exception as e:
-        logger.error(f"Error generating graph: {str(e)}")
+        logger.error(f"Error generating graph: {e!s}")
         return GraphFormatter.format_error("GraphGenerationError", str(e))
 
 
@@ -2655,13 +2668,13 @@ async def bipartite_analysis(
 ) -> Dict[str, Any]:
     """
     Analyze bipartite graphs with specialized algorithms.
-    
+
     Args:
         graph_id: ID of the graph
         analysis_type: Type - 'check', 'projection', 'matching', 'clustering', 'communities'
         weight: Edge weight attribute (for weighted operations)
         params: Analysis-specific parameters
-    
+
     Returns:
         Bipartite analysis results
     """
@@ -2696,7 +2709,7 @@ async def bipartite_analysis(
         return GraphFormatter.format_success("bipartite_analysis", "Analysis completed", result)
 
     except Exception as e:
-        logger.error(f"Error in bipartite analysis: {str(e)}")
+        logger.error(f"Error in bipartite analysis: {e!s}")
         return GraphFormatter.format_error("BipartiteAnalysisError", str(e))
 
 
@@ -2708,13 +2721,13 @@ async def directed_graph_analysis(
 ) -> Dict[str, Any]:
     """
     Analyze directed graphs with specialized algorithms.
-    
+
     Args:
         graph_id: ID of the graph
-        analysis_type: Type - 'dag_check', 'scc', 'topological_sort', 'tournament', 
+        analysis_type: Type - 'dag_check', 'scc', 'topological_sort', 'tournament',
                       'bow_tie', 'hierarchy', 'temporal'
         params: Analysis-specific parameters
-    
+
     Returns:
         Directed graph analysis results
     """
@@ -2758,7 +2771,7 @@ async def directed_graph_analysis(
         return GraphFormatter.format_success("directed_analysis", "Analysis completed", result)
 
     except Exception as e:
-        logger.error(f"Error in directed graph analysis: {str(e)}")
+        logger.error(f"Error in directed graph analysis: {e!s}")
         return GraphFormatter.format_error("DirectedAnalysisError", str(e))
 
 
@@ -2770,13 +2783,13 @@ async def specialized_algorithms(
 ) -> Dict[str, Any]:
     """
     Run specialized graph algorithms.
-    
+
     Args:
         graph_id: ID of the graph
-        algorithm: Algorithm - 'spanning_tree', 'coloring', 'max_clique', 
+        algorithm: Algorithm - 'spanning_tree', 'coloring', 'max_clique',
                    'matching', 'vertex_cover', 'dominating_set', 'link_prediction'
         params: Algorithm-specific parameters
-    
+
     Returns:
         Algorithm results
     """
@@ -2813,7 +2826,7 @@ async def specialized_algorithms(
         return GraphFormatter.format_success(f"specialized_{algorithm}", "Algorithm completed", result)
 
     except Exception as e:
-        logger.error(f"Error in {algorithm}: {str(e)}")
+        logger.error(f"Error in {algorithm}: {e!s}")
         return GraphFormatter.format_error(f"{algorithm.title()}Error", str(e))
 
 
@@ -2825,12 +2838,12 @@ async def ml_graph_analysis(
 ) -> Dict[str, Any]:
     """
     Machine learning-based graph analysis.
-    
+
     Args:
         graph_id: ID of the graph
         analysis_type: Type - 'embeddings', 'features', 'similarity', 'anomaly'
         params: Analysis-specific parameters
-    
+
     Returns:
         ML analysis results
     """
@@ -2877,7 +2890,7 @@ async def ml_graph_analysis(
         return GraphFormatter.format_success(f"ml_{analysis_type}", "Analysis completed", result)
 
     except Exception as e:
-        logger.error(f"Error in ML {analysis_type}: {str(e)}")
+        logger.error(f"Error in ML {analysis_type}: {e!s}")
         return GraphFormatter.format_error(f"ML{analysis_type.title()}Error", str(e))
 
 
@@ -2889,12 +2902,12 @@ async def robustness_analysis(
 ) -> Dict[str, Any]:
     """
     Analyze network robustness and resilience.
-    
+
     Args:
         graph_id: ID of the graph
         analysis_type: Type - 'attack', 'percolation', 'cascading', 'resilience'
         params: Analysis-specific parameters
-    
+
     Returns:
         Robustness analysis results
     """
@@ -2930,7 +2943,7 @@ async def robustness_analysis(
         return GraphFormatter.format_success(f"robustness_{analysis_type}", "Analysis completed", result)
 
     except Exception as e:
-        logger.error(f"Error in robustness {analysis_type}: {str(e)}")
+        logger.error(f"Error in robustness {analysis_type}: {e!s}")
         return GraphFormatter.format_error(f"Robustness{analysis_type.title()}Error", str(e))
 
 
@@ -2946,14 +2959,14 @@ async def visualize_graph(
 ) -> Dict[str, Any]:
     """
     Create graph visualizations with various backends.
-    
+
     Args:
         graph_id: ID of the graph
         visualization_type: Type - 'static', 'interactive', 'pyvis', 'specialized'
         layout: Layout algorithm - 'spring', 'circular', 'shell', 'kamada_kawai', 'hierarchical'
         format: Output format - 'png', 'svg', 'html', 'json'
         params: Additional visualization parameters
-    
+
     Returns:
         Visualization data in requested format
     """
@@ -3023,7 +3036,7 @@ async def visualize_graph(
         return GraphFormatter.format_success("visualize_graph", "Visualization created", result)
 
     except Exception as e:
-        logger.error(f"Error in visualization: {str(e)}")
+        logger.error(f"Error in visualization: {e!s}")
         return GraphFormatter.format_error("VisualizationError", str(e))
 
 
@@ -3035,12 +3048,12 @@ async def visualize_3d(
 ) -> Dict[str, Any]:
     """
     Create 3D graph visualization.
-    
+
     Args:
         graph_id: ID of the graph
         layout: 3D layout algorithm
         params: Additional parameters
-    
+
     Returns:
         3D visualization data
     """
@@ -3058,7 +3071,7 @@ async def visualize_3d(
         return GraphFormatter.format_success("visualize_3d", "3D visualization created", result)
 
     except Exception as e:
-        logger.error(f"Error in 3D visualization: {str(e)}")
+        logger.error(f"Error in 3D visualization: {e!s}")
         return GraphFormatter.format_error("Visualization3DError", str(e))
 
 
@@ -3071,13 +3084,13 @@ async def import_from_source(
 ) -> Dict[str, Any]:
     """
     Import graph data from various sources with intelligent parsing.
-    
+
     Args:
         source_type: Type - 'csv', 'json', 'database', 'api', 'excel'
         source_config: Source-specific configuration
         graph_id: ID for the imported graph (auto-generated if not provided)
         params: Additional import parameters
-    
+
     Returns:
         Import results with graph metadata
     """
@@ -3152,7 +3165,7 @@ async def import_from_source(
         )
 
     except Exception as e:
-        logger.error(f"Error importing from {source_type}: {str(e)}")
+        logger.error(f"Error importing from {source_type}: {e!s}")
         return GraphFormatter.format_error("ImportError", str(e))
 
 
@@ -3165,13 +3178,13 @@ async def batch_graph_analysis(
 ) -> Dict[str, Any]:
     """
     Process multiple graphs with batch operations.
-    
+
     Args:
         graph_ids: List of graph IDs to process
         operations: List of operations to perform
         parallel: Use parallel processing
         params: Additional parameters
-    
+
     Returns:
         Batch analysis results
     """
@@ -3203,7 +3216,7 @@ async def batch_graph_analysis(
         return GraphFormatter.format_success("batch_analysis", "Batch analysis completed", results)
 
     except Exception as e:
-        logger.error(f"Error in batch analysis: {str(e)}")
+        logger.error(f"Error in batch analysis: {e!s}")
         return GraphFormatter.format_error("BatchAnalysisError", str(e))
 
 
@@ -3216,13 +3229,13 @@ async def create_analysis_workflow(
 ) -> Dict[str, Any]:
     """
     Execute analysis workflow with chained operations.
-    
+
     Args:
         graph_id: ID of the graph
         workflow_steps: List of workflow step configurations
         cache_results: Cache intermediate results
         params: Additional parameters
-    
+
     Returns:
         Workflow execution results
     """
@@ -3244,7 +3257,7 @@ async def create_analysis_workflow(
         return GraphFormatter.format_success("analysis_workflow", "Workflow completed", results)
 
     except Exception as e:
-        logger.error(f"Error in analysis workflow: {str(e)}")
+        logger.error(f"Error in analysis workflow: {e!s}")
         return GraphFormatter.format_error("WorkflowError", str(e))
 
 
@@ -3257,13 +3270,13 @@ async def generate_report(
 ) -> Dict[str, Any]:
     """
     Generate analysis report in various formats.
-    
+
     Args:
         analysis_data: Analysis results to include
         report_format: Format - 'pdf', 'html'
         template: Report template
         params: Additional parameters
-    
+
     Returns:
         Generated report data
     """
@@ -3301,7 +3314,7 @@ async def generate_report(
         return GraphFormatter.format_success("generate_report", "Report generated", result)
 
     except Exception as e:
-        logger.error(f"Error generating report: {str(e)}")
+        logger.error(f"Error generating report: {e!s}")
         return GraphFormatter.format_error("ReportGenerationError", str(e))
 
 
@@ -3313,12 +3326,12 @@ async def setup_monitoring(
 ) -> Dict[str, Any]:
     """
     Setup monitoring and alerts for a graph.
-    
+
     Args:
         graph_id: ID of the graph to monitor
         alert_rules: List of alert rule configurations
         params: Additional parameters
-    
+
     Returns:
         Monitoring setup confirmation
     """
@@ -3354,24 +3367,24 @@ async def setup_monitoring(
         )
 
     except Exception as e:
-        logger.error(f"Error setting up monitoring: {str(e)}")
+        logger.error(f"Error setting up monitoring: {e!s}")
         return GraphFormatter.format_error("MonitoringSetupError", str(e))
 
 
 @mcp.tool()
 async def create_dashboard(
     graph_id: str,
-    visualizations: List[str] = None,
+    visualizations: Optional[List[str]] = None,
     params: Optional[Dict[str, Any]] = None
 ) -> Dict[str, Any]:
     """
     Create interactive dashboard with multiple visualizations.
-    
+
     Args:
         graph_id: ID of the graph
         visualizations: List of visualization types to include
         params: Additional parameters
-    
+
     Returns:
         Dashboard data
     """
@@ -3394,7 +3407,7 @@ async def create_dashboard(
         return GraphFormatter.format_success("create_dashboard", "Dashboard created", result)
 
     except Exception as e:
-        logger.error(f"Error creating dashboard: {str(e)}")
+        logger.error(f"Error creating dashboard: {e!s}")
         return GraphFormatter.format_error("DashboardError", str(e))
 
 
@@ -3402,10 +3415,10 @@ async def create_dashboard(
 async def get_graph_resource(graph_id: str) -> List[TextContent]:
     """
     Provide graph data as an MCP resource.
-    
+
     Args:
         graph_id: ID of the graph
-    
+
     Returns:
         Graph data as text content
     """
@@ -3423,7 +3436,7 @@ async def get_graph_resource(graph_id: str) -> List[TextContent]:
         return [
             TextContent(
                 type="text",
-                text=f"Error retrieving graph {graph_id}: {str(e)}"
+                text=f"Error retrieving graph {graph_id}: {e!s}"
             )
         ]
 
@@ -3432,7 +3445,7 @@ async def get_graph_resource(graph_id: str) -> List[TextContent]:
 async def list_graphs_resource() -> List[TextContent]:
     """
     List all available graphs as an MCP resource.
-    
+
     Returns:
         List of graphs as text content
     """
@@ -3450,7 +3463,7 @@ async def list_graphs_resource() -> List[TextContent]:
         return [
             TextContent(
                 type="text",
-                text=f"Error listing graphs: {str(e)}"
+                text=f"Error listing graphs: {e!s}"
             )
         ]
 
@@ -3459,21 +3472,22 @@ def main():
     """Run the NetworkX MCP server."""
     import os
     import sys
+
     from datetime import datetime
 
     # Import datetime for the import_graph tool
-    globals()['datetime'] = datetime
+    globals()["datetime"] = datetime
 
     # Get transport method from environment or default
     transport = os.environ.get("MCP_TRANSPORT", "stdio")
-    
+
     # Get port from environment or command line (for SSE transport)
     port = 8765  # Changed default port to avoid conflicts
-    
+
     # Check for port in environment
     if os.environ.get("MCP_PORT"):
         port = int(os.environ.get("MCP_PORT"))
-    
+
     # Check for transport and port in command line arguments
     if len(sys.argv) > 1:
         if sys.argv[1] in ["stdio", "sse", "streamable-http"]:
@@ -3490,18 +3504,18 @@ def main():
                 transport = "sse"  # Default to SSE when port is specified
             except ValueError:
                 logger.warning(f"Invalid argument '{sys.argv[1]}', using defaults")
-    
-    logger.info(f"Starting NetworkX MCP Server")
+
+    logger.info("Starting NetworkX MCP Server")
     logger.info(f"Transport: {transport}")
-    
+
     if transport in ["sse", "streamable-http"]:
         logger.info(f"Port: {port}")
         logger.info(f"Server will be available at http://localhost:{port}")
     else:
         logger.info("Using stdio transport - communicate via standard input/output")
-    
+
     logger.info("Press Ctrl+C to stop the server")
-    
+
     try:
         # Run the server using FastMCP's built-in run method
         if transport == "stdio":
@@ -3514,14 +3528,14 @@ def main():
             logger.error(f"Unknown transport: {transport}")
             logger.info("Valid transports: stdio, sse, streamable-http")
             sys.exit(1)
-            
+
     except OSError as e:
         if "Address already in use" in str(e):
             logger.error(f"Port {port} is already in use!")
             logger.info("Try one of these options:")
             logger.info(f"  1. Kill the process: lsof -ti:{port} | xargs kill -9")
-            logger.info(f"  2. Use a different port: python -m networkx_mcp.server sse 8766")
-            logger.info(f"  3. Set environment variable: MCP_PORT=8766 python -m networkx_mcp.server")
+            logger.info("  2. Use a different port: python -m networkx_mcp.server sse 8766")
+            logger.info("  3. Set environment variable: MCP_PORT=8766 python -m networkx_mcp.server")
             sys.exit(1)
         else:
             raise

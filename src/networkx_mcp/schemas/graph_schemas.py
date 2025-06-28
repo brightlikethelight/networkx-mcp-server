@@ -1,8 +1,15 @@
 """Pydantic schemas for graph data validation."""
 
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Literal
+from typing import Optional
+from typing import Union
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel
+from pydantic import Field
+from pydantic import validator
 
 
 class NodeSchema(BaseModel):
@@ -116,11 +123,12 @@ class ImportGraphRequest(BaseModel):
     graph_id: Optional[str] = None
     options: Dict[str, Any] = Field(default_factory=dict)
 
-    @validator('data')
-    def validate_data_or_path(cls, v, values):
+    @validator("data")
+    def validate_data_or_path(self, v, values):
         """Ensure either data or path is provided."""
-        if v is None and values.get('path') is None:
-            raise ValueError("Either 'data' or 'path' must be provided")
+        if v is None and values.get("path") is None:
+            msg = "Either 'data' or 'path' must be provided"
+            raise ValueError(msg)
         return v
 
 

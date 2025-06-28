@@ -2,12 +2,22 @@
 
 import logging
 import time
+
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Set
+from typing import Tuple
+from typing import Union
 
 import networkx as nx
 import numpy as np
+
 from networkx.algorithms import bipartite
+from networkx.algorithms.community import greedy_modularity_communities
+
 
 logger = logging.getLogger(__name__)
 
@@ -22,14 +32,14 @@ class BipartiteAnalysis:
     ) -> Union[bool, Tuple[bool, Optional[Tuple[Set, Set]]]]:
         """
         Check if graph is bipartite and optionally return the bipartition.
-        
+
         Parameters:
         -----------
         graph : nx.Graph
             Input graph
         return_sets : bool
             Whether to return the two sets of nodes
-            
+
         Returns:
         --------
         bool or Tuple[bool, Optional[Tuple[Set, Set]]]
@@ -59,11 +69,11 @@ class BipartiteAnalysis:
         graph: nx.Graph,
         nodes: Set[Any],
         weight_function: Optional[str] = "overlap",
-        **params
+        **_params
     ) -> Tuple[nx.Graph, Dict[str, Any]]:
         """
         Create weighted or unweighted projection onto one node set.
-        
+
         Parameters:
         -----------
         graph : nx.Graph
@@ -72,7 +82,7 @@ class BipartiteAnalysis:
             Nodes to project onto
         weight_function : str
             Weight function: 'overlap', 'jaccard', 'newman', None
-            
+
         Returns:
         --------
         Tuple of (projection graph, metadata)
@@ -82,7 +92,8 @@ class BipartiteAnalysis:
         # Verify bipartite
         is_bip, sets = BipartiteAnalysis.is_bipartite(graph, return_sets=True)
         if not is_bip:
-            raise ValueError("Graph is not bipartite")
+            msg = "Graph is not bipartite"
+            raise ValueError(msg)
 
         # Determine which set contains the nodes
         if nodes.issubset(sets[0]):
@@ -92,7 +103,8 @@ class BipartiteAnalysis:
             bottom_nodes = sets[1]
             top_nodes = sets[0]
         else:
-            raise ValueError("Nodes must all belong to one partition")
+            msg = "Nodes must all belong to one partition"
+            raise ValueError(msg)
 
         # Create projection based on weight function
         if weight_function is None:
@@ -134,7 +146,8 @@ class BipartiteAnalysis:
             edge_weights = nx.get_edge_attributes(P, "weight")
 
         else:
-            raise ValueError(f"Unknown weight function: {weight_function}")
+            msg = f"Unknown weight function: {weight_function}"
+            raise ValueError(msg)
 
         execution_time = (time.time() - start_time) * 1000
 
@@ -172,11 +185,11 @@ class BipartiteAnalysis:
         graph: nx.Graph,
         nodes: Optional[Set[Any]] = None,
         mode: str = "dot",
-        **params
+        **_params
     ) -> Dict[str, Any]:
         """
         Calculate bipartite clustering coefficients.
-        
+
         Parameters:
         -----------
         graph : nx.Graph
@@ -185,7 +198,7 @@ class BipartiteAnalysis:
             Nodes to calculate clustering for (default: all)
         mode : str
             Clustering mode: 'dot', 'min', 'max'
-            
+
         Returns:
         --------
         Dict containing clustering coefficients and statistics
@@ -193,7 +206,8 @@ class BipartiteAnalysis:
         # Verify bipartite
         is_bip, sets = BipartiteAnalysis.is_bipartite(graph, return_sets=True)
         if not is_bip:
-            raise ValueError("Graph is not bipartite")
+            msg = "Graph is not bipartite"
+            raise ValueError(msg)
 
         if nodes is None:
             # Calculate for both sets
@@ -207,7 +221,8 @@ class BipartiteAnalysis:
                 elif mode == "max":
                     clustering = bipartite.clustering(graph, node_set, mode="max")
                 else:
-                    raise ValueError(f"Unknown clustering mode: {mode}")
+                    msg = f"Unknown clustering mode: {mode}"
+                    raise ValueError(msg)
 
                 # Calculate statistics
                 values = list(clustering.values())
@@ -241,7 +256,8 @@ class BipartiteAnalysis:
             elif mode == "max":
                 clustering = bipartite.clustering(graph, nodes, mode="max")
             else:
-                raise ValueError(f"Unknown clustering mode: {mode}")
+                msg = f"Unknown clustering mode: {mode}"
+                raise ValueError(msg)
 
             values = list(clustering.values())
 
@@ -260,11 +276,11 @@ class BipartiteAnalysis:
         graph: nx.Graph,
         centrality_type: str = "degree",
         normalized: bool = True,
-        **params
+        **_params
     ) -> Dict[str, Any]:
         """
         Calculate adapted centrality measures for bipartite graphs.
-        
+
         Parameters:
         -----------
         graph : nx.Graph
@@ -273,7 +289,7 @@ class BipartiteAnalysis:
             Type: 'degree', 'betweenness', 'closeness'
         normalized : bool
             Whether to normalize values
-            
+
         Returns:
         --------
         Dict containing centrality measures by node set
@@ -281,7 +297,8 @@ class BipartiteAnalysis:
         # Verify bipartite
         is_bip, sets = BipartiteAnalysis.is_bipartite(graph, return_sets=True)
         if not is_bip:
-            raise ValueError("Graph is not bipartite")
+            msg = "Graph is not bipartite"
+            raise ValueError(msg)
 
         results = {}
 
@@ -355,7 +372,8 @@ class BipartiteAnalysis:
                 }
 
         else:
-            raise ValueError(f"Unknown centrality type: {centrality_type}")
+            msg = f"Unknown centrality type: {centrality_type}"
+            raise ValueError(msg)
 
         return {
             "centrality_type": centrality_type,
@@ -369,11 +387,11 @@ class BipartiteAnalysis:
         graph: nx.Graph,
         weight: Optional[str] = None,
         top_nodes: Optional[Set[Any]] = None,
-        **params
+        **_params
     ) -> Dict[str, Any]:
         """
         Find maximum matching using Hungarian algorithm.
-        
+
         Parameters:
         -----------
         graph : nx.Graph
@@ -382,7 +400,7 @@ class BipartiteAnalysis:
             Edge attribute for weights
         top_nodes : Set, optional
             One set of the bipartition
-            
+
         Returns:
         --------
         Dict containing matching and statistics
@@ -392,7 +410,8 @@ class BipartiteAnalysis:
         # Verify bipartite
         is_bip, sets = BipartiteAnalysis.is_bipartite(graph, return_sets=True)
         if not is_bip:
-            raise ValueError("Graph is not bipartite")
+            msg = "Graph is not bipartite"
+            raise ValueError(msg)
 
         # Use provided top_nodes or infer
         if top_nodes is None:
@@ -413,7 +432,7 @@ class BipartiteAnalysis:
                 weights = weight
 
             # Use minimum weight matching with negative weights
-            neg_weights = {e: -w for e, w in weights.items()}
+            # neg_weights = {e: -w for e, w in weights.items()}  # Not used by NetworkX
 
             # NetworkX's max_weight_matching works for general graphs
             # For bipartite, we use it directly
@@ -465,18 +484,18 @@ class BipartiteAnalysis:
     def bipartite_community_detection(
         graph: nx.Graph,
         method: str = "label_propagation",
-        **params
+        **_params
     ) -> Dict[str, Any]:
         """
         Detect communities in bipartite graphs using specialized algorithms.
-        
+
         Parameters:
         -----------
         graph : nx.Graph
             Bipartite graph
         method : str
             Method: 'label_propagation', 'modularity', 'barber'
-            
+
         Returns:
         --------
         Dict containing communities and metadata
@@ -486,12 +505,13 @@ class BipartiteAnalysis:
         # Verify bipartite
         is_bip, sets = BipartiteAnalysis.is_bipartite(graph, return_sets=True)
         if not is_bip:
-            raise ValueError("Graph is not bipartite")
+            msg = "Graph is not bipartite"
+            raise ValueError(msg)
 
         if method == "label_propagation":
             # Bipartite-aware label propagation
             communities = BipartiteAnalysis._bipartite_label_propagation(
-                graph, sets[0], sets[1], **params
+                graph, sets[0], sets[1], **_params
             )
 
         elif method == "modularity":
@@ -503,7 +523,6 @@ class BipartiteAnalysis:
             )
 
             # Detect communities in projection
-            from networkx.algorithms.community import greedy_modularity_communities
             proj_communities = list(greedy_modularity_communities(projection))
 
             # Map back to original nodes
@@ -520,10 +539,11 @@ class BipartiteAnalysis:
 
         elif method == "barber":
             # Barber's bipartite modularity optimization
-            communities = BipartiteAnalysis._barber_modularity(graph, sets[0], sets[1], **params)
+            communities = BipartiteAnalysis._barber_modularity(graph, sets[0], sets[1], **_params)
 
         else:
-            raise ValueError(f"Unknown method: {method}")
+            msg = f"Unknown method: {method}"
+            raise ValueError(msg)
 
         execution_time = (time.time() - start_time) * 1000
 
@@ -563,13 +583,13 @@ class BipartiteAnalysis:
         set0: Set,
         set1: Set,
         max_iterations: int = 100,
-        **params
+        **_params
     ) -> List[Set]:
         """Bipartite-aware label propagation."""
         # Initialize each node with its own label
         labels = {node: i for i, node in enumerate(graph.nodes())}
 
-        for iteration in range(max_iterations):
+        for _ in range(max_iterations):
             changed = False
 
             # Update labels for set 0 based on set 1 neighbors
@@ -614,8 +634,8 @@ class BipartiteAnalysis:
         graph: nx.Graph,
         set0: Set,
         set1: Set,
-        resolution: float = 1.0,
-        **params
+        _resolution: float = 1.0,
+        **_params
     ) -> List[Set]:
         """Barber's bipartite modularity optimization (simplified)."""
         # This is a simplified greedy approach
@@ -643,7 +663,7 @@ class BipartiteAnalysis:
                     )
 
                     # New modularity
-                    new_communities = [c for k, c in enumerate(communities) if k != i and k != j]
+                    new_communities = [c for k, c in enumerate(communities) if k not in (i, j)]
                     new_communities.append(merged)
                     new_mod = BipartiteAnalysis._calculate_bipartite_modularity(
                         graph, new_communities, set0, set1
@@ -660,7 +680,7 @@ class BipartiteAnalysis:
                 i, j = best_merge
                 # Merge communities
                 merged = communities[i] | communities[j]
-                communities = [c for k, c in enumerate(communities) if k != i and k != j]
+                communities = [c for k, c in enumerate(communities) if k not in (i, j)]
                 communities.append(merged)
 
         return communities

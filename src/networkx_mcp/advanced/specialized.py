@@ -3,11 +3,19 @@
 import logging
 import random
 import time
+
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Set
+from typing import Tuple
+from typing import Union
 
 import networkx as nx
 import numpy as np
+
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +33,7 @@ class SpecializedAlgorithms:
     ) -> Dict[str, Any]:
         """
         Find minimum/maximum spanning trees using various algorithms.
-        
+
         Parameters:
         -----------
         graph : nx.Graph or nx.DiGraph
@@ -36,7 +44,7 @@ class SpecializedAlgorithms:
             Edge attribute for weights
         k : int
             Number of spanning trees to find (for k-MST)
-            
+
         Returns:
         --------
         Dict containing spanning tree(s) and metadata
@@ -119,7 +127,8 @@ class SpecializedAlgorithms:
             })
 
         else:
-            raise ValueError(f"Unknown algorithm: {algorithm}")
+            msg = f"Unknown algorithm: {algorithm}"
+            raise ValueError(msg)
 
         # Add statistics
         if "edges" in results:
@@ -193,14 +202,14 @@ class SpecializedAlgorithms:
     ) -> Dict[str, Any]:
         """
         Color graph nodes using various strategies.
-        
+
         Parameters:
         -----------
         graph : nx.Graph
             Input graph
         strategy : str
             Strategy: 'greedy', 'welsh_powell', 'dsatur', 'brooks'
-            
+
         Returns:
         --------
         Dict containing coloring and statistics
@@ -393,14 +402,14 @@ class SpecializedAlgorithms:
     ) -> Dict[str, Any]:
         """
         Find maximum clique using exact or approximate algorithms.
-        
+
         Parameters:
         -----------
         graph : nx.Graph
             Input graph
         method : str
             Method: 'exact', 'approximation', 'heuristic'
-            
+
         Returns:
         --------
         Dict containing clique and statistics
@@ -507,7 +516,7 @@ class SpecializedAlgorithms:
     ) -> Dict[str, Any]:
         """
         Find various types of graph matchings.
-        
+
         Parameters:
         -----------
         graph : nx.Graph
@@ -516,7 +525,7 @@ class SpecializedAlgorithms:
             Type: 'maximum', 'maximal', 'perfect'
         weight : str
             Edge attribute for weighted matching
-            
+
         Returns:
         --------
         Dict containing matching and statistics
@@ -560,7 +569,8 @@ class SpecializedAlgorithms:
                 }
 
         else:
-            raise ValueError(f"Unknown matching type: {matching_type}")
+            msg = f"Unknown matching type: {matching_type}"
+            raise ValueError(msg)
 
         # Calculate statistics
         matched_nodes = set()
@@ -605,14 +615,14 @@ class SpecializedAlgorithms:
     ) -> Dict[str, Any]:
         """
         Find minimum vertex cover.
-        
+
         Parameters:
         -----------
         graph : nx.Graph
             Input graph
         method : str
             Method: 'approximation', 'ilp' (for small graphs)
-            
+
         Returns:
         --------
         Dict containing vertex cover
@@ -705,14 +715,14 @@ class SpecializedAlgorithms:
     ) -> Dict[str, Any]:
         """
         Find minimum dominating set.
-        
+
         Parameters:
         -----------
         graph : nx.Graph
             Input graph
         method : str
             Method: 'greedy', 'approximation'
-            
+
         Returns:
         --------
         Dict containing dominating set
@@ -794,7 +804,7 @@ class SpecializedAlgorithms:
     ) -> Dict[str, Any]:
         """
         Predict missing links in the graph.
-        
+
         Parameters:
         -----------
         graph : nx.Graph
@@ -805,7 +815,7 @@ class SpecializedAlgorithms:
             Specific pairs to evaluate (default: all non-edges)
         top_k : int
             Return top k predictions
-            
+
         Returns:
         --------
         Dict containing link predictions
@@ -870,7 +880,8 @@ class SpecializedAlgorithms:
                 scores.append(((u, v), score))
 
         else:
-            raise ValueError(f"Unknown method: {method}")
+            msg = f"Unknown method: {method}"
+            raise ValueError(msg)
 
         # Sort by score
         scores.sort(key=lambda x: x[1], reverse=True)

@@ -3,12 +3,19 @@
 import logging
 import random
 import time
+
 from collections import defaultdict
-from typing import Any, Dict, List, Union
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Union
 
 import networkx as nx
 import numpy as np
+
 from sklearn.preprocessing import StandardScaler
+
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +32,7 @@ class MLIntegration:
     ) -> Dict[str, Any]:
         """
         Generate node embeddings for machine learning.
-        
+
         Parameters:
         -----------
         graph : nx.Graph or nx.DiGraph
@@ -34,7 +41,7 @@ class MLIntegration:
             Method: 'node2vec', 'deepwalk', 'spectral', 'structural'
         dimensions : int
             Embedding dimensions
-            
+
         Returns:
         --------
         Dict containing embeddings and metadata
@@ -62,7 +69,8 @@ class MLIntegration:
             )
 
         else:
-            raise ValueError(f"Unknown embedding method: {method}")
+            msg = f"Unknown embedding method: {method}"
+            raise ValueError(msg)
 
         # Calculate embedding statistics
         embedding_matrix = np.array(list(embeddings.values()))
@@ -328,19 +336,19 @@ class MLIntegration:
     @staticmethod
     def graph_features(
         graph: Union[nx.Graph, nx.DiGraph],
-        feature_types: List[str] = None,
+        feature_types: Optional[List[str]] = None,
         **params
     ) -> Dict[str, Any]:
         """
         Extract features for machine learning from graph.
-        
+
         Parameters:
         -----------
         graph : nx.Graph or nx.DiGraph
             Input graph
         feature_types : List[str]
             Types of features to extract
-            
+
         Returns:
         --------
         Dict containing features
@@ -525,19 +533,19 @@ class MLIntegration:
     def similarity_metrics(
         graph1: nx.Graph,
         graph2: nx.Graph,
-        metrics: List[str] = None,
+        metrics: Optional[List[str]] = None,
         **params
     ) -> Dict[str, Any]:
         """
         Calculate similarity between two graphs.
-        
+
         Parameters:
         -----------
         graph1, graph2 : nx.Graph
             Graphs to compare
         metrics : List[str]
             Similarity metrics to compute
-            
+
         Returns:
         --------
         Dict containing similarity scores
@@ -638,7 +646,7 @@ class MLIntegration:
     ) -> Dict[str, Any]:
         """
         Detect anomalous nodes or edges in the graph.
-        
+
         Parameters:
         -----------
         graph : nx.Graph or nx.DiGraph
@@ -647,7 +655,7 @@ class MLIntegration:
             Method: 'statistical', 'structural', 'spectral'
         contamination : float
             Expected fraction of anomalies
-            
+
         Returns:
         --------
         Dict containing anomaly scores and detected anomalies
@@ -766,7 +774,8 @@ class MLIntegration:
                 anomaly_scores[node] = score
 
         else:
-            raise ValueError(f"Unknown method: {method}")
+            msg = f"Unknown method: {method}"
+            raise ValueError(msg)
 
         # Identify anomalies based on contamination rate
         threshold = np.percentile(

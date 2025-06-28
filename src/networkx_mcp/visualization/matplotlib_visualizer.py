@@ -2,13 +2,20 @@
 
 import base64
 import logging
+
 from io import BytesIO
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
+from typing import Union
 
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
+
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +65,7 @@ class MatplotlibVisualizer:
     ) -> Dict[str, Any]:
         """
         Create a static graph visualization with extensive customization options.
-        
+
         Parameters:
         -----------
         graph : nx.Graph or nx.DiGraph
@@ -87,7 +94,7 @@ class MatplotlibVisualizer:
             Figure size (width, height)
         dpi : int
             Dots per inch for resolution
-        
+
         Returns:
         --------
         Dict containing plot data and metadata
@@ -182,7 +189,7 @@ class MatplotlibVisualizer:
         if show_labels:
             if kwargs.get("smart_labels", True) and graph.number_of_nodes() > 20:
                 # Smart label placement for dense graphs
-                labels = MatplotlibVisualizer._smart_label_placement(
+                MatplotlibVisualizer._smart_label_placement(
                     graph, pos, label_font_size
                 )
             else:
@@ -197,7 +204,7 @@ class MatplotlibVisualizer:
             plt.title(title, fontsize=16, fontweight="bold")
 
         # Add legend if using attribute-based coloring
-        if isinstance(node_color, str) and node_color in graph.nodes[list(graph.nodes())[0]]:
+        if isinstance(node_color, str) and node_color in graph.nodes[next(iter(graph.nodes()))]:
             MatplotlibVisualizer._add_color_legend(graph, node_color)
 
         # Remove axes

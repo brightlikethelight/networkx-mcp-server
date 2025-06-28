@@ -2,10 +2,17 @@
 
 import logging
 import re
+
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
+from typing import Union
 
 import networkx as nx
+
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +62,7 @@ class GraphValidator:
 
             # Warn about reserved names but don't fail
             if key in reserved:
-                print(f"Warning: '{key}' is a reserved attribute name")
+                pass
 
         return True
 
@@ -252,10 +259,10 @@ class GraphValidator:
     @staticmethod
     def validate_graph_id(graph_id: str) -> Tuple[bool, Optional[str]]:
         """Validate graph ID format and constraints.
-        
+
         Args:
             graph_id: Graph identifier to validate
-            
+
         Returns:
             Tuple of (is_valid, error_message)
         """
@@ -270,11 +277,11 @@ class GraphValidator:
             return False, "Graph ID must be between 1 and 255 characters"
 
         # Character constraints - alphanumeric, underscores, hyphens
-        if not re.match(r'^[a-zA-Z0-9_-]+$', graph_id):
+        if not re.match(r"^[a-zA-Z0-9_-]+$", graph_id):
             return False, "Graph ID must contain only alphanumeric characters, underscores, and hyphens"
 
         # Reserved names
-        reserved_names = {'graph', 'graphs', 'list', 'all', 'none', 'null', 'undefined'}
+        reserved_names = {"graph", "graphs", "list", "all", "none", "null", "undefined"}
         if graph_id.lower() in reserved_names:
             return False, f"Graph ID '{graph_id}' is reserved"
 
@@ -286,11 +293,11 @@ class GraphValidator:
         expected_formats: Optional[List[str]] = None
     ) -> Tuple[bool, Optional[str]]:
         """Validate file format based on extension and expected formats.
-        
+
         Args:
             filepath: Path to file
             expected_formats: List of expected formats (e.g., ['graphml', 'json'])
-            
+
         Returns:
             Tuple of (is_valid, error_message)
         """
@@ -319,29 +326,29 @@ class GraphValidator:
 
             # Validate format if expected
             if expected_formats:
-                ext = path.suffix.lower().lstrip('.')
+                ext = path.suffix.lower().lstrip(".")
 
                 # Map extensions to formats
                 ext_to_format = {
-                    'graphml': 'graphml',
-                    'xml': 'graphml',
-                    'gexf': 'gexf',
-                    'json': 'json',
-                    'yaml': 'yaml',
-                    'yml': 'yaml',
-                    'csv': 'csv',
-                    'edges': 'edgelist',
-                    'edgelist': 'edgelist',
-                    'txt': 'edgelist',
-                    'adj': 'adjacency',
-                    'mat': 'adjacency',
-                    'pickle': 'pickle',
-                    'pkl': 'pickle',
-                    'p': 'pickle',
-                    'net': 'pajek',
-                    'pajek': 'pajek',
-                    'dot': 'dot',
-                    'gv': 'dot'
+                    "graphml": "graphml",
+                    "xml": "graphml",
+                    "gexf": "gexf",
+                    "json": "json",
+                    "yaml": "yaml",
+                    "yml": "yaml",
+                    "csv": "csv",
+                    "edges": "edgelist",
+                    "edgelist": "edgelist",
+                    "txt": "edgelist",
+                    "adj": "adjacency",
+                    "mat": "adjacency",
+                    "pickle": "pickle",
+                    "pkl": "pickle",
+                    "p": "pickle",
+                    "net": "pajek",
+                    "pajek": "pajek",
+                    "dot": "dot",
+                    "gv": "dot"
                 }
 
                 detected_format = ext_to_format.get(ext)
@@ -351,15 +358,15 @@ class GraphValidator:
             return True, None
 
         except Exception as e:
-            return False, f"Error validating file: {str(e)}"
+            return False, f"Error validating file: {e!s}"
 
     @staticmethod
     def validate_graph_data(data: Dict[str, Any]) -> Tuple[bool, List[str]]:
         """Validate graph data structure for import.
-        
+
         Args:
             data: Graph data dictionary
-            
+
         Returns:
             Tuple of (is_valid, list_of_errors)
         """
@@ -369,29 +376,29 @@ class GraphValidator:
             return False, ["Graph data must be a dictionary"]
 
         # Check for required structure
-        if 'nodes' in data:
-            if not isinstance(data['nodes'], list):
+        if "nodes" in data:
+            if not isinstance(data["nodes"], list):
                 errors.append("'nodes' must be a list")
             else:
                 # Validate each node
-                for i, node in enumerate(data['nodes']):
+                for i, node in enumerate(data["nodes"]):
                     if isinstance(node, dict):
-                        if 'id' not in node:
+                        if "id" not in node:
                             errors.append(f"Node at index {i} missing 'id' field")
                     elif not GraphValidator.validate_node_id(node):
                         errors.append(f"Invalid node ID at index {i}: {node}")
 
-        if 'edges' in data or 'links' in data:
-            edges = data.get('edges', data.get('links', []))
+        if "edges" in data or "links" in data:
+            edges = data.get("edges", data.get("links", []))
             if not isinstance(edges, list):
                 errors.append("'edges' must be a list")
             else:
                 # Validate each edge
                 for i, edge in enumerate(edges):
                     if isinstance(edge, dict):
-                        if 'source' not in edge:
+                        if "source" not in edge:
                             errors.append(f"Edge at index {i} missing 'source' field")
-                        if 'target' not in edge:
+                        if "target" not in edge:
                             errors.append(f"Edge at index {i} missing 'target' field")
                     elif isinstance(edge, (list, tuple)):
                         if len(edge) < 2:
@@ -400,26 +407,25 @@ class GraphValidator:
                         errors.append(f"Invalid edge format at index {i}")
 
         # Check graph metadata
-        if 'graph' in data:
-            if not isinstance(data['graph'], dict):
+        if "graph" in data:
+            if not isinstance(data["graph"], dict):
                 errors.append("'graph' metadata must be a dictionary")
 
         # Check for alternative formats
-        if 'adjacency_matrix' in data:
-            matrix = data['adjacency_matrix']
+        if "adjacency_matrix" in data:
+            matrix = data["adjacency_matrix"]
             if not isinstance(matrix, list):
                 errors.append("'adjacency_matrix' must be a list")
-            else:
-                # Check if square matrix
-                if matrix:
-                    n = len(matrix)
-                    for i, row in enumerate(matrix):
-                        if not isinstance(row, list) or len(row) != n:
-                            errors.append(f"Adjacency matrix row {i} has incorrect length")
-                            break
+            # Check if square matrix
+            elif matrix:
+                n = len(matrix)
+                for i, row in enumerate(matrix):
+                    if not isinstance(row, list) or len(row) != n:
+                        errors.append(f"Adjacency matrix row {i} has incorrect length")
+                        break
 
-        if 'edge_list' in data:
-            if not isinstance(data['edge_list'], list):
+        if "edge_list" in data:
+            if not isinstance(data["edge_list"], list):
                 errors.append("'edge_list' must be a list")
 
         return len(errors) == 0, errors
@@ -431,21 +437,21 @@ class GraphValidator:
         path: Optional[Union[str, Path]] = None
     ) -> Tuple[bool, Optional[str]]:
         """Validate import data based on format.
-        
+
         Args:
             format: Import format
             data: Import data (for formats that accept direct data)
             path: File path (for file-based formats)
-            
+
         Returns:
             Tuple of (is_valid, error_message)
         """
         # Formats that require file path
-        file_formats = {'graphml', 'gexf', 'pajek', 'dot'}
+        file_formats = {"graphml", "gexf", "pajek", "dot"}
         # Formats that can accept data or path
-        data_formats = {'json', 'yaml', 'adjacency'}
+        data_formats = {"json", "yaml", "adjacency"}
         # Formats that require path
-        path_only_formats = {'csv', 'edgelist', 'pickle'}
+        path_only_formats = {"csv", "edgelist", "pickle"}
 
         if format in file_formats or format in path_only_formats:
             if not path:
@@ -465,10 +471,10 @@ class GraphValidator:
                 if not valid:
                     return False, error
 
-            if data and format in ['json', 'yaml', 'adjacency']:
+            if data and format in ["json", "yaml", "adjacency"]:
                 # Basic structure validation
-                if format == 'adjacency':
-                    if not isinstance(data, dict) or 'matrix' not in data:
+                if format == "adjacency":
+                    if not isinstance(data, dict) or "matrix" not in data:
                         return False, "Adjacency format requires dict with 'matrix' key"
 
         else:

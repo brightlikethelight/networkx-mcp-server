@@ -1,28 +1,34 @@
 """Louvain algorithm for community detection."""
 
+from typing import List
+from typing import Set
+
 import networkx as nx
-from typing import Dict, List, Set, Any
-from .base import CommunityDetector, CommunityResult, format_community_result
+
+from networkx_mcp.advanced.community.base import CommunityDetector
+from networkx_mcp.advanced.community.base import CommunityResult
+
 
 class LouvainCommunityDetector(CommunityDetector):
     """Louvain algorithm implementation for community detection."""
-    
+
     async def detect_communities(self, resolution: float = 1.0, threshold: float = 1e-7, max_iter: int = 100) -> CommunityResult:
         """Detect communities using Louvain algorithm."""
         if not self.validate_graph():
-            raise ValueError("Graph is not suitable for community detection")
-        
+            msg = "Graph is not suitable for community detection"
+            raise ValueError(msg)
+
         try:
             # Use NetworkX's Louvain implementation
             communities = nx.community.louvain_communities(
-                self.graph, 
+                self.graph,
                 resolution=resolution,
                 threshold=threshold
             )
-            
+
             # Calculate modularity
             modularity = nx.community.modularity(self.graph, communities)
-            
+
             return CommunityResult(
                 communities=list(communities),
                 modularity=modularity,
@@ -33,9 +39,10 @@ class LouvainCommunityDetector(CommunityDetector):
                     "max_iter": max_iter
                 }
             )
-            
+
         except Exception as e:
-            raise RuntimeError(f"Louvain algorithm failed: {e}")
+            msg = f"Louvain algorithm failed: {e}"
+            raise RuntimeError(msg)
 
 def louvain_communities(graph: nx.Graph, resolution: float = 1.0) -> List[Set[str]]:
     """Simple function interface for Louvain communities."""

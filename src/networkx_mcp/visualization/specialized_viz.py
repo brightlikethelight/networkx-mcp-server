@@ -2,16 +2,25 @@
 
 import base64
 import logging
+
 from io import BytesIO
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
+from typing import Union
 
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import plotly.graph_objects as go
 import seaborn as sns
+
 from plotly.subplots import make_subplots
-from scipy.cluster.hierarchy import dendrogram, linkage
+from scipy.cluster.hierarchy import dendrogram
+from scipy.cluster.hierarchy import linkage
+
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +40,7 @@ class SpecializedVisualizations:
     ) -> Dict[str, Any]:
         """
         Create adjacency matrix heatmap visualization.
-        
+
         Parameters:
         -----------
         graph : nx.Graph or nx.DiGraph
@@ -40,7 +49,7 @@ class SpecializedVisualizations:
             Order of nodes (useful for clustering visualization)
         cmap : str
             Colormap for the heatmap
-        
+
         Returns:
         --------
         Dict containing the heatmap visualization
@@ -65,7 +74,7 @@ class SpecializedVisualizations:
                 cbar_kws={"label": "Edge Weight"},
                 ax=ax
             )
-            plt.xticks(rotation=45, ha='right')
+            plt.xticks(rotation=45, ha="right")
             plt.yticks(rotation=0)
         else:
             sns.heatmap(
@@ -81,7 +90,7 @@ class SpecializedVisualizations:
 
         # Save to base64
         buffer = BytesIO()
-        plt.savefig(buffer, format='png', dpi=150, bbox_inches='tight')
+        plt.savefig(buffer, format="png", dpi=150, bbox_inches="tight")
         buffer.seek(0)
         img_base64 = base64.b64encode(buffer.read()).decode()
         plt.close()
@@ -93,13 +102,13 @@ class SpecializedVisualizations:
             y=node_order,
             colorscale=cmap,
             hoverongaps=False,
-            hovertemplate='Source: %{y}<br>Target: %{x}<br>Weight: %{z}<extra></extra>'
+            hovertemplate="Source: %{y}<br>Target: %{x}<br>Weight: %{z}<extra></extra>"
         ))
 
         fig_plotly.update_layout(
             title=title,
-            xaxis=dict(title="Target Node", side="bottom"),
-            yaxis=dict(title="Source Node", autorange="reversed"),
+            xaxis={"title": "Target Node", "side": "bottom"},
+            yaxis={"title": "Source Node", "autorange": "reversed"},
             width=800,
             height=800
         )
@@ -121,7 +130,7 @@ class SpecializedVisualizations:
     ) -> Dict[str, Any]:
         """
         Create chord diagram for network relationships.
-        
+
         Parameters:
         -----------
         graph : nx.Graph or nx.DiGraph
@@ -130,7 +139,7 @@ class SpecializedVisualizations:
             Show only top N nodes by degree
         min_weight : float
             Minimum edge weight to display
-        
+
         Returns:
         --------
         Dict containing chord diagram visualization
@@ -179,13 +188,13 @@ class SpecializedVisualizations:
                     trace = go.Scatter(
                         x=path_x,
                         y=path_y,
-                        mode='lines',
-                        line=dict(
-                            color=f'rgba(100, 100, 100, {min(weight/adj_matrix.max(), 1)})',
-                            width=weight * 3 / adj_matrix.max()
-                        ),
-                        hoverinfo='text',
-                        hovertext=f'{nodes[i]} - {nodes[j]}: {weight:.2f}',
+                        mode="lines",
+                        line={
+                            "color": f"rgba(100, 100, 100, {min(weight/adj_matrix.max(), 1)})",
+                            "width": weight * 3 / adj_matrix.max()
+                        },
+                        hoverinfo="text",
+                        hovertext=f"{nodes[i]} - {nodes[j]}: {weight:.2f}",
                         showlegend=False
                     )
                     traces.append(trace)
@@ -194,17 +203,17 @@ class SpecializedVisualizations:
         node_trace = go.Scatter(
             x=x,
             y=y,
-            mode='markers+text',
-            marker=dict(
-                size=20,
-                color='lightblue',
-                line=dict(color='darkblue', width=2)
-            ),
+            mode="markers+text",
+            marker={
+                "size": 20,
+                "color": "lightblue",
+                "line": {"color": "darkblue", "width": 2}
+            },
             text=nodes,
-            textposition='outside',
-            textfont=dict(size=12),
-            hoverinfo='text',
-            hovertext=[f'{node}<br>Degree: {subgraph.degree(node)}' for node in nodes],
+            textposition="outside",
+            textfont={"size": 12},
+            hoverinfo="text",
+            hovertext=[f"{node}<br>Degree: {subgraph.degree(node)}" for node in nodes],
             showlegend=False
         )
         traces.append(node_trace)
@@ -215,16 +224,16 @@ class SpecializedVisualizations:
         fig.update_layout(
             title=title,
             showlegend=False,
-            xaxis=dict(showgrid=False, showticklabels=False, zeroline=False),
-            yaxis=dict(showgrid=False, showticklabels=False, zeroline=False),
+            xaxis={"showgrid": False, "showticklabels": False, "zeroline": False},
+            yaxis={"showgrid": False, "showticklabels": False, "zeroline": False},
             width=800,
             height=800,
-            plot_bgcolor='white'
+            plot_bgcolor="white"
         )
 
         return {
             "plotly_figure": fig.to_dict(),
-            "html": fig.to_html(include_plotlyjs='cdn'),
+            "html": fig.to_html(include_plotlyjs="cdn"),
             "num_nodes": n,
             "num_chords": sum(1 for i in range(n) for j in range(i+1, n)
                             if adj_matrix[i, j] > 0 or adj_matrix[j, i] > 0)
@@ -241,7 +250,7 @@ class SpecializedVisualizations:
     ) -> Dict[str, Any]:
         """
         Create Sankey diagram for flow visualization.
-        
+
         Parameters:
         -----------
         graph : nx.DiGraph
@@ -252,13 +261,14 @@ class SpecializedVisualizations:
             Target nodes (auto-detect if None)
         flow_attribute : str
             Edge attribute containing flow values
-        
+
         Returns:
         --------
         Dict containing Sankey diagram
         """
         if not graph.is_directed():
-            raise ValueError("Sankey diagram requires a directed graph")
+            msg = "Sankey diagram requires a directed graph"
+            raise ValueError(msg)
 
         # Auto-detect source and target nodes if not provided
         if source_nodes is None:
@@ -287,28 +297,28 @@ class SpecializedVisualizations:
         node_colors = []
         for node in all_nodes:
             if node in source_nodes:
-                node_colors.append('rgba(0, 150, 0, 0.8)')  # Green for sources
+                node_colors.append("rgba(0, 150, 0, 0.8)")  # Green for sources
             elif node in target_nodes:
-                node_colors.append('rgba(150, 0, 0, 0.8)')  # Red for targets
+                node_colors.append("rgba(150, 0, 0, 0.8)")  # Red for targets
             else:
-                node_colors.append('rgba(100, 100, 100, 0.8)')  # Gray for intermediate
+                node_colors.append("rgba(100, 100, 100, 0.8)")  # Gray for intermediate
 
         # Create Sankey diagram
         fig = go.Figure(data=[go.Sankey(
-            node=dict(
-                pad=15,
-                thickness=20,
-                line=dict(color="black", width=0.5),
-                label=[str(node) for node in all_nodes],
-                color=node_colors
-            ),
-            link=dict(
-                source=sources,
-                target=targets,
-                value=values,
-                label=link_labels,
-                color='rgba(100, 100, 100, 0.3)'
-            )
+            node={
+                "pad": 15,
+                "thickness": 20,
+                "line": {"color": "black", "width": 0.5},
+                "label": [str(node) for node in all_nodes],
+                "color": node_colors
+            },
+            link={
+                "source": sources,
+                "target": targets,
+                "value": values,
+                "label": link_labels,
+                "color": "rgba(100, 100, 100, 0.3)"
+            }
         )])
 
         fig.update_layout(
@@ -320,7 +330,7 @@ class SpecializedVisualizations:
 
         return {
             "plotly_figure": fig.to_dict(),
-            "html": fig.to_html(include_plotlyjs='cdn'),
+            "html": fig.to_html(include_plotlyjs="cdn"),
             "num_sources": len(source_nodes),
             "num_targets": len(target_nodes),
             "total_flow": sum(values)
@@ -337,7 +347,7 @@ class SpecializedVisualizations:
     ) -> Dict[str, Any]:
         """
         Create dendrogram for hierarchical clustering visualization.
-        
+
         Parameters:
         -----------
         graph : nx.Graph or nx.DiGraph
@@ -346,7 +356,7 @@ class SpecializedVisualizations:
             Linkage method ('single', 'complete', 'average', 'ward')
         metric : str
             Distance metric
-        
+
         Returns:
         --------
         Dict containing dendrogram visualization
@@ -397,7 +407,7 @@ class SpecializedVisualizations:
         # Create dendrogram
         plt.figure(figsize=figsize)
 
-        dendrogram_data = dendrogram(
+        dendrogram(
             linkage_matrix,
             labels=nodes,
             leaf_rotation=90,
@@ -405,13 +415,13 @@ class SpecializedVisualizations:
         )
 
         plt.title(title)
-        plt.xlabel('Nodes')
-        plt.ylabel('Distance')
+        plt.xlabel("Nodes")
+        plt.ylabel("Distance")
         plt.tight_layout()
 
         # Save to base64
         buffer = BytesIO()
-        plt.savefig(buffer, format='png', dpi=150, bbox_inches='tight')
+        plt.savefig(buffer, format="png", dpi=150, bbox_inches="tight")
         buffer.seek(0)
         img_base64 = base64.b64encode(buffer.read()).decode()
         plt.close()
@@ -424,7 +434,7 @@ class SpecializedVisualizations:
         cluster_results = {}
 
         for t in thresholds:
-            clusters = fcluster(linkage_matrix, t, criterion='distance')
+            clusters = fcluster(linkage_matrix, t, criterion="distance")
             cluster_dict = {}
             for i, cluster_id in enumerate(clusters):
                 if cluster_id not in cluster_dict:
@@ -447,19 +457,19 @@ class SpecializedVisualizations:
     @staticmethod
     def create_dashboard(
         graph: Union[nx.Graph, nx.DiGraph],
-        visualizations: List[str] = None,
+        visualizations: Optional[List[str]] = None,
         **kwargs
     ) -> Dict[str, Any]:
         """
         Create a dashboard with multiple visualizations.
-        
+
         Parameters:
         -----------
         graph : nx.Graph or nx.DiGraph
             The graph to visualize
         visualizations : list
             List of visualizations to include
-        
+
         Returns:
         --------
         Dict containing dashboard HTML
@@ -475,7 +485,6 @@ class SpecializedVisualizations:
             specs=[[{"type": "heatmap"}, {"type": "bar"}] for _ in range(rows)]
         )
 
-        viz_results = {}
 
         for i, viz_type in enumerate(visualizations):
             row = i // 2 + 1
@@ -488,7 +497,7 @@ class SpecializedVisualizations:
                 adj_matrix = nx.adjacency_matrix(subgraph).toarray()
 
                 fig.add_trace(
-                    go.Heatmap(z=adj_matrix, colorscale='Viridis'),
+                    go.Heatmap(z=adj_matrix, colorscale="Viridis"),
                     row=row, col=col
                 )
 
@@ -539,6 +548,6 @@ class SpecializedVisualizations:
 
         return {
             "dashboard_plotly": fig.to_dict(),
-            "dashboard_html": fig.to_html(include_plotlyjs='cdn'),
+            "dashboard_html": fig.to_html(include_plotlyjs="cdn"),
             "visualizations_included": visualizations
         }

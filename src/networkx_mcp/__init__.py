@@ -3,14 +3,15 @@
 __version__ = "0.1.0"
 __author__ = "NetworkX MCP Server Contributors"
 
-from .core.algorithms import GraphAlgorithms
-from .core.graph_operations import GraphManager
-from .core.io_handlers import GraphIOHandler
-from .server import mcp
+from networkx_mcp.core.algorithms import GraphAlgorithms
+from networkx_mcp.core.graph_operations import GraphManager
+from networkx_mcp.core.io_handlers import GraphIOHandler
+from networkx_mcp.server import mcp
+
 
 __all__ = [
-    "mcp",
-    "GraphManager",
     "GraphAlgorithms",
     "GraphIOHandler",
+    "GraphManager",
+    "mcp",
 ]

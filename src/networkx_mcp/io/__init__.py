@@ -5,23 +5,30 @@ This package provides readers and writers for various graph formats:
 
 Example usage:
     from networkx_mcp.io import read_graphml, write_graphml
-    
+
     graph = await read_graphml("data.graphml")
     await write_graphml(graph, "output.graphml")
 """
 
-from .base import GraphReader, GraphWriter, validate_file_path, detect_format
-from .graphml import GraphMLReader, GraphMLWriter, read_graphml, write_graphml
+from networkx_mcp.io.base import GraphReader
+from networkx_mcp.io.base import GraphWriter
+from networkx_mcp.io.base import detect_format
+from networkx_mcp.io.base import validate_file_path
+from networkx_mcp.io.graphml import GraphMLReader
+from networkx_mcp.io.graphml import GraphMLWriter
+from networkx_mcp.io.graphml import read_graphml
+from networkx_mcp.io.graphml import write_graphml
+
 
 __all__ = [
+    "GraphMLReader",
+    "GraphMLWriter",
     "GraphReader",
     "GraphWriter",
-    "GraphMLReader", 
-    "GraphMLWriter",
+    "detect_format",
     "read_graphml",
-    "write_graphml", 
     "validate_file_path",
-    "detect_format"
+    "write_graphml"
 ]
 
 # Factory functions
@@ -30,10 +37,11 @@ def get_reader(format_name: str):
     readers = {
         "graphml": GraphMLReader
     }
-    
+
     if format_name not in readers:
-        raise ValueError(f"Unsupported format: {format_name}")
-    
+        msg = f"Unsupported format: {format_name}"
+        raise ValueError(msg)
+
     return readers[format_name]()
 
 def get_writer(format_name: str):
@@ -41,8 +49,9 @@ def get_writer(format_name: str):
     writers = {
         "graphml": GraphMLWriter
     }
-    
+
     if format_name not in writers:
-        raise ValueError(f"Unsupported format: {format_name}")
-    
+        msg = f"Unsupported format: {format_name}"
+        raise ValueError(msg)
+
     return writers[format_name]()
