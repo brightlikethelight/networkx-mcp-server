@@ -1,0 +1,57 @@
+name: Dependency Update
+
+on:
+  schedule:
+    # Run every Monday at 9 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+jobs:
+  update-dependencies:
+    name: Update Dependencies
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pip-tools
+    
+    - name: Update requirements
+      run: |
+        # Update requirements.txt from pyproject.toml
+        pip-compile --upgrade --resolver=backtracking
+    
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: "chore: update dependencies"
+        title: "chore: update dependencies"
+        body: |
+          ## Dependency Updates
+          
+          This PR updates the project dependencies to their latest compatible versions.
+          
+          ### Changes
+          - Updated requirements.txt with latest compatible versions
+          - All tests should pass with these updates
+          
+          ### Checklist
+          - [ ] All tests pass
+          - [ ] No breaking changes identified
+          - [ ] Security vulnerabilities addressed
+          
+          ---
+          *This PR was automatically created by the dependency update workflow.*
+        branch: dependency-updates
+        delete-branch: true
