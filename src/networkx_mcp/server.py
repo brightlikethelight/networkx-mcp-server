@@ -3457,20 +3457,76 @@ async def list_graphs_resource() -> List[TextContent]:
 
 def main():
     """Run the NetworkX MCP server."""
+    import os
+    import sys
     from datetime import datetime
-
-    import uvicorn
 
     # Import datetime for the import_graph tool
     globals()['datetime'] = datetime
 
-    # Run the server
-    uvicorn.run(
-        "networkx_mcp.server:mcp",
-        host="0.0.0.0",
-        port=8000,
-        reload=True
-    )
+    # Get transport method from environment or default
+    transport = os.environ.get("MCP_TRANSPORT", "stdio")
+    
+    # Get port from environment or command line (for SSE transport)
+    port = 8765  # Changed default port to avoid conflicts
+    
+    # Check for port in environment
+    if os.environ.get("MCP_PORT"):
+        port = int(os.environ.get("MCP_PORT"))
+    
+    # Check for transport and port in command line arguments
+    if len(sys.argv) > 1:
+        if sys.argv[1] in ["stdio", "sse", "streamable-http"]:
+            transport = sys.argv[1]
+            if len(sys.argv) > 2:
+                try:
+                    port = int(sys.argv[2])
+                except ValueError:
+                    logger.warning(f"Invalid port '{sys.argv[2]}', using default port {port}")
+        else:
+            # Assume it's a port number
+            try:
+                port = int(sys.argv[1])
+                transport = "sse"  # Default to SSE when port is specified
+            except ValueError:
+                logger.warning(f"Invalid argument '{sys.argv[1]}', using defaults")
+    
+    logger.info(f"Starting NetworkX MCP Server")
+    logger.info(f"Transport: {transport}")
+    
+    if transport in ["sse", "streamable-http"]:
+        logger.info(f"Port: {port}")
+        logger.info(f"Server will be available at http://localhost:{port}")
+    else:
+        logger.info("Using stdio transport - communicate via standard input/output")
+    
+    logger.info("Press Ctrl+C to stop the server")
+    
+    try:
+        # Run the server using FastMCP's built-in run method
+        if transport == "stdio":
+            mcp.run()
+        elif transport == "sse":
+            mcp.run(transport="sse", port=port, host="0.0.0.0")
+        elif transport == "streamable-http":
+            mcp.run(transport="streamable-http", port=port, host="0.0.0.0")
+        else:
+            logger.error(f"Unknown transport: {transport}")
+            logger.info("Valid transports: stdio, sse, streamable-http")
+            sys.exit(1)
+            
+    except OSError as e:
+        if "Address already in use" in str(e):
+            logger.error(f"Port {port} is already in use!")
+            logger.info("Try one of these options:")
+            logger.info(f"  1. Kill the process: lsof -ti:{port} | xargs kill -9")
+            logger.info(f"  2. Use a different port: python -m networkx_mcp.server sse 8766")
+            logger.info(f"  3. Set environment variable: MCP_PORT=8766 python -m networkx_mcp.server")
+            sys.exit(1)
+        else:
+            raise
+    except KeyboardInterrupt:
+        logger.info("\nServer stopped by user")
 
 
 if __name__ == "__main__":
