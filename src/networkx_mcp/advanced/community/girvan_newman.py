@@ -1,5 +1,7 @@
 """Girvan-Newman algorithm for community detection."""
 
+import asyncio
+
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -61,12 +63,11 @@ class GirvanNewmanDetector(CommunityDetector):
 
         except Exception as e:
             msg = f"Girvan-Newman algorithm failed: {e}"
-            raise RuntimeError(msg)
+            raise RuntimeError(msg) from e
 
 def girvan_newman_communities(graph: nx.Graph, k: int = 2) -> List[Set[str]]:
     """Simple function interface for Girvan-Newman communities."""
     detector = GirvanNewmanDetector(graph)
-    import asyncio
     result = asyncio.run(detector.detect_communities(k=k))
     return result.communities
 

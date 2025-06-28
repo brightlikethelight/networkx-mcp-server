@@ -12,6 +12,10 @@ from typing import Set
 import networkx as nx
 
 
+# Constants
+MIN_NODES_FOR_COMMUNITY_DETECTION = 2
+
+
 @dataclass
 class CommunityResult:
     """Result from community detection algorithm."""
@@ -35,7 +39,7 @@ class CommunityDetector(ABC):
 
     def validate_graph(self) -> bool:
         """Validate graph is suitable for community detection."""
-        if self.graph.number_of_nodes() < 2:
+        if self.graph.number_of_nodes() < MIN_NODES_FOR_COMMUNITY_DETECTION:
             return False
         if self.graph.number_of_edges() == 0:
             return False

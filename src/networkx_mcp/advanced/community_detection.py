@@ -16,6 +16,16 @@ import networkx as nx
 import numpy as np
 
 
+# Optional dependencies
+try:
+    import community as community_louvain
+except ImportError:
+    community_louvain = None
+
+# Constants for algorithm selection
+SMALL_GRAPH_THRESHOLD = 100
+MEDIUM_GRAPH_THRESHOLD = 10000
+
 # Suppress warnings for optional dependencies
 warnings.filterwarnings("ignore", category=ImportWarning)
 
@@ -61,9 +71,9 @@ class CommunityDetection:
             num_nodes = graph.number_of_nodes()
             graph.number_of_edges()
 
-            if num_nodes < 100:
+            if num_nodes < SMALL_GRAPH_THRESHOLD:
                 algorithm = "girvan_newman"  # Most accurate for small graphs
-            elif num_nodes < 10000:
+            elif num_nodes < MEDIUM_GRAPH_THRESHOLD:
                 algorithm = "louvain"  # Good balance
             else:
                 algorithm = "label_propagation"  # Fastest for large graphs
@@ -103,9 +113,8 @@ class CommunityDetection:
     @staticmethod
     def _louvain_method(graph: nx.Graph, resolution: float = 1.0, **kwargs) -> List[Set]:
         """Louvain community detection with resolution parameter."""
-        try:
-            # Try to use python-louvain if available
-            import community as community_louvain
+        if community_louvain is not None:
+            # Use python-louvain if available
             partition = community_louvain.best_partition(
                 graph,
                 resolution=resolution,
@@ -117,7 +126,7 @@ class CommunityDetection:
             for node, comm_id in partition.items():
                 communities[comm_id].add(node)
             return list(communities.values())
-        except ImportError:
+        else:
             # Fallback to NetworkX greedy modularity
             logger.warning("python-louvain not available, using greedy modularity")
             return list(nx.algorithms.community.greedy_modularity_communities(
@@ -126,7 +135,7 @@ class CommunityDetection:
             ))
 
     @staticmethod
-    def _girvan_newman(graph: nx.Graph, num_communities: Optional[int] = None, **kwargs) -> List[Set]:
+    def _girvan_newman(graph: nx.Graph, num_communities: Optional[int] = None, **_kwargs) -> List[Set]:
         """Girvan-Newman edge betweenness community detection."""
         # Create a copy to avoid modifying original
         G = graph.copy()
@@ -158,7 +167,7 @@ class CommunityDetection:
             return list(communities)  # Return last if not enough splits
 
     @staticmethod
-    def _label_propagation(graph: nx.Graph, max_iterations: int = 100, **kwargs) -> List[Set]:
+    def _label_propagation(graph: nx.Graph, _max_iterations: int = 100, **kwargs) -> List[Set]:
         """Asynchronous label propagation algorithm."""
         communities = nx.algorithms.community.asyn_lpa_communities(
             graph,

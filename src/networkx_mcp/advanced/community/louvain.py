@@ -1,5 +1,7 @@
 """Louvain algorithm for community detection."""
 
+import asyncio
+
 from typing import List
 from typing import Set
 
@@ -42,12 +44,11 @@ class LouvainCommunityDetector(CommunityDetector):
 
         except Exception as e:
             msg = f"Louvain algorithm failed: {e}"
-            raise RuntimeError(msg)
+            raise RuntimeError(msg) from e
 
 def louvain_communities(graph: nx.Graph, resolution: float = 1.0) -> List[Set[str]]:
     """Simple function interface for Louvain communities."""
     detector = LouvainCommunityDetector(graph)
-    import asyncio
     result = asyncio.run(detector.detect_communities(resolution=resolution))
     return result.communities
 
