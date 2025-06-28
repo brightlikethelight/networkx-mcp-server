@@ -1,0 +1,106 @@
+name: 🐛 Bug Report
+description: Report a bug or unexpected behavior
+title: "🐛 [Bug]: "
+labels: ["bug", "needs-triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out this form completely to help us fix the issue.
+
+  - type: checkboxes
+    id: preliminary-checks
+    attributes:
+      label: Preliminary Checks
+      description: Please confirm you've done these checks before submitting
+      options:
+        - label: I searched existing issues and couldn't find a duplicate
+          required: true
+        - label: I'm using a supported Python version (3.8+)
+          required: true
+        - label: I've read the documentation and troubleshooting guide
+          required: true
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is
+      placeholder: Describe what happened and what you expected to happen
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: Steps to Reproduce
+      description: Step-by-step instructions to reproduce the bug
+      placeholder: |
+        1. Start the server with `networkx-mcp-server`
+        2. Call the tool with these parameters: ...
+        3. Observe the error: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What should have happened instead?
+      placeholder: Describe the expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual Behavior
+      description: What actually happened? Include error messages, logs, or screenshots
+      placeholder: Include full error messages, stack traces, or screenshots
+    validations:
+      required: true
+
+  - type: textarea
+    id: minimal-example
+    attributes:
+      label: Minimal Code Example
+      description: Provide the smallest possible code example that reproduces the issue
+      placeholder: |
+        ```python
+        # Your minimal example here
+        import networkx_mcp
+        # ... rest of the example
+        ```
+      render: python
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Information
+      description: Please provide your environment details
+      placeholder: |
+        - OS: [e.g., macOS 13.5, Ubuntu 22.04, Windows 11]
+        - Python version: [e.g., 3.11.5]
+        - NetworkX MCP Server version: [e.g., 1.0.0]
+        - NetworkX version: [e.g., 3.2]
+        - Installation method: [pip, conda, source]
+        - Redis version (if using persistence): [e.g., 7.0]
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other context about the problem
+      placeholder: Add any other context, configuration files, or relevant information
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      description: Are you willing to help fix this issue?
+      options:
+        - label: I'm willing to submit a PR to fix this issue
+        - label: I'm willing to help test a fix

@@ -1,0 +1,88 @@
+name: ❓ Question
+description: Ask a question about usage, implementation, or concepts
+title: "❓ [Question]: "
+labels: ["question", "needs-response"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have a question? We're here to help! Please provide context so we can give you the best answer.
+
+  - type: checkboxes
+    id: preliminary-checks
+    attributes:
+      label: Preliminary Checks
+      description: Please confirm you've done these before asking
+      options:
+        - label: I've searched existing issues and discussions
+          required: true
+        - label: I've read the documentation and API reference
+          required: true
+        - label: I've looked at the examples in the repository
+          required: true
+
+  - type: dropdown
+    id: question-type
+    attributes:
+      label: Question Type
+      description: What type of question is this?
+      options:
+        - Usage help (how to use existing features)
+        - Implementation question (how something works internally)
+        - Best practices (recommended approaches)
+        - Graph theory concepts
+        - Performance optimization
+        - Integration with other tools
+        - Troubleshooting
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your Question
+      description: What would you like to know?
+      placeholder: Ask your question clearly and specifically
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context and Background
+      description: Provide context about what you're trying to accomplish
+      placeholder: |
+        - What are you trying to build or analyze?
+        - What have you tried so far?
+        - What specific challenges are you facing?
+
+  - type: textarea
+    id: code-example
+    attributes:
+      label: Relevant Code
+      description: If applicable, show what you've tried or what you're working with
+      placeholder: |
+        ```python
+        # Your code here
+        ```
+      render: python
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment (if relevant)
+      description: Your setup details if they might be relevant to the question
+      placeholder: |
+        - OS: [e.g., macOS, Ubuntu, Windows]
+        - Python version: [e.g., 3.11]
+        - NetworkX MCP Server version: [e.g., 1.0.0]
+        - Graph size: [e.g., 1000 nodes, 5000 edges]
+
+  - type: textarea
+    id: additional-info
+    attributes:
+      label: Additional Information
+      description: Any other details that might be helpful
+      placeholder: Links, references, or other context that might help us answer your question

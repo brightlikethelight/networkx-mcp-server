@@ -1,0 +1,141 @@
+name: 🚀 Feature Request
+description: Suggest a new feature or enhancement
+title: "🚀 [Feature]: "
+labels: ["enhancement", "needs-discussion"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a feature! Please provide as much detail as possible to help us understand your request.
+
+  - type: checkboxes
+    id: preliminary-checks
+    attributes:
+      label: Preliminary Checks
+      description: Please confirm you've done these checks before submitting
+      options:
+        - label: I searched existing issues and discussions
+          required: true
+        - label: This feature would benefit the broader community
+          required: true
+        - label: I've considered if this could be implemented as a plugin
+          required: true
+
+  - type: textarea
+    id: feature-summary
+    attributes:
+      label: Feature Summary
+      description: A brief, clear description of the feature you'd like to see
+      placeholder: In one or two sentences, what would you like to add or change?
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation and Use Case
+      description: Why is this feature needed? What problem does it solve?
+      placeholder: |
+        Describe your use case and why existing functionality doesn't meet your needs.
+        Include real-world scenarios where this would be helpful.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: How should this feature work? Be as specific as possible.
+      placeholder: |
+        Describe your ideal solution:
+        - New MCP tools to add
+        - API changes needed
+        - User interface considerations
+        - Configuration options
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: What other solutions or workarounds have you considered?
+      placeholder: |
+        - Alternative approach 1: ...
+        - Alternative approach 2: ...
+        - Why these alternatives aren't sufficient: ...
+
+  - type: dropdown
+    id: feature-type
+    attributes:
+      label: Feature Type
+      description: What type of feature is this?
+      options:
+        - New MCP tool/algorithm
+        - Visualization enhancement
+        - Performance improvement
+        - API enhancement
+        - Documentation improvement
+        - Developer experience
+        - Integration with external service
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: complexity
+    attributes:
+      label: Estimated Complexity
+      description: How complex do you think this feature would be to implement?
+      options:
+        - Simple (few lines of code)
+        - Moderate (new function/class)
+        - Complex (significant changes)
+        - Major (architectural changes)
+        - Not sure
+
+  - type: textarea
+    id: implementation-ideas
+    attributes:
+      label: Implementation Ideas
+      description: Do you have ideas about how this could be implemented?
+      placeholder: |
+        If you have technical ideas or suggestions:
+        - Which files might need changes
+        - Dependencies that might be needed
+        - Potential challenges or considerations
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Code Examples
+      description: Provide examples of how this feature would be used
+      placeholder: |
+        ```python
+        # Example of how the new feature would be used
+        result = await client.call_tool("new_feature", {
+            "parameter": "value"
+        })
+        ```
+      render: python
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      description: Are you willing to help implement this feature?
+      options:
+        - label: I'm willing to submit a PR for this feature
+        - label: I'm willing to help with testing
+        - label: I'm willing to help with documentation
+        - label: I'm willing to help with research/design
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other information, mockups, or references
+      placeholder: |
+        - Links to similar features in other projects
+        - Academic papers or algorithms
+        - Mockups or diagrams
+        - Performance requirements
