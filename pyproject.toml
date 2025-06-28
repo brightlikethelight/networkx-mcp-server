@@ -86,13 +86,13 @@ networkx-mcp-server = "networkx_mcp.server:main"
 networkx-mcp = "networkx_mcp.server:main"
 
 [project.urls]
-Homepage = "https://github.com/yourusername/networkx-mcp-server"
+Homepage = "https://github.com/Bright-L01/networkx-mcp-server"
 Documentation = "https://networkx-mcp-server.readthedocs.io"
-Repository = "https://github.com/yourusername/networkx-mcp-server.git"
-Issues = "https://github.com/yourusername/networkx-mcp-server/issues"
-Discussions = "https://github.com/yourusername/networkx-mcp-server/discussions"
-Changelog = "https://github.com/yourusername/networkx-mcp-server/blob/main/CHANGELOG.md"
-Funding = "https://github.com/sponsors/yourusername"
+Repository = "https://github.com/Bright-L01/networkx-mcp-server.git"
+Issues = "https://github.com/Bright-L01/networkx-mcp-server/issues"
+Discussions = "https://github.com/Bright-L01/networkx-mcp-server/discussions"
+Changelog = "https://github.com/Bright-L01/networkx-mcp-server/blob/main/CHANGELOG.md"
+Funding = "https://github.com/sponsors/Bright-L01"
 
 [tool.setuptools.packages.find]
 where = ["src"]

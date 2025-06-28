@@ -2,8 +2,8 @@
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![CI](https://github.com/yourusername/networkx-mcp-server/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/networkx-mcp-server/actions)
-[![Coverage](https://codecov.io/gh/yourusername/networkx-mcp-server/branch/main/graph/badge.svg)](https://codecov.io/gh/yourusername/networkx-mcp-server)
+[![CI](https://github.com/Bright-L01/networkx-mcp-server/actions/workflows/ci.yml/badge.svg)](https://github.com/Bright-L01/networkx-mcp-server/actions)
+[![Coverage](https://codecov.io/gh/Bright-L01/networkx-mcp-server/branch/main/graph/badge.svg)](https://codecov.io/gh/Bright-L01/networkx-mcp-server)
 [![PyPI](https://img.shields.io/pypi/v/networkx-mcp-server.svg)](https://pypi.org/project/networkx-mcp-server/)
 [![Downloads](https://pepy.tech/badge/networkx-mcp-server)](https://pepy.tech/project/networkx-mcp-server)
 
@@ -288,8 +288,8 @@ src/networkx_mcp/
 ## 🌐 Community & Support
 
 - **📖 Documentation**: Complete API docs and guides
-- **💬 Discussions**: [GitHub Discussions](https://github.com/yourusername/networkx-mcp-server/discussions)
-- **🐛 Issues**: [Issue Tracker](https://github.com/yourusername/networkx-mcp-server/issues)
+- **💬 Discussions**: [GitHub Discussions](https://github.com/Bright-L01/networkx-mcp-server/discussions)
+- **🐛 Issues**: [Issue Tracker](https://github.com/Bright-L01/networkx-mcp-server/issues)
 - **🤝 Contributing**: [Contributing Guide](CONTRIBUTING.md)
 - **📜 License**: [MIT License](LICENSE)
 
@@ -378,7 +378,7 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) for deta
 
 **⭐ Star this repository if it helped you!**
 
-[**📖 Documentation**](docs/api/README.md) • [**🚀 Get Started**](docs/getting-started.md) • [**💬 Support**](https://github.com/yourusername/networkx-mcp-server/discussions)
+[**📖 Documentation**](docs/api/README.md) • [**🚀 Get Started**](docs/getting-started.md) • [**💬 Support**](https://github.com/Bright-L01/networkx-mcp-server/discussions)
 
 *Built with ❤️ for the graph analysis community*
 

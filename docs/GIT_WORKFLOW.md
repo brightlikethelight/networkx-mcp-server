@@ -46,7 +46,7 @@ git clone https://github.com/YOUR_USERNAME/networkx-mcp-server.git
 cd networkx-mcp-server
 
 # Add upstream remote to keep your fork updated
-git remote add upstream https://github.com/brightliu/networkx-mcp-server.git
+git remote add upstream https://github.com/Bright-L01/networkx-mcp-server.git
 git remote -v  # Verify remotes
 ```
 
@@ -460,8 +460,8 @@ git filter-branch --force --index-filter \
 
 ## 🤝 Need Help?
 
-- 💬 [GitHub Discussions](https://github.com/brightliu/networkx-mcp-server/discussions)
-- 🐛 [Report Issues](https://github.com/brightliu/networkx-mcp-server/issues)
+- 💬 [GitHub Discussions](https://github.com/Bright-L01/networkx-mcp-server/discussions)
+- 🐛 [Report Issues](https://github.com/Bright-L01/networkx-mcp-server/issues)
 - 📧 Email: support@networkx-mcp.org
 
 **Happy contributing!** 🚀
