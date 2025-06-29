@@ -24,6 +24,7 @@ class GraphReader(ABC):
         path = Path(filepath)
         return path.suffix.lower() in self.file_extensions
 
+
 class GraphWriter(ABC):
     """Base class for graph file writers."""
 
@@ -32,9 +33,12 @@ class GraphWriter(ABC):
         self.file_extension = file_extension
 
     @abstractmethod
-    async def write(self, graph: nx.Graph, filepath: Union[str, Path], **options) -> bool:
+    async def write(
+        self, graph: nx.Graph, filepath: Union[str, Path], **options
+    ) -> bool:
         """Write a graph to file."""
         pass
+
 
 def validate_file_path(filepath: Union[str, Path], must_exist: bool = True) -> Path:
     """Validate and normalize file path."""
@@ -55,6 +59,7 @@ def validate_file_path(filepath: Union[str, Path], must_exist: bool = True) -> P
 
     return path
 
+
 def detect_format(filepath: Union[str, Path]) -> str:
     """Detect graph format from file extension."""
     path = Path(filepath)
@@ -68,7 +73,7 @@ def detect_format(filepath: Union[str, Path]) -> str:
         ".adjlist": "adjlist",
         ".json": "json",
         ".yaml": "yaml",
-        ".csv": "csv"
+        ".csv": "csv",
     }
 
     return format_map.get(extension, "unknown")

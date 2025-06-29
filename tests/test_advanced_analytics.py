@@ -1,6 +1,5 @@
 """Tests for Phase 2 Advanced Analytics features."""
 
-
 import networkx as nx
 import pytest
 
@@ -51,12 +50,13 @@ class TestCommunityDetection:
     def test_hierarchical_communities(self):
         """Test hierarchical community detection."""
         graph = nx.karate_club_graph()
-        result = CommunityDetection.hierarchical_communities(
-            graph, num_levels=3
-        )
+        result = CommunityDetection.hierarchical_communities(graph, num_levels=3)
 
         assert len(result["hierarchy"]) <= 3
-        assert result["hierarchy"][0]["num_communities"] >= result["hierarchy"][-1]["num_communities"]
+        assert (
+            result["hierarchy"][0]["num_communities"]
+            >= result["hierarchy"][-1]["num_communities"]
+        )
 
 
 class TestNetworkFlow:
@@ -75,10 +75,15 @@ class TestNetworkFlow:
         """Test minimum cut analysis."""
         G = nx.DiGraph()
         edges = [
-            (0, 1, 10), (0, 2, 10),
-            (1, 2, 2), (1, 3, 4), (1, 4, 8),
-            (2, 4, 9), (3, 5, 10), (4, 3, 6),
-            (4, 5, 10)
+            (0, 1, 10),
+            (0, 2, 10),
+            (1, 2, 2),
+            (1, 3, 4),
+            (1, 4, 8),
+            (2, 4, 9),
+            (3, 5, 10),
+            (4, 3, 6),
+            (4, 5, 10),
         ]
         for u, v, c in edges:
             G.add_edge(u, v, capacity=c)
@@ -114,11 +119,7 @@ class TestGraphGenerators:
     def test_social_network_generation(self):
         """Test social network model generation."""
         result = GraphGenerators.social_network_graph(
-            100,
-            communities=5,
-            p_in=0.3,
-            p_out=0.05,
-            model="stochastic_block"
+            100, communities=5, p_in=0.3, p_out=0.05, model="stochastic_block"
         )
 
         assert result["graph"].number_of_nodes() == 100
@@ -147,11 +148,7 @@ class TestBipartiteAnalysis:
     def test_maximum_matching(self):
         """Test maximum matching in bipartite graph."""
         B = nx.Graph()
-        B.add_edges_from([
-            ("A", 1), ("A", 2),
-            ("B", 2), ("B", 3),
-            ("C", 3), ("C", 4)
-        ])
+        B.add_edges_from([("A", 1), ("A", 2), ("B", 2), ("B", 3), ("C", 3), ("C", 4)])
 
         result = BipartiteAnalysis.maximum_matching(B)
         assert result["matching_size"] == 3
@@ -220,11 +217,7 @@ class TestSpecializedAlgorithms:
         edges_to_remove = [(0, 2), (1, 3), (5, 7)]
         G.remove_edges_from(edges_to_remove)
 
-        result = SpecializedAlgorithms.link_prediction(
-            G,
-            method="adamic_adar",
-            top_k=5
-        )
+        result = SpecializedAlgorithms.link_prediction(G, method="adamic_adar", top_k=5)
 
         assert len(result["top_predictions"]) <= 5
         assert all("score" in pred for pred in result["top_predictions"])
@@ -239,17 +232,10 @@ class TestMLIntegration:
 
         # Test different methods
         for method in ["spectral", "structural"]:
-            result = MLIntegration.node_embeddings(
-                G,
-                method=method,
-                dimensions=32
-            )
+            result = MLIntegration.node_embeddings(G, method=method, dimensions=32)
 
             assert len(result["embeddings"]) == G.number_of_nodes()
-            assert all(
-                len(emb) == 32
-                for emb in result["embeddings"].values()
-            )
+            assert all(len(emb) == 32 for emb in result["embeddings"].values())
             assert result["embedding_stats"]["sparsity"] >= 0
 
     def test_anomaly_detection(self):
@@ -263,15 +249,15 @@ class TestMLIntegration:
         G.add_edges_from([(star_center, i) for i in range(102, 112)])
 
         result = MLIntegration.anomaly_detection(
-            G,
-            method="statistical",
-            contamination=0.1
+            G, method="statistical", contamination=0.1
         )
 
         assert len(result["anomalous_nodes"]) > 0
         assert result["num_anomalous_nodes"] <= int(G.number_of_nodes() * 0.1 + 1)
         # Check if isolated node is detected
-        assert 100 in result["anomalous_nodes"] or star_center in result["anomalous_nodes"]
+        assert (
+            100 in result["anomalous_nodes"] or star_center in result["anomalous_nodes"]
+        )
 
 
 class TestRobustnessAnalysis:
@@ -283,10 +269,7 @@ class TestRobustnessAnalysis:
 
         # Random attack
         result = RobustnessAnalysis.attack_simulation(
-            G,
-            attack_type="random",
-            fraction=0.2,
-            measure="connectivity"
+            G, attack_type="random", fraction=0.2, measure="connectivity"
         )
 
         assert result["num_nodes_removed"] == 20
@@ -295,10 +278,7 @@ class TestRobustnessAnalysis:
 
         # Targeted attack
         result_targeted = RobustnessAnalysis.attack_simulation(
-            G,
-            attack_type="targeted_degree",
-            fraction=0.2,
-            measure="largest_component"
+            G, attack_type="targeted_degree", fraction=0.2, measure="largest_component"
         )
 
         # Targeted attacks should be more effective
@@ -313,7 +293,7 @@ class TestRobustnessAnalysis:
             percolation_type="site",
             probability_range=(0.0, 1.0),
             num_steps=10,
-            num_trials=5
+            num_trials=5,
         )
 
         assert len(result["results"]) == 10
@@ -325,8 +305,7 @@ class TestRobustnessAnalysis:
         G = nx.karate_club_graph()
 
         result = RobustnessAnalysis.network_resilience(
-            G,
-            resilience_metrics=["connectivity", "redundancy", "clustering"]
+            G, resilience_metrics=["connectivity", "redundancy", "clustering"]
         )
 
         assert "overall_resilience_score" in result
@@ -366,14 +345,9 @@ class TestPerformance:
             G = nx.barabasi_albert_graph(n, 3)
 
             start = time.time()
-            MLIntegration.node_embeddings(
-                G,
-                method="structural",
-                dimensions=16
-            )
+            MLIntegration.node_embeddings(G, method="structural", dimensions=16)
             elapsed = time.time() - start
             times.append(elapsed)
-
 
         # Check that time scales reasonably
         assert all(t < 5.0 for t in times)  # All should complete within 5s

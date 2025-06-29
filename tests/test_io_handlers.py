@@ -39,7 +39,7 @@ class TestJSONIO:
         data = {
             "graph": {"directed": False},
             "nodes": [{"id": "A"}, {"id": "B"}, {"id": "C"}],
-            "links": [{"source": "A", "target": "B"}, {"source": "B", "target": "C"}]
+            "links": [{"source": "A", "target": "B"}, {"source": "B", "target": "C"}],
         }
 
         G = GraphIOHandler.import_graph("json", data=data)
@@ -75,11 +75,13 @@ class TestCSVIO:
     def test_csv_export(self):
         """Test CSV edge list export."""
         G = nx.Graph()
-        G.add_edges_from([
-            ("A", "B", {"weight": 1.5, "type": "friend"}),
-            ("B", "C", {"weight": 2.0, "type": "family"}),
-            ("C", "D", {"weight": 0.5, "type": "friend"})
-        ])
+        G.add_edges_from(
+            [
+                ("A", "B", {"weight": 1.5, "type": "friend"}),
+                ("B", "C", {"weight": 2.0, "type": "family"}),
+                ("C", "D", {"weight": 0.5, "type": "friend"}),
+            ]
+        )
 
         with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
             temp_path = f.name
@@ -145,10 +147,7 @@ CityA,CityD,200,local"""
 
         try:
             edges = GraphIOHandler.csv_to_edge_list(
-                temp_path,
-                source_col="from",
-                target_col="to",
-                weight_col="distance"
+                temp_path, source_col="from", target_col="to", weight_col="distance"
             )
 
             assert len(edges) == 4
@@ -185,14 +184,9 @@ class TestAdjacencyIO:
     def test_adjacency_import(self):
         """Test adjacency matrix import."""
         data = {
-            "matrix": [
-                [0, 1, 0, 1],
-                [1, 0, 1, 0],
-                [0, 1, 0, 1],
-                [1, 0, 1, 0]
-            ],
+            "matrix": [[0, 1, 0, 1], [1, 0, 1, 0], [0, 1, 0, 1], [1, 0, 1, 0]],
             "nodes": ["A", "B", "C", "D"],
-            "directed": False
+            "directed": False,
         }
 
         G = GraphIOHandler.import_graph("adjacency", data=data)
@@ -208,7 +202,7 @@ class TestAdjacencyIO:
         # Create sparse graph
         G = nx.Graph()
         G.add_nodes_from(range(100))
-        G.add_edges_from([(i, i+1) for i in range(99)])  # Path graph
+        G.add_edges_from([(i, i + 1) for i in range(99)])  # Path graph
 
         # Export with sparse format
         data = GraphIOHandler.export_graph(G, "adjacency", sparse_format=True)
@@ -233,7 +227,7 @@ class TestFormatConverters:
             "from": ["A", "B", "C", "A"],
             "to": ["B", "C", "D", "D"],
             "weight": [1.5, 2.0, 0.5, 3.0],
-            "type": ["friend", "family", "friend", "work"]
+            "type": ["friend", "family", "friend", "work"],
         }
         edges_df = pd.DataFrame(edge_data)
 
@@ -241,7 +235,7 @@ class TestFormatConverters:
         node_data = {
             "id": ["A", "B", "C", "D"],
             "city": ["NYC", "Boston", "Chicago", "LA"],
-            "population": [8, 0.6, 2.7, 4]
+            "population": [8, 0.6, 2.7, 4],
         }
         nodes_df = pd.DataFrame(node_data)
 
@@ -252,7 +246,7 @@ class TestFormatConverters:
             target_col="to",
             edge_attr=["weight", "type"],
             node_attr_df=nodes_df,
-            node_key="id"
+            node_key="id",
         )
 
         assert G.number_of_nodes() == 4
@@ -268,18 +262,11 @@ class TestFormatConverters:
 
     def test_adjacency_to_edge_list(self):
         """Test adjacency matrix to edge list conversion."""
-        matrix = [
-            [0, 2, 0, 3],
-            [2, 0, 1, 0],
-            [0, 1, 0, 4],
-            [3, 0, 4, 0]
-        ]
+        matrix = [[0, 2, 0, 3], [2, 0, 1, 0], [0, 1, 0, 4], [3, 0, 4, 0]]
         nodes = ["W", "X", "Y", "Z"]
 
         edges = GraphIOHandler.adjacency_to_edge_list(
-            matrix,
-            node_labels=nodes,
-            threshold=1.5  # Only edges with weight > 1.5
+            matrix, node_labels=nodes, threshold=1.5  # Only edges with weight > 1.5
         )
 
         assert len(edges) == 3
@@ -337,7 +324,7 @@ class TestFormatValidation:
             ("graph.edges", "edgelist"),
             ("matrix.adj", "adjacency"),
             ("saved.pickle", "pickle"),
-            ("graph.net", "pajek")
+            ("graph.net", "pajek"),
         ]
 
         for filename, expected_format in test_cases:
@@ -379,7 +366,7 @@ B,C"""
                     "csv",
                     path=temp_path,
                     source_col="source",  # Column doesn't exist
-                    target_col="target"
+                    target_col="target",
                 )
         finally:
             os.unlink(temp_path)

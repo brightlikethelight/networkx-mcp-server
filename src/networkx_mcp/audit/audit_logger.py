@@ -3,6 +3,7 @@
 import asyncio
 import json
 import logging
+import os
 import uuid
 from collections import defaultdict
 from contextvars import ContextVar
@@ -29,7 +30,7 @@ class AuditEvent:
         user_id: str,
         status: str = "success",
         details: Optional[Dict[str, Any]] = None,
-        error: Optional[str] = None
+        error: Optional[str] = None,
     ):
         self.event_id = str(uuid.uuid4())
         self.timestamp = datetime.now(timezone.utc).isoformat()
@@ -45,8 +46,9 @@ class AuditEvent:
         self.session_id = session_id_var.get() or "unknown"
 
         # System info
-        self.server_version = "0.1.0"  # TODO: Get from config
-        self.server_node = "server-1"  # TODO: Get from environment
+        from ..__version__ import __version__
+        self.server_version = __version__
+        self.server_node = os.environ.get("MCP_SERVER_NODE", "server-1")
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for storage."""
@@ -62,7 +64,7 @@ class AuditEvent:
             "client_ip": self.client_ip,
             "session_id": self.session_id,
             "server_version": self.server_version,
-            "server_node": self.server_node
+            "server_node": self.server_node,
         }
 
     def to_json(self) -> str:
@@ -81,7 +83,7 @@ class SecurityAlert:
         severity: str,
         user_id: str,
         description: str,
-        evidence: Dict[str, Any]
+        evidence: Dict[str, Any],
     ):
         self.alert_id = str(uuid.uuid4())
         self.timestamp = datetime.now(timezone.utc).isoformat()
@@ -106,7 +108,7 @@ class SecurityAlert:
             "evidence": self.evidence,
             "status": self.status,
             "assigned_to": self.assigned_to,
-            "resolution": self.resolution
+            "resolution": self.resolution,
         }
 
 
@@ -146,16 +148,12 @@ class AuditLogger:
         status: str = "success",
         details: Optional[Dict[str, Any]] = None,
         error: Optional[str] = None,
-        tx: Optional[Transaction] = None
+        tx: Optional[Transaction] = None,
     ) -> str:
         """Log an audit event."""
         # Create event
         event = AuditEvent(
-            action=action,
-            user_id=user_id,
-            status=status,
-            details=details,
-            error=error
+            action=action, user_id=user_id, status=status, details=details, error=error
         )
 
         # Store event
@@ -192,8 +190,7 @@ class AuditLogger:
             client = tx.pipeline if tx else self.storage._client
             for key in keys:
                 await client.zadd(
-                    key,
-                    {event_json: datetime.now(timezone.utc).timestamp()}
+                    key, {event_json: datetime.now(timezone.utc).timestamp()}
                 )
                 # Set TTL (90 days)
                 await client.expire(key, 90 * 24 * 3600)
@@ -201,10 +198,7 @@ class AuditLogger:
             # Fallback for other storage backends
             # Store as metadata
             await self.storage.update_graph_metadata(
-                "system",
-                f"audit_{event.event_id}",
-                event.to_dict(),
-                tx
+                "system", f"audit_{event.event_id}", event.to_dict(), tx
             )
 
     async def _is_suspicious(self, event: AuditEvent) -> bool:
@@ -217,36 +211,36 @@ class AuditLogger:
 
         suspicious_patterns = [
             # Rapid deletion
-            (action == "delete_graph" and
-             recent_activity.get("delete_graph", 0) > 10),
-
+            (action == "delete_graph" and recent_activity.get("delete_graph", 0) > 10),
             # Mass data export
-            (action == "export_graph" and
-             recent_activity.get("export_graph", 0) > 20),
-
+            (action == "export_graph" and recent_activity.get("export_graph", 0) > 20),
             # Failed auth attempts
-            (action == "auth_failed" and
-             recent_activity.get("auth_failed", 0) > 5),
-
+            (action == "auth_failed" and recent_activity.get("auth_failed", 0) > 5),
             # Privilege escalation attempts
-            (action in ["modify_permissions", "access_admin"] and
-             event.status == "failed"),
-
+            (
+                action in ["modify_permissions", "access_admin"]
+                and event.status == "failed"
+            ),
             # Large graph operations
-            (action in ["import_graph", "create_graph"] and
-             event.details.get("size_mb", 0) > 50),
-
+            (
+                action in ["import_graph", "create_graph"]
+                and event.details.get("size_mb", 0) > 50
+            ),
             # Unusual file paths
-            (action in ["import_graph", "export_graph"] and
-             any(pattern in str(event.details.get("filepath", ""))
-                 for pattern in ["../", "/etc/", "/root/", "/proc/"])),
-
+            (
+                action in ["import_graph", "export_graph"]
+                and any(
+                    pattern in str(event.details.get("filepath", ""))
+                    for pattern in ["../", "/etc/", "/root/", "/proc/"]
+                )
+            ),
             # Rate anomalies
             (sum(recent_activity.values()) > 1000),  # 1000 actions recently
-
             # Time anomalies (activity at unusual hours)
-            (datetime.now(timezone.utc).hour in [1, 2, 3, 4] and
-             sum(recent_activity.values()) > 100),
+            (
+                datetime.now(timezone.utc).hour in [1, 2, 3, 4]
+                and sum(recent_activity.values()) > 100
+            ),
         ]
 
         return any(suspicious_patterns)
@@ -256,7 +250,11 @@ class AuditLogger:
         # Determine alert type and severity
         if event.action == "auth_failed":
             alert_type = "brute_force_attempt"
-            severity = "high" if self._user_activity[event.user_id]["auth_failed"] > 10 else "medium"
+            severity = (
+                "high"
+                if self._user_activity[event.user_id]["auth_failed"] > 10
+                else "medium"
+            )
         elif "delete" in event.action:
             alert_type = "mass_deletion"
             severity = "high"
@@ -279,8 +277,8 @@ class AuditLogger:
             evidence={
                 "event": event.to_dict(),
                 "recent_activity": dict(self._user_activity[event.user_id]),
-                "total_actions": sum(self._user_activity[event.user_id].values())
-            }
+                "total_actions": sum(self._user_activity[event.user_id].values()),
+            },
         )
 
         # Store alert
@@ -300,29 +298,27 @@ class AuditLogger:
 
         if hasattr(self.storage, "_client"):  # Redis backend
             # Store in sorted set by severity
-            severity_score = {
-                "low": 1, "medium": 2, "high": 3, "critical": 4
-            }.get(alert.severity, 2)
+            severity_score = {"low": 1, "medium": 2, "high": 3, "critical": 4}.get(
+                alert.severity, 2
+            )
 
             await self.storage._client.zadd(
                 f"audit:alerts:{date_str}",
-                {json.dumps(alert.to_dict()): severity_score}
+                {json.dumps(alert.to_dict()): severity_score},
             )
 
             # Also store by user
             await self.storage._client.zadd(
                 f"audit:alerts:user:{alert.user_id}",
-                {json.dumps(alert.to_dict()): datetime.now(timezone.utc).timestamp()}
+                {json.dumps(alert.to_dict()): datetime.now(timezone.utc).timestamp()},
             )
 
-    def add_alert_handler(self, handler: callable):
+    def add_alert_handler(self, handler: callable) -> None:
         """Add handler for security alerts."""
         self._alert_handlers.append(handler)
 
     async def get_user_activity_summary(
-        self,
-        user_id: str,
-        hours: int = 24
+        self, user_id: str, hours: int = 24
     ) -> Dict[str, Any]:
         """Get user activity summary."""
         # Get from cache
@@ -360,7 +356,7 @@ class AuditLogger:
             "activity": dict(stored_activity),
             "total_actions": sum(stored_activity.values()),
             "risk_score": risk_score,
-            "risk_level": self._risk_level(risk_score)
+            "risk_level": self._risk_level(risk_score),
         }
 
     def _calculate_risk_score(self, activity: Dict[str, int]) -> float:
@@ -373,7 +369,7 @@ class AuditLogger:
             "export_graph": 3.0,
             "auth_failed": 10.0,
             "modify_permissions": 8.0,
-            "import_graph": 2.0
+            "import_graph": 2.0,
         }
 
         for action, weight in high_risk.items():
@@ -413,12 +409,13 @@ class AuditLogger:
             "events_by_action": dict(self._metrics),
             "unique_users": len(self._user_activity),
             "high_risk_users": [
-                user_id for user_id in self._user_activity
+                user_id
+                for user_id in self._user_activity
                 if self._calculate_risk_score(self._user_activity[user_id]) >= 60
-            ]
+            ],
         }
 
-    async def cleanup_old_events(self, days: int = 90):
+    async def cleanup_old_events(self, days: int = 90) -> None:
         """Clean up old audit events."""
         # This would be called by a scheduled job
         # Redis handles TTL automatically
@@ -426,10 +423,11 @@ class AuditLogger:
 
 
 # Decorators for audit logging
-def audit_log(action: str):
+def audit_log(action: str) -> callable:
     """Decorator to automatically log actions."""
-    def decorator(func):
-        async def wrapper(*args, **kwargs):
+
+    def decorator(func: callable) -> callable:
+        async def wrapper(*args: Any, **kwargs: Any) -> Any:
             # Extract user_id
             user_id = kwargs.get("user_id", "anonymous")
             if not user_id and args:
@@ -447,7 +445,7 @@ def audit_log(action: str):
                         action=action,
                         user_id=user_id,
                         status="success",
-                        details={"args": str(args)[:200], "kwargs": str(kwargs)[:200]}
+                        details={"args": str(args)[:200], "kwargs": str(kwargs)[:200]},
                     )
 
                 return result
@@ -459,9 +457,10 @@ def audit_log(action: str):
                         user_id=user_id,
                         status="failed",
                         error=str(e),
-                        details={"args": str(args)[:200], "kwargs": str(kwargs)[:200]}
+                        details={"args": str(args)[:200], "kwargs": str(kwargs)[:200]},
                     )
                 raise
 
         return wrapper
+
     return decorator

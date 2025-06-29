@@ -18,19 +18,20 @@ class NodeClassifier(GraphMLModel):
 
         # Extract multiple feature types
         all_features = extract_node_features(
-            self.graph,
-            ["degree", "clustering", "betweenness", "closeness"]
+            self.graph, ["degree", "clustering", "betweenness", "closeness"]
         )
 
         # Combine features into matrix
         node_indices = {node: i for i, node in enumerate(self.graph.nodes())}
         target_indices = [node_indices[node] for node in nodes if node in node_indices]
 
-        feature_matrix = np.column_stack([
-            all_features["degree"][target_indices],
-            all_features["clustering"][target_indices],
-            all_features["betweenness"][target_indices]
-        ])
+        feature_matrix = np.column_stack(
+            [
+                all_features["degree"][target_indices],
+                all_features["clustering"][target_indices],
+                all_features["betweenness"][target_indices],
+            ]
+        )
 
         return feature_matrix
 
@@ -69,18 +70,32 @@ class NodeClassifier(GraphMLModel):
             if i < len(features):
                 degree_feature = features[i][0]  # Degree is first feature
                 # Simple rule-based prediction
-                pred = "high_degree" if degree_feature > np.mean(features[:, 0]) else "low_degree"
+                pred = (
+                    "high_degree"
+                    if degree_feature > np.mean(features[:, 0])
+                    else "low_degree"
+                )
                 predictions[node] = pred
-                confidence[node] = min(0.9, abs(degree_feature - np.mean(features[:, 0])) / np.std(features[:, 0]))
+                confidence[node] = min(
+                    0.9,
+                    abs(degree_feature - np.mean(features[:, 0]))
+                    / np.std(features[:, 0]),
+                )
 
         return MLResult(
             predictions=predictions,
             confidence=confidence,
-            model_info={"type": "node_classifier", "features": ["degree", "clustering", "betweenness"]},
-            features_used=["degree", "clustering", "betweenness"]
+            model_info={
+                "type": "node_classifier",
+                "features": ["degree", "clustering", "betweenness"],
+            },
+            features_used=["degree", "clustering", "betweenness"],
         )
 
-async def classify_nodes(graph: nx.Graph, labeled_nodes: Dict[str, str], target_nodes: List[str]) -> Dict[str, str]:
+
+async def classify_nodes(
+    graph: nx.Graph, labeled_nodes: Dict[str, str], target_nodes: List[str]
+) -> Dict[str, str]:
     """Simple function interface for node classification."""
     classifier = NodeClassifier(graph)
     await classifier.train(labeled_nodes)

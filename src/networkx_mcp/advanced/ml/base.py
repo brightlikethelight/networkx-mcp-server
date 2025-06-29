@@ -11,10 +11,12 @@ import numpy as np
 @dataclass
 class MLResult:
     """Result from ML algorithm on graphs."""
+
     predictions: Union[Dict[str, Any], List[Any]]
     confidence: Optional[Dict[str, float]] = None
     model_info: Optional[Dict[str, Any]] = None
     features_used: Optional[List[str]] = None
+
 
 class GraphMLModel(ABC):
     """Base class for graph machine learning models."""
@@ -39,7 +41,10 @@ class GraphMLModel(ABC):
         """Make predictions for given nodes."""
         pass
 
-def extract_node_features(graph: nx.Graph, feature_types: Optional[List[str]] = None) -> Dict[str, np.ndarray]:
+
+def extract_node_features(
+    graph: nx.Graph, feature_types: Optional[List[str]] = None
+) -> Dict[str, np.ndarray]:
     """Extract standard node features from graph."""
     if feature_types is None:
         feature_types = ["degree", "clustering", "betweenness"]

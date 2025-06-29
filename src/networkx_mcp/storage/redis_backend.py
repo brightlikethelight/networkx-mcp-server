@@ -71,7 +71,7 @@ class RedisBackend(StorageBackend):
         redis_url: str = "redis://localhost:6379",
         max_graph_size_mb: int = 100,
         compression_level: int = 6,
-        key_prefix: str = "networkx_mcp"
+        key_prefix: str = "networkx_mcp",
     ):
         self.redis_url = redis_url
         self.max_size_bytes = max_graph_size_mb * 1024 * 1024
@@ -91,7 +91,7 @@ class RedisBackend(StorageBackend):
                 1: 1,  # TCP_KEEPIDLE
                 2: 30,  # TCP_KEEPINTVL
                 3: 5,  # TCP_KEEPCNT
-            }
+            },
         )
         self._client = redis.Redis(connection_pool=self.pool)
 
@@ -136,7 +136,7 @@ class RedisBackend(StorageBackend):
         graph_id: str,
         graph: nx.Graph,
         metadata: Optional[Dict[str, Any]] = None,
-        tx: Optional[Transaction] = None
+        tx: Optional[Transaction] = None,
     ) -> bool:
         """Save graph with compression and metadata."""
         # Validate inputs
@@ -159,9 +159,7 @@ class RedisBackend(StorageBackend):
                 f"Graph exceeds size limit: {len(compressed)/1024/1024:.1f}MB "
                 f"(max {self.max_size_bytes/1024/1024:.1f}MB)"
             )
-            raise StorageQuotaExceededError(
-                msg
-            )
+            raise StorageQuotaExceededError(msg)
 
         # Prepare metadata
         now = datetime.now(timezone.utc).isoformat()
@@ -223,10 +221,7 @@ class RedisBackend(StorageBackend):
         return True
 
     async def load_graph(
-        self,
-        user_id: str,
-        graph_id: str,
-        tx: Optional[Transaction] = None
+        self, user_id: str, graph_id: str, tx: Optional[Transaction] = None
     ) -> Optional[nx.Graph]:
         """Load graph from storage."""
         # Validate inputs
@@ -260,18 +255,13 @@ class RedisBackend(StorageBackend):
         if not tx:
             meta_key = self._make_key("graph_meta", user_id, graph_id)
             await self._client.hset(
-                meta_key,
-                "last_accessed_at",
-                datetime.now(timezone.utc).isoformat()
+                meta_key, "last_accessed_at", datetime.now(timezone.utc).isoformat()
             )
 
         return graph
 
     async def delete_graph(
-        self,
-        user_id: str,
-        graph_id: str,
-        tx: Optional[Transaction] = None
+        self, user_id: str, graph_id: str, tx: Optional[Transaction] = None
     ) -> bool:
         """Delete graph from storage."""
         # Validate inputs
@@ -318,7 +308,7 @@ class RedisBackend(StorageBackend):
         user_id: str,
         limit: int = 100,
         offset: int = 0,
-        tx: Optional[Transaction] = None
+        tx: Optional[Transaction] = None,
     ) -> List[Dict[str, Any]]:
         """List user's graphs with metadata."""
         # Validate inputs
@@ -337,12 +327,16 @@ class RedisBackend(StorageBackend):
 
         # Sort for consistent pagination
         sorted_ids = sorted(graph_ids)
-        paginated_ids = sorted_ids[offset:offset + limit]
+        paginated_ids = sorted_ids[offset : offset + limit]
 
         # Get metadata for each graph
         graphs = []
         for graph_id_bytes in paginated_ids:
-            graph_id = graph_id_bytes.decode("utf-8") if isinstance(graph_id_bytes, bytes) else graph_id_bytes
+            graph_id = (
+                graph_id_bytes.decode("utf-8")
+                if isinstance(graph_id_bytes, bytes)
+                else graph_id_bytes
+            )
             meta_key = self._make_key("graph_meta", user_id, graph_id)
 
             metadata = await client.get(meta_key)
@@ -356,10 +350,7 @@ class RedisBackend(StorageBackend):
         return graphs
 
     async def get_graph_metadata(
-        self,
-        user_id: str,
-        graph_id: str,
-        tx: Optional[Transaction] = None
+        self, user_id: str, graph_id: str, tx: Optional[Transaction] = None
     ) -> Optional[Dict[str, Any]]:
         """Get graph metadata without loading the full graph."""
         # Validate inputs
@@ -379,7 +370,7 @@ class RedisBackend(StorageBackend):
         user_id: str,
         graph_id: str,
         metadata: Dict[str, Any],
-        tx: Optional[Transaction] = None
+        tx: Optional[Transaction] = None,
     ) -> bool:
         """Update graph metadata."""
         # Validate inputs
@@ -420,9 +411,11 @@ class RedisBackend(StorageBackend):
             "total_bytes": int(stats.get(b"total_bytes", 0)),
             "total_mb": round(int(stats.get(b"total_bytes", 0)) / 1024 / 1024, 2),
             "quota_mb": self.max_size_bytes / 1024 / 1024,
-            "usage_percent": round(
-                int(stats.get(b"total_bytes", 0)) / self.max_size_bytes * 100, 2
-            ) if self.max_size_bytes > 0 else 0
+            "usage_percent": (
+                round(int(stats.get(b"total_bytes", 0)) / self.max_size_bytes * 100, 2)
+                if self.max_size_bytes > 0
+                else 0
+            ),
         }
 
     async def check_health(self) -> Dict[str, Any]:
@@ -442,17 +435,15 @@ class RedisBackend(StorageBackend):
                 "latency_ms": round(latency, 2),
                 "redis_version": info.get("redis_version", "unknown"),
                 "connected_clients": info.get("connected_clients", 0),
-                "used_memory_mb": round(
-                    info.get("used_memory", 0) / 1024 / 1024, 2
-                ),
-                "uptime_days": round(info.get("uptime_in_seconds", 0) / 86400, 2)
+                "used_memory_mb": round(info.get("used_memory", 0) / 1024 / 1024, 2),
+                "uptime_days": round(info.get("uptime_in_seconds", 0) / 86400, 2),
             }
         except Exception as e:
             return {
                 "status": "unhealthy",
                 "backend": "redis",
                 "error": str(e),
-                "error_type": type(e).__name__
+                "error_type": type(e).__name__,
             }
 
     async def cleanup_expired(self, days: int = 30) -> int:

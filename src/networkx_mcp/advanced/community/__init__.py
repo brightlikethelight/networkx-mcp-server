@@ -23,15 +23,16 @@ __all__ = [
     "format_community_result",
     "girvan_newman_communities",
     "louvain_communities",
-    "validate_communities"
+    "validate_communities",
 ]
+
 
 # Factory function for easy access
 def get_community_detector(algorithm: str, graph):
     """Get community detector by algorithm name."""
     detectors = {
         "louvain": LouvainCommunityDetector,
-        "girvan_newman": GirvanNewmanDetector
+        "girvan_newman": GirvanNewmanDetector,
     }
 
     if algorithm not in detectors:

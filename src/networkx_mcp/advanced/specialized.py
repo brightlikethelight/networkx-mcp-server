@@ -21,7 +21,7 @@ class SpecializedAlgorithms:
         algorithm: str = "kruskal",
         weight: Optional[str] = "weight",
         k: int = 1,
-        **params
+        **params,
     ) -> Dict[str, Any]:
         """
         Find minimum/maximum spanning trees using various algorithms.
@@ -59,9 +59,13 @@ class SpecializedAlgorithms:
             for component in components:
                 subgraph = G.subgraph(component)
                 if subgraph.number_of_edges() > 0:
-                    mst = nx.minimum_spanning_tree(subgraph, weight=weight, algorithm=algorithm)
+                    mst = nx.minimum_spanning_tree(
+                        subgraph, weight=weight, algorithm=algorithm
+                    )
                     forest.extend(mst.edges(data=True))
-                    total_weight += sum(d.get(weight, 1) for _, _, d in mst.edges(data=True))
+                    total_weight += sum(
+                        d.get(weight, 1) for _, _, d in mst.edges(data=True)
+                    )
 
             return {
                 "is_tree": False,
@@ -70,7 +74,7 @@ class SpecializedAlgorithms:
                 "edges": forest,
                 "total_weight": total_weight,
                 "algorithm": algorithm,
-                "execution_time_ms": (time.time() - start_time) * 1000
+                "execution_time_ms": (time.time() - start_time) * 1000,
             }
 
         results = {"algorithm": algorithm}
@@ -82,12 +86,14 @@ class SpecializedAlgorithms:
             edges = list(mst.edges(data=True))
             total_weight = sum(d.get(weight, 1) for _, _, d in edges)
 
-            results.update({
-                "edges": edges,
-                "num_edges": len(edges),
-                "total_weight": total_weight,
-                "is_tree": True
-            })
+            results.update(
+                {
+                    "edges": edges,
+                    "num_edges": len(edges),
+                    "total_weight": total_weight,
+                    "is_tree": True,
+                }
+            )
 
             # Find k-MST if requested
             if k > 1:
@@ -108,15 +114,17 @@ class SpecializedAlgorithms:
             edges = list(steiner.edges(data=True))
             total_weight = sum(d.get(weight, 1) for _, _, d in edges)
 
-            results.update({
-                "edges": edges,
-                "num_edges": len(edges),
-                "total_weight": total_weight,
-                "terminals": terminals,
-                "num_terminals": len(terminals),
-                "num_steiner_nodes": steiner.number_of_nodes() - len(terminals),
-                "approximation_ratio": 2.0  # Known approximation ratio
-            })
+            results.update(
+                {
+                    "edges": edges,
+                    "num_edges": len(edges),
+                    "total_weight": total_weight,
+                    "terminals": terminals,
+                    "num_terminals": len(terminals),
+                    "num_steiner_nodes": steiner.number_of_nodes() - len(terminals),
+                    "approximation_ratio": 2.0,  # Known approximation ratio
+                }
+            )
 
         else:
             msg = f"Unknown algorithm: {algorithm}"
@@ -130,7 +138,7 @@ class SpecializedAlgorithms:
                     "min": min(edge_weights),
                     "max": max(edge_weights),
                     "mean": np.mean(edge_weights),
-                    "std": np.std(edge_weights)
+                    "std": np.std(edge_weights),
                 }
 
         results["execution_time_ms"] = (time.time() - start_time) * 1000
@@ -139,9 +147,7 @@ class SpecializedAlgorithms:
 
     @staticmethod
     def _find_k_spanning_trees(
-        graph: nx.Graph,
-        k: int,
-        weight: str
+        graph: nx.Graph, k: int, weight: str
     ) -> List[Dict[str, Any]]:
         """Find k different spanning trees."""
         trees = []
@@ -152,10 +158,12 @@ class SpecializedAlgorithms:
         mst_edges = frozenset(mst.edges())
         used_edge_sets.add(mst_edges)
 
-        trees.append({
-            "edges": list(mst.edges(data=True)),
-            "weight": sum(d.get(weight, 1) for _, _, d in mst.edges(data=True))
-        })
+        trees.append(
+            {
+                "edges": list(mst.edges(data=True)),
+                "weight": sum(d.get(weight, 1) for _, _, d in mst.edges(data=True)),
+            }
+        )
 
         # Try to find more by excluding edges
         attempts = 0
@@ -166,8 +174,7 @@ class SpecializedAlgorithms:
 
             # Randomly exclude some edges
             exclude_edges = random.sample(
-                list(graph.edges()),
-                min(graph.number_of_edges() // 4, 5)
+                list(graph.edges()), min(graph.number_of_edges() // 4, 5)
             )
 
             temp_graph = graph.copy()
@@ -179,18 +186,20 @@ class SpecializedAlgorithms:
 
                 if mst_edges not in used_edge_sets:
                     used_edge_sets.add(mst_edges)
-                    trees.append({
-                        "edges": list(mst.edges(data=True)),
-                        "weight": sum(d.get(weight, 1) for _, _, d in mst.edges(data=True))
-                    })
+                    trees.append(
+                        {
+                            "edges": list(mst.edges(data=True)),
+                            "weight": sum(
+                                d.get(weight, 1) for _, _, d in mst.edges(data=True)
+                            ),
+                        }
+                    )
 
         return trees
 
     @staticmethod
     def graph_coloring(
-        graph: nx.Graph,
-        strategy: str = "greedy",
-        **params
+        graph: nx.Graph, strategy: str = "greedy", **params
     ) -> Dict[str, Any]:
         """
         Color graph nodes using various strategies.
@@ -213,7 +222,9 @@ class SpecializedAlgorithms:
             ordering = params.get("ordering", "largest_first")
 
             if ordering == "largest_first":
-                node_ordering = sorted(graph.nodes(), key=lambda x: graph.degree(x), reverse=True)
+                node_ordering = sorted(
+                    graph.nodes(), key=lambda x: graph.degree(x), reverse=True
+                )
             elif ordering == "smallest_last":
                 node_ordering = SpecializedAlgorithms._smallest_last_ordering(graph)
             elif ordering == "random":
@@ -234,10 +245,14 @@ class SpecializedAlgorithms:
 
         elif strategy == "brooks":
             # Brooks' theorem based coloring
-            max_degree = max(dict(graph.degree()).values()) if graph.number_of_nodes() > 0 else 0
+            max_degree = (
+                max(dict(graph.degree()).values()) if graph.number_of_nodes() > 0 else 0
+            )
 
             # Check if graph is complete or odd cycle
-            if nx.is_complete_graph(graph) or (nx.is_cycle_graph(graph) and graph.number_of_nodes() % 2 == 1):
+            if nx.is_complete_graph(graph) or (
+                nx.is_cycle_graph(graph) and graph.number_of_nodes() % 2 == 1
+            ):
                 # Need max_degree + 1 colors
                 coloring = nx.coloring.greedy_color(graph)
             else:
@@ -261,7 +276,11 @@ class SpecializedAlgorithms:
 
         # Chromatic number bounds
         CLIQUE_NUMBER_LIMIT = 100  # noqa: PLR2004
-        clique_number = nx.graph_clique_number(graph) if graph.number_of_nodes() < CLIQUE_NUMBER_LIMIT else None
+        clique_number = (
+            nx.graph_clique_number(graph)
+            if graph.number_of_nodes() < CLIQUE_NUMBER_LIMIT
+            else None
+        )
 
         results = {
             "coloring": coloring,
@@ -270,8 +289,12 @@ class SpecializedAlgorithms:
             "is_valid_coloring": is_valid,
             "strategy": strategy,
             "lower_bound": clique_number,  # χ(G) ≥ ω(G)
-            "upper_bound": max(dict(graph.degree()).values()) + 1 if graph.number_of_nodes() > 0 else 0,
-            "execution_time_ms": (time.time() - start_time) * 1000
+            "upper_bound": (
+                max(dict(graph.degree()).values()) + 1
+                if graph.number_of_nodes() > 0
+                else 0
+            ),
+            "execution_time_ms": (time.time() - start_time) * 1000,
         }
 
         return results
@@ -344,15 +367,10 @@ class SpecializedAlgorithms:
         # Color remaining vertices
         while uncolored:
             # Choose vertex with highest saturation, break ties by degree
-            next_vertex = max(
-                uncolored,
-                key=lambda x: (saturation[x], graph.degree(x))
-            )
+            next_vertex = max(uncolored, key=lambda x: (saturation[x], graph.degree(x)))
 
             # Find smallest available color
-            neighbor_colors = {
-                coloring[n] for n in graph[next_vertex] if n in coloring
-            }
+            neighbor_colors = {coloring[n] for n in graph[next_vertex] if n in coloring}
 
             color = 0
             while color in neighbor_colors:
@@ -389,9 +407,7 @@ class SpecializedAlgorithms:
 
     @staticmethod
     def maximum_clique(
-        graph: nx.Graph,
-        method: str = "approximation",
-        **_params
+        graph: nx.Graph, method: str = "approximation", **_params
     ) -> Dict[str, Any]:
         """
         Find maximum clique using exact or approximate algorithms.
@@ -413,14 +429,16 @@ class SpecializedAlgorithms:
         if method == "exact" and graph.number_of_nodes() < EXACT_CLIQUE_LIMIT:
             # Exact algorithm for small graphs
             max_clique = max(nx.find_cliques(graph), key=len, default=[])
-            all_max_cliques = [c for c in nx.find_cliques(graph) if len(c) == len(max_clique)]
+            all_max_cliques = [
+                c for c in nx.find_cliques(graph) if len(c) == len(max_clique)
+            ]
 
             results = {
                 "max_clique": list(max_clique),
                 "clique_size": len(max_clique),
                 "num_max_cliques": len(all_max_cliques),
                 "all_max_cliques": all_max_cliques[:10],  # Limit to 10
-                "method": "exact"
+                "method": "exact",
             }
 
         elif method == "approximation":
@@ -431,7 +449,7 @@ class SpecializedAlgorithms:
                 "max_clique": list(clique),
                 "clique_size": len(clique),
                 "method": "approximation",
-                "guarantee": "2-approximation"
+                "guarantee": "2-approximation",
             }
 
         else:  # heuristic
@@ -441,7 +459,7 @@ class SpecializedAlgorithms:
             results = {
                 "max_clique": list(clique),
                 "clique_size": len(clique),
-                "method": "greedy_heuristic"
+                "method": "greedy_heuristic",
             }
 
         # Calculate clique number bounds
@@ -451,18 +469,22 @@ class SpecializedAlgorithms:
         # Upper bound: Lovász theta (if scipy available)
         try:
             # Simplified upper bound using max degree
-            max_degree = max(dict(graph.degree()).values()) if graph.number_of_nodes() > 0 else 0
+            max_degree = (
+                max(dict(graph.degree()).values()) if graph.number_of_nodes() > 0 else 0
+            )
             upper_bound = min(max_degree + 1, graph.number_of_nodes())
         except Exception as e:
             logger.debug(f"Failed to compute upper bound for chromatic number: {e}")
             upper_bound = graph.number_of_nodes()
 
-        results.update({
-            "lower_bound": lower_bound,
-            "upper_bound": upper_bound,
-            "graph_density": nx.density(graph),
-            "execution_time_ms": (time.time() - start_time) * 1000
-        })
+        results.update(
+            {
+                "lower_bound": lower_bound,
+                "upper_bound": upper_bound,
+                "graph_density": nx.density(graph),
+                "execution_time_ms": (time.time() - start_time) * 1000,
+            }
+        )
 
         return results
 
@@ -470,7 +492,9 @@ class SpecializedAlgorithms:
     def _greedy_clique_heuristic(graph: nx.Graph) -> Set:
         """Greedy heuristic for finding large clique."""
         # Start with highest degree node
-        nodes_by_degree = sorted(graph.nodes(), key=lambda x: graph.degree(x), reverse=True)
+        nodes_by_degree = sorted(
+            graph.nodes(), key=lambda x: graph.degree(x), reverse=True
+        )
 
         best_clique = set()
 
@@ -484,7 +508,9 @@ class SpecializedAlgorithms:
                 best_connections = -1
 
                 for candidate in candidates:
-                    connections = sum(1 for node in clique if graph.has_edge(candidate, node))
+                    connections = sum(
+                        1 for node in clique if graph.has_edge(candidate, node)
+                    )
                     if connections == len(clique):  # Connected to all
                         if connections > best_connections:
                             best_connections = connections
@@ -507,7 +533,7 @@ class SpecializedAlgorithms:
         graph: nx.Graph,
         matching_type: str = "maximum",
         weight: Optional[str] = None,
-        **_params
+        **_params,
     ) -> Dict[str, Any]:
         """
         Find various types of graph matchings.
@@ -547,7 +573,7 @@ class SpecializedAlgorithms:
                 return {
                     "has_perfect_matching": False,
                     "reason": "Odd number of nodes",
-                    "execution_time_ms": (time.time() - start_time) * 1000
+                    "execution_time_ms": (time.time() - start_time) * 1000,
                 }
 
             matching = nx.max_weight_matching(graph)
@@ -559,8 +585,9 @@ class SpecializedAlgorithms:
                 return {
                     "has_perfect_matching": False,
                     "matching_size": len(matching_edges),
-                    "uncovered_nodes": graph.number_of_nodes() - len(matching_edges) * 2,
-                    "execution_time_ms": (time.time() - start_time) * 1000
+                    "uncovered_nodes": graph.number_of_nodes()
+                    - len(matching_edges) * 2,
+                    "execution_time_ms": (time.time() - start_time) * 1000,
                 }
 
         else:
@@ -585,9 +612,13 @@ class SpecializedAlgorithms:
             "matching_size": len(matching_edges),
             "matched_nodes": list(matched_nodes),
             "num_matched_nodes": len(matched_nodes),
-            "coverage": len(matched_nodes) / graph.number_of_nodes() if graph.number_of_nodes() > 0 else 0,
+            "coverage": (
+                len(matched_nodes) / graph.number_of_nodes()
+                if graph.number_of_nodes() > 0
+                else 0
+            ),
             "is_perfect": len(matched_nodes) == graph.number_of_nodes(),
-            "weighted": weight is not None
+            "weighted": weight is not None,
         }
 
         if weight:
@@ -604,9 +635,7 @@ class SpecializedAlgorithms:
 
     @staticmethod
     def vertex_cover(
-        graph: nx.Graph,
-        method: str = "approximation",
-        **_params
+        graph: nx.Graph, method: str = "approximation", **_params
     ) -> Dict[str, Any]:
         """
         Find minimum vertex cover.
@@ -634,7 +663,7 @@ class SpecializedAlgorithms:
                 "vertex_cover": list(cover),
                 "size": len(cover),
                 "method": "2-approximation",
-                "approximation_ratio": 2.0
+                "approximation_ratio": 2.0,
             }
 
         elif method == "ilp" and graph.number_of_nodes() < ILP_LIMIT:
@@ -654,7 +683,7 @@ class SpecializedAlgorithms:
             results = {
                 "vertex_cover": list(cover),
                 "size": len(cover),
-                "method": "matching_based"
+                "method": "matching_based",
             }
 
         else:
@@ -664,7 +693,7 @@ class SpecializedAlgorithms:
             results = {
                 "vertex_cover": list(cover),
                 "size": len(cover),
-                "method": "greedy_heuristic"
+                "method": "greedy_heuristic",
             }
 
         # Verify cover
@@ -676,7 +705,9 @@ class SpecializedAlgorithms:
         results["lower_bound"] = matching_size
 
         # Cover efficiency
-        results["efficiency"] = len(cover) / graph.number_of_edges() if graph.number_of_edges() > 0 else 0
+        results["efficiency"] = (
+            len(cover) / graph.number_of_edges() if graph.number_of_edges() > 0 else 0
+        )
 
         results["execution_time_ms"] = (time.time() - start_time) * 1000
 
@@ -706,9 +737,7 @@ class SpecializedAlgorithms:
 
     @staticmethod
     def dominating_set(
-        graph: nx.Graph,
-        method: str = "greedy",
-        **_params
+        graph: nx.Graph, method: str = "greedy", **_params
     ) -> Dict[str, Any]:
         """
         Find minimum dominating set.
@@ -747,12 +776,16 @@ class SpecializedAlgorithms:
             "dominated_nodes": list(dominated_nodes),
             "is_total_dominating": len(dominated_nodes) == graph.number_of_nodes(),
             "method": method,
-            "execution_time_ms": (time.time() - start_time) * 1000
+            "execution_time_ms": (time.time() - start_time) * 1000,
         }
 
         # Lower bound
         # Every node can dominate at most degree + 1 nodes
-        max_domination = max(graph.degree(n) + 1 for n in graph.nodes()) if graph.number_of_nodes() > 0 else 1
+        max_domination = (
+            max(graph.degree(n) + 1 for n in graph.nodes())
+            if graph.number_of_nodes() > 0
+            else 1
+        )
         results["lower_bound"] = graph.number_of_nodes() / max_domination
 
         return results
@@ -797,7 +830,7 @@ class SpecializedAlgorithms:
         method: str = "common_neighbors",
         node_pairs: Optional[List[Tuple]] = None,
         top_k: int = 10,
-        **_params
+        **_params,
     ) -> Dict[str, Any]:
         """
         Predict missing links in the graph.
@@ -824,7 +857,9 @@ class SpecializedAlgorithms:
             # Sample non-edges for large graphs
             LINK_PREDICTION_SAMPLE_LIMIT = 100  # noqa: PLR2004
             if graph.number_of_nodes() > LINK_PREDICTION_SAMPLE_LIMIT:
-                all_possible = graph.number_of_nodes() * (graph.number_of_nodes() - 1) // 2
+                all_possible = (
+                    graph.number_of_nodes() * (graph.number_of_nodes() - 1) // 2
+                )
                 existing = graph.number_of_edges()
                 non_edges = all_possible - existing
 
@@ -837,7 +872,12 @@ class SpecializedAlgorithms:
                 while len(node_pairs) < sample_size and attempts < sample_size * 3:
                     u = random.choice(nodes)  # noqa: S311
                     v = random.choice(nodes)  # noqa: S311
-                    if u != v and not graph.has_edge(u, v) and (u, v) not in node_pairs and (v, u) not in node_pairs:
+                    if (
+                        u != v
+                        and not graph.has_edge(u, v)
+                        and (u, v) not in node_pairs
+                        and (v, u) not in node_pairs
+                    ):
                         node_pairs.append((u, v))
                     attempts += 1
             else:
@@ -845,7 +885,7 @@ class SpecializedAlgorithms:
                 node_pairs = []
                 nodes = list(graph.nodes())
                 for i, u in enumerate(nodes):
-                    for v in nodes[i+1:]:
+                    for v in nodes[i + 1 :]:
                         if not graph.has_edge(u, v):
                             node_pairs.append((u, v))
 
@@ -890,11 +930,7 @@ class SpecializedAlgorithms:
         results = {
             "method": method,
             "top_predictions": [
-                {
-                    "node_pair": pair,
-                    "score": score,
-                    "rank": i + 1
-                }
+                {"node_pair": pair, "score": score, "rank": i + 1}
                 for i, (pair, score) in enumerate(top_predictions)
             ],
             "num_candidates_evaluated": len(node_pairs),
@@ -902,9 +938,9 @@ class SpecializedAlgorithms:
                 "min": min(s[1] for s in scores) if scores else 0,
                 "max": max(s[1] for s in scores) if scores else 0,
                 "mean": np.mean([s[1] for s in scores]) if scores else 0,
-                "std": np.std([s[1] for s in scores]) if scores else 0
+                "std": np.std([s[1] for s in scores]) if scores else 0,
             },
-            "execution_time_ms": (time.time() - start_time) * 1000
+            "execution_time_ms": (time.time() - start_time) * 1000,
         }
 
         return results

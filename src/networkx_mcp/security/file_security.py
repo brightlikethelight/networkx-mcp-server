@@ -15,6 +15,7 @@ from .validator import SecurityError, SecurityValidator
 
 class FileSecurityError(SecurityError):
     """File operation security error."""
+
     pass
 
 
@@ -86,9 +87,7 @@ class SecureFileHandler:
 
         if not is_allowed:
             msg = f"Access denied: Path '{filepath}' is outside allowed directories"
-            raise FileSecurityError(
-                msg
-            )
+            raise FileSecurityError(msg)
 
         # Additional security checks
         path_str = str(requested)
@@ -118,8 +117,15 @@ class SecureFileHandler:
         # Ensure suffix is safe
         if suffix:
             safe_extensions = {
-                ".graphml", ".gml", ".json", ".yaml", ".yml",
-                ".gexf", ".edgelist", ".adjlist", ".txt"
+                ".graphml",
+                ".gml",
+                ".json",
+                ".yaml",
+                ".yml",
+                ".gexf",
+                ".edgelist",
+                ".adjlist",
+                ".txt",
             }
             if suffix not in safe_extensions:
                 msg = f"Unsafe file extension: {suffix}"
@@ -127,9 +133,7 @@ class SecureFileHandler:
 
         # Create temp file in secure directory
         fd, filepath = tempfile.mkstemp(
-            suffix=suffix,
-            prefix=prefix,
-            dir=str(self.temp_dir)
+            suffix=suffix, prefix=prefix, dir=str(self.temp_dir)
         )
         os.close(fd)  # Close file descriptor
 
@@ -158,9 +162,7 @@ class SecureFileHandler:
         file_size = secure_path.stat().st_size
         if file_size > max_size:
             msg = f"File too large ({file_size} bytes), max {max_size} bytes"
-            raise FileSecurityError(
-                msg
-            )
+            raise FileSecurityError(msg)
 
         # Read based on format
         try:
@@ -187,8 +189,9 @@ class SecureFileHandler:
             msg = f"Failed to read graph: {safe_error}"
             raise FileSecurityError(msg) from e
 
-    def safe_write_graph(self, graph: nx.Graph, filepath: Union[str, Path],
-                         file_format: str) -> Path:
+    def safe_write_graph(
+        self, graph: nx.Graph, filepath: Union[str, Path], file_format: str
+    ) -> Path:
         """Safely write graph to file."""
         # Validate inputs
         secure_path = self.validate_path(filepath)
@@ -307,7 +310,7 @@ class SecureFileHandler:
             "nodes": [
                 {
                     "id": SecurityValidator.validate_node_id(node),
-                    "attributes": SecurityValidator.sanitize_attributes(attrs)
+                    "attributes": SecurityValidator.sanitize_attributes(attrs),
                 }
                 for node, attrs in graph.nodes(data=True)
             ],
@@ -315,10 +318,10 @@ class SecureFileHandler:
                 {
                     "source": SecurityValidator.validate_node_id(u),
                     "target": SecurityValidator.validate_node_id(v),
-                    "attributes": SecurityValidator.sanitize_attributes(attrs)
+                    "attributes": SecurityValidator.sanitize_attributes(attrs),
                 }
                 for u, v, attrs in graph.edges(data=True)
-            ]
+            ],
         }
 
         with open(filepath, "w", encoding="utf-8") as f:
@@ -394,6 +397,7 @@ class SecureFileHandler:
         try:
             if self.temp_dir.exists():
                 import shutil
+
                 shutil.rmtree(self.temp_dir)
         except Exception:
             pass

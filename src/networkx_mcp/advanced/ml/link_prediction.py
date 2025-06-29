@@ -11,12 +11,19 @@ from networkx_mcp.advanced.ml.base import GraphMLModel, MLResult
 class LinkPredictor(GraphMLModel):
     """Link prediction using graph topology."""
 
-    async def extract_features(self, node_pairs: Optional[List[Tuple[str, str]]] = None) -> np.ndarray:
+    async def extract_features(
+        self, node_pairs: Optional[List[Tuple[str, str]]] = None
+    ) -> np.ndarray:
         """Extract features for link prediction."""
         if node_pairs is None:
             # Generate all possible pairs
             nodes = list(self.graph.nodes())
-            node_pairs = [(u, v) for u in nodes for v in nodes if u < v and not self.graph.has_edge(u, v)]
+            node_pairs = [
+                (u, v)
+                for u in nodes
+                for v in nodes
+                if u < v and not self.graph.has_edge(u, v)
+            ]
 
         features = []
         for u, v in node_pairs:
@@ -39,7 +46,12 @@ class LinkPredictor(GraphMLModel):
 
         return np.array(features)
 
-    async def train(self, positive_edges: List[Tuple[str, str]], negative_edges: List[Tuple[str, str]], **params) -> bool:
+    async def train(
+        self,
+        positive_edges: List[Tuple[str, str]],
+        negative_edges: List[Tuple[str, str]],
+        **params,
+    ) -> bool:
         """Train link predictor."""
         try:
             # Extract features for positive and negative examples
@@ -74,17 +86,25 @@ class LinkPredictor(GraphMLModel):
         return MLResult(
             predictions=predictions,
             confidence=confidence,
-            model_info={"type": "link_predictor", "features": ["common_neighbors", "jaccard", "adamic_adar"]},
-            features_used=["common_neighbors", "jaccard", "adamic_adar"]
+            model_info={
+                "type": "link_predictor",
+                "features": ["common_neighbors", "jaccard", "adamic_adar"],
+            },
+            features_used=["common_neighbors", "jaccard", "adamic_adar"],
         )
 
-async def predict_links(graph: nx.Graph, num_predictions: int = 10) -> List[Tuple[str, str, float]]:
+
+async def predict_links(
+    graph: nx.Graph, num_predictions: int = 10
+) -> List[Tuple[str, str, float]]:
     """Simple function interface for link prediction."""
     predictor = LinkPredictor(graph)
 
     # Generate candidate pairs
     nodes = list(graph.nodes())
-    candidates = [(u, v) for u in nodes for v in nodes if u < v and not graph.has_edge(u, v)]
+    candidates = [
+        (u, v) for u in nodes for v in nodes if u < v and not graph.has_edge(u, v)
+    ]
 
     MAX_CANDIDATES = 100
     if len(candidates) > MAX_CANDIDATES:  # Limit for performance

@@ -15,7 +15,7 @@ process = subprocess.Popen(
     [sys.executable, "-m", "networkx_mcp.server", "sse", "8765"],
     stdout=subprocess.PIPE,
     stderr=subprocess.PIPE,
-    text=True
+    text=True,
 )
 
 # Wait a bit for server to start

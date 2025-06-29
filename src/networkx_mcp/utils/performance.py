@@ -15,6 +15,7 @@ class PerformanceMonitor:
 
     def time_operation(self, operation_name: str):
         """Decorator to time operations."""
+
         def decorator(func: Callable) -> Callable:
             @wraps(func)
             def wrapper(*args, **kwargs):
@@ -27,7 +28,9 @@ class PerformanceMonitor:
                 self.metrics[operation_name].append(duration)
 
                 return result
+
             return wrapper
+
         return decorator
 
     def get_memory_usage(self) -> Dict[str, float]:
@@ -37,7 +40,7 @@ class PerformanceMonitor:
         return {
             "rss_mb": memory_info.rss / 1024 / 1024,
             "vms_mb": memory_info.vms / 1024 / 1024,
-            "percent": process.memory_percent()
+            "percent": process.memory_percent(),
         }
 
     def get_performance_summary(self) -> Dict[str, Any]:
@@ -49,6 +52,6 @@ class PerformanceMonitor:
                 "total_time": sum(times),
                 "avg_time": sum(times) / len(times),
                 "max_time": max(times),
-                "min_time": min(times)
+                "min_time": min(times),
             }
         return summary

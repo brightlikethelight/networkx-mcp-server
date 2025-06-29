@@ -17,10 +17,14 @@ class PerformanceMonitor:
             max_history: Maximum number of operations to keep in history
         """
         self.max_history = max_history
-        self.operations: Dict[str, deque] = defaultdict(lambda: deque(maxlen=max_history))
+        self.operations: Dict[str, deque] = defaultdict(
+            lambda: deque(maxlen=max_history)
+        )
         self.start_time = time.time()
 
-    def record_operation(self, operation: str, duration: float, metadata: Optional[Dict] = None):
+    def record_operation(
+        self, operation: str, duration: float, metadata: Optional[Dict] = None
+    ):
         """Record an operation's performance metrics.
 
         Args:
@@ -31,7 +35,7 @@ class PerformanceMonitor:
         record = {
             "timestamp": datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),
             "duration_ms": round(duration * 1000, 2),
-            "metadata": metadata or {}
+            "metadata": metadata or {},
         }
         self.operations[operation].append(record)
 
@@ -59,7 +63,7 @@ class PerformanceMonitor:
                 "min_ms": min(durations),
                 "max_ms": max(durations),
                 "total_ms": sum(durations),
-                "recent_operations": list(self.operations[operation])[-10:]
+                "recent_operations": list(self.operations[operation])[-10:],
             }
         else:
             # Stats for all operations
@@ -70,13 +74,13 @@ class PerformanceMonitor:
                     stats[op_name] = {
                         "count": len(durations),
                         "mean_ms": round(sum(durations) / len(durations), 2),
-                        "total_ms": sum(durations)
+                        "total_ms": sum(durations),
                     }
 
             return {
                 "uptime_seconds": round(time.time() - self.start_time, 2),
                 "operations": stats,
-                "total_operations": sum(len(ops) for ops in self.operations.values())
+                "total_operations": sum(len(ops) for ops in self.operations.values()),
             }
 
     def get_slow_operations(self, threshold_ms: float = 1000) -> List[Dict[str, Any]]:
@@ -92,12 +96,14 @@ class PerformanceMonitor:
         for op_name, op_list in self.operations.items():
             for op in op_list:
                 if op["duration_ms"] > threshold_ms:
-                    slow_ops.append({
-                        "operation": op_name,
-                        "timestamp": op["timestamp"],
-                        "duration_ms": op["duration_ms"],
-                        "metadata": op["metadata"]
-                    })
+                    slow_ops.append(
+                        {
+                            "operation": op_name,
+                            "timestamp": op["timestamp"],
+                            "duration_ms": op["duration_ms"],
+                            "metadata": op["metadata"],
+                        }
+                    )
 
         return sorted(slow_ops, key=lambda x: x["duration_ms"], reverse=True)
 
@@ -120,7 +126,9 @@ class OperationCounter:
     def __init__(self):
         """Initialize operation counter."""
         self.counts: Dict[str, int] = defaultdict(int)
-        self.hourly_counts: Dict[str, Dict[int, int]] = defaultdict(lambda: defaultdict(int))
+        self.hourly_counts: Dict[str, Dict[int, int]] = defaultdict(
+            lambda: defaultdict(int)
+        )
         self.start_time = datetime.now(timezone.utc).replace(tzinfo=None)
         self.errors: Dict[str, int] = defaultdict(int)
 
@@ -160,7 +168,7 @@ class OperationCounter:
             for op, count in self.counts.items():
                 operation_distribution[op] = {
                     "count": count,
-                    "percentage": round((count / total_operations) * 100, 2)
+                    "percentage": round((count / total_operations) * 100, 2),
                 }
 
         # Calculate hourly patterns
@@ -173,7 +181,10 @@ class OperationCounter:
         for error_key, count in self.errors.items():
             operation = error_key.split(":")[0]
             if operation not in error_rates:
-                error_rates[operation] = {"errors": 0, "total": self.counts.get(operation, 0)}
+                error_rates[operation] = {
+                    "errors": 0,
+                    "total": self.counts.get(operation, 0),
+                }
             error_rates[operation]["errors"] += count
 
         for _op, data in error_rates.items():
@@ -185,8 +196,14 @@ class OperationCounter:
         return {
             "total_operations": total_operations,
             "total_errors": total_errors,
-            "error_rate": round((total_errors / total_operations * 100), 2) if total_operations > 0 else 0,
-            "uptime": str(datetime.now(timezone.utc).replace(tzinfo=None) - self.start_time),
+            "error_rate": (
+                round((total_errors / total_operations * 100), 2)
+                if total_operations > 0
+                else 0
+            ),
+            "uptime": str(
+                datetime.now(timezone.utc).replace(tzinfo=None) - self.start_time
+            ),
             "operation_counts": dict(self.counts),
             "operation_distribution": operation_distribution,
             "hourly_patterns": hourly_patterns,
@@ -194,8 +211,8 @@ class OperationCounter:
             "top_operations": sorted(
                 [(op, count) for op, count in self.counts.items()],
                 key=lambda x: x[1],
-                reverse=True
-            )[:10]
+                reverse=True,
+            )[:10],
         }
 
     def reset(self):
@@ -212,7 +229,9 @@ class OperationCounter:
             filepath: Path to save the statistics
         """
         stats = self.get_counts()
-        stats["exported_at"] = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
+        stats["exported_at"] = (
+            datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
+        )
 
         with open(filepath, "w") as f:
             json.dump(stats, f, indent=2)
@@ -235,7 +254,7 @@ class MemoryMonitor:
 
         # Base object sizes
         node_size = 100  # Estimated bytes per node
-        edge_size = 50   # Estimated bytes per edge
+        edge_size = 50  # Estimated bytes per edge
 
         # Calculate attribute sizes
         node_attr_size = 0
@@ -248,18 +267,30 @@ class MemoryMonitor:
 
         # Total estimates
         total_bytes = (
-            graph.number_of_nodes() * node_size +
-            graph.number_of_edges() * edge_size +
-            node_attr_size +
-            edge_attr_size
+            graph.number_of_nodes() * node_size
+            + graph.number_of_edges() * edge_size
+            + node_attr_size
+            + edge_attr_size
         )
 
         return {
             "total_bytes": total_bytes,
             "total_kb": round(total_bytes / 1024, 2),
             "total_mb": round(total_bytes / (1024 * 1024), 2),
-            "node_memory_kb": round((graph.number_of_nodes() * node_size + node_attr_size) / 1024, 2),
-            "edge_memory_kb": round((graph.number_of_edges() * edge_size + edge_attr_size) / 1024, 2),
-            "avg_node_size_bytes": round((node_size + node_attr_size / graph.number_of_nodes()), 2) if graph.number_of_nodes() > 0 else 0,
-            "avg_edge_size_bytes": round((edge_size + edge_attr_size / graph.number_of_edges()), 2) if graph.number_of_edges() > 0 else 0
+            "node_memory_kb": round(
+                (graph.number_of_nodes() * node_size + node_attr_size) / 1024, 2
+            ),
+            "edge_memory_kb": round(
+                (graph.number_of_edges() * edge_size + edge_attr_size) / 1024, 2
+            ),
+            "avg_node_size_bytes": (
+                round((node_size + node_attr_size / graph.number_of_nodes()), 2)
+                if graph.number_of_nodes() > 0
+                else 0
+            ),
+            "avg_edge_size_bytes": (
+                round((edge_size + edge_attr_size / graph.number_of_edges()), 2)
+                if graph.number_of_edges() > 0
+                else 0
+            ),
         }

@@ -11,9 +11,19 @@ def format_graph_summary(graph) -> Dict[str, Any]:
         "edges": graph.number_of_edges(),
         "directed": graph.is_directed(),
         "multigraph": graph.is_multigraph(),
-        "connected": hasattr(graph, 'is_connected') and graph.is_connected() if not graph.is_directed() else None,
-        "density": graph.number_of_edges() / (graph.number_of_nodes() * (graph.number_of_nodes() - 1) / 2) if graph.number_of_nodes() > 1 else 0
+        "connected": (
+            hasattr(graph, "is_connected") and graph.is_connected()
+            if not graph.is_directed()
+            else None
+        ),
+        "density": (
+            graph.number_of_edges()
+            / (graph.number_of_nodes() * (graph.number_of_nodes() - 1) / 2)
+            if graph.number_of_nodes() > 1
+            else 0
+        ),
     }
+
 
 def format_json_output(data: Any, pretty: bool = True) -> str:
     """Format data as JSON string."""
@@ -21,10 +31,7 @@ def format_json_output(data: Any, pretty: bool = True) -> str:
         return json.dumps(data, indent=2, sort_keys=True, default=str)
     return json.dumps(data, default=str)
 
+
 def format_error_response(error: Exception, context: str = "") -> Dict[str, str]:
     """Format error as response dict."""
-    return {
-        "error": str(error),
-        "type": type(error).__name__,
-        "context": context
-    }
+    return {"error": str(error), "type": type(error).__name__, "context": context}

@@ -15,7 +15,7 @@ process = subprocess.Popen(
     stdout=subprocess.PIPE,
     stderr=subprocess.PIPE,
     text=True,
-    bufsize=0
+    bufsize=0,
 )
 
 # Give it a moment to start
@@ -32,11 +32,7 @@ if process.poll() is not None:
 print("✅ Server process started successfully!")
 
 # Test with a simple MCP request
-test_request = {
-    "jsonrpc": "2.0",
-    "method": "tools/list",
-    "id": 1
-}
+test_request = {"jsonrpc": "2.0", "method": "tools/list", "id": 1}
 
 try:
     # Send request
@@ -49,6 +45,7 @@ try:
     import fcntl
     import os
     import select
+
     flags = fcntl.fcntl(process.stdout.fileno(), fcntl.F_GETFL)
     fcntl.fcntl(process.stdout.fileno(), fcntl.F_SETFL, flags | os.O_NONBLOCK)
 

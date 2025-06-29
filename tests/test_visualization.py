@@ -22,9 +22,7 @@ class TestMatplotlibVisualizer:
         graph = sample_graphs["simple"]
 
         result = MatplotlibVisualizer.create_static_plot(
-            graph,
-            layout="spring",
-            show_labels=True
+            graph, layout="spring", show_labels=True
         )
 
         assert isinstance(result, dict)
@@ -53,7 +51,9 @@ class TestMatplotlibVisualizer:
         graph = sample_graphs["weighted"]
 
         # Set node colors based on attribute
-        node_colors = {node: graph.nodes[node].get("color", "gray") for node in graph.nodes()}
+        node_colors = {
+            node: graph.nodes[node].get("color", "gray") for node in graph.nodes()
+        }
         node_sizes = {node: (node + 1) * 100 for node in graph.nodes()}
 
         result = MatplotlibVisualizer.create_static_plot(
@@ -61,7 +61,7 @@ class TestMatplotlibVisualizer:
             layout="circular",
             node_color=node_colors,
             node_size=node_sizes,
-            show_labels=True
+            show_labels=True,
         )
 
         assert result["layout_used"] == "circular"
@@ -73,16 +73,20 @@ class TestMatplotlibVisualizer:
         graph = sample_graphs["weighted"]
 
         # Set edge attributes for visualization
-        edge_widths = {edge: graph.edges[edge].get("weight", 1.0) for edge in graph.edges()}
-        edge_colors = {edge: "red" if graph.edges[edge].get("weight", 1) > 2 else "blue"
-                      for edge in graph.edges()}
+        edge_widths = {
+            edge: graph.edges[edge].get("weight", 1.0) for edge in graph.edges()
+        }
+        edge_colors = {
+            edge: "red" if graph.edges[edge].get("weight", 1) > 2 else "blue"
+            for edge in graph.edges()
+        }
 
         result = MatplotlibVisualizer.create_static_plot(
             graph,
             layout="spring",
             edge_width=edge_widths,
             edge_color=edge_colors,
-            edge_style="solid"
+            edge_style="solid",
         )
 
         assert "formats" in result
@@ -93,10 +97,7 @@ class TestMatplotlibVisualizer:
         graph = sample_graphs["directed"]
 
         result = MatplotlibVisualizer.create_static_plot(
-            graph,
-            layout="kamada_kawai",
-            show_labels=True,
-            title="Directed Graph Test"
+            graph, layout="kamada_kawai", show_labels=True, title="Directed Graph Test"
         )
 
         assert result["layout_used"] == "kamada_kawai"
@@ -109,10 +110,7 @@ class TestMatplotlibVisualizer:
         layouts = ["spring", "circular", "random", "shell", "spectral"]
 
         for layout in layouts:
-            result = MatplotlibVisualizer.create_static_plot(
-                graph,
-                layout=layout
-            )
+            result = MatplotlibVisualizer.create_static_plot(graph, layout=layout)
 
             assert result["layout_used"] == layout
             assert "formats" in result
@@ -121,10 +119,7 @@ class TestMatplotlibVisualizer:
         """Test hierarchical layout for tree-like structures."""
         graph = sample_graphs["tree"]
 
-        result = MatplotlibVisualizer.create_static_plot(
-            graph,
-            layout="hierarchical"
-        )
+        result = MatplotlibVisualizer.create_static_plot(graph, layout="hierarchical")
 
         assert result["layout_used"] == "hierarchical"
         assert "formats" in result
@@ -134,12 +129,11 @@ class TestMatplotlibVisualizer:
         graph = sample_graphs["large"]
 
         import time
+
         start_time = time.time()
 
         result = MatplotlibVisualizer.create_static_plot(
-            graph,
-            layout="spring",
-            show_labels=False  # Disable labels for large graphs
+            graph, layout="spring", show_labels=False  # Disable labels for large graphs
         )
 
         elapsed_time = time.time() - start_time
@@ -163,7 +157,7 @@ class TestMatplotlibVisualizer:
             edge_style="dashed",
             title="Custom Styled Graph",
             figsize=(10, 8),
-            dpi=150
+            dpi=150,
         )
 
         assert "formats" in result
@@ -187,8 +181,7 @@ class TestMatplotlibVisualizer:
         # Invalid layout
         graph = nx.complete_graph(3)
         result = MatplotlibVisualizer.create_static_plot(
-            graph,
-            layout="invalid_layout"  # Should fall back to spring
+            graph, layout="invalid_layout"  # Should fall back to spring
         )
         assert result["layout_used"] == "spring"
 
@@ -200,10 +193,7 @@ class TestPlotlyVisualizer:
         """Test basic interactive plot creation."""
         graph = sample_graphs["simple"]
 
-        result = PlotlyVisualizer.create_interactive_plot(
-            graph,
-            layout="spring"
-        )
+        result = PlotlyVisualizer.create_interactive_plot(graph, layout="spring")
 
         assert isinstance(result, dict)
         assert "html" in result or "json" in result or "plot_data" in result
@@ -218,10 +208,7 @@ class TestPlotlyVisualizer:
         """Test 3D visualization."""
         graph = sample_graphs["simple"]
 
-        result = PlotlyVisualizer.create_3d_plot(
-            graph,
-            layout="spring_3d"
-        )
+        result = PlotlyVisualizer.create_3d_plot(graph, layout="spring_3d")
 
         assert "plot_data" in result or "html" in result
         assert "layout_used" in result
@@ -236,10 +223,7 @@ class TestPlotlyVisualizer:
             graph.nodes[node]["info"] = f"Node {node}"
 
         result = PlotlyVisualizer.create_interactive_plot(
-            graph,
-            layout="circular",
-            show_hover=True,
-            enable_selection=True
+            graph, layout="circular", show_hover=True, enable_selection=True
         )
 
         assert "plot_data" in result or "html" in result
@@ -249,9 +233,7 @@ class TestPlotlyVisualizer:
         graph = sample_graphs["karate"]
 
         result = PlotlyVisualizer.create_network_dashboard(
-            graph,
-            include_metrics=True,
-            include_centrality=True
+            graph, include_metrics=True, include_centrality=True
         )
 
         assert "dashboard_html" in result or "plot_data" in result
@@ -269,9 +251,7 @@ class TestPlotlyVisualizer:
             graphs.append(g)
 
         result = PlotlyVisualizer.create_animated_plot(
-            graphs,
-            layout="spring",
-            frame_duration=500
+            graphs, layout="spring", frame_duration=500
         )
 
         assert "animation_html" in result or "plot_data" in result
@@ -283,10 +263,7 @@ class TestPlotlyVisualizer:
         graph = sample_graphs["large"]
 
         result = PlotlyVisualizer.create_interactive_plot(
-            graph,
-            layout="spring",
-            optimize_for_size=True,
-            max_nodes_full_render=500
+            graph, layout="spring", optimize_for_size=True, max_nodes_full_render=500
         )
 
         assert "plot_data" in result or "html" in result
@@ -301,10 +278,7 @@ class TestPlotlyVisualizer:
             graph.nodes[node]["value"] = i * 10
 
         result = PlotlyVisualizer.create_interactive_plot(
-            graph,
-            layout="spring",
-            node_color_attr="value",
-            colorscale="viridis"
+            graph, layout="spring", node_color_attr="value", colorscale="viridis"
         )
 
         assert "plot_data" in result or "html" in result
@@ -326,11 +300,7 @@ class TestPyvisVisualizer:
         """Test basic Pyvis network creation."""
         graph = sample_graphs["simple"]
 
-        result = PyvisVisualizer.create_network(
-            graph,
-            height="400px",
-            width="600px"
-        )
+        result = PyvisVisualizer.create_network(graph, height="400px", width="600px")
 
         assert "html" in result
         assert "num_nodes" in result
@@ -345,10 +315,7 @@ class TestPyvisVisualizer:
         result = PyvisVisualizer.create_network(
             graph,
             physics=True,
-            physics_config={
-                "enabled": True,
-                "stabilization": {"iterations": 100}
-            }
+            physics_config={"enabled": True, "stabilization": {"iterations": 100}},
         )
 
         assert "html" in result
@@ -359,8 +326,7 @@ class TestPyvisVisualizer:
         graph = sample_graphs["tree"]
 
         result = PyvisVisualizer.create_hierarchical_network(
-            graph,
-            layout_direction="UD"  # Up-Down
+            graph, layout_direction="UD"  # Up-Down
         )
 
         assert "html" in result
@@ -381,7 +347,7 @@ class TestPyvisVisualizer:
             graph,
             node_color_attr="color",
             node_size_attr="size",
-            node_hover_attr="title"
+            node_hover_attr="title",
         )
 
         assert "html" in result
@@ -400,7 +366,7 @@ class TestPyvisVisualizer:
             graph,
             edge_width_attr="width",
             edge_label_attr="label",
-            show_edge_labels=True
+            show_edge_labels=True,
         )
 
         assert "html" in result
@@ -410,10 +376,7 @@ class TestPyvisVisualizer:
         graph = sample_graphs["simple"]
 
         result = PyvisVisualizer.create_network(
-            graph,
-            show_buttons=True,
-            filter_menu=True,
-            select_menu=True
+            graph, show_buttons=True, filter_menu=True, select_menu=True
         )
 
         assert "html" in result
@@ -431,9 +394,7 @@ class TestSpecializedVisualizations:
         graph = sample_graphs["simple"]
 
         result = SpecializedVisualizations.adjacency_matrix_plot(
-            graph,
-            colormap="Blues",
-            show_values=True
+            graph, colormap="Blues", show_values=True
         )
 
         assert "matrix_data" in result
@@ -445,9 +406,7 @@ class TestSpecializedVisualizations:
         graph = sample_graphs["scale_free"]
 
         result = SpecializedVisualizations.degree_distribution_plot(
-            graph,
-            log_scale=True,
-            fit_powerlaw=True
+            graph, log_scale=True, fit_powerlaw=True
         )
 
         assert "degree_sequence" in result
@@ -463,8 +422,7 @@ class TestSpecializedVisualizations:
         graph = sample_graphs["karate"]
 
         result = SpecializedVisualizations.centrality_heatmap(
-            graph,
-            measures=["degree", "betweenness", "closeness", "eigenvector"]
+            graph, measures=["degree", "betweenness", "closeness", "eigenvector"]
         )
 
         assert "centrality_data" in result
@@ -476,9 +434,7 @@ class TestSpecializedVisualizations:
         graph = sample_graphs["karate"]
 
         result = SpecializedVisualizations.community_plot(
-            graph,
-            algorithm="louvain",
-            show_modularity=True
+            graph, algorithm="louvain", show_modularity=True
         )
 
         assert "communities" in result
@@ -495,9 +451,7 @@ class TestSpecializedVisualizations:
         nodes2 = list(graph.nodes())[17:]
 
         result = SpecializedVisualizations.subgraph_comparison(
-            graph,
-            subgraph_nodes=[nodes1, nodes2],
-            titles=["Group 1", "Group 2"]
+            graph, subgraph_nodes=[nodes1, nodes2], titles=["Group 1", "Group 2"]
         )
 
         assert "subgraphs" in result
@@ -518,9 +472,7 @@ class TestSpecializedVisualizations:
             graphs.append(g)
 
         result = SpecializedVisualizations.temporal_network_plot(
-            graphs,
-            time_labels=[f"t={i}" for i in range(5)],
-            layout="spring"
+            graphs, time_labels=[f"t={i}" for i in range(5)], layout="spring"
         )
 
         assert "temporal_data" in result
@@ -532,9 +484,7 @@ class TestSpecializedVisualizations:
         graph = sample_graphs["bipartite"]
 
         result = SpecializedVisualizations.bipartite_plot(
-            graph,
-            node_sets_attr="bipartite",
-            vertical_layout=True
+            graph, node_sets_attr="bipartite", vertical_layout=True
         )
 
         assert "node_sets" in result
@@ -547,11 +497,7 @@ class TestSpecializedVisualizations:
         graph = sample_graphs["directed"]
 
         result = SpecializedVisualizations.flow_network_plot(
-            graph,
-            source="start",
-            sink="end",
-            capacity_attr="capacity",
-            show_flow=True
+            graph, source="start", sink="end", capacity_attr="capacity", show_flow=True
         )
 
         assert "flow_data" in result
@@ -572,8 +518,7 @@ class TestSpecializedVisualizations:
         isolated_graph.add_nodes_from([1, 2, 3])
 
         result = SpecializedVisualizations.centrality_heatmap(
-            isolated_graph,
-            measures=["degree"]
+            isolated_graph, measures=["degree"]
         )
         assert "centrality_data" in result
 
@@ -591,9 +536,7 @@ class TestVisualizationIntegration:
         )
 
         # Plotly version
-        plotly_result = PlotlyVisualizer.create_interactive_plot(
-            graph, layout="spring"
-        )
+        plotly_result = PlotlyVisualizer.create_interactive_plot(graph, layout="spring")
 
         # Both should succeed and have similar metadata
         assert matplotlib_result["num_nodes"] == plotly_result["num_nodes"]
@@ -620,8 +563,7 @@ class TestVisualizationIntegration:
 
         # Test matplotlib formats
         result = MatplotlibVisualizer.create_static_plot(
-            graph,
-            formats=["png", "svg", "pdf"]
+            graph, formats=["png", "svg", "pdf"]
         )
 
         formats = result.get("formats", {})
@@ -642,9 +584,7 @@ class TestVisualizationIntegration:
 
         start_time = time.time()
         result = MatplotlibVisualizer.create_static_plot(
-            large_graph,
-            layout="spring",
-            show_labels=False
+            large_graph, layout="spring", show_labels=False
         )
         matplotlib_time = time.time() - start_time
 
@@ -668,10 +608,7 @@ class TestVisualizationPerformance:
         initial_memory = process.memory_info().rss
 
         # Create visualization
-        result = MatplotlibVisualizer.create_static_plot(
-            graph,
-            layout="spring"
-        )
+        result = MatplotlibVisualizer.create_static_plot(graph, layout="spring")
 
         final_memory = process.memory_info().rss
         memory_increase = final_memory - initial_memory
@@ -691,9 +628,7 @@ class TestVisualizationPerformance:
                 start_time = time.time()
 
                 result = MatplotlibVisualizer.create_static_plot(
-                    graph,
-                    layout="spring",
-                    show_labels=False
+                    graph, layout="spring", show_labels=False
                 )
 
                 elapsed = time.time() - start_time
@@ -716,10 +651,7 @@ class TestVisualizationPerformance:
         graph_names = ["simple", "weighted", "complete", "tree"]
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
-            futures = {
-                executor.submit(create_viz, name): name
-                for name in graph_names
-            }
+            futures = {executor.submit(create_viz, name): name for name in graph_names}
 
             results = {}
             for future in concurrent.futures.as_completed(futures):

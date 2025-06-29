@@ -11,15 +11,13 @@ __all__ = [
     "NodeClassifier",
     "classify_nodes",
     "extract_node_features",
-    "predict_links"
+    "predict_links",
 ]
+
 
 def get_ml_model(model_type: str, graph):
     """Get ML model by type."""
-    models = {
-        "node_classifier": NodeClassifier,
-        "link_predictor": LinkPredictor
-    }
+    models = {"node_classifier": NodeClassifier, "link_predictor": LinkPredictor}
 
     if model_type not in models:
         msg = f"Unknown model type: {model_type}"

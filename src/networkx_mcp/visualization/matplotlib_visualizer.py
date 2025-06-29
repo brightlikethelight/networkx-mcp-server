@@ -24,7 +24,7 @@ class MatplotlibVisualizer:
         "kamada_kawai": nx.kamada_kawai_layout,
         "spectral": nx.spectral_layout,
         "random": nx.random_layout,
-        "hierarchical": None  # Custom implementation
+        "hierarchical": None,  # Custom implementation
     }
 
     # Node shape mappings
@@ -36,7 +36,7 @@ class MatplotlibVisualizer:
         "hexagon": "h",
         "octagon": "8",
         "pentagon": "p",
-        "star": "*"
+        "star": "*",
     }
 
     @staticmethod
@@ -54,7 +54,7 @@ class MatplotlibVisualizer:
         title: Optional[str] = None,
         figsize: Tuple[int, int] = (12, 8),
         dpi: int = 100,
-        **kwargs
+        **kwargs,
     ) -> Dict[str, Any]:
         """
         Create a static graph visualization with extensive customization options.
@@ -98,7 +98,9 @@ class MatplotlibVisualizer:
         if layout == "hierarchical":
             pos = MatplotlibVisualizer._hierarchical_layout(graph)
         else:
-            layout_func = MatplotlibVisualizer.LAYOUT_ALGORITHMS.get(layout, nx.spring_layout)
+            layout_func = MatplotlibVisualizer.LAYOUT_ALGORITHMS.get(
+                layout, nx.spring_layout
+            )
             pos = layout_func(graph, **kwargs.get("layout_params", {}))
 
         # Process node attributes
@@ -127,7 +129,8 @@ class MatplotlibVisualizer:
             if graph.is_directed():
                 # Draw directed edges with arrows
                 nx.draw_networkx_edges(
-                    graph, pos,
+                    graph,
+                    pos,
                     edgelist=[(u, v)],
                     width=width,
                     edge_color=[color],
@@ -135,17 +138,18 @@ class MatplotlibVisualizer:
                     arrows=True,
                     arrowsize=10,
                     arrowstyle="->",
-                    alpha=0.7
+                    alpha=0.7,
                 )
             else:
                 # Draw undirected edges
                 nx.draw_networkx_edges(
-                    graph, pos,
+                    graph,
+                    pos,
                     edgelist=[(u, v)],
                     width=width,
                     edge_color=[color],
                     style=style,
-                    alpha=0.7
+                    alpha=0.7,
                 )
 
         # Draw nodes by shape groups
@@ -160,36 +164,40 @@ class MatplotlibVisualizer:
             for shape, nodes in shape_groups.items():
                 shape_marker = MatplotlibVisualizer.NODE_SHAPES.get(shape, "o")
                 nx.draw_networkx_nodes(
-                    graph, pos,
+                    graph,
+                    pos,
                     nodelist=nodes,
-                    node_size=[node_sizes[i] for i, n in enumerate(graph.nodes()) if n in nodes],
-                    node_color=[node_colors[i] for i, n in enumerate(graph.nodes()) if n in nodes],
+                    node_size=[
+                        node_sizes[i] for i, n in enumerate(graph.nodes()) if n in nodes
+                    ],
+                    node_color=[
+                        node_colors[i]
+                        for i, n in enumerate(graph.nodes())
+                        if n in nodes
+                    ],
                     node_shape=shape_marker,
-                    alpha=0.9
+                    alpha=0.9,
                 )
         else:
             # Draw all nodes with same shape
             shape_marker = MatplotlibVisualizer.NODE_SHAPES.get(node_shape, "o")
             nx.draw_networkx_nodes(
-                graph, pos,
+                graph,
+                pos,
                 node_size=node_sizes,
                 node_color=node_colors,
                 node_shape=shape_marker,
-                alpha=0.9
+                alpha=0.9,
             )
 
         # Draw labels with smart placement
         if show_labels:
             if kwargs.get("smart_labels", True) and graph.number_of_nodes() > 20:
                 # Smart label placement for dense graphs
-                MatplotlibVisualizer._smart_label_placement(
-                    graph, pos, label_font_size
-                )
+                MatplotlibVisualizer._smart_label_placement(graph, pos, label_font_size)
             else:
                 nx.draw_networkx_labels(
-                    graph, pos,
-                    font_size=label_font_size,
-                    font_color="black"
+                    graph, pos, font_size=label_font_size, font_color="black"
                 )
 
         # Add title
@@ -197,7 +205,10 @@ class MatplotlibVisualizer:
             plt.title(title, fontsize=16, fontweight="bold")
 
         # Add legend if using attribute-based coloring
-        if isinstance(node_color, str) and node_color in graph.nodes[next(iter(graph.nodes()))]:
+        if (
+            isinstance(node_color, str)
+            and node_color in graph.nodes[next(iter(graph.nodes()))]
+        ):
             MatplotlibVisualizer._add_color_legend(graph, node_color)
 
         # Remove axes
@@ -209,7 +220,7 @@ class MatplotlibVisualizer:
             "layout_used": layout,
             "num_nodes": graph.number_of_nodes(),
             "num_edges": graph.number_of_edges(),
-            "formats": {}
+            "formats": {},
         }
 
         # Save as PNG (base64)
@@ -239,7 +250,7 @@ class MatplotlibVisualizer:
 
             for i, generation in enumerate(generations):
                 for j, node in enumerate(generation):
-                    x = (j - len(generation)/2) * 2 / max(1, len(generation))
+                    x = (j - len(generation) / 2) * 2 / max(1, len(generation))
                     y = -i
                     pos[node] = (x, y)
 
@@ -250,9 +261,7 @@ class MatplotlibVisualizer:
 
     @staticmethod
     def _get_node_attributes(
-        graph: nx.Graph,
-        attr: Union[int, float, str, Dict],
-        default: Any
+        graph: nx.Graph, attr: Union[int, float, str, Dict], default: Any
     ) -> List[Any]:
         """Get node attributes as a list."""
         if isinstance(attr, dict):
@@ -266,9 +275,7 @@ class MatplotlibVisualizer:
 
     @staticmethod
     def _get_edge_attributes(
-        graph: nx.Graph,
-        attr: Union[int, float, str, Dict],
-        default: Any
+        graph: nx.Graph, attr: Union[int, float, str, Dict], default: Any
     ) -> List[Any]:
         """Get edge attributes as a list."""
         if isinstance(attr, dict):
@@ -282,9 +289,7 @@ class MatplotlibVisualizer:
 
     @staticmethod
     def _smart_label_placement(
-        graph: nx.Graph,
-        pos: Dict[Any, Tuple[float, float]],
-        font_size: int
+        graph: nx.Graph, pos: Dict[Any, Tuple[float, float]], font_size: int
     ) -> Dict[Any, str]:
         """Smart label placement to avoid overlap."""
         # For now, show labels only for high-degree nodes
@@ -297,10 +302,7 @@ class MatplotlibVisualizer:
                 labels[node] = str(node)
 
         nx.draw_networkx_labels(
-            graph, pos,
-            labels=labels,
-            font_size=font_size,
-            font_color="black"
+            graph, pos, labels=labels, font_size=font_size, font_color="black"
         )
 
         return labels
@@ -331,7 +333,7 @@ class MatplotlibVisualizer:
         graph: nx.Graph,
         views: List[Dict[str, Any]],
         figsize: Tuple[int, int] = (16, 8),
-        dpi: int = 100
+        dpi: int = 100,
     ) -> Dict[str, Any]:
         """Create multiple graph views in subplots."""
         num_views = len(views)
@@ -359,23 +361,23 @@ class MatplotlibVisualizer:
 
             # Draw the graph with view-specific settings
             nx.draw(
-                graph, pos,
+                graph,
+                pos,
                 node_color=view_config.get("node_color", "lightblue"),
                 node_size=view_config.get("node_size", 300),
                 edge_color=view_config.get("edge_color", "gray"),
                 width=view_config.get("edge_width", 1.0),
                 with_labels=view_config.get("show_labels", True),
                 font_size=view_config.get("font_size", 10),
-                ax=ax
+                ax=ax,
             )
 
             ax.set_title(view_config.get("title", f"View {layout}"))
             ax.axis("off")
 
-            results["views"].append({
-                "layout": layout,
-                "title": view_config.get("title", f"View {layout}")
-            })
+            results["views"].append(
+                {"layout": layout, "title": view_config.get("title", f"View {layout}")}
+            )
 
         plt.tight_layout()
 

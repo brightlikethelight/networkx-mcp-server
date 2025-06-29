@@ -1,6 +1,5 @@
 """Base storage abstraction with transaction support."""
 
-
 from abc import ABC, abstractmethod
 from contextlib import asynccontextmanager
 from typing import Any, AsyncGenerator, Dict, List, Optional
@@ -48,27 +47,21 @@ class StorageBackend(ABC):
         graph_id: str,
         graph: nx.Graph,
         metadata: Optional[Dict[str, Any]] = None,
-        tx: Optional[Transaction] = None
+        tx: Optional[Transaction] = None,
     ) -> bool:
         """Save graph with metadata."""
         pass
 
     @abstractmethod
     async def load_graph(
-        self,
-        user_id: str,
-        graph_id: str,
-        tx: Optional[Transaction] = None
+        self, user_id: str, graph_id: str, tx: Optional[Transaction] = None
     ) -> Optional[nx.Graph]:
         """Load graph from storage."""
         pass
 
     @abstractmethod
     async def delete_graph(
-        self,
-        user_id: str,
-        graph_id: str,
-        tx: Optional[Transaction] = None
+        self, user_id: str, graph_id: str, tx: Optional[Transaction] = None
     ) -> bool:
         """Delete graph from storage."""
         pass
@@ -79,17 +72,14 @@ class StorageBackend(ABC):
         user_id: str,
         limit: int = 100,
         offset: int = 0,
-        tx: Optional[Transaction] = None
+        tx: Optional[Transaction] = None,
     ) -> List[Dict[str, Any]]:
         """List user's graphs with metadata."""
         pass
 
     @abstractmethod
     async def get_graph_metadata(
-        self,
-        user_id: str,
-        graph_id: str,
-        tx: Optional[Transaction] = None
+        self, user_id: str, graph_id: str, tx: Optional[Transaction] = None
     ) -> Optional[Dict[str, Any]]:
         """Get graph metadata without loading the full graph."""
         pass
@@ -100,7 +90,7 @@ class StorageBackend(ABC):
         user_id: str,
         graph_id: str,
         metadata: Dict[str, Any],
-        tx: Optional[Transaction] = None
+        tx: Optional[Transaction] = None,
     ) -> bool:
         """Update graph metadata."""
         pass
@@ -118,19 +108,23 @@ class StorageBackend(ABC):
 
 class StorageError(Exception):
     """Base exception for storage errors."""
+
     pass
 
 
 class GraphNotFoundError(StorageError):
     """Raised when requested graph doesn't exist."""
+
     pass
 
 
 class StorageQuotaExceededError(StorageError):
     """Raised when user exceeds storage quota."""
+
     pass
 
 
 class TransactionError(StorageError):
     """Raised when transaction operations fail."""
+
     pass

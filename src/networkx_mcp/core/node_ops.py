@@ -34,5 +34,5 @@ class NodeOperations:
             "id": node_id,
             "attributes": dict(self.graph.nodes[node_id]),
             "degree": self.graph.degree(node_id),
-            "neighbors": list(self.graph.neighbors(node_id))
+            "neighbors": list(self.graph.neighbors(node_id)),
         }

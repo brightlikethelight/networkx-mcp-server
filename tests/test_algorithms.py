@@ -17,10 +17,9 @@ class TestGraphAlgorithms:
         """Test Dijkstra's shortest path algorithm."""
         # Create weighted graph
         G = nx.Graph()
-        G.add_weighted_edges_from([
-            ("A", "B", 1), ("B", "C", 2), ("A", "C", 4),
-            ("C", "D", 1), ("B", "D", 5)
-        ])
+        G.add_weighted_edges_from(
+            [("A", "B", 1), ("B", "C", 2), ("A", "C", 4), ("C", "D", 1), ("B", "D", 5)]
+        )
 
         # Single target
         result = GraphAlgorithms.shortest_path(G, "A", "D", weight="weight")
@@ -108,10 +107,9 @@ class TestGraphAlgorithms:
     def test_minimum_spanning_tree(self):
         """Test minimum spanning tree algorithms."""
         G = nx.Graph()
-        G.add_weighted_edges_from([
-            ("A", "B", 1), ("B", "C", 2), ("A", "C", 3),
-            ("B", "D", 4), ("C", "D", 1)
-        ])
+        G.add_weighted_edges_from(
+            [("A", "B", 1), ("B", "C", 2), ("A", "C", 3), ("B", "D", 4), ("C", "D", 1)]
+        )
 
         # Kruskal's algorithm
         result = GraphAlgorithms.minimum_spanning_tree(G, algorithm="kruskal")
@@ -202,10 +200,9 @@ class TestGraphAlgorithms:
     def test_matching(self):
         """Test matching algorithms."""
         G = nx.Graph()
-        G.add_edges_from([
-            ("A", "1"), ("A", "2"), ("B", "2"),
-            ("B", "3"), ("C", "3"), ("C", "4")
-        ])
+        G.add_edges_from(
+            [("A", "1"), ("A", "2"), ("B", "2"), ("B", "3"), ("C", "3"), ("C", "4")]
+        )
 
         result = GraphAlgorithms.matching(G, max_cardinality=True)
         assert "matching" in result
@@ -291,7 +288,9 @@ class TestAlgorithmPerformance:
 
         # Check performance scaling
         # Time should not grow too rapidly (allow for larger tolerance)
-        assert times[-1] < times[0] * 100 or times[-1] < 1.0  # Reasonable scaling or under 1 second
+        assert (
+            times[-1] < times[0] * 100 or times[-1] < 1.0
+        )  # Reasonable scaling or under 1 second
 
     def test_shortest_path_performance(self):
         """Test shortest path performance."""
@@ -304,9 +303,7 @@ class TestAlgorithmPerformance:
 
         start = time.time()
         # Find paths from corner to corner
-        result = GraphAlgorithms.shortest_path(
-            G, "0,0", "9,9"
-        )
+        result = GraphAlgorithms.shortest_path(G, "0,0", "9,9")
         elapsed = time.time() - start
 
         assert result["path"] is not None
@@ -324,7 +321,7 @@ class TestAlgorithmPerformance:
             G.add_nodes_from(nodes)
             # Make complete subgraph
             for j in range(len(nodes)):
-                for k in range(j+1, len(nodes)):
+                for k in range(j + 1, len(nodes)):
                     G.add_edge(nodes[j], nodes[k])
 
         start = time.time()
@@ -350,17 +347,13 @@ class TestAdvancedAlgorithms:
             ("B", "D", {"weight": 1, "cost": 3}),
             ("C", "D", {"weight": 1, "cost": 2}),
             ("B", "E", {"weight": 3, "cost": 1}),
-            ("D", "E", {"weight": 1, "cost": 1})
+            ("D", "E", {"weight": 1, "cost": 1}),
         ]
         G.add_edges_from(edges)
 
         # Test with different weight attributes
-        result_weight = GraphAlgorithms.shortest_path(
-            G, "A", "E", weight="weight"
-        )
-        result_cost = GraphAlgorithms.shortest_path(
-            G, "A", "E", weight="cost"
-        )
+        result_weight = GraphAlgorithms.shortest_path(G, "A", "E", weight="weight")
+        result_cost = GraphAlgorithms.shortest_path(G, "A", "E", weight="cost")
 
         # Different paths based on weight attribute
         assert result_weight["path"] == ["A", "B", "D", "E"]
@@ -372,12 +365,14 @@ class TestAdvancedAlgorithms:
     def test_negative_weight_detection(self):
         """Test handling of negative weights."""
         G = nx.DiGraph()
-        G.add_weighted_edges_from([
-            ("A", "B", 1),
-            ("B", "C", -2),  # Negative weight
-            ("C", "D", 1),
-            ("B", "D", 3)
-        ])
+        G.add_weighted_edges_from(
+            [
+                ("A", "B", 1),
+                ("B", "C", -2),  # Negative weight
+                ("C", "D", 1),
+                ("B", "D", 3),
+            ]
+        )
 
         # Bellman-Ford should handle negative weights
         result = GraphAlgorithms.shortest_path(
@@ -392,7 +387,9 @@ class TestAdvancedAlgorithms:
 
         # Should detect negative cycle
         with pytest.raises(nx.NetworkXUnbounded):
-            GraphAlgorithms.shortest_path(G, "A", "D", weight="weight", method="bellman-ford")
+            GraphAlgorithms.shortest_path(
+                G, "A", "D", weight="weight", method="bellman-ford"
+            )
 
     def test_centrality_edge_cases(self):
         """Test centrality measures on special graph structures."""
@@ -426,7 +423,7 @@ class TestAdvancedAlgorithms:
         community1 = [f"A{i}" for i in range(10)]
         G.add_nodes_from(community1)
         for i in range(10):
-            for j in range(i+1, 10):
+            for j in range(i + 1, 10):
                 if np.random.random() < 0.8:  # Dense connections
                     G.add_edge(community1[i], community1[j])
 
@@ -434,7 +431,7 @@ class TestAdvancedAlgorithms:
         community2 = [f"B{i}" for i in range(10)]
         G.add_nodes_from(community2)
         for i in range(10):
-            for j in range(i+1, 10):
+            for j in range(i + 1, 10):
                 if np.random.random() < 0.8:  # Dense connections
                     G.add_edge(community2[i], community2[j])
 
@@ -501,11 +498,7 @@ class TestGraphMetrics:
         """Test metrics specific to directed graphs."""
         # Create a directed acyclic graph
         D = nx.DiGraph()
-        D.add_edges_from([
-            ("A", "B"), ("A", "C"),
-            ("B", "D"), ("C", "D"),
-            ("D", "E")
-        ])
+        D.add_edges_from([("A", "B"), ("A", "C"), ("B", "D"), ("C", "D"), ("D", "E")])
 
         stats = GraphAlgorithms.graph_statistics(D)
 

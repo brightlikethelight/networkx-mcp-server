@@ -17,9 +17,7 @@ class TestDataPipelinesIntegration:
         """Test complete CSV to graph pipeline."""
         # Test the CSV pipeline
         result = DataPipelines.csv_pipeline(
-            temp_files["csv"],
-            type_inference=True,
-            directed=False
+            temp_files["csv"], type_inference=True, directed=False
         )
 
         assert "graph" in result
@@ -39,10 +37,7 @@ class TestDataPipelinesIntegration:
 
     def test_json_to_graph_pipeline(self, temp_files):
         """Test JSON to graph pipeline with auto-detection."""
-        result = DataPipelines.json_pipeline(
-            temp_files["json"],
-            format_type="auto"
-        )
+        result = DataPipelines.json_pipeline(temp_files["json"], format_type="auto")
 
         assert "graph" in result
         assert "format_detected" in result
@@ -63,24 +58,27 @@ class TestDataPipelinesIntegration:
             # Create Excel with multiple sheets
             with pd.ExcelWriter(excel_path, engine="openpyxl") as writer:
                 # Nodes sheet
-                nodes_df = pd.DataFrame({
-                    "id": ["A", "B", "C", "D"],
-                    "type": ["input", "process", "process", "output"],
-                    "value": [1, 2, 3, 4]
-                })
+                nodes_df = pd.DataFrame(
+                    {
+                        "id": ["A", "B", "C", "D"],
+                        "type": ["input", "process", "process", "output"],
+                        "value": [1, 2, 3, 4],
+                    }
+                )
                 nodes_df.to_excel(writer, sheet_name="Nodes", index=False)
 
                 # Edges sheet
-                edges_df = pd.DataFrame({
-                    "source": ["A", "B", "C"],
-                    "target": ["B", "C", "D"],
-                    "weight": [1.5, 2.0, 1.0]
-                })
+                edges_df = pd.DataFrame(
+                    {
+                        "source": ["A", "B", "C"],
+                        "target": ["B", "C", "D"],
+                        "weight": [1.5, 2.0, 1.0],
+                    }
+                )
                 edges_df.to_excel(writer, sheet_name="Edges", index=False)
 
             result = DataPipelines.excel_pipeline(
-                excel_path,
-                sheet_mapping={"Nodes": "nodes", "Edges": "edges"}
+                excel_path, sheet_mapping={"Nodes": "nodes", "Edges": "edges"}
             )
 
             assert "graph" in result
@@ -99,6 +97,7 @@ class TestDataPipelinesIntegration:
 
         finally:
             import os
+
             os.unlink(excel_path)
 
     @pytest.mark.asyncio
@@ -110,7 +109,7 @@ class TestDataPipelinesIntegration:
         mock_response_data = {
             "nodes": [
                 {"id": "user1", "name": "Alice", "followers": 100},
-                {"id": "user2", "name": "Bob", "followers": 50}
+                {"id": "user2", "name": "Bob", "followers": 50},
             ]
         }
 
@@ -126,14 +125,12 @@ class TestDataPipelinesIntegration:
                     "path": "/users",
                     "type": "nodes",
                     "id_field": "id",
-                    "data_path": "nodes"
+                    "data_path": "nodes",
                 }
             ]
 
             result = await DataPipelines.api_pipeline(
-                base_url="https://api.example.com",
-                endpoints=endpoints,
-                rate_limit=0.1
+                base_url="https://api.example.com", endpoints=endpoints, rate_limit=0.1
             )
 
             assert "graph" in result
@@ -147,6 +144,7 @@ class TestDataPipelinesIntegration:
 
     def test_streaming_pipeline(self):
         """Test streaming data pipeline."""
+
         def generate_stream_data():
             """Generate streaming graph data."""
             # Add nodes
@@ -155,18 +153,35 @@ class TestDataPipelinesIntegration:
             yield {"type": "node", "id": "C", "attributes": {"value": 3}}
 
             # Add edges
-            yield {"type": "edge", "source": "A", "target": "B", "attributes": {"weight": 1.5}}
-            yield {"type": "edge", "source": "B", "target": "C", "attributes": {"weight": 2.0}}
+            yield {
+                "type": "edge",
+                "source": "A",
+                "target": "B",
+                "attributes": {"weight": 1.5},
+            }
+            yield {
+                "type": "edge",
+                "source": "B",
+                "target": "C",
+                "attributes": {"weight": 2.0},
+            }
 
             # Add more nodes
             yield {"type": "node", "id": "D", "attributes": {"value": 4}}
-            yield {"type": "edge", "source": "C", "target": "D", "attributes": {"weight": 1.0}}
+            yield {
+                "type": "edge",
+                "source": "C",
+                "target": "D",
+                "attributes": {"weight": 1.0},
+            }
 
-        updates = list(DataPipelines.streaming_pipeline(
-            generate_stream_data(),
-            update_interval=0.1,
-            window_size=None  # Cumulative
-        ))
+        updates = list(
+            DataPipelines.streaming_pipeline(
+                generate_stream_data(),
+                update_interval=0.1,
+                window_size=None,  # Cumulative
+            )
+        )
 
         # Should have received updates
         assert len(updates) > 0
@@ -195,26 +210,28 @@ class TestDataPipelinesIntegration:
             cursor = conn.cursor()
 
             # Create table
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE TABLE edges (
                     source TEXT,
                     target TEXT,
                     weight REAL,
                     type TEXT
                 )
-            """)
+            """
+            )
 
             # Insert data
             edges_data = [
                 ("node1", "node2", 1.5, "collaboration"),
                 ("node2", "node3", 2.0, "friendship"),
                 ("node3", "node4", 1.0, "collaboration"),
-                ("node4", "node1", 2.5, "mentorship")
+                ("node4", "node1", 2.5, "mentorship"),
             ]
 
             cursor.executemany(
                 "INSERT INTO edges (source, target, weight, type) VALUES (?, ?, ?, ?)",
-                edges_data
+                edges_data,
             )
 
             conn.commit()
@@ -225,7 +242,7 @@ class TestDataPipelinesIntegration:
                 connection_string=db_path,
                 query="SELECT source, target, weight, type FROM edges",
                 db_type="sqlite",
-                edge_columns=("source", "target")
+                edge_columns=("source", "target"),
             )
 
             assert "graph" in result
@@ -244,6 +261,7 @@ class TestDataPipelinesIntegration:
 
         finally:
             import os
+
             os.unlink(db_path)
 
 
@@ -264,9 +282,7 @@ class TestEndToEndWorkflows:
 
         # Step 1: Import graph from file
         import_result = await import_graph(
-            format="json",
-            path=temp_files["json"],
-            graph_id="workflow_test"
+            format="json", path=temp_files["json"], graph_id="workflow_test"
         )
 
         assert import_result["graph_id"] == "workflow_test"
@@ -278,8 +294,7 @@ class TestEndToEndWorkflows:
 
         # Step 3: Analyze centrality
         centrality_result = await centrality_measures(
-            graph_id="workflow_test",
-            measures=["degree", "betweenness"]
+            graph_id="workflow_test", measures=["degree", "betweenness"]
         )
 
         assert "degree_centrality" in centrality_result
@@ -288,8 +303,7 @@ class TestEndToEndWorkflows:
         # Step 4: Detect communities (if applicable)
         try:
             community_result = await community_detection(
-                graph_id="workflow_test",
-                algorithm="louvain"
+                graph_id="workflow_test", algorithm="louvain"
             )
             assert "communities" in community_result
         except Exception:
@@ -298,18 +312,13 @@ class TestEndToEndWorkflows:
 
         # Step 5: Create visualization
         viz_result = await visualize_graph(
-            graph_id="workflow_test",
-            layout="spring",
-            params={"show_labels": True}
+            graph_id="workflow_test", layout="spring", params={"show_labels": True}
         )
 
         assert "visualization_type" in viz_result or "formats" in viz_result
 
         # Step 6: Export results
-        export_result = await export_graph(
-            graph_id="workflow_test",
-            format="json"
-        )
+        export_result = await export_graph(graph_id="workflow_test", format="json")
 
         assert "data" in export_result
         assert export_result["format"] == "json"
@@ -330,7 +339,7 @@ class TestEndToEndWorkflows:
         await create_graph(
             graph_id="social_network",
             graph_type="Graph",
-            params={"name": "Social Network", "type": "friendship"}
+            params={"name": "Social Network", "type": "friendship"},
         )
 
         # Add people as nodes
@@ -340,7 +349,7 @@ class TestEndToEndWorkflows:
             ("Charlie", {"age": 28, "location": "LA"}),
             ("Diana", {"age": 35, "location": "NYC"}),
             ("Eve", {"age": 22, "location": "SF"}),
-            ("Frank", {"age": 40, "location": "LA"})
+            ("Frank", {"age": 40, "location": "LA"}),
         ]
 
         await add_nodes(graph_id="social_network", nodes=people)
@@ -353,7 +362,7 @@ class TestEndToEndWorkflows:
             ("Bob", "Eve", {"strength": 0.6, "years": 1}),
             ("Charlie", "Frank", {"strength": 0.8, "years": 4}),
             ("Diana", "Frank", {"strength": 0.5, "years": 1}),
-            ("Eve", "Frank", {"strength": 0.7, "years": 2})
+            ("Eve", "Frank", {"strength": 0.7, "years": 2}),
         ]
 
         await add_edges(graph_id="social_network", edges=friendships)
@@ -367,7 +376,7 @@ class TestEndToEndWorkflows:
         centrality = await centrality_measures(
             graph_id="social_network",
             measures=["degree", "betweenness", "closeness"],
-            top_k=3
+            top_k=3,
         )
 
         assert "degree_centrality" in centrality
@@ -375,8 +384,7 @@ class TestEndToEndWorkflows:
 
         # Detect friend groups
         communities = await community_detection(
-            graph_id="social_network",
-            algorithm="louvain"
+            graph_id="social_network", algorithm="louvain"
         )
 
         assert "communities" in communities
@@ -397,7 +405,7 @@ class TestEndToEndWorkflows:
         await create_graph(
             graph_id="transport_net",
             graph_type="Graph",
-            params={"name": "City Transport", "type": "infrastructure"}
+            params={"name": "City Transport", "type": "infrastructure"},
         )
 
         # Add locations
@@ -407,7 +415,7 @@ class TestEndToEndWorkflows:
             ("Mall", {"type": "commercial", "capacity": 300}),
             ("University", {"type": "education", "capacity": 200}),
             ("Hospital", {"type": "medical", "capacity": 100}),
-            ("Stadium", {"type": "entertainment", "capacity": 800})
+            ("Stadium", {"type": "entertainment", "capacity": 800}),
         ]
 
         await add_nodes(graph_id="transport_net", nodes=locations)
@@ -421,7 +429,7 @@ class TestEndToEndWorkflows:
             ("Mall", "University", {"distance": 12, "time": 20, "cost": 10}),
             ("Mall", "Stadium", {"distance": 18, "time": 25, "cost": 14}),
             ("University", "Hospital", {"distance": 10, "time": 15, "cost": 9}),
-            ("Hospital", "Stadium", {"distance": 22, "time": 35, "cost": 18})
+            ("Hospital", "Stadium", {"distance": 22, "time": 35, "cost": 18}),
         ]
 
         await add_edges(graph_id="transport_net", edges=routes)
@@ -431,7 +439,7 @@ class TestEndToEndWorkflows:
             graph_id="transport_net",
             source="Airport",
             target="Stadium",
-            weight="distance"
+            weight="distance",
         )
 
         assert "path" in shortest_dist
@@ -439,10 +447,7 @@ class TestEndToEndWorkflows:
         assert shortest_dist["target"] == "Stadium"
 
         shortest_time = await shortest_path(
-            graph_id="transport_net",
-            source="Airport",
-            target="Stadium",
-            weight="time"
+            graph_id="transport_net", source="Airport", target="Stadium", weight="time"
         )
 
         # Time-optimal path might be different from distance-optimal
@@ -450,9 +455,7 @@ class TestEndToEndWorkflows:
 
         # Find minimum spanning tree (most efficient connection network)
         mst = await minimum_spanning_tree(
-            graph_id="transport_net",
-            weight="cost",
-            algorithm="kruskal"
+            graph_id="transport_net", weight="cost", algorithm="kruskal"
         )
 
         assert "mst_edges" in mst
@@ -474,7 +477,7 @@ class TestEndToEndWorkflows:
         await create_graph(
             graph_id="citations",
             graph_type="DiGraph",
-            params={"name": "Research Citations", "domain": "computer_science"}
+            params={"name": "Research Citations", "domain": "computer_science"},
         )
 
         # Add research papers
@@ -484,7 +487,7 @@ class TestEndToEndWorkflows:
             ("Paper_C", {"year": 2021, "field": "NLP", "citations": 45}),
             ("Paper_D", {"year": 2018, "field": "CV", "citations": 201}),
             ("Paper_E", {"year": 2022, "field": "ML", "citations": 12}),
-            ("Paper_F", {"year": 2020, "field": "NLP", "citations": 67})
+            ("Paper_F", {"year": 2020, "field": "NLP", "citations": 67}),
         ]
 
         await add_nodes(graph_id="citations", nodes=papers)
@@ -498,16 +501,14 @@ class TestEndToEndWorkflows:
             ("Paper_A", "Paper_E", {"context": "extension"}),
             ("Paper_C", "Paper_E", {"context": "application"}),
             ("Paper_B", "Paper_F", {"context": "technique"}),
-            ("Paper_D", "Paper_F", {"context": "dataset"})
+            ("Paper_D", "Paper_F", {"context": "dataset"}),
         ]
 
         await add_edges(graph_id="citations", edges=citations)
 
         # Analyze influence (citations received)
         centrality = await centrality_measures(
-            graph_id="citations",
-            measures=["degree", "pagerank"],
-            top_k=3
+            graph_id="citations", measures=["degree", "pagerank"], top_k=3
         )
 
         # In citation networks, in-degree represents influence
@@ -530,11 +531,13 @@ class TestComplexDataIntegration:
         # Create additional data files
 
         # JSON file with node attributes
-        node_attrs_file = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False)
+        node_attrs_file = tempfile.NamedTemporaryFile(
+            mode="w", suffix=".json", delete=False
+        )
         node_attrs = {
             "node1": {"type": "person", "age": 25, "department": "engineering"},
             "node2": {"type": "person", "age": 30, "department": "marketing"},
-            "node3": {"type": "person", "age": 28, "department": "engineering"}
+            "node3": {"type": "person", "age": 28, "department": "engineering"},
         }
         json.dump(node_attrs, node_attrs_file)
         node_attrs_file.close()
@@ -562,7 +565,8 @@ class TestComplexDataIntegration:
 
             # Step 4: Analyze by attributes
             engineering_nodes = [
-                node for node, data in base_graph.nodes(data=True)
+                node
+                for node, data in base_graph.nodes(data=True)
                 if data.get("department") == "engineering"
             ]
 
@@ -570,6 +574,7 @@ class TestComplexDataIntegration:
 
         finally:
             import os
+
             os.unlink(node_attrs_file.name)
 
     def test_temporal_data_integration(self):
@@ -589,7 +594,9 @@ class TestComplexDataIntegration:
 
             # Add new connections over time
             if i > 0:
-                edges.append(("A", "C", {"timestamp": timestamp, "weight": 0.5 + i * 0.3}))
+                edges.append(
+                    ("A", "C", {"timestamp": timestamp, "weight": 0.5 + i * 0.3})
+                )
             if i > 1:
                 edges.append(("C", "D", {"timestamp": timestamp, "weight": 2.0}))
 
@@ -620,7 +627,7 @@ class TestComplexDataIntegration:
         layers = {
             "friendship": [("A", "B"), ("B", "C"), ("C", "A")],
             "collaboration": [("A", "C"), ("B", "D"), ("C", "D")],
-            "mentorship": [("A", "D"), ("B", "A")]
+            "mentorship": [("A", "D"), ("B", "A")],
         }
 
         # Integrate into single graph with layer attributes
@@ -644,11 +651,14 @@ class TestComplexDataIntegration:
 
         # Find edges that exist in multiple layers
         multi_layer_edges = [
-            (u, v) for u, v, data in multilayer_graph.edges(data=True)
+            (u, v)
+            for u, v, data in multilayer_graph.edges(data=True)
             if len(data["layers"]) > 1
         ]
 
-        assert len(multi_layer_edges) >= 1  # A-C should be in both friendship and collaboration
+        assert (
+            len(multi_layer_edges) >= 1
+        )  # A-C should be in both friendship and collaboration
 
     def test_geospatial_network_integration(self):
         """Test integration of geospatial network data."""
@@ -658,7 +668,7 @@ class TestComplexDataIntegration:
             "LA": (34.0522, -118.2437),
             "Chicago": (41.8781, -87.6298),
             "Houston": (29.7604, -95.3698),
-            "Phoenix": (33.4484, -112.0740)
+            "Phoenix": (33.4484, -112.0740),
         }
 
         # Create graph with geographic data
@@ -682,7 +692,10 @@ class TestComplexDataIntegration:
             # Haversine formula
             dlat = lat2 - lat1
             dlon = lon2 - lon1
-            a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
+            a = (
+                math.sin(dlat / 2) ** 2
+                + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+            )
             c = 2 * math.asin(math.sqrt(a))
             r = 6371  # Earth's radius in kilometers
 
@@ -695,7 +708,7 @@ class TestComplexDataIntegration:
             ("LA", "Phoenix"),
             ("LA", "Chicago"),
             ("Chicago", "Houston"),
-            ("Houston", "Phoenix")
+            ("Houston", "Phoenix"),
         ]
 
         for city1, city2 in city_pairs:
@@ -734,7 +747,7 @@ class TestErrorRecoveryIntegration:
             {"source": "C", "target": "D", "weight": "invalid"},  # Invalid weight
             {"source": "D", "target": "E", "weight": 2.5},  # Valid
             {},  # Invalid - empty
-            {"source": "E", "target": "A", "weight": 1.0}  # Valid
+            {"source": "E", "target": "A", "weight": 1.0},  # Valid
         ]
 
         # Process with error recovery

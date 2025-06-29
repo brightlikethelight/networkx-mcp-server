@@ -23,6 +23,7 @@ DEFAULT_WINDOW_SIZE = 5
 # Optional imports - not all may be available
 try:
     from sklearn.decomposition import PCA
+
     HAS_PCA = True
 except ImportError:
     HAS_PCA = False
@@ -30,6 +31,7 @@ except ImportError:
 
 try:
     from scipy.sparse.linalg import eigs
+
     HAS_SCIPY_SPARSE = True
 except ImportError:
     HAS_SCIPY_SPARSE = False
@@ -47,7 +49,7 @@ class MLIntegration:
         graph: Union[nx.Graph, nx.DiGraph],
         method: str = "node2vec",
         dimensions: int = 128,
-        **params
+        **params,
     ) -> Dict[str, Any]:
         """
         Generate node embeddings for machine learning.
@@ -68,19 +70,13 @@ class MLIntegration:
         start_time = time.time()
 
         if method == "node2vec":
-            embeddings = MLIntegration._node2vec_embeddings(
-                graph, dimensions, **params
-            )
+            embeddings = MLIntegration._node2vec_embeddings(graph, dimensions, **params)
 
         elif method == "deepwalk":
-            embeddings = MLIntegration._deepwalk_embeddings(
-                graph, dimensions, **params
-            )
+            embeddings = MLIntegration._deepwalk_embeddings(graph, dimensions, **params)
 
         elif method == "spectral":
-            embeddings = MLIntegration._spectral_embeddings(
-                graph, dimensions, **params
-            )
+            embeddings = MLIntegration._spectral_embeddings(graph, dimensions, **params)
 
         elif method == "structural":
             embeddings = MLIntegration._structural_embeddings(
@@ -104,10 +100,12 @@ class MLIntegration:
                 "std": float(np.std(embedding_matrix)),
                 "min": float(np.min(embedding_matrix)),
                 "max": float(np.max(embedding_matrix)),
-                "sparsity": float(np.sum(embedding_matrix == 0) / embedding_matrix.size)
+                "sparsity": float(
+                    np.sum(embedding_matrix == 0) / embedding_matrix.size
+                ),
             },
             "parameters": params,
-            "execution_time_ms": (time.time() - start_time) * MILLISECONDS_PER_SECOND
+            "execution_time_ms": (time.time() - start_time) * MILLISECONDS_PER_SECOND,
         }
 
         # Sample embeddings for inspection
@@ -127,7 +125,7 @@ class MLIntegration:
         num_walks: int = DEFAULT_WALK_LENGTH,
         p: float = 1.0,
         q: float = 1.0,
-        **params
+        **params,
     ) -> Dict[Any, np.ndarray]:
         """Generate Node2Vec embeddings (simplified version)."""
         # Generate biased random walks
@@ -145,7 +143,9 @@ class MLIntegration:
 
         for walk in walks:
             for i, node in enumerate(walk):
-                for j in range(max(0, i - window_size), min(len(walk), i + window_size + 1)):
+                for j in range(
+                    max(0, i - window_size), min(len(walk), i + window_size + 1)
+                ):
                     if i != j:
                         co_occurrence[node][walk[j]] += 1
 
@@ -177,7 +177,7 @@ class MLIntegration:
         walk_length: int,
         num_walks: int,
         p: float,
-        q: float
+        q: float,
     ) -> List[List]:
         """Generate biased random walks for Node2Vec."""
         walks = []
@@ -232,7 +232,7 @@ class MLIntegration:
         dimensions: int,
         walk_length: int = DEFAULT_NUM_WALKS,
         num_walks: int = DEFAULT_WALK_LENGTH,
-        **params
+        **params,
     ) -> Dict[Any, np.ndarray]:
         """Generate DeepWalk embeddings (uniform random walks)."""
         # DeepWalk is Node2Vec with p=1, q=1
@@ -242,9 +242,7 @@ class MLIntegration:
 
     @staticmethod
     def _spectral_embeddings(
-        graph: Union[nx.Graph, nx.DiGraph],
-        dimensions: int,
-        **_params
+        graph: Union[nx.Graph, nx.DiGraph], dimensions: int, **_params
     ) -> Dict[Any, np.ndarray]:
         """Generate spectral embeddings using graph Laplacian."""
         # Get adjacency matrix
@@ -255,14 +253,16 @@ class MLIntegration:
         laplacian = degree_matrix - adj_matrix.toarray()
 
         # Normalize
-        degree_sqrt_inv = np.diag(1.0 / np.sqrt(np.maximum(degree_matrix.diagonal(), 1e-10)))
+        degree_sqrt_inv = np.diag(
+            1.0 / np.sqrt(np.maximum(degree_matrix.diagonal(), 1e-10))
+        )
         norm_laplacian = degree_sqrt_inv @ laplacian @ degree_sqrt_inv
 
         # Compute eigenvectors
         try:
             eigenvalues, eigenvectors = np.linalg.eigh(norm_laplacian)
             # Use smallest non-zero eigenvectors
-            embeddings = eigenvectors[:, 1:dimensions+1]
+            embeddings = eigenvectors[:, 1 : dimensions + 1]
         except Exception as e:
             # Fallback to random
             logger.debug(f"Eigenvalue decomposition failed: {e}")
@@ -273,9 +273,7 @@ class MLIntegration:
 
     @staticmethod
     def _structural_embeddings(
-        graph: Union[nx.Graph, nx.DiGraph],
-        dimensions: int,
-        **_params
+        graph: Union[nx.Graph, nx.DiGraph], dimensions: int, **_params
     ) -> Dict[Any, np.ndarray]:
         """Generate structural feature embeddings."""
         features = []
@@ -286,11 +284,13 @@ class MLIntegration:
 
             # Degree features
             if graph.is_directed():
-                node_features.extend([
-                    graph.in_degree(node),
-                    graph.out_degree(node),
-                    graph.in_degree(node) + graph.out_degree(node)
-                ])
+                node_features.extend(
+                    [
+                        graph.in_degree(node),
+                        graph.out_degree(node),
+                        graph.in_degree(node) + graph.out_degree(node),
+                    ]
+                )
             else:
                 node_features.append(graph.degree(node))
 
@@ -304,12 +304,14 @@ class MLIntegration:
             # Neighbor degrees
             neighbor_degrees = [graph.degree(n) for n in graph.neighbors(node)]
             if neighbor_degrees:
-                node_features.extend([
-                    np.mean(neighbor_degrees),
-                    np.std(neighbor_degrees),
-                    np.min(neighbor_degrees),
-                    np.max(neighbor_degrees)
-                ])
+                node_features.extend(
+                    [
+                        np.mean(neighbor_degrees),
+                        np.std(neighbor_degrees),
+                        np.min(neighbor_degrees),
+                        np.max(neighbor_degrees),
+                    ]
+                )
             else:
                 node_features.extend([0, 0, 0, 0])
 
@@ -359,7 +361,7 @@ class MLIntegration:
     def graph_features(
         graph: Union[nx.Graph, nx.DiGraph],
         feature_types: Optional[List[str]] = None,
-        **_params
+        **_params,
     ) -> Dict[str, Any]:
         """
         Extract features for machine learning from graph.
@@ -387,19 +389,25 @@ class MLIntegration:
                 "num_edges": graph.number_of_edges(),
                 "density": nx.density(graph),
                 "is_directed": graph.is_directed(),
-                "is_connected": nx.is_weakly_connected(graph) if graph.is_directed() else nx.is_connected(graph)
+                "is_connected": (
+                    nx.is_weakly_connected(graph)
+                    if graph.is_directed()
+                    else nx.is_connected(graph)
+                ),
             }
 
             # Degree statistics
             degrees = [d for n, d in graph.degree()]
             if degrees:
-                features["basic"].update({
-                    "degree_mean": np.mean(degrees),
-                    "degree_std": np.std(degrees),
-                    "degree_min": min(degrees),
-                    "degree_max": max(degrees),
-                    "degree_gini": MLIntegration._gini_coefficient(degrees)
-                })
+                features["basic"].update(
+                    {
+                        "degree_mean": np.mean(degrees),
+                        "degree_std": np.std(degrees),
+                        "degree_min": min(degrees),
+                        "degree_max": max(degrees),
+                        "degree_gini": MLIntegration._gini_coefficient(degrees),
+                    }
+                )
 
             # Clustering
             if not graph.is_directed():
@@ -408,12 +416,21 @@ class MLIntegration:
 
             # Components
             if graph.is_directed():
-                features["basic"]["num_sccs"] = nx.number_strongly_connected_components(graph)
-                features["basic"]["num_wccs"] = nx.number_weakly_connected_components(graph)
+                features["basic"]["num_sccs"] = nx.number_strongly_connected_components(
+                    graph
+                )
+                features["basic"]["num_wccs"] = nx.number_weakly_connected_components(
+                    graph
+                )
             else:
-                features["basic"]["num_components"] = nx.number_connected_components(graph)
+                features["basic"]["num_components"] = nx.number_connected_components(
+                    graph
+                )
 
-        if "spectral" in feature_types and graph.number_of_nodes() < MAX_NODES_FOR_SPECTRAL_FEATURES:
+        if (
+            "spectral" in feature_types
+            and graph.number_of_nodes() < MAX_NODES_FOR_SPECTRAL_FEATURES
+        ):
             # Spectral features
             adj_matrix = nx.adjacency_matrix(graph)
 
@@ -425,32 +442,58 @@ class MLIntegration:
 
                     features["spectral"] = {
                         "largest_eigenvalue": eigenvalues[0],
-                        "second_largest_eigenvalue": eigenvalues[1] if len(eigenvalues) > 1 else 0,
-                        "spectral_gap": eigenvalues[0] - eigenvalues[1] if len(eigenvalues) > 1 else 0,
+                        "second_largest_eigenvalue": (
+                            eigenvalues[1] if len(eigenvalues) > 1 else 0
+                        ),
+                        "spectral_gap": (
+                            eigenvalues[0] - eigenvalues[1]
+                            if len(eigenvalues) > 1
+                            else 0
+                        ),
                         "spectral_radius": max(abs(eigenvalues)),
-                        "algebraic_connectivity": eigenvalues[-2] if len(eigenvalues) > 1 else 0
+                        "algebraic_connectivity": (
+                            eigenvalues[-2] if len(eigenvalues) > 1 else 0
+                        ),
                     }
                 elif HAS_SCIPY_SPARSE:
                     # Use sparse methods for larger graphs
-                    eigenvalues, _ = eigs(adj_matrix.asfptype(), k=min(6, graph.number_of_nodes()-1))
+                    eigenvalues, _ = eigs(
+                        adj_matrix.asfptype(), k=min(6, graph.number_of_nodes() - 1)
+                    )
                     eigenvalues = sorted(eigenvalues.real, reverse=True)
 
                     features["spectral"] = {
                         "largest_eigenvalue": eigenvalues[0],
-                        "second_largest_eigenvalue": eigenvalues[1] if len(eigenvalues) > 1 else 0,
-                        "spectral_gap": eigenvalues[0] - eigenvalues[1] if len(eigenvalues) > 1 else 0
+                        "second_largest_eigenvalue": (
+                            eigenvalues[1] if len(eigenvalues) > 1 else 0
+                        ),
+                        "spectral_gap": (
+                            eigenvalues[0] - eigenvalues[1]
+                            if len(eigenvalues) > 1
+                            else 0
+                        ),
                     }
                 else:
-                    features["spectral"] = {"error": "scipy.sparse required for large graphs"}
+                    features["spectral"] = {
+                        "error": "scipy.sparse required for large graphs"
+                    }
             except Exception as e:
                 logger.debug(f"Failed to compute spectral features: {e}")
-                features["spectral"] = {"error": f"Could not compute spectral features: {e!s}"}
+                features["spectral"] = {
+                    "error": f"Could not compute spectral features: {e!s}"
+                }
 
-        if "graphlet" in feature_types and graph.number_of_nodes() < MAX_NODES_FOR_EXPENSIVE_COMPUTATION:
+        if (
+            "graphlet" in feature_types
+            and graph.number_of_nodes() < MAX_NODES_FOR_EXPENSIVE_COMPUTATION
+        ):
             # Graphlet features (small subgraph counts)
             features["graphlet"] = MLIntegration._graphlet_features(graph)
 
-        if "centrality" in feature_types and graph.number_of_nodes() < MAX_NODES_FOR_EXPENSIVE_COMPUTATION:
+        if (
+            "centrality" in feature_types
+            and graph.number_of_nodes() < MAX_NODES_FOR_EXPENSIVE_COMPUTATION
+        ):
             # Centrality statistics
             centrality_stats = {}
 
@@ -461,7 +504,7 @@ class MLIntegration:
                 "mean": np.mean(betweenness_values),
                 "std": np.std(betweenness_values),
                 "max": max(betweenness_values),
-                "gini": MLIntegration._gini_coefficient(betweenness_values)
+                "gini": MLIntegration._gini_coefficient(betweenness_values),
             }
 
             # PageRank (if directed)
@@ -473,7 +516,7 @@ class MLIntegration:
                         "mean": np.mean(pr_values),
                         "std": np.std(pr_values),
                         "max": max(pr_values),
-                        "gini": MLIntegration._gini_coefficient(pr_values)
+                        "gini": MLIntegration._gini_coefficient(pr_values),
                     }
                 except Exception as e:
                     logger.debug(f"Failed to compute PageRank: {e}")
@@ -496,7 +539,7 @@ class MLIntegration:
             "features": features,
             "feature_vector": feature_vector,
             "feature_names": feature_names,
-            "vector_dimension": len(feature_vector)
+            "vector_dimension": len(feature_vector),
         }
 
     @staticmethod
@@ -524,7 +567,7 @@ class MLIntegration:
             "4_cliques": 0,
             "4_cycles": 0,
             "4_paths": 0,
-            "4_stars": 0
+            "4_stars": 0,
         }
 
         # Count triangles
@@ -560,7 +603,7 @@ class MLIntegration:
         graph1: nx.Graph,
         graph2: nx.Graph,
         metrics: Optional[List[str]] = None,
-        **_params
+        **_params,
     ) -> Dict[str, Any]:
         """
         Calculate similarity between two graphs.
@@ -584,11 +627,15 @@ class MLIntegration:
         if "structural" in metrics:
             # Basic structural similarity
             structural_sim = {
-                "node_ratio": min(graph1.number_of_nodes(), graph2.number_of_nodes()) /
-                              max(graph1.number_of_nodes(), graph2.number_of_nodes()),
-                "edge_ratio": min(graph1.number_of_edges(), graph2.number_of_edges()) /
-                              max(graph1.number_of_edges(), graph2.number_of_edges()) if max(graph1.number_of_edges(), graph2.number_of_edges()) > 0 else 0,
-                "density_diff": abs(nx.density(graph1) - nx.density(graph2))
+                "node_ratio": min(graph1.number_of_nodes(), graph2.number_of_nodes())
+                / max(graph1.number_of_nodes(), graph2.number_of_nodes()),
+                "edge_ratio": (
+                    min(graph1.number_of_edges(), graph2.number_of_edges())
+                    / max(graph1.number_of_edges(), graph2.number_of_edges())
+                    if max(graph1.number_of_edges(), graph2.number_of_edges()) > 0
+                    else 0
+                ),
+                "density_diff": abs(nx.density(graph1) - nx.density(graph2)),
             }
 
             # Degree distribution similarity
@@ -612,12 +659,22 @@ class MLIntegration:
 
             results["structural"] = structural_sim
 
-        if "spectral" in metrics and max(graph1.number_of_nodes(), graph2.number_of_nodes()) < MAX_NODES_FOR_EXPENSIVE_COMPUTATION:
+        if (
+            "spectral" in metrics
+            and max(graph1.number_of_nodes(), graph2.number_of_nodes())
+            < MAX_NODES_FOR_EXPENSIVE_COMPUTATION
+        ):
             # Spectral similarity
             try:
                 # Compare eigenvalue distributions
-                eig1 = sorted(np.linalg.eigvalsh(nx.adjacency_matrix(graph1).toarray()), reverse=True)
-                eig2 = sorted(np.linalg.eigvalsh(nx.adjacency_matrix(graph2).toarray()), reverse=True)
+                eig1 = sorted(
+                    np.linalg.eigvalsh(nx.adjacency_matrix(graph1).toarray()),
+                    reverse=True,
+                )
+                eig2 = sorted(
+                    np.linalg.eigvalsh(nx.adjacency_matrix(graph2).toarray()),
+                    reverse=True,
+                )
 
                 # Truncate to same length
                 min_len = min(len(eig1), len(eig2))
@@ -625,15 +682,21 @@ class MLIntegration:
                 eig2 = eig2[:min_len]
 
                 # Spectral distance
-                spectral_distance = np.sqrt(sum((e1 - e2) ** 2 for e1, e2 in zip(eig1, eig2)))
+                spectral_distance = np.sqrt(
+                    sum((e1 - e2) ** 2 for e1, e2 in zip(eig1, eig2))
+                )
 
                 results["spectral"] = {
                     "spectral_distance": spectral_distance,
-                    "normalized_distance": spectral_distance / np.sqrt(min_len) if min_len > 0 else 0
+                    "normalized_distance": (
+                        spectral_distance / np.sqrt(min_len) if min_len > 0 else 0
+                    ),
                 }
             except Exception as e:
                 logger.debug(f"Failed to compute spectral similarity: {e}")
-                results["spectral"] = {"error": f"Could not compute spectral similarity: {e!s}"}
+                results["spectral"] = {
+                    "error": f"Could not compute spectral similarity: {e!s}"
+                }
 
         if "feature" in metrics:
             # Feature-based similarity
@@ -659,7 +722,7 @@ class MLIntegration:
 
             results["feature"] = {
                 "cosine_similarity": feature_similarity,
-                "euclidean_distance": np.linalg.norm(np.array(feat1) - np.array(feat2))
+                "euclidean_distance": np.linalg.norm(np.array(feat1) - np.array(feat2)),
             }
 
         return results
@@ -669,7 +732,7 @@ class MLIntegration:
         graph: Union[nx.Graph, nx.DiGraph],
         method: str = "statistical",
         contamination: float = 0.1,
-        **_params
+        **_params,
     ) -> Dict[str, Any]:
         """
         Detect anomalous nodes or edges in the graph.
@@ -713,10 +776,9 @@ class MLIntegration:
                 # Neighbor statistics
                 neighbor_degrees = [graph.degree(n) for n in graph.neighbors(node)]
                 if neighbor_degrees:
-                    features.extend([
-                        np.mean(neighbor_degrees),
-                        np.std(neighbor_degrees)
-                    ])
+                    features.extend(
+                        [np.mean(neighbor_degrees), np.std(neighbor_degrees)]
+                    )
                 else:
                     features.extend([0, 0])
 
@@ -749,7 +811,9 @@ class MLIntegration:
 
             except Exception as e:
                 # Fallback to Euclidean distance
-                logger.debug(f"Failed to compute Mahalanobis distance, using Euclidean: {e}")
+                logger.debug(
+                    f"Failed to compute Mahalanobis distance, using Euclidean: {e}"
+                )
                 anomaly_scores = {}
                 for i, node in enumerate(nodes):
                     score = np.linalg.norm(feature_matrix[i] - mean)
@@ -774,7 +838,9 @@ class MLIntegration:
                     ego_nodes = set(ego.nodes())
                     neighbor_nodes = set(neighbor_ego.nodes())
 
-                    jaccard = len(ego_nodes & neighbor_nodes) / len(ego_nodes | neighbor_nodes)
+                    jaccard = len(ego_nodes & neighbor_nodes) / len(
+                        ego_nodes | neighbor_nodes
+                    )
                     neighbor_similarities.append(jaccard)
 
                 # Anomaly score: inverse of average similarity
@@ -789,7 +855,9 @@ class MLIntegration:
                 return {"error": "Graph too large for spectral method"}
 
             # Use spectral embedding
-            embeddings = MLIntegration._spectral_embeddings(graph, dimensions=DEFAULT_WALK_LENGTH)
+            embeddings = MLIntegration._spectral_embeddings(
+                graph, dimensions=DEFAULT_WALK_LENGTH
+            )
 
             # Calculate distances from center
             embedding_matrix = np.array(list(embeddings.values()))
@@ -808,13 +876,11 @@ class MLIntegration:
 
         # Identify anomalies based on contamination rate
         threshold = np.percentile(
-            list(anomaly_scores.values()),
-            (1 - contamination) * 100
+            list(anomaly_scores.values()), (1 - contamination) * 100
         )
 
         anomalous_nodes = [
-            node for node, score in anomaly_scores.items()
-            if score > threshold
+            node for node, score in anomaly_scores.items() if score > threshold
         ]
 
         # Edge anomalies (for small graphs)
@@ -832,12 +898,12 @@ class MLIntegration:
 
             if edge_scores:
                 edge_threshold = np.percentile(
-                    list(edge_scores.values()),
-                    (1 - contamination) * 100
+                    list(edge_scores.values()), (1 - contamination) * 100
                 )
 
                 edge_anomalies = [
-                    edge for edge, score in edge_scores.items()
+                    edge
+                    for edge, score in edge_scores.items()
                     if score > edge_threshold
                 ]
 
@@ -850,15 +916,11 @@ class MLIntegration:
             "contamination_rate": contamination,
             "edge_anomalies": edge_anomalies,
             "num_anomalous_edges": len(edge_anomalies),
-            "execution_time_ms": (time.time() - start_time) * MILLISECONDS_PER_SECOND
+            "execution_time_ms": (time.time() - start_time) * MILLISECONDS_PER_SECOND,
         }
 
         # Top anomalies
-        sorted_nodes = sorted(
-            anomaly_scores.items(),
-            key=lambda x: x[1],
-            reverse=True
-        )
+        sorted_nodes = sorted(anomaly_scores.items(), key=lambda x: x[1], reverse=True)
         results["top_anomalies"] = sorted_nodes[:10]
 
         return results

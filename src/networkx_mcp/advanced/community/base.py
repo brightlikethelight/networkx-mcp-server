@@ -13,11 +13,13 @@ MIN_NODES_FOR_COMMUNITY_DETECTION = 2
 @dataclass
 class CommunityResult:
     """Result from community detection algorithm."""
+
     communities: List[Set[str]]
     modularity: float
     algorithm: str
     parameters: Dict[str, Any]
     metadata: Optional[Dict[str, Any]] = None
+
 
 class CommunityDetector(ABC):
     """Base class for community detection algorithms."""
@@ -39,6 +41,7 @@ class CommunityDetector(ABC):
             return False
         return True
 
+
 def validate_communities(communities: List[Set[str]], graph: nx.Graph) -> bool:
     """Validate that communities are valid for the graph."""
     all_nodes = set()
@@ -50,13 +53,20 @@ def validate_communities(communities: List[Set[str]], graph: nx.Graph) -> bool:
     # Check all nodes are covered
     return all_nodes == set(graph.nodes())
 
-def format_community_result(communities: List[Set[str]], algorithm: str, modularity: float) -> Dict[str, Any]:
+
+def format_community_result(
+    communities: List[Set[str]], algorithm: str, modularity: float
+) -> Dict[str, Any]:
     """Format community detection result for API response."""
     return {
         "algorithm": algorithm,
         "num_communities": len(communities),
         "communities": [list(community) for community in communities],
         "modularity": modularity,
-        "largest_community_size": max(len(c) for c in communities) if communities else 0,
-        "smallest_community_size": min(len(c) for c in communities) if communities else 0
+        "largest_community_size": (
+            max(len(c) for c in communities) if communities else 0
+        ),
+        "smallest_community_size": (
+            min(len(c) for c in communities) if communities else 0
+        ),
     }

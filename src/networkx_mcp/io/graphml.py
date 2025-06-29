@@ -32,13 +32,16 @@ class GraphMLReader(GraphReader):
             msg = f"Failed to read GraphML file {path}: {e}"
             raise RuntimeError(msg) from e
 
+
 class GraphMLWriter(GraphWriter):
     """Write graphs to GraphML format."""
 
     def __init__(self):
         super().__init__("graphml", ".graphml")
 
-    async def write(self, graph: nx.Graph, filepath: Union[str, Path], **options) -> bool:
+    async def write(
+        self, graph: nx.Graph, filepath: Union[str, Path], **options
+    ) -> bool:
         """Write graph to GraphML file."""
         path = validate_file_path(filepath, must_exist=False)
 
@@ -55,10 +58,12 @@ class GraphMLWriter(GraphWriter):
             msg = f"Failed to write GraphML file {path}: {e}"
             raise RuntimeError(msg) from e
 
+
 async def read_graphml(filepath: Union[str, Path]) -> nx.Graph:
     """Simple function interface for reading GraphML."""
     reader = GraphMLReader()
     return await reader.read(filepath)
+
 
 async def write_graphml(graph: nx.Graph, filepath: Union[str, Path]) -> bool:
     """Simple function interface for writing GraphML."""

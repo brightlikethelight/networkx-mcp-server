@@ -13,6 +13,7 @@ import psutil
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
+
 class TestLoadCapacity:
     """Test server capacity under various load conditions."""
 
@@ -27,16 +28,20 @@ class TestLoadCapacity:
             "memory_mb": process.memory_info().rss / 1024 / 1024,
             "cpu_percent": process.cpu_percent(),
             "threads": process.num_threads(),
-            "open_files": len(process.open_files()) if hasattr(process, "open_files") else 0
+            "open_files": (
+                len(process.open_files()) if hasattr(process, "open_files") else 0
+            ),
         }
 
-    async def simulate_realistic_user(self, user_id: int, operations: int, graph_manager):
+    async def simulate_realistic_user(
+        self, user_id: int, operations: int, graph_manager
+    ):
         """Simulate realistic user behavior with NetworkX operations."""
         user_stats = {
             "user_id": user_id,
             "operations_completed": 0,
             "errors": 0,
-            "total_time": 0
+            "total_time": 0,
         }
 
         try:
@@ -56,7 +61,9 @@ class TestLoadCapacity:
                         raise Exception(msg)
 
                     # 2. Build a social network
-                    nodes = [f"person_{i}" for i in range(20)]  # Smaller for load testing
+                    nodes = [
+                        f"person_{i}" for i in range(20)
+                    ]  # Smaller for load testing
                     graph_manager.add_nodes_from(graph_id, nodes)
 
                     # 3. Add random edges (social connections)
@@ -160,11 +167,11 @@ class TestLoadCapacity:
                         "memory_increase_mb": memory_increase,
                         "final_memory_mb": end_stats["memory_mb"],
                         "cpu_percent": end_stats["cpu_percent"],
-                        "success": successful_users == num_users and total_errors < num_users * 0.1
+                        "success": successful_users == num_users
+                        and total_errors < num_users * 0.1,
                     }
 
                     self.test_results.append(test_result)
-
 
                     if not test_result["success"]:
                         break
@@ -238,7 +245,6 @@ class TestLoadCapacity:
                 end_memory = self.get_system_stats()["memory_mb"]
                 memory_used = end_memory - start_memory
 
-
                 # Clean up
                 for i in range(1000):
                     graph_id = f"small_graph_{i}"
@@ -279,7 +285,7 @@ class TestLoadCapacity:
                 "add_nodes": [],
                 "add_edges": [],
                 "get_info": [],
-                "delete_graph": []
+                "delete_graph": [],
             }
 
             # Run multiple iterations to get average latencies
@@ -321,7 +327,6 @@ class TestLoadCapacity:
                 p95_latency = sorted(times)[int(len(times) * 0.95)]
                 max(times)
 
-
                 # Check if P95 latency is acceptable (< 100ms for basic operations)
                 if p95_latency > 100:
                     all_good = False
@@ -339,7 +344,6 @@ class TestLoadCapacity:
         if not self.test_results:
             return
 
-
         for result in self.test_results:
             "✅ PASS" if result["success"] else "❌ FAIL"
 
@@ -348,7 +352,6 @@ class TestLoadCapacity:
         for result in self.test_results:
             if result["success"]:
                 max_users = max(max_users, result["num_users"])
-
 
         if max_users >= 20:
             pass
@@ -359,6 +362,7 @@ class TestLoadCapacity:
         else:
             pass
 
+
 async def main():
     """Run comprehensive load testing."""
 
@@ -367,7 +371,7 @@ async def main():
     tests = [
         ("Concurrent user capacity", load_tester.test_concurrent_users()),
         ("Memory limit enforcement", load_tester.test_memory_limits()),
-        ("Operation latency", load_tester.test_latency_performance())
+        ("Operation latency", load_tester.test_latency_performance()),
     ]
 
     results = []
@@ -388,13 +392,13 @@ async def main():
         if result:
             passed += 1
 
-
     if passed == len(results):
         pass
     else:
         pass
 
     return passed == len(results)
+
 
 if __name__ == "__main__":
     success = asyncio.run(main())

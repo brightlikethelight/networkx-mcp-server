@@ -18,8 +18,7 @@ class BipartiteAnalysis:
 
     @staticmethod
     def is_bipartite(
-        graph: nx.Graph,
-        return_sets: bool = True
+        graph: nx.Graph, return_sets: bool = True
     ) -> Union[bool, Tuple[bool, Optional[Tuple[Set, Set]]]]:
         """
         Check if graph is bipartite and optionally return the bipartition.
@@ -60,7 +59,7 @@ class BipartiteAnalysis:
         graph: nx.Graph,
         nodes: Set[Any],
         weight_function: Optional[str] = "overlap",
-        **_params
+        **_params,
     ) -> Tuple[nx.Graph, Dict[str, Any]]:
         """
         Create weighted or unweighted projection onto one node set.
@@ -151,17 +150,19 @@ class BipartiteAnalysis:
             "bottom_nodes": len(bottom_nodes),
             "top_nodes": len(top_nodes),
             "weight_function": weight_function,
-            "execution_time_ms": execution_time
+            "execution_time_ms": execution_time,
         }
 
         if edge_weights:
             weights = list(edge_weights.values())
-            metadata.update({
-                "min_weight": min(weights),
-                "max_weight": max(weights),
-                "mean_weight": np.mean(weights),
-                "std_weight": np.std(weights)
-            })
+            metadata.update(
+                {
+                    "min_weight": min(weights),
+                    "max_weight": max(weights),
+                    "mean_weight": np.mean(weights),
+                    "std_weight": np.std(weights),
+                }
+            )
 
         # Density comparison
         max_possible_edges = len(nodes) * (len(nodes) - 1) // 2
@@ -173,10 +174,7 @@ class BipartiteAnalysis:
 
     @staticmethod
     def bipartite_clustering(
-        graph: nx.Graph,
-        nodes: Optional[Set[Any]] = None,
-        mode: str = "dot",
-        **_params
+        graph: nx.Graph, nodes: Optional[Set[Any]] = None, mode: str = "dot", **_params
     ) -> Dict[str, Any]:
         """
         Calculate bipartite clustering coefficients.
@@ -223,7 +221,7 @@ class BipartiteAnalysis:
                     "min_clustering": min(values) if values else 0,
                     "max_clustering": max(values) if values else 0,
                     "std_clustering": np.std(values) if values else 0,
-                    "num_nodes": len(node_set)
+                    "num_nodes": len(node_set),
                 }
 
             # Overall statistics
@@ -235,7 +233,7 @@ class BipartiteAnalysis:
                 "by_set": results,
                 "overall_average": np.mean(all_values) if all_values else 0,
                 "mode": mode,
-                "bipartite_sets": [list(s) for s in sets]
+                "bipartite_sets": [list(s) for s in sets],
             }
 
         else:
@@ -259,7 +257,7 @@ class BipartiteAnalysis:
                 "max_clustering": max(values) if values else 0,
                 "std_clustering": np.std(values) if values else 0,
                 "num_nodes": len(nodes),
-                "mode": mode
+                "mode": mode,
             }
 
     @staticmethod
@@ -267,7 +265,7 @@ class BipartiteAnalysis:
         graph: nx.Graph,
         centrality_type: str = "degree",
         normalized: bool = True,
-        **_params
+        **_params,
     ) -> Dict[str, Any]:
         """
         Calculate adapted centrality measures for bipartite graphs.
@@ -308,14 +306,14 @@ class BipartiteAnalysis:
                     "centrality": bottom_deg_centrality,
                     "average": np.mean(list(bottom_deg_centrality.values())),
                     "max": max(bottom_deg_centrality.values()),
-                    "node_count": len(bottom_nodes)
+                    "node_count": len(bottom_nodes),
                 },
                 "top_nodes": {
                     "centrality": top_deg_centrality,
                     "average": np.mean(list(top_deg_centrality.values())),
                     "max": max(top_deg_centrality.values()),
-                    "node_count": len(top_nodes)
-                }
+                    "node_count": len(top_nodes),
+                },
             }
 
         elif centrality_type == "betweenness":
@@ -336,7 +334,7 @@ class BipartiteAnalysis:
                     "average": np.mean(values) if values else 0,
                     "max": max(values) if values else 0,
                     "min": min(values) if values else 0,
-                    "node_count": len(node_set)
+                    "node_count": len(node_set),
                 }
 
         elif centrality_type == "closeness":
@@ -346,7 +344,9 @@ class BipartiteAnalysis:
                 centrality = nx.harmonic_centrality(graph)
                 centrality_name = "harmonic_centrality"
             else:
-                centrality = bipartite.closeness_centrality(graph, sets[1], normalized=normalized)
+                centrality = bipartite.closeness_centrality(
+                    graph, sets[1], normalized=normalized
+                )
                 centrality_name = "closeness_centrality"
 
             # Separate by sets
@@ -359,7 +359,7 @@ class BipartiteAnalysis:
                     "average": np.mean(values) if values else 0,
                     "max": max(values) if values else 0,
                     "min": min(values) if values else 0,
-                    "node_count": len(node_set)
+                    "node_count": len(node_set),
                 }
 
         else:
@@ -370,7 +370,7 @@ class BipartiteAnalysis:
             "centrality_type": centrality_type,
             "normalized": normalized,
             "results": results,
-            "bipartite_sets": [list(s) for s in sets]
+            "bipartite_sets": [list(s) for s in sets],
         }
 
     @staticmethod
@@ -378,7 +378,7 @@ class BipartiteAnalysis:
         graph: nx.Graph,
         weight: Optional[str] = None,
         top_nodes: Optional[Set[Any]] = None,
-        **_params
+        **_params,
     ) -> Dict[str, Any]:
         """
         Find maximum matching using Hungarian algorithm.
@@ -436,8 +436,7 @@ class BipartiteAnalysis:
 
             # Calculate total weight
             matching_weight = sum(
-                weights.get((u, v), weights.get((v, u), 0))
-                for u, v in matching_edges
+                weights.get((u, v), weights.get((v, u), 0)) for u, v in matching_edges
             )
 
         execution_time = (time.time() - start_time) * 1000
@@ -468,14 +467,12 @@ class BipartiteAnalysis:
             "set1_matched": set1_matched,
             "coverage": len(matched_nodes) / graph.number_of_nodes(),
             "execution_time_ms": execution_time,
-            "weighted": weight is not None
+            "weighted": weight is not None,
         }
 
     @staticmethod
     def bipartite_community_detection(
-        graph: nx.Graph,
-        method: str = "label_propagation",
-        **_params
+        graph: nx.Graph, method: str = "label_propagation", **_params
     ) -> Dict[str, Any]:
         """
         Detect communities in bipartite graphs using specialized algorithms.
@@ -530,7 +527,9 @@ class BipartiteAnalysis:
 
         elif method == "barber":
             # Barber's bipartite modularity optimization
-            communities = BipartiteAnalysis._barber_modularity(graph, sets[0], sets[1], **_params)
+            communities = BipartiteAnalysis._barber_modularity(
+                graph, sets[0], sets[1], **_params
+            )
 
         else:
             msg = f"Unknown method: {method}"
@@ -551,12 +550,15 @@ class BipartiteAnalysis:
         for comm in communities:
             set0_nodes = len(comm & sets[0])
             set1_nodes = len(comm & sets[1])
-            spanning_stats.append({
-                "total": len(comm),
-                "set0": set0_nodes,
-                "set1": set1_nodes,
-                "balance": min(set0_nodes, set1_nodes) / max(set0_nodes, set1_nodes, 1)
-            })
+            spanning_stats.append(
+                {
+                    "total": len(comm),
+                    "set0": set0_nodes,
+                    "set1": set1_nodes,
+                    "balance": min(set0_nodes, set1_nodes)
+                    / max(set0_nodes, set1_nodes, 1),
+                }
+            )
 
         return {
             "communities": [list(c) for c in communities],
@@ -565,16 +567,12 @@ class BipartiteAnalysis:
             "community_sizes": comm_sizes,
             "spanning_statistics": spanning_stats,
             "method": method,
-            "execution_time_ms": execution_time
+            "execution_time_ms": execution_time,
         }
 
     @staticmethod
     def _bipartite_label_propagation(
-        graph: nx.Graph,
-        set0: Set,
-        set1: Set,
-        max_iterations: int = 100,
-        **_params
+        graph: nx.Graph, set0: Set, set1: Set, max_iterations: int = 100, **_params
     ) -> List[Set]:
         """Bipartite-aware label propagation."""
         # Initialize each node with its own label
@@ -622,11 +620,7 @@ class BipartiteAnalysis:
 
     @staticmethod
     def _barber_modularity(
-        graph: nx.Graph,
-        set0: Set,
-        set1: Set,
-        _resolution: float = 1.0,
-        **_params
+        graph: nx.Graph, set0: Set, set1: Set, _resolution: float = 1.0, **_params
     ) -> List[Set]:
         """Barber's bipartite modularity optimization (simplified)."""
         # This is a simplified greedy approach
@@ -654,7 +648,9 @@ class BipartiteAnalysis:
                     )
 
                     # New modularity
-                    new_communities = [c for k, c in enumerate(communities) if k not in (i, j)]
+                    new_communities = [
+                        c for k, c in enumerate(communities) if k not in (i, j)
+                    ]
                     new_communities.append(merged)
                     new_mod = BipartiteAnalysis._calculate_bipartite_modularity(
                         graph, new_communities, set0, set1
@@ -678,10 +674,7 @@ class BipartiteAnalysis:
 
     @staticmethod
     def _calculate_bipartite_modularity(
-        graph: nx.Graph,
-        communities: List[Set],
-        set0: Set,
-        set1: Set
+        graph: nx.Graph, communities: List[Set], set0: Set, set1: Set
     ) -> float:
         """Calculate Barber's bipartite modularity."""
         m = graph.number_of_edges()
@@ -711,6 +704,6 @@ class BipartiteAnalysis:
                 for v in comm1:
                     expected_edges += degrees0[u] * degrees1[v] / (2 * m)
 
-            modularity += (actual_edges - expected_edges)
+            modularity += actual_edges - expected_edges
 
         return modularity / m

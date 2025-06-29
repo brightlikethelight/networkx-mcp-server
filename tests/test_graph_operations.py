@@ -31,7 +31,9 @@ class TestGraphManager:
         assert isinstance(self.manager.graphs["test2"], nx.DiGraph)
 
         # Test with attributes
-        result = self.manager.create_graph("test3", "Graph", name="TestGraph", weight=1.0)
+        result = self.manager.create_graph(
+            "test3", "Graph", name="TestGraph", weight=1.0
+        )
         graph = self.manager.get_graph("test3")
         assert graph.graph["name"] == "TestGraph"
         assert graph.graph["weight"] == 1.0
@@ -141,10 +143,7 @@ class TestGraphManager:
         assert result["total_edges"] == 3
 
         # Add edges with attributes
-        edges_with_attrs = [
-            ("A", "C", {"weight": 1.5}),
-            ("B", "D", {"weight": 2.0})
-        ]
+        edges_with_attrs = [("A", "C", {"weight": 1.5}), ("B", "D", {"weight": 2.0})]
         result = self.manager.add_edges_from("test", edges_with_attrs)
         assert result["total_edges"] == 5
 
@@ -190,9 +189,9 @@ class TestGraphManager:
         """Test getting graph information."""
         self.manager.create_graph("test", "DiGraph")
         self.manager.add_nodes_from("test", ["A", "B", "C", "D"])
-        self.manager.add_edges_from("test", [
-            ("A", "B"), ("B", "C"), ("C", "D"), ("D", "A")
-        ])
+        self.manager.add_edges_from(
+            "test", [("A", "B"), ("B", "C"), ("C", "D"), ("D", "A")]
+        )
 
         info = self.manager.get_graph_info("test")
         assert info["graph_id"] == "test"
@@ -207,9 +206,7 @@ class TestGraphManager:
         """Test getting node neighbors."""
         self.manager.create_graph("test", "Graph")
         self.manager.add_nodes_from("test", ["A", "B", "C", "D"])
-        self.manager.add_edges_from("test", [
-            ("A", "B"), ("A", "C"), ("B", "D")
-        ])
+        self.manager.add_edges_from("test", [("A", "B"), ("A", "C"), ("B", "D")])
 
         neighbors = self.manager.get_neighbors("test", "A")
         assert set(neighbors) == {"B", "C"}
@@ -238,8 +235,7 @@ class TestGraphManager:
 
         # Set node attributes
         result = self.manager.set_node_attributes(
-            "test",
-            {"A": {"color": "green", "size": 10}, "B": {"size": 20}}
+            "test", {"A": {"color": "green", "size": 10}, "B": {"size": 20}}
         )
         assert result["nodes_updated"] == 2
 
@@ -267,8 +263,7 @@ class TestGraphManager:
 
         # Set edge attributes
         result = self.manager.set_edge_attributes(
-            "test",
-            {("A", "B"): {"weight": 3.0}, ("B", "C"): {"color": "green"}}
+            "test", {("A", "B"): {"weight": 3.0}, ("B", "C"): {"color": "green"}}
         )
         assert result["edges_updated"] == 2
 
@@ -280,9 +275,9 @@ class TestGraphManager:
         """Test subgraph creation."""
         self.manager.create_graph("test", "Graph")
         self.manager.add_nodes_from("test", ["A", "B", "C", "D", "E"])
-        self.manager.add_edges_from("test", [
-            ("A", "B"), ("B", "C"), ("C", "D"), ("D", "E"), ("E", "A")
-        ])
+        self.manager.add_edges_from(
+            "test", [("A", "B"), ("B", "C"), ("C", "D"), ("D", "E"), ("E", "A")]
+        )
 
         # Create subgraph copy
         result = self.manager.subgraph("test", ["A", "B", "C"], create_copy=True)
@@ -351,17 +346,11 @@ class TestPerformance:
         self.manager.create_graph("memory_test", "Graph")
 
         # Add nodes with attributes
-        nodes_with_attrs = [
-            (i, {"data": "x" * 100, "value": i})
-            for i in range(100)
-        ]
+        nodes_with_attrs = [(i, {"data": "x" * 100, "value": i}) for i in range(100)]
         self.manager.add_nodes_from("memory_test", nodes_with_attrs)
 
         # Add edges with attributes
-        edges_with_attrs = [
-            (i, (i + 1) % 100, {"weight": i * 0.1})
-            for i in range(100)
-        ]
+        edges_with_attrs = [(i, (i + 1) % 100, {"weight": i * 0.1}) for i in range(100)]
         self.manager.add_edges_from("memory_test", edges_with_attrs)
 
         info = self.manager.get_graph_info("memory_test")
@@ -400,12 +389,10 @@ class TestEdgeCases:
 
         # Add self-loops
         self.manager.add_nodes_from("loops", ["A", "B", "C"])
-        self.manager.add_edges_from("loops", [
-            ("A", "A"),  # Self-loop
-            ("A", "B"),
-            ("B", "B"),  # Self-loop
-            ("B", "C")
-        ])
+        self.manager.add_edges_from(
+            "loops",
+            [("A", "A"), ("A", "B"), ("B", "B"), ("B", "C")],  # Self-loop  # Self-loop
+        )
 
         graph = self.manager.get_graph("loops")
         assert graph.number_of_edges() == 4
@@ -418,12 +405,15 @@ class TestEdgeCases:
 
         # Add multiple edges between same nodes
         self.manager.add_nodes_from("multi", ["X", "Y", "Z"])
-        self.manager.add_edges_from("multi", [
-            ("X", "Y", {"weight": 1}),
-            ("X", "Y", {"weight": 2}),
-            ("X", "Y", {"weight": 3}),
-            ("Y", "Z", {"weight": 4})
-        ])
+        self.manager.add_edges_from(
+            "multi",
+            [
+                ("X", "Y", {"weight": 1}),
+                ("X", "Y", {"weight": 2}),
+                ("X", "Y", {"weight": 3}),
+                ("Y", "Z", {"weight": 4}),
+            ],
+        )
 
         graph = self.manager.get_graph("multi")
         assert graph.number_of_edges() == 4
@@ -434,12 +424,14 @@ class TestEdgeCases:
         self.manager.create_graph("attrs", "Graph")
 
         # Add nodes with various attribute types
-        self.manager.add_node("attrs", "N1",
+        self.manager.add_node(
+            "attrs",
+            "N1",
             string_attr="test",
             int_attr=42,
             float_attr=3.14,
             list_attr=[1, 2, 3],
-            dict_attr={"nested": "value"}
+            dict_attr={"nested": "value"},
         )
 
         attrs = self.manager.get_node_attributes("attrs", "N1")
@@ -451,8 +443,7 @@ class TestEdgeCases:
 
         # Update attributes
         self.manager.set_node_attributes(
-            "attrs",
-            {"N1": {"new_attr": "new_value", "int_attr": 100}}
+            "attrs", {"N1": {"new_attr": "new_value", "int_attr": 100}}
         )
 
         attrs = self.manager.get_node_attributes("attrs", "N1")
@@ -491,25 +482,23 @@ class TestValidation:
         """Test file format validation."""
         # Create a temporary file for testing
         import tempfile
+
         with tempfile.NamedTemporaryFile(suffix=".graphml", delete=False) as f:
             f.write(b"test")
             temp_path = f.name
 
         try:
             # Valid file
-            valid, error = GraphValidator.validate_file_format(
-                temp_path, ["graphml"]
-            )
+            valid, error = GraphValidator.validate_file_format(temp_path, ["graphml"])
             assert valid is True
 
             # Wrong format
-            valid, error = GraphValidator.validate_file_format(
-                temp_path, ["json"]
-            )
+            valid, error = GraphValidator.validate_file_format(temp_path, ["json"])
             assert valid is False
 
         finally:
             import os
+
             os.unlink(temp_path)
 
     def test_graph_data_validation(self):
@@ -517,16 +506,14 @@ class TestValidation:
         # Valid data
         valid_data = {
             "nodes": [{"id": "A"}, {"id": "B"}],
-            "edges": [{"source": "A", "target": "B"}]
+            "edges": [{"source": "A", "target": "B"}],
         }
         valid, errors = GraphValidator.validate_graph_data(valid_data)
         assert valid is True
         assert len(errors) == 0
 
         # Invalid data - missing edge target
-        invalid_data = {
-            "edges": [{"source": "A"}]  # Missing target
-        }
+        invalid_data = {"edges": [{"source": "A"}]}  # Missing target
         valid, errors = GraphValidator.validate_graph_data(invalid_data)
         assert valid is False
         assert len(errors) > 0

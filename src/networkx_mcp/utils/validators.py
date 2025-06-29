@@ -35,10 +35,9 @@ class GraphValidator:
             return False
 
         # Validate source and target nodes
-        return (
-            GraphValidator.validate_node_id(edge[0]) and
-            GraphValidator.validate_node_id(edge[1])
-        )
+        return GraphValidator.validate_node_id(
+            edge[0]
+        ) and GraphValidator.validate_node_id(edge[1])
 
     @staticmethod
     def validate_attributes(attributes: Dict[str, Any]) -> bool:
@@ -74,9 +73,7 @@ class GraphValidator:
 
     @staticmethod
     def validate_path_exists(
-        graph: nx.Graph,
-        source: Union[str, int],
-        target: Union[str, int]
+        graph: nx.Graph, source: Union[str, int], target: Union[str, int]
     ) -> bool:
         """Validate if path exists between two nodes."""
         if source not in graph or target not in graph:
@@ -85,12 +82,14 @@ class GraphValidator:
         return nx.has_path(graph, source, target)
 
     @staticmethod
-    def validate_graph_connectivity(graph: nx.Graph, require_connected: bool = False) -> Dict[str, Any]:
+    def validate_graph_connectivity(
+        graph: nx.Graph, require_connected: bool = False
+    ) -> Dict[str, Any]:
         """Validate graph connectivity properties."""
         result = {
             "valid": True,
             "num_nodes": graph.number_of_nodes(),
-            "num_edges": graph.number_of_edges()
+            "num_edges": graph.number_of_edges(),
         }
 
         if graph.number_of_nodes() == 0:
@@ -116,9 +115,7 @@ class GraphValidator:
 
     @staticmethod
     def validate_algorithm_input(
-        algorithm: str,
-        graph: nx.Graph,
-        params: Dict[str, Any]
+        algorithm: str, graph: nx.Graph, params: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Validate inputs for specific algorithms."""
         result = {"valid": True, "errors": []}
@@ -128,16 +125,22 @@ class GraphValidator:
             if "source" in params:
                 if params["source"] not in graph:
                     result["valid"] = False
-                    result["errors"].append(f"Source node '{params['source']}' not in graph")
+                    result["errors"].append(
+                        f"Source node '{params['source']}' not in graph"
+                    )
 
             if "target" in params:
                 if params["target"] not in graph:
                     result["valid"] = False
-                    result["errors"].append(f"Target node '{params['target']}' not in graph")
+                    result["errors"].append(
+                        f"Target node '{params['target']}' not in graph"
+                    )
 
             if "weight" in params:
                 if not GraphValidator.validate_weight(graph, params["weight"]):
-                    result["errors"].append(f"Weight attribute '{params['weight']}' not found in edges")
+                    result["errors"].append(
+                        f"Weight attribute '{params['weight']}' not found in edges"
+                    )
 
         # Flow algorithms
         elif algorithm in ["maximum_flow", "minimum_cut"]:
@@ -148,15 +151,21 @@ class GraphValidator:
             for node_param in ["source", "sink"]:
                 if node_param in params and params[node_param] not in graph:
                     result["valid"] = False
-                    result["errors"].append(f"{node_param.capitalize()} node '{params[node_param]}' not in graph")
+                    result["errors"].append(
+                        f"{node_param.capitalize()} node '{params[node_param]}' not in graph"
+                    )
 
         # Spanning tree algorithms
         elif algorithm in ["minimum_spanning_tree", "maximum_spanning_tree"]:
             if graph.is_directed():
                 result["valid"] = False
-                result["errors"].append("Spanning tree algorithms require undirected graphs")
+                result["errors"].append(
+                    "Spanning tree algorithms require undirected graphs"
+                )
 
-            connectivity = GraphValidator.validate_graph_connectivity(graph, require_connected=True)
+            connectivity = GraphValidator.validate_graph_connectivity(
+                graph, require_connected=True
+            )
             if not connectivity["valid"]:
                 result["valid"] = False
                 result["errors"].append(connectivity["message"])
@@ -164,7 +173,9 @@ class GraphValidator:
         # Coloring algorithms
         elif algorithm == "graph_coloring":
             if graph.is_directed():
-                result["errors"].append("Graph coloring typically applied to undirected graphs")
+                result["errors"].append(
+                    "Graph coloring typically applied to undirected graphs"
+                )
 
         return result
 
@@ -172,8 +183,14 @@ class GraphValidator:
     def validate_centrality_measure(measure: str) -> bool:
         """Validate centrality measure name."""
         valid_measures = {
-            "degree", "betweenness", "closeness", "eigenvector",
-            "pagerank", "katz", "hits", "harmonic"
+            "degree",
+            "betweenness",
+            "closeness",
+            "eigenvector",
+            "pagerank",
+            "katz",
+            "hits",
+            "harmonic",
         }
         return measure in valid_measures
 
@@ -182,13 +199,26 @@ class GraphValidator:
         """Validate file format for import/export."""
         if operation == "export":
             valid_formats = {
-                "json", "graphml", "gexf", "edgelist", "adjacency",
-                "pickle", "dot", "pajek", "yaml"
+                "json",
+                "graphml",
+                "gexf",
+                "edgelist",
+                "adjacency",
+                "pickle",
+                "dot",
+                "pajek",
+                "yaml",
             }
         else:  # import
             valid_formats = {
-                "json", "graphml", "gexf", "edgelist", "adjacency",
-                "pickle", "pajek", "yaml"
+                "json",
+                "graphml",
+                "gexf",
+                "edgelist",
+                "adjacency",
+                "pickle",
+                "pajek",
+                "yaml",
             }
 
         return file_format.lower() in valid_formats
@@ -197,9 +227,15 @@ class GraphValidator:
     def validate_layout_algorithm(algorithm: str) -> bool:
         """Validate layout algorithm name."""
         valid_algorithms = {
-            "spring", "circular", "random", "shell", "spectral",
-            "kamada_kawai", "planar", "fruchterman_reingold",
-            "bipartite"
+            "spring",
+            "circular",
+            "random",
+            "shell",
+            "spectral",
+            "kamada_kawai",
+            "planar",
+            "fruchterman_reingold",
+            "bipartite",
         }
         return algorithm in valid_algorithms
 
@@ -230,7 +266,7 @@ class GraphValidator:
                     if "source" in edge and "target" in edge:
                         edge_data = {
                             "source": str(edge["source"]),
-                            "target": str(edge["target"])
+                            "target": str(edge["target"]),
                         }
                         # Add other attributes
                         for key, value in edge.items():
@@ -238,10 +274,9 @@ class GraphValidator:
                                 edge_data[key] = value
                         sanitized["edges"].append(edge_data)
                 elif isinstance(edge, (tuple, list)) and len(edge) >= 2:
-                    sanitized["edges"].append({
-                        "source": str(edge[0]),
-                        "target": str(edge[1])
-                    })
+                    sanitized["edges"].append(
+                        {"source": str(edge[0]), "target": str(edge[1])}
+                    )
 
         # Copy graph attributes
         if "graph" in data and isinstance(data["graph"], dict):
@@ -271,7 +306,10 @@ class GraphValidator:
 
         # Character constraints - alphanumeric, underscores, hyphens
         if not re.match(r"^[a-zA-Z0-9_-]+$", graph_id):
-            return False, "Graph ID must contain only alphanumeric characters, underscores, and hyphens"
+            return (
+                False,
+                "Graph ID must contain only alphanumeric characters, underscores, and hyphens",
+            )
 
         # Reserved names
         reserved_names = {"graph", "graphs", "list", "all", "none", "null", "undefined"}
@@ -282,8 +320,7 @@ class GraphValidator:
 
     @staticmethod
     def validate_file_path_format(
-        filepath: Union[str, Path],
-        expected_formats: Optional[List[str]] = None
+        filepath: Union[str, Path], expected_formats: Optional[List[str]] = None
     ) -> Tuple[bool, Optional[str]]:
         """Validate file format based on extension and expected formats.
 
@@ -315,7 +352,9 @@ class GraphValidator:
 
             # Warn for large files
             if size > 500 * 1024 * 1024:  # 500MB
-                logger.warning(f"Large file detected ({size / 1024 / 1024:.1f}MB): {filepath}")
+                logger.warning(
+                    f"Large file detected ({size / 1024 / 1024:.1f}MB): {filepath}"
+                )
 
             # Validate format if expected
             if expected_formats:
@@ -341,12 +380,15 @@ class GraphValidator:
                     "net": "pajek",
                     "pajek": "pajek",
                     "dot": "dot",
-                    "gv": "dot"
+                    "gv": "dot",
                 }
 
                 detected_format = ext_to_format.get(ext)
                 if detected_format not in expected_formats:
-                    return False, f"Unexpected file format. Expected {expected_formats}, got '{ext}'"
+                    return (
+                        False,
+                        f"Unexpected file format. Expected {expected_formats}, got '{ext}'",
+                    )
 
             return True, None
 
@@ -395,7 +437,9 @@ class GraphValidator:
                             errors.append(f"Edge at index {i} missing 'target' field")
                     elif isinstance(edge, (list, tuple)):
                         if len(edge) < 2:
-                            errors.append(f"Edge at index {i} must have at least 2 elements")
+                            errors.append(
+                                f"Edge at index {i} must have at least 2 elements"
+                            )
                     else:
                         errors.append(f"Invalid edge format at index {i}")
 
@@ -425,9 +469,7 @@ class GraphValidator:
 
     @staticmethod
     def validate_import_data(
-        format: str,
-        data: Optional[Any] = None,
-        path: Optional[Union[str, Path]] = None
+        format: str, data: Optional[Any] = None, path: Optional[Union[str, Path]] = None
     ) -> Tuple[bool, Optional[str]]:
         """Validate import data based on format.
 

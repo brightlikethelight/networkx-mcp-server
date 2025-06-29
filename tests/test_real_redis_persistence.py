@@ -8,6 +8,7 @@ from pathlib import Path
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
+
 def test_real_redis_persistence():
     """Test that data actually survives across 'restarts' using Redis."""
     print("🚀 TESTING REAL REDIS PERSISTENCE")
@@ -33,7 +34,7 @@ def test_real_redis_persistence():
             return False
 
         # Verify we're using Redis
-        if not hasattr(storage, '_redis_available') or not storage._redis_available:
+        if not hasattr(storage, "_redis_available") or not storage._redis_available:
             print("❌ Not using Redis backend!")
             return False
 
@@ -50,7 +51,7 @@ def test_real_redis_persistence():
             ("knowledge_graph", "MultiDiGraph", 30, 45),
             ("simple_graph", "Graph", 20, 25),
             ("transport_network", "MultiGraph", 40, 60),
-            ("workflow", "DiGraph", 15, 20)
+            ("workflow", "DiGraph", 15, 20),
         ]
 
         for graph_id, graph_type, num_nodes, num_edges in graph_configs:
@@ -66,11 +67,16 @@ def test_real_redis_persistence():
             nodes = []
             for i in range(num_nodes):
                 node_id = f"{graph_id}_node_{i}"
-                nodes.append((node_id, {
-                    "type": "test_node",
-                    "value": i * 2,
-                    "category": "A" if i % 2 == 0 else "B"
-                }))
+                nodes.append(
+                    (
+                        node_id,
+                        {
+                            "type": "test_node",
+                            "value": i * 2,
+                            "category": "A" if i % 2 == 0 else "B",
+                        },
+                    )
+                )
 
             graph_manager.add_nodes_from(graph_id, nodes)
 
@@ -79,10 +85,7 @@ def test_real_redis_persistence():
             for i in range(min(num_edges, num_nodes - 1)):
                 src = f"{graph_id}_node_{i}"
                 dst = f"{graph_id}_node_{(i + 1) % num_nodes}"
-                edges.append((src, dst, {
-                    "weight": i + 1,
-                    "type": "test_edge"
-                }))
+                edges.append((src, dst, {"weight": i + 1, "type": "test_edge"}))
 
             if edges:
                 graph_manager.add_edges_from(graph_id, edges)
@@ -94,10 +97,12 @@ def test_real_redis_persistence():
                 "nodes": info["num_nodes"],
                 "edges": info["num_edges"],
                 "node_sample": f"{graph_id}_node_0",
-                "expected_attrs": nodes[0][1] if nodes else {}
+                "expected_attrs": nodes[0][1] if nodes else {},
             }
 
-            print(f"    ✅ {graph_id}: {info['num_nodes']} nodes, {info['num_edges']} edges")
+            print(
+                f"    ✅ {graph_id}: {info['num_nodes']} nodes, {info['num_edges']} edges"
+            )
 
         print(f"📊 Created {len(test_data)} test graphs")
 
@@ -106,12 +111,15 @@ def test_real_redis_persistence():
 
         # Check Redis directly
         import redis
-        redis_client = redis.Redis(host='localhost', port=6379, decode_responses=False)
+
+        redis_client = redis.Redis(host="localhost", port=6379, decode_responses=False)
 
         redis_keys = redis_client.keys("networkx_mcp:*")
         graph_keys = [k for k in redis_keys if b"graph:" in k]
 
-        print(f"📊 Redis keys found: {len(redis_keys)} total, {len(graph_keys)} graph keys")
+        print(
+            f"📊 Redis keys found: {len(redis_keys)} total, {len(graph_keys)} graph keys"
+        )
 
         if len(graph_keys) == 0:
             print("❌ No graph data found in Redis!")
@@ -139,6 +147,7 @@ def test_real_redis_persistence():
 
         # Re-initialize persistence (simulating restart)
         import importlib
+
         importlib.reload(add_persistence)
 
         # Apply patches again
@@ -155,10 +164,9 @@ def test_real_redis_persistence():
             print(f"  🔍 Recovering {graph_id}...")
 
             # Load from Redis
-            if hasattr(graph_manager, '_storage'):
+            if hasattr(graph_manager, "_storage"):
                 stored_graph = graph_manager._storage.load_graph(
-                    graph_manager._default_user,
-                    graph_id
+                    graph_manager._default_user, graph_id
                 )
 
                 if stored_graph is not None:
@@ -167,22 +175,23 @@ def test_real_redis_persistence():
                     graph_manager.metadata[graph_id] = {
                         "created_at": "recovered",
                         "graph_type": type(stored_graph).__name__,
-                        "attributes": {}
+                        "attributes": {},
                     }
 
                     # Verify data integrity
                     info = graph_manager.get_graph_info(graph_id)
 
-                    if (info["num_nodes"] == expected_data["nodes"] and
-                        info["num_edges"] == expected_data["edges"] and
-                        info["graph_type"] == expected_data["type"]):
+                    if (
+                        info["num_nodes"] == expected_data["nodes"]
+                        and info["num_edges"] == expected_data["edges"]
+                        and info["graph_type"] == expected_data["type"]
+                    ):
 
                         # Check node attributes if we have a sample node
                         if expected_data["node_sample"]:
                             try:
                                 node_attrs = graph_manager.get_node_attributes(
-                                    graph_id,
-                                    expected_data["node_sample"]
+                                    graph_id, expected_data["node_sample"]
                                 )
                                 expected_attrs = expected_data["expected_attrs"]
 
@@ -193,15 +202,21 @@ def test_real_redis_persistence():
                                 )
 
                                 if attrs_ok:
-                                    print(f"    ✅ {graph_id}: Complete data integrity verified")
+                                    print(
+                                        f"    ✅ {graph_id}: Complete data integrity verified"
+                                    )
                                     recovered_count += 1
                                 else:
-                                    print(f"    ⚠️ {graph_id}: Basic structure OK, attribute corruption")
+                                    print(
+                                        f"    ⚠️ {graph_id}: Basic structure OK, attribute corruption"
+                                    )
                                     print(f"        Expected: {expected_attrs}")
                                     print(f"        Got: {node_attrs}")
                                     recovered_count += 1  # Still count as recovered
                             except Exception as e:
-                                print(f"    ✅ {graph_id}: Structure OK (attr check failed: {e})")
+                                print(
+                                    f"    ✅ {graph_id}: Structure OK (attr check failed: {e})"
+                                )
                                 recovered_count += 1
                         else:
                             print(f"    ✅ {graph_id}: Structure verified")
@@ -219,17 +234,23 @@ def test_real_redis_persistence():
         print("📝 Phase 6: Final validation...")
 
         success_rate = recovered_count / len(test_data)
-        print(f"📊 Recovery results: {recovered_count}/{len(test_data)} ({success_rate*100:.1f}%)")
+        print(
+            f"📊 Recovery results: {recovered_count}/{len(test_data)} ({success_rate*100:.1f}%)"
+        )
 
         # Test operations on recovered data
         if recovered_count > 0:
             test_graph_id = list(test_data.keys())[0]
             try:
                 # Test we can still operate on recovered graphs
-                neighbors = graph_manager.get_neighbors(test_graph_id, f"{test_graph_id}_node_0")
+                neighbors = graph_manager.get_neighbors(
+                    test_graph_id, f"{test_graph_id}_node_0"
+                )
                 list_result = graph_manager.list_graphs()
 
-                print(f"📊 Operational test: neighbors={len(neighbors)}, total_graphs={len(list_result)}")
+                print(
+                    f"📊 Operational test: neighbors={len(neighbors)}, total_graphs={len(list_result)}"
+                )
                 print("✅ Recovered graphs are fully operational")
 
             except Exception as e:
@@ -261,8 +282,10 @@ def test_real_redis_persistence():
     except Exception as e:
         print(f"\n❌ TEST FAILED WITH ERROR: {e}")
         import traceback
+
         traceback.print_exc()
         return False
+
 
 if __name__ == "__main__":
     success = test_real_redis_persistence()

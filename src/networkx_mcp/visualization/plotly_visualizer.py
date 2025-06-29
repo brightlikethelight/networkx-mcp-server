@@ -26,7 +26,7 @@ class PlotlyVisualizer:
         height: int = 800,
         width: int = 1200,
         show_edge_labels: bool = False,
-        **kwargs
+        **kwargs,
     ) -> Dict[str, Any]:
         """
         Create an interactive graph visualization with zoom, pan, and hover.
@@ -50,7 +50,9 @@ class PlotlyVisualizer:
         """
         # Calculate layout
         if layout == "spring":
-            pos = nx.spring_layout(graph, k=1/np.sqrt(graph.number_of_nodes()), iterations=50)
+            pos = nx.spring_layout(
+                graph, k=1 / np.sqrt(graph.number_of_nodes()), iterations=50
+            )
         elif layout == "circular":
             pos = nx.circular_layout(graph)
         elif layout == "spectral":
@@ -72,7 +74,10 @@ class PlotlyVisualizer:
         fig = go.Figure(
             data=[*edge_traces, node_trace],
             layout=go.Layout(
-                title={"text": title or "Interactive Network Graph", "font": {"size": 16}},
+                title={
+                    "text": title or "Interactive Network Graph",
+                    "font": {"size": 16},
+                },
                 showlegend=False,
                 hovermode="closest",
                 margin={"b": 20, "l": 5, "r": 5, "t": 40},
@@ -80,15 +85,15 @@ class PlotlyVisualizer:
                 xaxis={"showgrid": False, "zeroline": False, "showticklabels": False},
                 yaxis={"showgrid": False, "zeroline": False, "showticklabels": False},
                 height=height,
-                width=width
-            )
+                width=width,
+            ),
         )
 
         # Add interactivity options
         fig.update_layout(
             dragmode="pan",
             modebar_add=["select2d", "lasso2d"],
-            modebar_remove=["pan2d", "zoomIn2d", "zoomOut2d"]
+            modebar_remove=["pan2d", "zoomIn2d", "zoomOut2d"],
         )
 
         # Generate HTML
@@ -99,7 +104,7 @@ class PlotlyVisualizer:
             "html": html_str,
             "num_nodes": graph.number_of_nodes(),
             "num_edges": graph.number_of_edges(),
-            "layout_used": layout
+            "layout_used": layout,
         }
 
     @staticmethod
@@ -109,16 +114,18 @@ class PlotlyVisualizer:
         node_color: Union[str, Dict, str] = "degree",
         title: Optional[str] = None,
         height: int = 800,
-        width: int = 1200
+        width: int = 1200,
     ) -> Dict[str, Any]:
         """Create 3D force-directed graph visualization."""
         # Calculate 3D layout
         if layout == "spring3d":
-            pos = nx.spring_layout(graph, dim=3, k=1/np.sqrt(graph.number_of_nodes()))
+            pos = nx.spring_layout(graph, dim=3, k=1 / np.sqrt(graph.number_of_nodes()))
         else:
             # Random 3D positions
-            pos = {node: (np.random.rand(), np.random.rand(), np.random.rand())
-                   for node in graph.nodes()}
+            pos = {
+                node: (np.random.rand(), np.random.rand(), np.random.rand())
+                for node in graph.nodes()
+            }
 
         # Extract coordinates
         x_nodes = [pos[node][0] for node in graph.nodes()]
@@ -133,10 +140,12 @@ class PlotlyVisualizer:
             z_edge = [pos[edge[0]][2], pos[edge[1]][2], None]
 
             edge_trace = go.Scatter3d(
-                x=x_edge, y=y_edge, z=z_edge,
+                x=x_edge,
+                y=y_edge,
+                z=z_edge,
                 mode="lines",
                 line={"color": "rgba(125,125,125,0.5)", "width": 1},
-                hoverinfo="none"
+                hoverinfo="none",
             )
             edge_traces.append(edge_trace)
 
@@ -150,7 +159,9 @@ class PlotlyVisualizer:
 
         # Create node trace
         node_trace = go.Scatter3d(
-            x=x_nodes, y=y_nodes, z=z_nodes,
+            x=x_nodes,
+            y=y_nodes,
+            z=z_nodes,
             mode="markers+text",
             marker={
                 "size": 10,
@@ -159,14 +170,16 @@ class PlotlyVisualizer:
                 "showscale": True,
                 "colorbar": {
                     "title": node_color if isinstance(node_color, str) else "Value",
-                    "tickmode": "linear"
-                }
+                    "tickmode": "linear",
+                },
             },
             text=[str(node) for node in graph.nodes()],
             textposition="top center",
             hoverinfo="text",
-            hovertext=[f"Node: {node}<br>Degree: {graph.degree(node)}"
-                      for node in graph.nodes()]
+            hovertext=[
+                f"Node: {node}<br>Degree: {graph.degree(node)}"
+                for node in graph.nodes()
+            ],
         )
 
         # Create figure
@@ -181,15 +194,15 @@ class PlotlyVisualizer:
                 "xaxis": {"showgrid": False, "showticklabels": False, "title": ""},
                 "yaxis": {"showgrid": False, "showticklabels": False, "title": ""},
                 "zaxis": {"showgrid": False, "showticklabels": False, "title": ""},
-                "bgcolor": "rgba(0,0,0,0)"
+                "bgcolor": "rgba(0,0,0,0)",
             },
-            margin={"l": 0, "r": 0, "b": 0, "t": 30}
+            margin={"l": 0, "r": 0, "b": 0, "t": 30},
         )
 
         return {
             "figure": fig.to_dict(),
             "html": fig.to_html(include_plotlyjs="cdn"),
-            "layout_type": "3d"
+            "layout_type": "3d",
         }
 
     @staticmethod
@@ -199,7 +212,7 @@ class PlotlyVisualizer:
         layout: str = "spring",
         title: str = "Temporal Network Animation",
         height: int = 800,
-        width: int = 1200
+        width: int = 1200,
     ) -> Dict[str, Any]:
         """Create animated visualization for temporal networks."""
         if not timestamps:
@@ -229,68 +242,76 @@ class PlotlyVisualizer:
                 graph, base_pos, node_size=10, node_color="degree"
             )
 
-            frame = go.Frame(
-                data=[*edge_traces, node_trace],
-                name=str(timestamp)
-            )
+            frame = go.Frame(data=[*edge_traces, node_trace], name=str(timestamp))
             frames.append(frame)
 
         # Create initial figure
-        fig = go.Figure(
-            data=frames[0].data,
-            frames=frames
-        )
+        fig = go.Figure(data=frames[0].data, frames=frames)
 
         # Add animation controls
         fig.update_layout(
             title=title,
             width=width,
             height=height,
-            updatemenus=[{
-                "type": "buttons",
-                "showactive": False,
-                "buttons": [
-                    {
-                        "label": "Play",
-                        "method": "animate",
-                        "args": [None, {
-                            "frame": {"duration": 500, "redraw": True},
-                            "fromcurrent": True,
-                            "transition": {"duration": 300}
-                        }]
-                    },
-                    {
-                        "label": "Pause",
-                        "method": "animate",
-                        "args": [[None], {
-                            "frame": {"duration": 0, "redraw": False},
-                            "mode": "immediate",
-                            "transition": {"duration": 0}
-                        }]
-                    }
-                ]
-            }],
-            sliders=[{
-                "active": 0,
-                "steps": [
-                    {
-                        "label": str(timestamp),
-                        "method": "animate",
-                        "args": [[str(timestamp)], {
-                            "frame": {"duration": 300, "redraw": True},
-                            "mode": "immediate",
-                            "transition": {"duration": 300}
-                        }]
-                    } for timestamp in timestamps
-                ]
-            }]
+            updatemenus=[
+                {
+                    "type": "buttons",
+                    "showactive": False,
+                    "buttons": [
+                        {
+                            "label": "Play",
+                            "method": "animate",
+                            "args": [
+                                None,
+                                {
+                                    "frame": {"duration": 500, "redraw": True},
+                                    "fromcurrent": True,
+                                    "transition": {"duration": 300},
+                                },
+                            ],
+                        },
+                        {
+                            "label": "Pause",
+                            "method": "animate",
+                            "args": [
+                                [None],
+                                {
+                                    "frame": {"duration": 0, "redraw": False},
+                                    "mode": "immediate",
+                                    "transition": {"duration": 0},
+                                },
+                            ],
+                        },
+                    ],
+                }
+            ],
+            sliders=[
+                {
+                    "active": 0,
+                    "steps": [
+                        {
+                            "label": str(timestamp),
+                            "method": "animate",
+                            "args": [
+                                [str(timestamp)],
+                                {
+                                    "frame": {"duration": 300, "redraw": True},
+                                    "mode": "immediate",
+                                    "transition": {"duration": 300},
+                                },
+                            ],
+                        }
+                        for timestamp in timestamps
+                    ],
+                }
+            ],
         )
 
         return {
             "figure": fig.to_dict(),
             "html": fig.to_html(include_plotlyjs="cdn"),
             "num_frames": len(frames),
-            "timestamps": timestamps
+            "timestamps": timestamps,
         }
 
     @staticmethod
@@ -299,7 +320,7 @@ class PlotlyVisualizer:
         pos: Dict,
         edge_width: Union[float, str, Dict],
         edge_color: Union[str, Dict],
-        show_labels: bool = False
+        show_labels: bool = False,
     ) -> List[go.Scatter]:
         """Create edge traces for plotly."""
         edge_traces = []
@@ -328,7 +349,7 @@ class PlotlyVisualizer:
                 y=[y0, y1, None],
                 mode="lines",
                 line={"width": width, "color": color},
-                hoverinfo="none"
+                hoverinfo="none",
             )
             edge_traces.append(edge_trace)
 
@@ -342,7 +363,7 @@ class PlotlyVisualizer:
                     mode="text",
                     text=[str(graph.edges[edge]["weight"])],
                     textposition="middle center",
-                    hoverinfo="none"
+                    hoverinfo="none",
                 )
                 edge_traces.append(edge_label)
 
@@ -354,7 +375,7 @@ class PlotlyVisualizer:
         pos: Dict,
         node_size: Union[int, str, Dict],
         node_color: Union[str, Dict],
-        hover_data: Optional[List[str]] = None
+        hover_data: Optional[List[str]] = None,
     ) -> go.Scatter:
         """Create node trace for plotly."""
         x_nodes = []
@@ -412,16 +433,13 @@ class PlotlyVisualizer:
                 "color": colors,
                 "colorscale": "Viridis",
                 "showscale": True,
-                "colorbar": {
-                    "title": colorbar_title,
-                    "tickmode": "linear"
-                },
-                "line": {"width": 2, "color": "white"}
+                "colorbar": {"title": colorbar_title, "tickmode": "linear"},
+                "line": {"width": 2, "color": "white"},
             },
             text=[str(node) for node in graph.nodes()],
             textposition="top center",
             hoverinfo="text",
-            hovertext=hover_texts
+            hovertext=hover_texts,
         )
 
         return node_trace
@@ -431,14 +449,14 @@ class PlotlyVisualizer:
         figure: Dict[str, Any],
         filename: str,
         include_plotlyjs: str = "cdn",
-        config: Optional[Dict[str, Any]] = None
+        config: Optional[Dict[str, Any]] = None,
     ) -> str:
         """Export interactive plot as standalone HTML."""
         if config is None:
             config = {
                 "displayModeBar": True,
                 "displaylogo": False,
-                "modeBarButtonsToRemove": ["pan2d", "lasso2d"]
+                "modeBarButtonsToRemove": ["pan2d", "lasso2d"],
             }
 
         # Convert dict back to figure if needed
@@ -449,9 +467,7 @@ class PlotlyVisualizer:
 
         # Generate HTML
         html_str = fig.to_html(
-            include_plotlyjs=include_plotlyjs,
-            config=config,
-            div_id="networkx-graph"
+            include_plotlyjs=include_plotlyjs, config=config, div_id="networkx-graph"
         )
 
         # Save to file

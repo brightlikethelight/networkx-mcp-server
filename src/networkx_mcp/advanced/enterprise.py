@@ -37,6 +37,7 @@ DISPLAY_LIMIT_FOR_ITEMS = 5
 # Optional imports
 try:
     import community as community_louvain
+
     HAS_LOUVAIN = True
 except ImportError:
     HAS_LOUVAIN = False
@@ -64,7 +65,7 @@ class EnterpriseFeatures:
         operations: List[Dict[str, Any]],
         parallel: bool = True,
         batch_size: int = 10,
-        progress_callback: Optional[Callable] = None
+        progress_callback: Optional[Callable] = None,
     ) -> Dict[str, Any]:
         """
         Process multiple graphs in parallel with batching.
@@ -94,13 +95,12 @@ class EnterpriseFeatures:
             # Process in parallel batches
             with ProcessPoolExecutor(max_workers=self.max_workers) as executor:
                 for i in range(0, len(graphs), batch_size):
-                    batch = graphs[i:i+batch_size]
+                    batch = graphs[i : i + batch_size]
                     batch_futures = []
 
                     for graph_id, graph in batch:
                         future = executor.submit(
-                            self._process_single_graph,
-                            graph_id, graph, operations
+                            self._process_single_graph, graph_id, graph, operations
                         )
                         batch_futures.append((graph_id, future))
 
@@ -115,14 +115,22 @@ class EnterpriseFeatures:
                     # Progress callback
                     if progress_callback:
                         progress = min(i + batch_size, total_graphs) / total_graphs
-                        progress_callback(progress, f"Processed {min(i + batch_size, total_graphs)}/{total_graphs} graphs")
+                        progress_callback(
+                            progress,
+                            f"Processed {min(i + batch_size, total_graphs)}/{total_graphs} graphs",
+                        )
         else:
             # Sequential processing
             for i, (graph_id, graph) in enumerate(graphs):
-                results[graph_id] = self._process_single_graph(graph_id, graph, operations)
+                results[graph_id] = self._process_single_graph(
+                    graph_id, graph, operations
+                )
 
                 if progress_callback:
-                    progress_callback((i + 1) / total_graphs, f"Processed {i + 1}/{total_graphs} graphs")
+                    progress_callback(
+                        (i + 1) / total_graphs,
+                        f"Processed {i + 1}/{total_graphs} graphs",
+                    )
 
         total_time = time.time() - start_time
 
@@ -133,20 +141,20 @@ class EnterpriseFeatures:
                 "successful": sum(1 for r in results.values() if "error" not in r),
                 "failed": sum(1 for r in results.values() if "error" in r),
                 "total_time": total_time,
-                "avg_time_per_graph": total_time / total_graphs
+                "avg_time_per_graph": total_time / total_graphs,
             },
             "batch_config": {
                 "parallel": parallel,
                 "batch_size": batch_size,
-                "max_workers": self.max_workers
-            }
+                "max_workers": self.max_workers,
+            },
         }
 
     def analysis_workflow(
         self,
         graph: nx.Graph,
         workflow_config: List[Dict[str, Any]],
-        cache_intermediate: bool = True
+        cache_intermediate: bool = True,
     ) -> Dict[str, Any]:
         """
         Chain operations with intermediate caching.
@@ -181,7 +189,9 @@ class EnterpriseFeatures:
                     logger.info(f"Using cached result for {step_name}")
                     step_result = self._cache[cache_key]
                 else:
-                    step_result = self._execute_operation(current_graph, operation, params)
+                    step_result = self._execute_operation(
+                        current_graph, operation, params
+                    )
                     self._cache[cache_key] = step_result
             else:
                 step_result = self._execute_operation(current_graph, operation, params)
@@ -204,7 +214,7 @@ class EnterpriseFeatures:
             "final_graph": current_graph,
             "steps_completed": len(results),
             "total_time": time.time() - start_time,
-            "cache_hits": sum(1 for k in results if k in self._cache)
+            "cache_hits": sum(1 for k in results if k in self._cache),
         }
 
     def report_generation(
@@ -213,7 +223,7 @@ class EnterpriseFeatures:
         template: str = "default",
         output_format: str = "pdf",
         include_visualizations: bool = True,
-        **kwargs
+        **kwargs,
     ) -> Union[bytes, str]:
         """
         Generate automated PDF/HTML reports.
@@ -251,7 +261,7 @@ class EnterpriseFeatures:
         self,
         graph: nx.Graph,
         alert_rules: List[Dict[str, Any]],
-        notification_callback: Optional[Callable] = None
+        notification_callback: Optional[Callable] = None,
     ) -> List[Dict[str, Any]]:
         """
         Anomaly detection and alerting system.
@@ -314,7 +324,7 @@ class EnterpriseFeatures:
                         "threshold": threshold,
                         "operator": operator,
                         "timestamp": datetime.now(tz=timezone.utc).isoformat(),
-                        "severity": rule.get("severity", "medium")
+                        "severity": rule.get("severity", "medium"),
                     }
                     triggered_alerts.append(alert)
 
@@ -325,7 +335,9 @@ class EnterpriseFeatures:
 
                 # Get historical values (would come from time series in production)
                 # For demo, generate synthetic historical data
-                historical_values = self._get_historical_metrics(graph, metric, periods=30)
+                historical_values = self._get_historical_metrics(
+                    graph, metric, periods=30
+                )
                 current_value = historical_values[-1]
 
                 mean = np.mean(historical_values[:-1])
@@ -341,7 +353,7 @@ class EnterpriseFeatures:
                         "std": std,
                         "z_score": (current_value - mean) / std if std > 0 else 0,
                         "timestamp": datetime.now(tz=timezone.utc).isoformat(),
-                        "severity": rule.get("severity", "high")
+                        "severity": rule.get("severity", "high"),
                     }
                     triggered_alerts.append(alert)
 
@@ -359,7 +371,7 @@ class EnterpriseFeatures:
                             "pattern": pattern,
                             "num_components": nx.number_connected_components(graph),
                             "timestamp": datetime.now(tz=timezone.utc).isoformat(),
-                            "severity": rule.get("severity", "high")
+                            "severity": rule.get("severity", "high"),
                         }
                         triggered_alerts.append(alert)
 
@@ -369,7 +381,9 @@ class EnterpriseFeatures:
 
         return triggered_alerts
 
-    def schedule_job(self, job_config: Dict[str, Any], start_immediately: bool = True) -> str:
+    def schedule_job(
+        self, job_config: Dict[str, Any], start_immediately: bool = True
+    ) -> str:
         """
         Schedule a job for execution.
 
@@ -406,27 +420,17 @@ class EnterpriseFeatures:
             unit = job_config["schedule"]["unit"]
 
             if unit == "seconds":
-                schedule.every(interval).seconds.do(
-                    self._run_scheduled_job, job_id
-                )
+                schedule.every(interval).seconds.do(self._run_scheduled_job, job_id)
             elif unit == "minutes":
-                schedule.every(interval).minutes.do(
-                    self._run_scheduled_job, job_id
-                )
+                schedule.every(interval).minutes.do(self._run_scheduled_job, job_id)
             elif unit == "hours":
-                schedule.every(interval).hours.do(
-                    self._run_scheduled_job, job_id
-                )
+                schedule.every(interval).hours.do(self._run_scheduled_job, job_id)
             elif unit == "days":
-                schedule.every(interval).days.do(
-                    self._run_scheduled_job, job_id
-                )
+                schedule.every(interval).days.do(self._run_scheduled_job, job_id)
 
         elif schedule_type == "daily":
             time_str = job_config["schedule"]["time"]
-            schedule.every().day.at(time_str).do(
-                self._run_scheduled_job, job_id
-            )
+            schedule.every().day.at(time_str).do(self._run_scheduled_job, job_id)
 
         elif schedule_type == "weekly":
             day = job_config["schedule"]["day"]
@@ -438,8 +442,7 @@ class EnterpriseFeatures:
         # Start scheduler thread if needed
         if start_immediately and self._scheduler_thread is None:
             self._scheduler_thread = threading.Thread(
-                target=self._scheduler_loop,
-                daemon=True
+                target=self._scheduler_loop, daemon=True
             )
             self._scheduler_thread.start()
 
@@ -447,7 +450,12 @@ class EnterpriseFeatures:
 
         return job_id
 
-    def save_graph_version(self, graph: nx.Graph, version_name: str, metadata: Optional[Dict[str, Any]] = None) -> str:
+    def save_graph_version(
+        self,
+        graph: nx.Graph,
+        version_name: str,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> str:
         """
         Save a versioned snapshot of a graph.
 
@@ -476,9 +484,9 @@ class EnterpriseFeatures:
             "graph_info": {
                 "num_nodes": graph.number_of_nodes(),
                 "num_edges": graph.number_of_edges(),
-                "type": type(graph).__name__
+                "type": type(graph).__name__,
             },
-            "metadata": metadata or {}
+            "metadata": metadata or {},
         }
 
         # Save graph and metadata
@@ -500,16 +508,10 @@ class EnterpriseFeatures:
         return version_id
 
     def _process_single_graph(
-        self,
-        graph_id: str,
-        graph: nx.Graph,
-        operations: List[Dict[str, Any]]
+        self, graph_id: str, graph: nx.Graph, operations: List[Dict[str, Any]]
     ) -> Dict[str, Any]:
         """Process a single graph with multiple operations."""
-        results = {
-            "graph_id": graph_id,
-            "operations": {}
-        }
+        results = {"graph_id": graph_id, "operations": {}}
 
         for op in operations:
             op_name = op["name"]
@@ -552,7 +554,7 @@ class EnterpriseFeatures:
         return {
             "type": centrality_type,
             "values": centrality,
-            "top_10": sorted(centrality.items(), key=lambda x: x[1], reverse=True)[:10]
+            "top_10": sorted(centrality.items(), key=lambda x: x[1], reverse=True)[:10],
         }
 
     def _detect_communities(self, graph: nx.Graph, **params) -> Dict[str, Any]:
@@ -570,7 +572,7 @@ class EnterpriseFeatures:
             return {
                 "num_communities": len(communities),
                 "communities": communities,
-                "modularity": community_louvain.modularity(partition, graph)
+                "modularity": community_louvain.modularity(partition, graph),
             }
         else:
             # Fallback to connected components
@@ -582,7 +584,7 @@ class EnterpriseFeatures:
             return {
                 "num_communities": len(components),
                 "communities": {i: list(comp) for i, comp in enumerate(components)},
-                "method": "connected_components"
+                "method": "connected_components",
             }
 
     def _calculate_metrics(self, graph: nx.Graph, **params) -> Dict[str, Any]:
@@ -591,10 +593,17 @@ class EnterpriseFeatures:
             "num_nodes": graph.number_of_nodes(),
             "num_edges": graph.number_of_edges(),
             "density": nx.density(graph),
-            "is_connected": nx.is_connected(graph) if not graph.is_directed() else nx.is_weakly_connected(graph)
+            "is_connected": (
+                nx.is_connected(graph)
+                if not graph.is_directed()
+                else nx.is_weakly_connected(graph)
+            ),
         }
 
-        if metrics["is_connected"] and graph.number_of_nodes() < MAX_NODES_FOR_EXPENSIVE_METRICS:
+        if (
+            metrics["is_connected"]
+            and graph.number_of_nodes() < MAX_NODES_FOR_EXPENSIVE_METRICS
+        ):
             metrics["diameter"] = nx.diameter(graph)
             metrics["radius"] = nx.radius(graph)
 
@@ -618,7 +627,9 @@ class EnterpriseFeatures:
 
         return f"{operation}_{graph_hash}_{params_hash}"
 
-    def _execute_operation(self, graph: nx.Graph, operation: str, params: Dict) -> Dict[str, Any]:
+    def _execute_operation(
+        self, graph: nx.Graph, operation: str, params: Dict
+    ) -> Dict[str, Any]:
         """Execute a single operation on graph."""
         # Map operation names to functions
         operations = {
@@ -634,7 +645,9 @@ class EnterpriseFeatures:
             msg = f"Unknown operation: {operation}"
             raise ValueError(msg)
 
-    def _evaluate_condition(self, result: Dict[str, Any], condition: Dict[str, Any]) -> bool:
+    def _evaluate_condition(
+        self, result: Dict[str, Any], condition: Dict[str, Any]
+    ) -> bool:
         """Evaluate workflow condition."""
         field = condition["field"]
         operator = condition["operator"]
@@ -674,7 +687,7 @@ class EnterpriseFeatures:
         template: str,
         timestamp: str,
         include_viz: bool,
-        **kwargs
+        **kwargs,
     ) -> str:
         """Generate HTML report."""
         # Simple HTML template
@@ -730,7 +743,7 @@ class EnterpriseFeatures:
             "num_edges": analysis.get("num_edges", 0),
             "density": analysis.get("density", 0),
             "visualizations": [],
-            "detailed_results": self._format_detailed_results(analysis)
+            "detailed_results": self._format_detailed_results(analysis),
         }
 
         if include_viz and "visualizations" in analysis:
@@ -744,7 +757,7 @@ class EnterpriseFeatures:
         template: str,
         timestamp: str,
         include_viz: bool,
-        **kwargs
+        **kwargs,
     ) -> bytes:
         """Generate PDF report."""
         buffer = io.BytesIO()
@@ -757,7 +770,7 @@ class EnterpriseFeatures:
             "CustomTitle",
             parent=styles["Heading1"],
             fontSize=24,
-            textColor="HexColor(0x333333)"
+            textColor="HexColor(0x333333)",
         )
         story.append(Paragraph("Network Analysis Report", title_style))
         story.append(Spacer(1, 12))
@@ -773,18 +786,20 @@ class EnterpriseFeatures:
             ["Number of Nodes", str(analysis.get("num_nodes", 0))],
             ["Number of Edges", str(analysis.get("num_edges", 0))],
             ["Density", f"{analysis.get('density', 0):.4f}"],
-            ["Connected", str(analysis.get("is_connected", False))]
+            ["Connected", str(analysis.get("is_connected", False))],
         ]
 
         summary_table = Table(summary_data)
-        summary_table.setStyle([
-            ("BACKGROUND", (0, 0), (-1, 0), "HexColor(0xCCCCCC)"),
-            ("GRID", (0, 0), (-1, -1), 1, "HexColor(0x000000)"),
-            ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-            ("FONTSIZE", (0, 0), (-1, -1), 10),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
-        ])
+        summary_table.setStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), "HexColor(0xCCCCCC)"),
+                ("GRID", (0, 0), (-1, -1), 1, "HexColor(0x000000)"),
+                ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTSIZE", (0, 0), (-1, -1), 10),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
+            ]
+        )
         story.append(summary_table)
         story.append(Spacer(1, 20))
 
@@ -795,14 +810,16 @@ class EnterpriseFeatures:
                 if viz.get("type") == "image" and viz.get("data"):
                     # Decode base64 image
                     img_data = base64.b64decode(viz["data"].split(",")[1])
-                    img = Image(io.BytesIO(img_data), width=6*inch, height=4*inch)
+                    img = Image(io.BytesIO(img_data), width=6 * inch, height=4 * inch)
                     story.append(img)
                     story.append(Spacer(1, 12))
 
         # Detailed results
         story.append(PageBreak())
         story.append(Paragraph("Detailed Results", styles["Heading2"]))
-        story.append(Paragraph(self._format_detailed_results(analysis), styles["Normal"]))
+        story.append(
+            Paragraph(self._format_detailed_results(analysis), styles["Normal"])
+        )
 
         # Build PDF
         doc.build(story)
@@ -819,19 +836,28 @@ class EnterpriseFeatures:
                 if isinstance(value, dict):
                     lines.append("  " * indent + f"{key}:")
                     format_dict(value, indent + 1)
-                elif isinstance(value, list) and len(value) > 0 and isinstance(value[0], (list, tuple)):
+                elif (
+                    isinstance(value, list)
+                    and len(value) > 0
+                    and isinstance(value[0], (list, tuple))
+                ):
                     lines.append("  " * indent + f"{key}:")
                     for item in value[:DISPLAY_LIMIT_FOR_ITEMS]:  # Limit to first items
                         lines.append("  " * (indent + 1) + str(item))
                     if len(value) > DISPLAY_LIMIT_FOR_ITEMS:
-                        lines.append("  " * (indent + 1) + f"... and {len(value) - DISPLAY_LIMIT_FOR_ITEMS} more")
+                        lines.append(
+                            "  " * (indent + 1)
+                            + f"... and {len(value) - DISPLAY_LIMIT_FOR_ITEMS} more"
+                        )
                 else:
                     lines.append("  " * indent + f"{key}: {value}")
 
         format_dict(analysis)
         return "\n".join(lines)
 
-    def _get_historical_metrics(self, graph: nx.Graph, metric: str, periods: int = 30) -> List[float]:
+    def _get_historical_metrics(
+        self, graph: nx.Graph, metric: str, periods: int = 30
+    ) -> List[float]:
         """Get historical metric values (simulated for demo)."""
         # In production, this would query a time series database
         current_value = 0
@@ -841,7 +867,9 @@ class EnterpriseFeatures:
         elif metric == "avg_degree":
             current_value = sum(d for n, d in graph.degree()) / graph.number_of_nodes()
         elif metric == "clustering":
-            current_value = nx.average_clustering(graph) if not graph.is_directed() else 0
+            current_value = (
+                nx.average_clustering(graph) if not graph.is_directed() else 0
+            )
 
         # Generate synthetic historical data with some variation
         np.random.seed(42)
@@ -908,12 +936,14 @@ class EnterpriseFeatures:
         else:
             index = {"versions": []}
 
-        index["versions"].append({
-            "version_id": version_id,
-            "version_name": version_data["version_name"],
-            "timestamp": version_data["timestamp"],
-            "graph_info": version_data["graph_info"]
-        })
+        index["versions"].append(
+            {
+                "version_id": version_id,
+                "version_name": version_data["version_name"],
+                "timestamp": version_data["timestamp"],
+                "graph_info": version_data["graph_info"],
+            }
+        )
 
         # Keep only last 100 versions in index
         index["versions"] = index["versions"][-100:]
@@ -921,7 +951,9 @@ class EnterpriseFeatures:
         with open(index_file, "w") as f:
             json.dump(index, f, indent=2)
 
-    def _send_job_notifications(self, job: Dict[str, Any], alerts: List[Dict[str, Any]]):
+    def _send_job_notifications(
+        self, job: Dict[str, Any], alerts: List[Dict[str, Any]]
+    ):
         """Send notifications for scheduled job alerts."""
         # In production, integrate with notification services
         logger.info(f"Sending {len(alerts)} alerts for job {job['job_id']}")

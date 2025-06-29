@@ -11,7 +11,9 @@ class EdgeOperations:
     def __init__(self, graph: nx.Graph):
         self.graph = graph
 
-    def add_edge_with_validation(self, source: Union[str, int], target: Union[str, int], **attrs) -> bool:
+    def add_edge_with_validation(
+        self, source: Union[str, int], target: Union[str, int], **attrs
+    ) -> bool:
         """Add edge with validation."""
         if self.graph.has_edge(source, target):
             return False
@@ -24,7 +26,9 @@ class EdgeOperations:
         self.graph.add_edges_from(edges)
         return self.graph.number_of_edges() - initial_count
 
-    def get_edge_summary(self, source: Union[str, int], target: Union[str, int]) -> Dict[str, Any]:
+    def get_edge_summary(
+        self, source: Union[str, int], target: Union[str, int]
+    ) -> Dict[str, Any]:
         """Get comprehensive edge information."""
         if not self.graph.has_edge(source, target):
             msg = f"Edge ({source}, {target}) not found"
@@ -34,5 +38,5 @@ class EdgeOperations:
             "source": source,
             "target": target,
             "attributes": dict(self.graph.edges[source, target]),
-            "weight": self.graph.edges[source, target].get("weight", 1)
+            "weight": self.graph.edges[source, target].get("weight", 1),
         }

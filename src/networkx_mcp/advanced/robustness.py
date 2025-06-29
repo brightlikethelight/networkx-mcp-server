@@ -26,7 +26,7 @@ class RobustnessAnalysis:
         attack_type: str = "random",
         fraction: float = 0.5,
         measure: str = "connectivity",
-        **params
+        **params,
     ) -> Dict[str, Any]:
         """
         Simulate node/edge removal attacks on the network.
@@ -62,9 +62,7 @@ class RobustnessAnalysis:
             # Remove highest degree nodes first
             node_degrees = dict(G.degree())
             nodes_to_remove = sorted(
-                node_degrees.keys(),
-                key=lambda x: node_degrees[x],
-                reverse=True
+                node_degrees.keys(), key=lambda x: node_degrees[x], reverse=True
             )[:num_nodes]
 
         elif attack_type == "targeted_betweenness":
@@ -72,19 +70,15 @@ class RobustnessAnalysis:
             if G.number_of_nodes() < MAX_NODES_FOR_EXPENSIVE_ANALYSIS:
                 betweenness = nx.betweenness_centrality(G)
                 nodes_to_remove = sorted(
-                    betweenness.keys(),
-                    key=lambda x: betweenness[x],
-                    reverse=True
+                    betweenness.keys(), key=lambda x: betweenness[x], reverse=True
                 )[:num_nodes]
             else:
                 # Approximate for large graphs
                 betweenness = nx.betweenness_centrality(
-                    G, k=min(100, G.number_of_nodes()//10)
+                    G, k=min(100, G.number_of_nodes() // 10)
                 )
                 nodes_to_remove = sorted(
-                    betweenness.keys(),
-                    key=lambda x: betweenness[x],
-                    reverse=True
+                    betweenness.keys(), key=lambda x: betweenness[x], reverse=True
                 )[:num_nodes]
 
         elif attack_type == "targeted_eigenvector":
@@ -92,18 +86,14 @@ class RobustnessAnalysis:
             try:
                 eigenvector = nx.eigenvector_centrality(G, max_iter=1000)
                 nodes_to_remove = sorted(
-                    eigenvector.keys(),
-                    key=lambda x: eigenvector[x],
-                    reverse=True
+                    eigenvector.keys(), key=lambda x: eigenvector[x], reverse=True
                 )[:num_nodes]
             except (nx.PowerIterationFailedConvergence, ValueError) as e:
                 # Fallback to degree-based
                 logger.debug(f"Eigenvector centrality failed, using degree-based: {e}")
                 node_degrees = dict(G.degree())
                 nodes_to_remove = sorted(
-                    node_degrees.keys(),
-                    key=lambda x: node_degrees[x],
-                    reverse=True
+                    node_degrees.keys(), key=lambda x: node_degrees[x], reverse=True
                 )[:num_nodes]
 
         else:
@@ -121,17 +111,23 @@ class RobustnessAnalysis:
             G.remove_node(node)
 
             # Calculate metrics after removal
-            current_metrics = RobustnessAnalysis._calculate_robustness_metrics(G, measure)
+            current_metrics = RobustnessAnalysis._calculate_robustness_metrics(
+                G, measure
+            )
 
-            removal_sequence.append({
-                "step": i + 1,
-                "removed_node": node,
-                "fraction_removed": (i + 1) / graph.number_of_nodes(),
-                "metrics": current_metrics
-            })
+            removal_sequence.append(
+                {
+                    "step": i + 1,
+                    "removed_node": node,
+                    "fraction_removed": (i + 1) / graph.number_of_nodes(),
+                    "metrics": current_metrics,
+                }
+            )
 
             # Early stopping if network is destroyed
-            if measure == "connectivity" and not current_metrics.get("is_connected", True):
+            if measure == "connectivity" and not current_metrics.get(
+                "is_connected", True
+            ):
                 if i < len(nodes_to_remove) - 1:
                     logger.info(f"Network disconnected after removing {i+1} nodes")
 
@@ -148,19 +144,20 @@ class RobustnessAnalysis:
             "num_nodes_removed": len(nodes_to_remove),
             "measure": measure,
             "initial_metrics": initial_metrics,
-            "final_metrics": removal_sequence[-1]["metrics"] if removal_sequence else initial_metrics,
+            "final_metrics": (
+                removal_sequence[-1]["metrics"] if removal_sequence else initial_metrics
+            ),
             "robustness_index": robustness_index,
             "removal_sequence": removal_sequence[:100],  # Limit to first 100 steps
             "critical_fraction": RobustnessAnalysis._find_critical_fraction(
                 removal_sequence, measure
             ),
-            "execution_time_ms": execution_time
+            "execution_time_ms": execution_time,
         }
 
     @staticmethod
     def _calculate_robustness_metrics(
-        graph: Union[nx.Graph, nx.DiGraph],
-        measure: str
+        graph: Union[nx.Graph, nx.DiGraph], measure: str
     ) -> Dict[str, Any]:
         """Calculate robustness metrics for current graph state."""
         metrics = {}
@@ -171,7 +168,7 @@ class RobustnessAnalysis:
                 "num_edges": 0,
                 "is_connected": False,
                 "largest_component_size": 0,
-                "efficiency": 0
+                "efficiency": 0,
             }
 
         if measure in {"connectivity", "all"}:
@@ -195,13 +192,16 @@ class RobustnessAnalysis:
                 metrics["num_components"] = len(wccs)
             else:
                 ccs = list(nx.connected_components(graph))
-                metrics["largest_component_size"] = max(len(c) for c in ccs) if ccs else 0
+                metrics["largest_component_size"] = (
+                    max(len(c) for c in ccs) if ccs else 0
+                )
                 metrics["num_components"] = len(ccs)
 
             # Relative size
             metrics["largest_component_fraction"] = (
                 metrics["largest_component_size"] / graph.number_of_nodes()
-                if graph.number_of_nodes() > 0 else 0
+                if graph.number_of_nodes() > 0
+                else 0
             )
 
         if measure in {"efficiency", "all"}:
@@ -210,7 +210,9 @@ class RobustnessAnalysis:
                 metrics["global_efficiency"] = nx.global_efficiency(graph)
             else:
                 # Approximate for large graphs
-                metrics["global_efficiency"] = RobustnessAnalysis._approximate_efficiency(graph)
+                metrics["global_efficiency"] = (
+                    RobustnessAnalysis._approximate_efficiency(graph)
+                )
 
             # Local efficiency (clustering-based approximation)
             if not graph.is_directed():
@@ -224,8 +226,7 @@ class RobustnessAnalysis:
 
     @staticmethod
     def _approximate_efficiency(
-        graph: Union[nx.Graph, nx.DiGraph],
-        sample_size: int = 1000
+        graph: Union[nx.Graph, nx.DiGraph], sample_size: int = 1000
     ) -> float:
         """Approximate global efficiency for large graphs."""
         nodes = list(graph.nodes())
@@ -265,8 +266,7 @@ class RobustnessAnalysis:
 
     @staticmethod
     def _calculate_robustness_index(
-        removal_sequence: List[Dict],
-        measure: str
+        removal_sequence: List[Dict], measure: str
     ) -> float:
         """Calculate robustness index (area under curve)."""
         if not removal_sequence:
@@ -314,8 +314,7 @@ class RobustnessAnalysis:
 
     @staticmethod
     def _find_critical_fraction(
-        removal_sequence: List[Dict],
-        measure: str
+        removal_sequence: List[Dict], measure: str
     ) -> Optional[float]:
         """Find critical fraction where network fails."""
         if not removal_sequence:
@@ -335,7 +334,9 @@ class RobustnessAnalysis:
 
         elif measure == "efficiency":
             # Find when efficiency drops below 50%
-            initial_efficiency = removal_sequence[0]["metrics"].get("global_efficiency", 1.0)
+            initial_efficiency = removal_sequence[0]["metrics"].get(
+                "global_efficiency", 1.0
+            )
             for step in removal_sequence:
                 current_efficiency = step["metrics"].get("global_efficiency", 0.0)
                 if current_efficiency < 0.5 * initial_efficiency:
@@ -350,7 +351,7 @@ class RobustnessAnalysis:
         probability_range: Tuple[float, float] = (0.0, 1.0),
         num_steps: int = 20,
         num_trials: int = 10,
-        **params
+        **params,
     ) -> Dict[str, Any]:
         """
         Analyze percolation threshold of the network.
@@ -375,9 +376,7 @@ class RobustnessAnalysis:
         start_time = time.time()
 
         probabilities = np.linspace(
-            probability_range[0],
-            probability_range[1],
-            num_steps
+            probability_range[0], probability_range[1], num_steps
         )
 
         results = []
@@ -391,8 +390,7 @@ class RobustnessAnalysis:
                 if percolation_type == "site":
                     # Site percolation: randomly remove nodes
                     nodes_to_keep = [
-                        node for node in G.nodes()
-                        if random.random() < p  # noqa: S311
+                        node for node in G.nodes() if random.random() < p  # noqa: S311
                     ]
                     nodes_to_remove = set(G.nodes()) - set(nodes_to_keep)
                     G.remove_nodes_from(nodes_to_remove)
@@ -400,8 +398,7 @@ class RobustnessAnalysis:
                 elif percolation_type == "bond":
                     # Bond percolation: randomly remove edges
                     edges_to_remove = [
-                        edge for edge in G.edges()
-                        if random.random() > p  # noqa: S311
+                        edge for edge in G.edges() if random.random() > p  # noqa: S311
                     ]
                     G.remove_edges_from(edges_to_remove)
 
@@ -440,27 +437,27 @@ class RobustnessAnalysis:
                     num_components = 0
                     avg_component_size = 0
 
-                trial_results.append({
-                    "giant_component_fraction": giant_component_fraction,
-                    "num_components": num_components,
-                    "avg_component_size": avg_component_size
-                })
+                trial_results.append(
+                    {
+                        "giant_component_fraction": giant_component_fraction,
+                        "num_components": num_components,
+                        "avg_component_size": avg_component_size,
+                    }
+                )
 
             # Average over trials
             avg_results = {
                 "probability": p,
-                "giant_component_fraction": np.mean([
-                    r["giant_component_fraction"] for r in trial_results
-                ]),
-                "giant_component_std": np.std([
-                    r["giant_component_fraction"] for r in trial_results
-                ]),
-                "num_components": np.mean([
-                    r["num_components"] for r in trial_results
-                ]),
-                "avg_component_size": np.mean([
-                    r["avg_component_size"] for r in trial_results
-                ])
+                "giant_component_fraction": np.mean(
+                    [r["giant_component_fraction"] for r in trial_results]
+                ),
+                "giant_component_std": np.std(
+                    [r["giant_component_fraction"] for r in trial_results]
+                ),
+                "num_components": np.mean([r["num_components"] for r in trial_results]),
+                "avg_component_size": np.mean(
+                    [r["avg_component_size"] for r in trial_results]
+                ),
             }
 
             results.append(avg_results)
@@ -486,7 +483,7 @@ class RobustnessAnalysis:
             "theoretical_threshold": theoretical_threshold,
             "num_steps": num_steps,
             "num_trials": num_trials,
-            "execution_time_ms": execution_time
+            "execution_time_ms": execution_time,
         }
 
     @staticmethod
@@ -497,9 +494,9 @@ class RobustnessAnalysis:
         threshold = None
 
         for i in range(1, len(results)):
-            p1 = results[i-1]["probability"]
+            p1 = results[i - 1]["probability"]
             p2 = results[i]["probability"]
-            gc1 = results[i-1]["giant_component_fraction"]
+            gc1 = results[i - 1]["giant_component_fraction"]
             gc2 = results[i]["giant_component_fraction"]
 
             if p2 > p1:
@@ -526,7 +523,7 @@ class RobustnessAnalysis:
         graph: Union[nx.Graph, nx.DiGraph],
         initial_failures: List[Any],
         failure_model: str = "threshold",
-        **params
+        **params,
     ) -> Dict[str, Any]:
         """
         Simulate cascading failures in the network.
@@ -550,12 +547,14 @@ class RobustnessAnalysis:
 
         # Initialize node states
         failed_nodes = set(initial_failures)
-        cascade_sequence = [{
-            "step": 0,
-            "new_failures": initial_failures,
-            "total_failed": len(failed_nodes),
-            "fraction_failed": len(failed_nodes) / G.number_of_nodes()
-        }]
+        cascade_sequence = [
+            {
+                "step": 0,
+                "new_failures": initial_failures,
+                "total_failed": len(failed_nodes),
+                "fraction_failed": len(failed_nodes) / G.number_of_nodes(),
+            }
+        ]
 
         if failure_model == "threshold":
             # Threshold model: node fails if too many neighbors have failed
@@ -585,12 +584,14 @@ class RobustnessAnalysis:
 
                 failed_nodes.update(new_failures)
 
-                cascade_sequence.append({
-                    "step": step,
-                    "new_failures": new_failures,
-                    "total_failed": len(failed_nodes),
-                    "fraction_failed": len(failed_nodes) / G.number_of_nodes()
-                })
+                cascade_sequence.append(
+                    {
+                        "step": step,
+                        "new_failures": new_failures,
+                        "total_failed": len(failed_nodes),
+                        "fraction_failed": len(failed_nodes) / G.number_of_nodes(),
+                    }
+                )
 
         elif failure_model == "load_redistribution":
             # Load redistribution model
@@ -646,12 +647,14 @@ class RobustnessAnalysis:
 
                 loads = new_loads
 
-                cascade_sequence.append({
-                    "step": step,
-                    "new_failures": new_failures,
-                    "total_failed": len(failed_nodes),
-                    "fraction_failed": len(failed_nodes) / graph.number_of_nodes()
-                })
+                cascade_sequence.append(
+                    {
+                        "step": step,
+                        "new_failures": new_failures,
+                        "total_failed": len(failed_nodes),
+                        "fraction_failed": len(failed_nodes) / graph.number_of_nodes(),
+                    }
+                )
 
         elif failure_model == "epidemic":
             # Epidemic-like spread
@@ -668,7 +671,10 @@ class RobustnessAnalysis:
                 for node in infected:
                     if node in G:
                         for neighbor in G.neighbors(node):
-                            if neighbor not in failed_nodes and random.random() < infection_prob:  # noqa: S311
+                            if (
+                                neighbor not in failed_nodes
+                                and random.random() < infection_prob
+                            ):  # noqa: S311
                                 new_infections.append(neighbor)
 
                 if not new_infections:
@@ -677,12 +683,14 @@ class RobustnessAnalysis:
                 failed_nodes.update(new_infections)
                 infected = set(new_infections)
 
-                cascade_sequence.append({
-                    "step": step,
-                    "new_failures": new_infections,
-                    "total_failed": len(failed_nodes),
-                    "fraction_failed": len(failed_nodes) / graph.number_of_nodes()
-                })
+                cascade_sequence.append(
+                    {
+                        "step": step,
+                        "new_failures": new_infections,
+                        "total_failed": len(failed_nodes),
+                        "fraction_failed": len(failed_nodes) / graph.number_of_nodes(),
+                    }
+                )
 
         else:
             msg = f"Unknown failure model: {failure_model}"
@@ -700,19 +708,21 @@ class RobustnessAnalysis:
             "final_failed_nodes": list(failed_nodes),
             "total_failed": len(failed_nodes),
             "cascade_size": cascade_size,
-            "cascade_ratio": cascade_size / len(initial_failures) if initial_failures else 0,
+            "cascade_ratio": (
+                cascade_size / len(initial_failures) if initial_failures else 0
+            ),
             "fraction_failed": len(failed_nodes) / graph.number_of_nodes(),
             "cascade_sequence": cascade_sequence,
             "num_steps": len(cascade_sequence) - 1,
             "parameters": params,
-            "execution_time_ms": execution_time
+            "execution_time_ms": execution_time,
         }
 
     @staticmethod
     def network_resilience(
         graph: Union[nx.Graph, nx.DiGraph],
         resilience_metrics: Optional[List[str]] = None,
-        **params
+        **params,
     ) -> Dict[str, Any]:
         """
         Calculate comprehensive network resilience metrics.
@@ -730,8 +740,11 @@ class RobustnessAnalysis:
         """
         if resilience_metrics is None:
             resilience_metrics = [
-                "connectivity", "redundancy", "clustering",
-                "efficiency", "robustness"
+                "connectivity",
+                "redundancy",
+                "clustering",
+                "efficiency",
+                "robustness",
             ]
 
         results = {}
@@ -741,9 +754,15 @@ class RobustnessAnalysis:
             conn_metrics = {}
 
             # Algebraic connectivity (Fiedler value)
-            if not graph.is_directed() and nx.is_connected(graph) and graph.number_of_nodes() < MAX_NODES_FOR_EXPENSIVE_ANALYSIS:
+            if (
+                not graph.is_directed()
+                and nx.is_connected(graph)
+                and graph.number_of_nodes() < MAX_NODES_FOR_EXPENSIVE_ANALYSIS
+            ):
                 try:
-                    conn_metrics["algebraic_connectivity"] = nx.algebraic_connectivity(graph)
+                    conn_metrics["algebraic_connectivity"] = nx.algebraic_connectivity(
+                        graph
+                    )
                 except Exception as e:
                     logger.debug(f"Failed to compute algebraic connectivity: {e}")
                     conn_metrics["algebraic_connectivity"] = None
@@ -770,19 +789,25 @@ class RobustnessAnalysis:
                 nodes = list(graph.nodes())
 
                 for i in range(min(50, len(nodes))):
-                    for j in range(i+1, min(i+10, len(nodes))):
+                    for j in range(i + 1, min(i + 10, len(nodes))):
                         try:
                             if graph.is_directed():
-                                num_paths = len(list(nx.node_disjoint_paths(
-                                    graph, nodes[i], nodes[j]
-                                )))
+                                num_paths = len(
+                                    list(
+                                        nx.node_disjoint_paths(
+                                            graph, nodes[i], nodes[j]
+                                        )
+                                    )
+                                )
                             else:
                                 num_paths = nx.node_connectivity(
                                     graph, nodes[i], nodes[j]
                                 )
                             path_counts.append(num_paths)
                         except Exception as e:
-                            logger.debug(f"Failed to compute node connectivity between nodes: {e}")
+                            logger.debug(
+                                f"Failed to compute node connectivity between nodes: {e}"
+                            )
                             path_counts.append(0)
 
                 redundancy_metrics["avg_node_disjoint_paths"] = (
@@ -791,12 +816,16 @@ class RobustnessAnalysis:
 
             # Cycle basis
             CYCLE_BASIS_EDGE_LIMIT = 1000  # noqa: PLR2004
-            if not graph.is_directed() and graph.number_of_edges() < CYCLE_BASIS_EDGE_LIMIT:
+            if (
+                not graph.is_directed()
+                and graph.number_of_edges() < CYCLE_BASIS_EDGE_LIMIT
+            ):
                 cycle_basis = nx.cycle_basis(graph)
                 redundancy_metrics["num_cycles"] = len(cycle_basis)
                 redundancy_metrics["cycle_density"] = (
                     len(cycle_basis) / graph.number_of_edges()
-                    if graph.number_of_edges() > 0 else 0
+                    if graph.number_of_edges() > 0
+                    else 0
                 )
 
             results["redundancy"] = redundancy_metrics
@@ -849,7 +878,7 @@ class RobustnessAnalysis:
 
                 # Heterogeneity (high = vulnerable to targeted attacks)
                 robustness_metrics["degree_heterogeneity"] = (
-                    degree_variance / (degree_mean ** 2) if degree_mean > 0 else 0
+                    degree_variance / (degree_mean**2) if degree_mean > 0 else 0
                 )
 
                 # Degree assortativity (positive = robust)

@@ -29,8 +29,9 @@ __all__ = [
     "PyvisVisualizer",
     "SpecializedVisualizations",
     "calculate_layout",
-    "prepare_graph_data"
+    "prepare_graph_data",
 ]
+
 
 # Factory function
 def get_visualizer(backend: str = "matplotlib"):
@@ -38,7 +39,7 @@ def get_visualizer(backend: str = "matplotlib"):
     visualizers = {
         "matplotlib": MatplotlibVisualizer,
         "plotly": PlotlyVisualizer,
-        "pyvis": PyvisVisualizer
+        "pyvis": PyvisVisualizer,
     }
 
     if backend not in visualizers:

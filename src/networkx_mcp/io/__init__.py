@@ -31,15 +31,14 @@ __all__ = [
     "detect_format",
     "read_graphml",
     "validate_file_path",
-    "write_graphml"
+    "write_graphml",
 ]
+
 
 # Factory functions
 def get_reader(format_name: str):
     """Get reader for specified format."""
-    readers = {
-        "graphml": GraphMLReader
-    }
+    readers = {"graphml": GraphMLReader}
 
     if format_name not in readers:
         msg = f"Unsupported format: {format_name}"
@@ -47,11 +46,10 @@ def get_reader(format_name: str):
 
     return readers[format_name]()
 
+
 def get_writer(format_name: str):
     """Get writer for specified format."""
-    writers = {
-        "graphml": GraphMLWriter
-    }
+    writers = {"graphml": GraphMLWriter}
 
     if format_name not in writers:
         msg = f"Unsupported format: {format_name}"

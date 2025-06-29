@@ -83,10 +83,10 @@ def graph_data():
     return {
         "json": {
             "nodes": [{"id": 1}, {"id": 2}, {"id": 3}],
-            "links": [{"source": 1, "target": 2}, {"source": 2, "target": 3}]
+            "links": [{"source": 1, "target": 2}, {"source": 2, "target": 3}],
         },
         "edgelist": "1 2\n2 3\n3 1\n",
-        "adjacency": [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
+        "adjacency": [[0, 1, 0], [1, 0, 1], [0, 1, 0]],
     }
 
 
@@ -97,5 +97,5 @@ def performance_config():
         "small_graph_size": 100,
         "medium_graph_size": 1000,
         "large_graph_size": 10000,
-        "timeout": 30
+        "timeout": 30,
     }

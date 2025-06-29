@@ -20,7 +20,7 @@ class NetworkFlow:
         sink: Any,
         capacity: str = "capacity",
         algorithm: str = "auto",
-        **_params
+        **_params,
     ) -> Dict[str, Any]:
         """
         Analyze maximum flow using various algorithms.
@@ -74,7 +74,9 @@ class NetworkFlow:
 
         # Run selected algorithm
         if algorithm == "ford_fulkerson":
-            flow_value, flow_dict = NetworkFlow._ford_fulkerson(G, source, sink, capacity)
+            flow_value, flow_dict = NetworkFlow._ford_fulkerson(
+                G, source, sink, capacity
+            )
         elif algorithm == "edmonds_karp":
             flow_value, flow_dict = NetworkFlow._edmonds_karp(G, source, sink, capacity)
         elif algorithm == "dinic":
@@ -97,13 +99,15 @@ class NetworkFlow:
         for u in flow_dict:
             for v, flow in flow_dict[u].items():
                 if flow > 0:
-                    flow_edges.append({
-                        "source": u,
-                        "target": v,
-                        "flow": flow,
-                        "capacity": G[u][v].get(capacity, 1),
-                        "utilization": flow / G[u][v].get(capacity, 1)
-                    })
+                    flow_edges.append(
+                        {
+                            "source": u,
+                            "target": v,
+                            "flow": flow,
+                            "capacity": G[u][v].get(capacity, 1),
+                            "utilization": flow / G[u][v].get(capacity, 1),
+                        }
+                    )
                     total_flow_edges += 1
 
         return {
@@ -118,20 +122,17 @@ class NetworkFlow:
                     for u in min_cut[0]
                     for v in G[u]
                     if v in min_cut[1]
-                )
+                ),
             },
             "flow_edges": flow_edges,
             "num_flow_edges": total_flow_edges,
             "algorithm_used": algorithm,
-            "execution_time_ms": execution_time
+            "execution_time_ms": execution_time,
         }
 
     @staticmethod
     def _ford_fulkerson(
-        graph: nx.DiGraph,
-        source: Any,
-        sink: Any,
-        capacity: str
+        graph: nx.DiGraph, source: Any, sink: Any, capacity: str
     ) -> Tuple[float, Dict]:
         """Ford-Fulkerson algorithm implementation."""
         # Create residual graph
@@ -152,9 +153,11 @@ class NetworkFlow:
                     edge_capacity = residual[source][neighbor].get(capacity, 0)
                     if edge_capacity > 0:
                         result = find_augmenting_path_dfs(
-                            residual, neighbor, sink,
+                            residual,
+                            neighbor,
+                            sink,
                             [*path, (source, neighbor, edge_capacity)],
-                            visited
+                            visited,
                         )
                         if result:
                             return result
@@ -204,10 +207,7 @@ class NetworkFlow:
 
     @staticmethod
     def _edmonds_karp(
-        graph: nx.DiGraph,
-        source: Any,
-        sink: Any,
-        capacity: str
+        graph: nx.DiGraph, source: Any, sink: Any, capacity: str
     ) -> Tuple[float, Dict]:
         """Edmonds-Karp algorithm (BFS-based Ford-Fulkerson)."""
         # Create residual graph
@@ -283,10 +283,7 @@ class NetworkFlow:
 
     @staticmethod
     def _dinic(
-        graph: nx.DiGraph,
-        source: Any,
-        sink: Any,
-        capacity: str
+        graph: nx.DiGraph, source: Any, sink: Any, capacity: str
     ) -> Tuple[float, Dict]:
         """Dinic's algorithm with level graph optimization."""
         # Create residual graph
@@ -320,9 +317,11 @@ class NetworkFlow:
                 return flow
 
             for v in list(residual[u]):
-                if (v in level and
-                    level[v] == level[u] + 1 and
-                    residual[u][v].get(capacity, 0) > 0):
+                if (
+                    v in level
+                    and level[v] == level[u] + 1
+                    and residual[u][v].get(capacity, 0) > 0
+                ):
 
                     min_flow = min(flow, residual[u][v].get(capacity, 0))
                     result = dfs_blocking_flow(residual, v, sink, min_flow, level)
@@ -364,11 +363,7 @@ class NetworkFlow:
 
     @staticmethod
     def _find_min_cut(
-        graph: nx.DiGraph,
-        source: Any,
-        _sink: Any,
-        flow_dict: Dict,
-        capacity: str
+        graph: nx.DiGraph, source: Any, _sink: Any, flow_dict: Dict, capacity: str
     ) -> Tuple[Set, Set]:
         """Find minimum cut given maximum flow."""
         # Build residual graph from flow
@@ -405,9 +400,7 @@ class NetworkFlow:
 
     @staticmethod
     def _get_cut_edges(
-        graph: nx.DiGraph,
-        source_set: Set,
-        sink_set: Set
+        graph: nx.DiGraph, source_set: Set, sink_set: Set
     ) -> List[Tuple]:
         """Get edges in the cut."""
         cut_edges = []
@@ -425,7 +418,7 @@ class NetworkFlow:
         source: Optional[Any] = None,
         sink: Optional[Any] = None,
         capacity: str = "capacity",
-        **params
+        **params,
     ) -> Dict[str, Any]:
         """
         Find minimum cut sets in the graph.
@@ -457,7 +450,7 @@ class NetworkFlow:
                 "source_partition": result["min_cut"]["source_partition"],
                 "sink_partition": result["min_cut"]["sink_partition"],
                 "cut_edges": result["min_cut"]["cut_edges"],
-                "execution_time_ms": result["execution_time_ms"]
+                "execution_time_ms": result["execution_time_ms"],
             }
         else:
             # Global minimum cut using Stoer-Wagner
@@ -484,7 +477,7 @@ class NetworkFlow:
                     "partition_1": list(partition[0]),
                     "partition_2": list(partition[1]),
                     "cut_edges": cut_edges,
-                    "execution_time_ms": execution_time
+                    "execution_time_ms": execution_time,
                 }
 
             except nx.NetworkXError:
@@ -494,7 +487,7 @@ class NetworkFlow:
                 best_cut = None
 
                 for i, s in enumerate(nodes[:-1]):
-                    for t in nodes[i+1:]:
+                    for t in nodes[i + 1 :]:
                         try:
                             flow_value = nx.maximum_flow_value(
                                 graph, s, t, capacity=capacity
@@ -503,7 +496,9 @@ class NetworkFlow:
                                 min_cut_value = flow_value
                                 best_cut = (s, t)
                         except (nx.NetworkXError, ValueError) as e:
-                            logger.debug(f"Failed to compute flow between {s} and {t}: {e}")
+                            logger.debug(
+                                f"Failed to compute flow between {s} and {t}: {e}"
+                            )
                             continue
 
                 if best_cut:
@@ -513,7 +508,7 @@ class NetworkFlow:
                 else:
                     return {
                         "error": "Could not find minimum cut",
-                        "execution_time_ms": (time.time() - start_time) * 1000
+                        "execution_time_ms": (time.time() - start_time) * 1000,
                     }
 
     @staticmethod
@@ -521,7 +516,7 @@ class NetworkFlow:
         graph: Union[nx.Graph, nx.DiGraph],
         demands: List[Tuple[Any, Any, float]],
         capacity: str = "capacity",
-        **_params
+        **_params,
     ) -> Dict[str, Any]:
         """
         Solve multi-commodity flow problem.
@@ -592,7 +587,8 @@ class NetworkFlow:
                     "demand": demand,
                     "flow_value": flow_value,
                     "flow_dict": flow_dict,
-                    "satisfied": flow_value >= demand * 0.99  # Allow small numerical error
+                    "satisfied": flow_value
+                    >= demand * 0.99,  # Allow small numerical error
                 }
 
                 total_flow += flow_value
@@ -604,7 +600,7 @@ class NetworkFlow:
                     "demand": demand,
                     "flow_value": 0,
                     "flow_dict": {},
-                    "satisfied": False
+                    "satisfied": False,
                 }
 
         execution_time = (time.time() - start_time) * 1000
@@ -622,7 +618,7 @@ class NetworkFlow:
             "num_commodities": len(demands),
             "num_satisfied": num_satisfied,
             "execution_time_ms": execution_time,
-            "method": "sequential_greedy"
+            "method": "sequential_greedy",
         }
 
     @staticmethod
@@ -630,7 +626,7 @@ class NetworkFlow:
         _graph: Union[nx.Graph, nx.DiGraph],
         flow_dict: Dict[Any, Dict[Any, float]],
         source: Any,
-        sink: Any
+        sink: Any,
     ) -> Dict[str, Any]:
         """
         Decompose a flow into path flows.
@@ -678,11 +674,7 @@ class NetworkFlow:
                 break
 
             # Record path
-            paths.append({
-                "path": path,
-                "flow": min_flow,
-                "length": len(path) - 1
-            })
+            paths.append({"path": path, "flow": min_flow, "length": len(path) - 1})
             total_path_flow += min_flow
 
             # Update residual flows
@@ -712,11 +704,7 @@ class NetworkFlow:
             if min_flow == float("inf") or min_flow <= 0:
                 break
 
-            cycles.append({
-                "cycle": cycle,
-                "flow": min_flow,
-                "length": len(cycle)
-            })
+            cycles.append({"cycle": cycle, "flow": min_flow, "length": len(cycle)})
 
             # Update residual flows
             for i in range(len(cycle)):
@@ -732,11 +720,15 @@ class NetworkFlow:
             "total_path_flow": total_path_flow,
             "cycles": cycles,
             "num_cycles": len(cycles),
-            "path_length_distribution": dict(NetworkFlow._count_by_key(paths, "length").items())
+            "path_length_distribution": dict(
+                NetworkFlow._count_by_key(paths, "length").items()
+            ),
         }
 
     @staticmethod
-    def _find_flow_path(flow_graph: nx.DiGraph, source: Any, sink: Any) -> Optional[List]:
+    def _find_flow_path(
+        flow_graph: nx.DiGraph, source: Any, sink: Any
+    ) -> Optional[List]:
         """Find a path from source to sink in flow graph using DFS."""
         visited = set()
         path = []
@@ -807,7 +799,7 @@ class NetworkFlow:
         graph: Union[nx.Graph, nx.DiGraph],
         demands: Dict[Any, float],
         capacity: str = "capacity",
-        **_params
+        **_params,
     ) -> Dict[str, Any]:
         """
         Check feasibility of circulation with demands.
@@ -840,7 +832,7 @@ class NetworkFlow:
                 "feasible": False,
                 "reason": "Demands do not sum to zero",
                 "total_demand": total_demand,
-                "execution_time_ms": (time.time() - start_time) * 1000
+                "execution_time_ms": (time.time() - start_time) * 1000,
             }
 
         # Create auxiliary graph with super source and sink
@@ -894,7 +886,7 @@ class NetworkFlow:
                         sum(flows.values()) for flows in circulation.values()
                     ),
                     "verification": verification,
-                    "execution_time_ms": execution_time
+                    "execution_time_ms": execution_time,
                 }
             else:
                 execution_time = (time.time() - start_time) * 1000
@@ -904,22 +896,19 @@ class NetworkFlow:
                     "reason": "Cannot satisfy all demands",
                     "max_flow_achieved": max_flow_value,
                     "required_flow": total_supply,
-                    "execution_time_ms": execution_time
+                    "execution_time_ms": execution_time,
                 }
 
         except nx.NetworkXError as e:
             return {
                 "feasible": False,
                 "reason": f"Flow computation failed: {e!s}",
-                "execution_time_ms": (time.time() - start_time) * 1000
+                "execution_time_ms": (time.time() - start_time) * 1000,
             }
 
     @staticmethod
     def _verify_circulation(
-        graph: nx.DiGraph,
-        circulation: Dict,
-        demands: Dict,
-        capacity: str
+        graph: nx.DiGraph, circulation: Dict, demands: Dict, capacity: str
     ) -> Dict[str, Any]:
         """Verify that a circulation satisfies all constraints."""
         violations = []
@@ -927,25 +916,25 @@ class NetworkFlow:
         # Check flow conservation at each node
         for node in graph.nodes():
             inflow = sum(
-                circulation.get(u, {}).get(node, 0)
-                for u in graph.predecessors(node)
+                circulation.get(u, {}).get(node, 0) for u in graph.predecessors(node)
             )
             outflow = sum(
-                circulation.get(node, {}).get(v, 0)
-                for v in graph.successors(node)
+                circulation.get(node, {}).get(v, 0) for v in graph.successors(node)
             )
 
             net_flow = inflow - outflow
             required_demand = demands.get(node, 0)
 
             if abs(net_flow - required_demand) > 1e-10:
-                violations.append({
-                    "node": node,
-                    "type": "flow_conservation",
-                    "net_flow": net_flow,
-                    "required_demand": required_demand,
-                    "difference": net_flow - required_demand
-                })
+                violations.append(
+                    {
+                        "node": node,
+                        "type": "flow_conservation",
+                        "net_flow": net_flow,
+                        "required_demand": required_demand,
+                        "difference": net_flow - required_demand,
+                    }
+                )
 
         # Check capacity constraints
         for u, v, data in graph.edges(data=True):
@@ -953,16 +942,18 @@ class NetworkFlow:
             cap = data.get(capacity, float("inf"))
 
             if flow > cap + 1e-10:
-                violations.append({
-                    "edge": (u, v),
-                    "type": "capacity_violation",
-                    "flow": flow,
-                    "capacity": cap,
-                    "excess": flow - cap
-                })
+                violations.append(
+                    {
+                        "edge": (u, v),
+                        "type": "capacity_violation",
+                        "flow": flow,
+                        "capacity": cap,
+                        "excess": flow - cap,
+                    }
+                )
 
         return {
             "valid": len(violations) == 0,
             "violations": violations,
-            "num_violations": len(violations)
+            "num_violations": len(violations),
         }

@@ -11,7 +11,9 @@ from networkx_mcp.advanced.community.base import CommunityDetector, CommunityRes
 class GirvanNewmanDetector(CommunityDetector):
     """Girvan-Newman algorithm implementation."""
 
-    async def detect_communities(self, k: Optional[int] = None, max_communities: int = 10) -> CommunityResult:
+    async def detect_communities(
+        self, k: Optional[int] = None, max_communities: int = 10
+    ) -> CommunityResult:
         """Detect communities using Girvan-Newman algorithm."""
         if not self.validate_graph():
             msg = "Graph is not suitable for community detection"
@@ -44,7 +46,9 @@ class GirvanNewmanDetector(CommunityDetector):
                         best_modularity = modularity
                         best_communities = communities_list
 
-                communities = best_communities if best_communities else [set(self.graph.nodes())]
+                communities = (
+                    best_communities if best_communities else [set(self.graph.nodes())]
+                )
 
             # Calculate final modularity
             modularity = nx.community.modularity(self.graph, communities)
@@ -53,18 +57,20 @@ class GirvanNewmanDetector(CommunityDetector):
                 communities=communities,
                 modularity=modularity,
                 algorithm="girvan_newman",
-                parameters={"k": k, "max_communities": max_communities}
+                parameters={"k": k, "max_communities": max_communities},
             )
 
         except Exception as e:
             msg = f"Girvan-Newman algorithm failed: {e}"
             raise RuntimeError(msg) from e
 
+
 def girvan_newman_communities(graph: nx.Graph, k: int = 2) -> List[Set[str]]:
     """Simple function interface for Girvan-Newman communities."""
     detector = GirvanNewmanDetector(graph)
     result = asyncio.run(detector.detect_communities(k=k))
     return result.communities
+
 
 def edge_betweenness_centrality(graph: nx.Graph) -> Dict[tuple, float]:
     """Calculate edge betweenness centrality (used in Girvan-Newman)."""

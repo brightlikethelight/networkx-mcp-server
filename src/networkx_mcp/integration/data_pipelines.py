@@ -29,7 +29,7 @@ class DataPipelines:
         delimiter: str = ",",
         encoding: str = "utf-8",
         type_inference: bool = True,
-        **kwargs
+        **kwargs,
     ) -> Dict[str, Any]:
         """
         Intelligent CSV parsing with type inference.
@@ -96,8 +96,7 @@ class DataPipelines:
 
         # Add edges with attributes
         edge_attr_cols = edge_attributes or [
-            col for col in df.columns
-            if col not in edge_columns
+            col for col in df.columns if col not in edge_columns
         ]
 
         for _, row in df.iterrows():
@@ -136,7 +135,7 @@ class DataPipelines:
             "attributes_detected": edge_attr_cols,
             "data_types": {col: str(df[col].dtype) for col in df.columns},
             "processing_time": processing_time,
-            "source_file": filepath
+            "source_file": filepath,
         }
 
     @staticmethod
@@ -145,7 +144,7 @@ class DataPipelines:
         format_type: str = "auto",
         node_path: Optional[str] = None,
         edge_path: Optional[str] = None,
-        **kwargs
+        **kwargs,
     ) -> Dict[str, Any]:
         """
         Convert nested JSON to graph.
@@ -201,12 +200,14 @@ class DataPipelines:
                 graph.add_edge(
                     item["source"],
                     item["target"],
-                    **{k: v for k, v in item.items() if k not in ["source", "target"]}
+                    **{k: v for k, v in item.items() if k not in ["source", "target"]},
                 )
 
         elif format_type == "custom":
             # Use JSONPath to extract nodes and edges
-            graph = DataPipelines._parse_custom_json(data, node_path, edge_path, **kwargs)
+            graph = DataPipelines._parse_custom_json(
+                data, node_path, edge_path, **kwargs
+            )
 
         else:
             msg = f"Unknown format type: {format_type}"
@@ -220,7 +221,7 @@ class DataPipelines:
             "num_edges": graph.number_of_edges(),
             "format_detected": format_type,
             "processing_time": processing_time,
-            "source_file": filepath
+            "source_file": filepath,
         }
 
     @staticmethod
@@ -229,7 +230,7 @@ class DataPipelines:
         query: str,
         db_type: str = "sqlite",
         edge_columns: Optional[Tuple[str, str]] = None,
-        **kwargs
+        **kwargs,
     ) -> Dict[str, Any]:
         """
         SQL to graph conversion.
@@ -260,6 +261,7 @@ class DataPipelines:
         elif db_type == "postgresql":
             # Requires psycopg2
             import psycopg2
+
             conn = psycopg2.connect(connection_string)
             df = pd.read_sql_query(query, conn)
             conn.close()
@@ -267,6 +269,7 @@ class DataPipelines:
         elif db_type == "mysql":
             # Requires pymysql
             import pymysql
+
             conn = pymysql.connect(connection_string)
             df = pd.read_sql_query(query, conn)
             conn.close()
@@ -290,7 +293,7 @@ class DataPipelines:
         endpoints: List[Dict[str, Any]],
         rate_limit: float = 1.0,
         max_retries: int = 3,
-        **kwargs
+        **kwargs,
     ) -> Dict[str, Any]:
         """
         REST API pagination and rate limiting.
@@ -340,8 +343,10 @@ class DataPipelines:
                                     total_requests += 1
                                     break
                                 HTTP_TOO_MANY_REQUESTS = 429  # noqa: PLR2004
-                                if response.status == HTTP_TOO_MANY_REQUESTS:  # Rate limited
-                                    await asyncio.sleep(2 ** attempt)
+                                if (
+                                    response.status == HTTP_TOO_MANY_REQUESTS
+                                ):  # Rate limited
+                                    await asyncio.sleep(2**attempt)
                         except Exception as e:
                             logger.error(f"API request failed: {e}")
                             if attempt == max_retries - 1:
@@ -361,14 +366,25 @@ class DataPipelines:
                         if endpoint["type"] == "nodes":
                             graph.add_node(
                                 item[endpoint["id_field"]],
-                                **{k: v for k, v in item.items() if k != endpoint["id_field"]}
+                                **{
+                                    k: v
+                                    for k, v in item.items()
+                                    if k != endpoint["id_field"]
+                                },
                             )
                         elif endpoint["type"] == "edges":
                             graph.add_edge(
                                 item[endpoint["source_field"]],
                                 item[endpoint["target_field"]],
-                                **{k: v for k, v in item.items()
-                                   if k not in [endpoint["source_field"], endpoint["target_field"]]}
+                                **{
+                                    k: v
+                                    for k, v in item.items()
+                                    if k
+                                    not in [
+                                        endpoint["source_field"],
+                                        endpoint["target_field"],
+                                    ]
+                                },
                             )
 
                     total_items += len(items)
@@ -387,7 +403,7 @@ class DataPipelines:
             "num_edges": graph.number_of_edges(),
             "total_api_requests": total_requests,
             "total_items_fetched": total_items,
-            "processing_time": time.time() - start_time
+            "processing_time": time.time() - start_time,
         }
 
     @staticmethod
@@ -395,7 +411,7 @@ class DataPipelines:
         stream_generator: Iterator[Dict[str, Any]],
         window_size: Optional[int] = None,
         update_interval: float = 1.0,
-        **kwargs
+        **kwargs,
     ) -> Iterator[Dict[str, Any]]:
         """
         Real-time data ingestion from streaming sources.
@@ -427,9 +443,7 @@ class DataPipelines:
                 graph.add_node(item["id"], **item.get("attributes", {}))
             elif item["type"] == "edge":
                 graph.add_edge(
-                    item["source"],
-                    item["target"],
-                    **item.get("attributes", {})
+                    item["source"], item["target"], **item.get("attributes", {})
                 )
 
             # Handle windowing
@@ -454,15 +468,13 @@ class DataPipelines:
                     "num_edges": graph.number_of_edges(),
                     "total_items_processed": total_items,
                     "window_size": len(window) if window_size else None,
-                    "timestamp": datetime.now(tz=timezone.utc).isoformat()
+                    "timestamp": datetime.now(tz=timezone.utc).isoformat(),
                 }
                 last_update = current_time
 
     @staticmethod
     def excel_pipeline(
-        filepath: str,
-        sheet_mapping: Optional[Dict[str, str]] = None,
-        **kwargs
+        filepath: str, sheet_mapping: Optional[Dict[str, str]] = None, **kwargs
     ) -> Dict[str, Any]:
         """
         Multi-sheet Excel processing.
@@ -516,7 +528,11 @@ class DataPipelines:
                     source = row.iloc[0]
                     target = row.iloc[1]
                     MIN_ROW_LENGTH_FOR_ATTRS = 2  # noqa: PLR2004
-                    attrs = row.iloc[2:].to_dict() if len(row) > MIN_ROW_LENGTH_FOR_ATTRS else {}
+                    attrs = (
+                        row.iloc[2:].to_dict()
+                        if len(row) > MIN_ROW_LENGTH_FOR_ATTRS
+                        else {}
+                    )
                     graph.add_edge(source, target, **attrs)
 
             elif data_type == "attributes":
@@ -529,8 +545,11 @@ class DataPipelines:
                     elif "source" in df.columns and "target" in df.columns:
                         source = row["source"]
                         target = row["target"]
-                        attrs = {k: v for k, v in row.items()
-                                if k not in ["source", "target"]}
+                        attrs = {
+                            k: v
+                            for k, v in row.items()
+                            if k not in ["source", "target"]
+                        }
                         if graph.has_edge(source, target):
                             graph.edges[source, target].update(attrs)
 
@@ -541,7 +560,7 @@ class DataPipelines:
             "sheets_processed": list(sheet_mapping.keys()),
             "sheet_mapping": sheet_mapping,
             "processing_time": time.time() - start_time,
-            "source_file": filepath
+            "source_file": filepath,
         }
 
     @staticmethod
@@ -549,7 +568,7 @@ class DataPipelines:
         data: Union[Dict, List],
         graph: nx.DiGraph,
         parent: Optional[Any] = None,
-        parent_key: Optional[str] = None
+        parent_key: Optional[str] = None,
     ):
         """Convert hierarchical JSON to directed graph."""
         if isinstance(data, dict):
@@ -586,9 +605,7 @@ class DataPipelines:
 
     @staticmethod
     def _dataframe_to_graph(
-        df: pd.DataFrame,
-        edge_columns: Optional[Tuple[str, str]] = None,
-        **kwargs
+        df: pd.DataFrame, edge_columns: Optional[Tuple[str, str]] = None, **kwargs
     ) -> Dict[str, Any]:
         """Convert pandas DataFrame to graph."""
         if edge_columns is None:
@@ -608,15 +625,12 @@ class DataPipelines:
             "num_nodes": graph.number_of_nodes(),
             "num_edges": graph.number_of_edges(),
             "edge_columns": edge_columns,
-            "attributes": edge_attrs
+            "attributes": edge_attrs,
         }
 
     @staticmethod
     def _parse_custom_json(
-        data: Any,
-        node_path: Optional[str],
-        edge_path: Optional[str],
-        **kwargs
+        data: Any, node_path: Optional[str], edge_path: Optional[str], **kwargs
     ) -> nx.Graph:
         """Parse custom JSON format using JSONPath-like expressions."""
         # Simplified JSONPath implementation
@@ -628,7 +642,9 @@ class DataPipelines:
             nodes = DataPipelines._extract_path(data, node_path)
             for node in nodes:
                 if isinstance(node, dict) and "id" in node:
-                    graph.add_node(node["id"], **{k: v for k, v in node.items() if k != "id"})
+                    graph.add_node(
+                        node["id"], **{k: v for k, v in node.items() if k != "id"}
+                    )
 
         # Extract edges
         if edge_path:
@@ -638,7 +654,11 @@ class DataPipelines:
                     graph.add_edge(
                         edge["source"],
                         edge["target"],
-                        **{k: v for k, v in edge.items() if k not in ["source", "target"]}
+                        **{
+                            k: v
+                            for k, v in edge.items()
+                            if k not in ["source", "target"]
+                        },
                     )
 
         return graph

@@ -14,6 +14,7 @@ import redis
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
+
 class RedisRealityCheck:
     """Test Redis persistence with real server processes."""
 
@@ -24,7 +25,9 @@ class RedisRealityCheck:
     def setup_redis_connection(self):
         """Connect to Redis and verify it's working."""
         try:
-            self.redis_client = redis.Redis(host='localhost', port=6379, decode_responses=True)
+            self.redis_client = redis.Redis(
+                host="localhost", port=6379, decode_responses=True
+            )
             self.redis_client.ping()
             print("✅ Redis connection established")
             return True
@@ -68,18 +71,20 @@ class RedisRealityCheck:
         """Start the server with Redis backend."""
         try:
             env = os.environ.copy()
-            env.update({
-                "REDIS_URL": "redis://localhost:6379/0",
-                "STORAGE_BACKEND": "redis",
-                "MCP_TRANSPORT": "sse"
-            })
+            env.update(
+                {
+                    "REDIS_URL": "redis://localhost:6379/0",
+                    "STORAGE_BACKEND": "redis",
+                    "MCP_TRANSPORT": "sse",
+                }
+            )
 
             print("🚀 Starting server with Redis backend...")
             self.server_process = subprocess.Popen(
                 [sys.executable, "run_secure_server.py"],
                 env=env,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
+                stderr=subprocess.PIPE,
             )
 
             # Wait for server to start
@@ -156,10 +161,12 @@ class RedisRealityCheck:
                 info = graph_manager.get_graph_info(graph_id)
                 test_graphs[graph_id] = {
                     "nodes": info["num_nodes"],
-                    "edges": info["num_edges"]
+                    "edges": info["num_edges"],
                 }
 
-                print(f"  ✅ Created {graph_id}: {info['num_nodes']} nodes, {info['num_edges']} edges")
+                print(
+                    f"  ✅ Created {graph_id}: {info['num_nodes']} nodes, {info['num_edges']} edges"
+                )
 
             print(f"📊 Created {len(test_graphs)} test graphs")
             return test_graphs
@@ -167,6 +174,7 @@ class RedisRealityCheck:
         except Exception as e:
             print(f"❌ Failed to create test data: {e}")
             import traceback
+
             traceback.print_exc()
             return False
 
@@ -203,10 +211,9 @@ class RedisRealityCheck:
             for graph_id, expected_data in expected_graphs.items():
 
                 # Try to load from Redis
-                if hasattr(graph_manager, '_storage'):
+                if hasattr(graph_manager, "_storage"):
                     stored_graph = graph_manager._storage.load_graph(
-                        graph_manager._default_user,
-                        graph_id
+                        graph_manager._default_user, graph_id
                     )
 
                     if stored_graph is not None:
@@ -215,15 +222,19 @@ class RedisRealityCheck:
                         graph_manager.metadata[graph_id] = {
                             "created_at": "recovered",
                             "graph_type": type(stored_graph).__name__,
-                            "attributes": {}
+                            "attributes": {},
                         }
 
                         # Verify data integrity
                         info = graph_manager.get_graph_info(graph_id)
 
-                        if (info["num_nodes"] == expected_data["nodes"] and
-                            info["num_edges"] == expected_data["edges"]):
-                            print(f"  ✅ Recovered {graph_id}: {info['num_nodes']} nodes, {info['num_edges']} edges")
+                        if (
+                            info["num_nodes"] == expected_data["nodes"]
+                            and info["num_edges"] == expected_data["edges"]
+                        ):
+                            print(
+                                f"  ✅ Recovered {graph_id}: {info['num_nodes']} nodes, {info['num_edges']} edges"
+                            )
                             recovered_count += 1
                         else:
                             print(f"  ❌ Data corruption in {graph_id}")
@@ -234,12 +245,15 @@ class RedisRealityCheck:
                 else:
                     print("  ❌ No storage backend available")
 
-            print(f"📊 Recovery results: {recovered_count}/{len(expected_graphs)} graphs recovered")
+            print(
+                f"📊 Recovery results: {recovered_count}/{len(expected_graphs)} graphs recovered"
+            )
             return recovered_count == len(expected_graphs)
 
         except Exception as e:
             print(f"❌ Data recovery test failed: {e}")
             import traceback
+
             traceback.print_exc()
             return False
 
@@ -282,6 +296,7 @@ class RedisRealityCheck:
         except Exception as e:
             print(f"❌ Server restart test failed: {e}")
             import traceback
+
             traceback.print_exc()
             return False
 
@@ -295,6 +310,7 @@ class RedisRealityCheck:
             print("📝 Test 1: Checking Redis backend availability...")
             try:
                 from src.networkx_mcp.storage.redis_backend import RedisGraphStorage
+
                 print("✅ Redis backend module exists")
             except ImportError:
                 print("❌ Redis backend module not found!")
@@ -306,7 +322,7 @@ class RedisRealityCheck:
                 storage = RedisGraphStorage(
                     redis_url="redis://localhost:6379/0",
                     key_prefix="test_",
-                    compression=True
+                    compression=True,
                 )
                 print("✅ Redis storage initialized")
             except Exception as e:
@@ -328,7 +344,7 @@ class RedisRealityCheck:
                     user_id="test_user",
                     graph_id="test_graph",
                     graph=test_graph,
-                    metadata={"test": "data"}
+                    metadata={"test": "data"},
                 )
 
                 if not save_result:
@@ -343,8 +359,10 @@ class RedisRealityCheck:
                     return False
 
                 # Verify data integrity
-                if (loaded_graph.number_of_nodes() == 3 and
-                    loaded_graph.number_of_edges() == 2):
+                if (
+                    loaded_graph.number_of_nodes() == 3
+                    and loaded_graph.number_of_edges() == 2
+                ):
                     print("✅ Redis operations work correctly")
                     return True
                 else:
@@ -358,8 +376,10 @@ class RedisRealityCheck:
         except Exception as e:
             print(f"❌ Redis backend integration test failed: {e}")
             import traceback
+
             traceback.print_exc()
             return False
+
 
 async def main():
     """Run comprehensive Redis reality check."""
@@ -408,6 +428,7 @@ async def main():
     except Exception as e:
         print(f"\n❌ REDIS REALITY CHECK FAILED: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -415,6 +436,7 @@ async def main():
         # Cleanup
         if tester.server_process:
             tester.stop_server()
+
 
 if __name__ == "__main__":
     success = asyncio.run(main())

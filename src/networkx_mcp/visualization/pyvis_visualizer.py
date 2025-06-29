@@ -23,22 +23,22 @@ class PyvisVisualizer:
             "springLength": 100,
             "springConstant": 0.05,
             "damping": 0.09,
-            "avoidOverlap": 0.5
+            "avoidOverlap": 0.5,
         },
         "force_atlas": {
             "gravitationalConstant": -50,
             "centralGravity": 0.01,
             "springLength": 100,
             "springConstant": 0.08,
-            "damping": 0.4
+            "damping": 0.4,
         },
         "repulsion": {
             "centralGravity": 0.2,
             "springLength": 200,
             "springConstant": 0.05,
             "nodeDistance": 100,
-            "damping": 0.09
-        }
+            "damping": 0.09,
+        },
     }
 
     @staticmethod
@@ -50,7 +50,7 @@ class PyvisVisualizer:
         font_color: str = "#000000",
         physics: Union[bool, str, Dict] = "barnes_hut",
         hierarchical: bool = False,
-        **kwargs
+        **kwargs,
     ) -> Dict[str, Any]:
         """
         Create an interactive network visualization with physics simulation.
@@ -83,7 +83,7 @@ class PyvisVisualizer:
             bgcolor=bgcolor,
             font_color=font_color,
             directed=graph.is_directed(),
-            notebook=False
+            notebook=False,
         )
 
         # Configure physics
@@ -100,12 +100,13 @@ class PyvisVisualizer:
                 central_gravity=physics_config.get("centralGravity", 0.3),
                 spring_length=physics_config.get("springLength", 100),
                 spring_strength=physics_config.get("springConstant", 0.05),
-                damping=physics_config.get("damping", 0.09)
+                damping=physics_config.get("damping", 0.09),
             )
 
         # Configure hierarchical layout if requested
         if hierarchical:
-            net.set_options("""
+            net.set_options(
+                """
             var options = {
                 "layout": {
                     "hierarchical": {
@@ -118,7 +119,8 @@ class PyvisVisualizer:
                     }
                 }
             }
-            """)
+            """
+            )
 
         # Add nodes with attributes
         PyvisVisualizer._add_nodes(net, graph, **kwargs)
@@ -145,7 +147,7 @@ class PyvisVisualizer:
             "num_nodes": graph.number_of_nodes(),
             "num_edges": graph.number_of_edges(),
             "physics_type": physics if isinstance(physics, str) else "custom",
-            "hierarchical": hierarchical
+            "hierarchical": hierarchical,
         }
 
     @staticmethod
@@ -154,7 +156,7 @@ class PyvisVisualizer:
         communities: Dict[int, List],
         height: str = "750px",
         width: str = "100%",
-        physics: str = "force_atlas"
+        physics: str = "force_atlas",
     ) -> Dict[str, Any]:
         """
         Visualize graph with community coloring.
@@ -172,10 +174,7 @@ class PyvisVisualizer:
         """
         # Create network
         net = Network(
-            height=height,
-            width=width,
-            directed=graph.is_directed(),
-            notebook=False
+            height=height, width=width, directed=graph.is_directed(), notebook=False
         )
 
         # Configure physics for community visualization
@@ -185,13 +184,21 @@ class PyvisVisualizer:
                 central_gravity=0.01,
                 spring_length=100,
                 spring_strength=0.08,
-                damping=0.4
+                damping=0.4,
             )
 
         # Create color palette for communities
         colors = [
-            "#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00",
-            "#ffff33", "#a65628", "#f781bf", "#999999", "#66c2a5"
+            "#e41a1c",
+            "#377eb8",
+            "#4daf4a",
+            "#984ea3",
+            "#ff7f00",
+            "#ffff33",
+            "#a65628",
+            "#f781bf",
+            "#999999",
+            "#66c2a5",
         ]
 
         # Create node to community mapping
@@ -210,19 +217,16 @@ class PyvisVisualizer:
                 label=str(node),
                 color=color,
                 title=f"Node: {node}<br>Community: {comm_id}<br>Degree: {graph.degree(node)}",
-                size=20 + graph.degree(node) * 2
+                size=20 + graph.degree(node) * 2,
             )
 
         # Add edges
         for edge in graph.edges(data=True):
-            net.add_edge(
-                str(edge[0]),
-                str(edge[1]),
-                weight=edge[2].get("weight", 1.0)
-            )
+            net.add_edge(str(edge[0]), str(edge[1]), weight=edge[2].get("weight", 1.0))
 
         # Enable community grouping
-        net.set_options("""
+        net.set_options(
+            """
         var options = {
             "physics": {
                 "enabled": true,
@@ -237,7 +241,8 @@ class PyvisVisualizer:
                 "useDefaultGroups": true
             }
         }
-        """)
+        """
+        )
 
         # Generate HTML
         with tempfile.NamedTemporaryFile(mode="w", suffix=".html", delete=False) as f:
@@ -252,7 +257,7 @@ class PyvisVisualizer:
         return {
             "html": html_content,
             "num_communities": len(communities),
-            "community_sizes": {k: len(v) for k, v in communities.items()}
+            "community_sizes": {k: len(v) for k, v in communities.items()},
         }
 
     @staticmethod
@@ -260,7 +265,7 @@ class PyvisVisualizer:
         tree: nx.DiGraph,
         root: Optional[Any] = None,
         height: str = "750px",
-        width: str = "100%"
+        width: str = "100%",
     ) -> Dict[str, Any]:
         """Create hierarchical visualization for tree structures."""
         if not nx.is_tree(tree):
@@ -278,11 +283,7 @@ class PyvisVisualizer:
 
         # Create network with hierarchical layout
         net = Network(
-            height=height,
-            width=width,
-            directed=True,
-            notebook=False,
-            layout=True
+            height=height, width=width, directed=True, notebook=False, layout=True
         )
 
         # Calculate levels using BFS
@@ -304,7 +305,7 @@ class PyvisVisualizer:
                 label=str(node),
                 level=level,
                 title=f"Node: {node}<br>Level: {level}<br>Children: {tree.out_degree(node)}",
-                size=25
+                size=25,
             )
 
         # Add edges
@@ -312,7 +313,8 @@ class PyvisVisualizer:
             net.add_edge(str(edge[0]), str(edge[1]))
 
         # Set hierarchical options
-        net.set_options("""
+        net.set_options(
+            """
         var options = {
             "layout": {
                 "hierarchical": {
@@ -331,7 +333,8 @@ class PyvisVisualizer:
                 "enabled": false
             }
         }
-        """)
+        """
+        )
 
         # Generate HTML
         with tempfile.NamedTemporaryFile(mode="w", suffix=".html", delete=False) as f:
@@ -347,7 +350,7 @@ class PyvisVisualizer:
             "html": html_content,
             "root": root,
             "num_levels": max(levels.values()) + 1,
-            "tree_height": max(levels.values())
+            "tree_height": max(levels.values()),
         }
 
     @staticmethod
@@ -357,7 +360,7 @@ class PyvisVisualizer:
         node_size_attr: Optional[str] = None,
         node_color_attr: Optional[str] = None,
         node_shape: str = "dot",
-        **kwargs
+        **kwargs,
     ):
         """Add nodes to PyVis network with attributes."""
         # Default sizes and colors
@@ -398,7 +401,7 @@ class PyvisVisualizer:
                 title=title,
                 size=size,
                 color=color,
-                shape=node_shape
+                shape=node_shape,
             )
 
     @staticmethod
@@ -407,7 +410,7 @@ class PyvisVisualizer:
         graph: nx.Graph,
         edge_width_attr: Optional[str] = None,
         edge_color_attr: Optional[str] = None,
-        **kwargs
+        **kwargs,
     ):
         """Add edges to PyVis network with attributes."""
         default_width = 1
@@ -438,19 +441,10 @@ class PyvisVisualizer:
             title = "<br>".join(title_parts)
 
             # Add edge
-            net.add_edge(
-                source,
-                target,
-                width=width,
-                color=color,
-                title=title
-            )
+            net.add_edge(source, target, width=width, color=color, title=title)
 
     @staticmethod
-    def set_custom_options(
-        net: Network,
-        options: Dict[str, Any]
-    ) -> Network:
+    def set_custom_options(net: Network, options: Dict[str, Any]) -> Network:
         """Set custom vis.js options."""
         options_str = json.dumps(options)
         net.set_options(f"var options = {options_str}")

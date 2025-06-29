@@ -31,10 +31,7 @@ class DirectedAnalysis:
     """Analysis tools for directed graphs."""
 
     @staticmethod
-    def dag_analysis(
-        graph: nx.DiGraph,
-        **_params
-    ) -> Dict[str, Any]:
+    def dag_analysis(graph: nx.DiGraph, **_params) -> Dict[str, Any]:
         """
         Analyze Directed Acyclic Graph (DAG) properties.
 
@@ -73,7 +70,7 @@ class DirectedAnalysis:
                 "num_cycles_found": len(cycles),
                 "cycles": cycles,
                 "cycles_truncated": cycles_truncated,
-                "execution_time_ms": (time.time() - start_time) * 1000
+                "execution_time_ms": (time.time() - start_time) * 1000,
             }
 
         # DAG analysis
@@ -129,16 +126,23 @@ class DirectedAnalysis:
 
         # Width (maximum nodes at any level)
         if "nodes_per_level" in results:
-            results["width"] = max(results["nodes_per_level"].values()) if results["nodes_per_level"] else 0
+            results["width"] = (
+                max(results["nodes_per_level"].values())
+                if results["nodes_per_level"]
+                else 0
+            )
 
         # Transitive reduction
         if graph.number_of_edges() < MAX_EDGES_FOR_TRANSITIVE_REDUCTION:
             try:
                 transitive_reduction = nx.transitive_reduction(graph)
-                results["transitive_reduction_edges"] = transitive_reduction.number_of_edges()
+                results["transitive_reduction_edges"] = (
+                    transitive_reduction.number_of_edges()
+                )
                 results["edge_reduction_ratio"] = (
                     1 - transitive_reduction.number_of_edges() / graph.number_of_edges()
-                    if graph.number_of_edges() > 0 else 0
+                    if graph.number_of_edges() > 0
+                    else 0
                 )
             except Exception as e:
                 logger.warning(f"Error computing transitive reduction: {e}")
@@ -193,7 +197,7 @@ class DirectedAnalysis:
         graph: nx.DiGraph,
         algorithm: str = "tarjan",
         return_condensation: bool = False,
-        **_params
+        **_params,
     ) -> Dict[str, Any]:
         """
         Find strongly connected components using various algorithms.
@@ -239,7 +243,7 @@ class DirectedAnalysis:
             "largest_scc_size": max(scc_sizes) if scc_sizes else 0,
             "is_strongly_connected": len(sccs) == 1,
             "trivial_sccs": sum(1 for s in scc_sizes if s == 1),
-            "non_trivial_sccs": sum(1 for s in scc_sizes if s > 1)
+            "non_trivial_sccs": sum(1 for s in scc_sizes if s > 1),
         }
 
         # Size distribution
@@ -255,7 +259,7 @@ class DirectedAnalysis:
                 "num_nodes": condensation.number_of_nodes(),
                 "num_edges": condensation.number_of_edges(),
                 "is_dag": nx.is_directed_acyclic_graph(condensation),
-                "mapping": dict(condensation.graph["mapping"])
+                "mapping": dict(condensation.graph["mapping"]),
             }
 
             # Analyze condensation
@@ -263,7 +267,8 @@ class DirectedAnalysis:
                 # Component relationships
                 results["condensation_graph"]["longest_path_length"] = (
                     nx.dag_longest_path_length(condensation)
-                    if nx.is_directed_acyclic_graph(condensation) else None
+                    if nx.is_directed_acyclic_graph(condensation)
+                    else None
                 )
 
         execution_time = (time.time() - start_time) * 1000
@@ -273,8 +278,7 @@ class DirectedAnalysis:
 
     @staticmethod
     def condensation_graph(
-        graph: nx.DiGraph,
-        **_params
+        graph: nx.DiGraph, **_params
     ) -> Tuple[nx.DiGraph, Dict[str, Any]]:
         """
         Create and analyze the condensation graph (SCC condensation).
@@ -316,7 +320,7 @@ class DirectedAnalysis:
             "original_nodes": graph.number_of_nodes(),
             "original_edges": graph.number_of_edges(),
             "reduction_ratio": C.number_of_nodes() / graph.number_of_nodes(),
-            "is_dag": nx.is_directed_acyclic_graph(C)
+            "is_dag": nx.is_directed_acyclic_graph(C),
         }
 
         if metadata["is_dag"]:
@@ -331,16 +335,13 @@ class DirectedAnalysis:
             "min": min(sizes) if sizes else 0,
             "max": max(sizes) if sizes else 0,
             "mean": np.mean(sizes) if sizes else 0,
-            "std": np.std(sizes) if sizes else 0
+            "std": np.std(sizes) if sizes else 0,
         }
 
         return C, metadata
 
     @staticmethod
-    def tournament_analysis(
-        graph: nx.DiGraph,
-        **_params
-    ) -> Dict[str, Any]:
+    def tournament_analysis(graph: nx.DiGraph, **_params) -> Dict[str, Any]:
         """
         Analyze tournament graph properties.
 
@@ -357,15 +358,14 @@ class DirectedAnalysis:
         n = graph.number_of_nodes()
         max_edges = n * (n - 1) // 2
 
-        is_tournament = (
-            graph.number_of_edges() == max_edges and
-            not any(graph.has_edge(v, u) for u, v in graph.edges())
+        is_tournament = graph.number_of_edges() == max_edges and not any(
+            graph.has_edge(v, u) for u, v in graph.edges()
         )
 
         results = {
             "is_tournament": is_tournament,
             "num_nodes": n,
-            "num_edges": graph.number_of_edges()
+            "num_edges": graph.number_of_edges(),
         }
 
         if not is_tournament:
@@ -434,9 +434,11 @@ class DirectedAnalysis:
             for j in range(3):
                 for k in range(3):
                     if j not in (i, k) and i != k:
-                        if (graph.has_edge(triple[i], triple[j]) and
-                            graph.has_edge(triple[j], triple[k]) and
-                            not graph.has_edge(triple[i], triple[k])):
+                        if (
+                            graph.has_edge(triple[i], triple[j])
+                            and graph.has_edge(triple[j], triple[k])
+                            and not graph.has_edge(triple[i], triple[k])
+                        ):
                             return False
         return True
 
@@ -471,9 +473,7 @@ class DirectedAnalysis:
 
     @staticmethod
     def feedback_arc_set(
-        graph: nx.DiGraph,
-        method: str = "greedy",
-        **_params
+        graph: nx.DiGraph, method: str = "greedy", **_params
     ) -> Dict[str, Any]:
         """
         Find minimum feedback arc set.
@@ -515,9 +515,11 @@ class DirectedAnalysis:
             "feedback_arc_set": fas,
             "size": len(fas),
             "method": method,
-            "fraction_of_edges": len(fas) / graph.number_of_edges() if graph.number_of_edges() > 0 else 0,
+            "fraction_of_edges": (
+                len(fas) / graph.number_of_edges() if graph.number_of_edges() > 0 else 0
+            ),
             "creates_dag": is_dag,
-            "execution_time_ms": execution_time
+            "execution_time_ms": execution_time,
         }
 
     @staticmethod
@@ -603,7 +605,8 @@ class DirectedAnalysis:
 
             # Remove cycles containing this edge
             remaining_cycles = [
-                cycle for cycle in remaining_cycles
+                cycle
+                for cycle in remaining_cycles
                 if not DirectedAnalysis._cycle_contains_edge(cycle, max_edge)
             ]
 
@@ -620,9 +623,7 @@ class DirectedAnalysis:
 
     @staticmethod
     def bow_tie_structure(
-        graph: nx.DiGraph,
-        largest_scc_only: bool = True,
-        **_params
+        graph: nx.DiGraph, largest_scc_only: bool = True, **_params
     ) -> Dict[str, Any]:
         """
         Analyze bow-tie structure of directed graph (common in web graphs).
@@ -673,8 +674,12 @@ class DirectedAnalysis:
         remaining = set(graph.nodes()) - core
 
         for node in remaining:
-            can_reach_core = nx.has_path(graph, node, next(iter(core))) if core else False
-            core_can_reach = nx.has_path(graph, next(iter(core)), node) if core else False
+            can_reach_core = (
+                nx.has_path(graph, node, next(iter(core))) if core else False
+            )
+            core_can_reach = (
+                nx.has_path(graph, next(iter(core)), node) if core else False
+            )
 
             if can_reach_core and not core_can_reach:
                 in_component.add(node)
@@ -682,8 +687,12 @@ class DirectedAnalysis:
                 out_component.add(node)
             elif not can_reach_core and not core_can_reach:
                 # Check if it's a tube or tendril
-                reaches_out = any(nx.has_path(graph, node, out_node) for out_node in out_component)
-                reached_from_in = any(nx.has_path(graph, in_node, node) for in_node in in_component)
+                reaches_out = any(
+                    nx.has_path(graph, node, out_node) for out_node in out_component
+                )
+                reached_from_in = any(
+                    nx.has_path(graph, in_node, node) for in_node in in_component
+                )
 
                 if reaches_out and reached_from_in:
                     tubes.add(node)
@@ -710,14 +719,18 @@ class DirectedAnalysis:
             "out_fraction": len(out_component) / n if n > 0 else 0,
             "tubes_fraction": len(tubes) / n if n > 0 else 0,
             "total_sccs": len(sccs),
-            "largest_scc_only": largest_scc_only
+            "largest_scc_only": largest_scc_only,
         }
 
         # Verify decomposition
         total_classified = (
-            len(core) + len(in_component) + len(out_component) +
-            len(tubes) + len(tendrils_in) + len(tendrils_out) +
-            len(disconnected)
+            len(core)
+            + len(in_component)
+            + len(out_component)
+            + len(tubes)
+            + len(tendrils_in)
+            + len(tendrils_out)
+            + len(disconnected)
         )
         results["all_nodes_classified"] = total_classified == n
 
@@ -730,7 +743,7 @@ class DirectedAnalysis:
     def temporal_graph_import(
         edge_list: List[Tuple[Any, Any, float]],
         time_window: Optional[Tuple[float, float]] = None,
-        **params
+        **params,
     ) -> Tuple[nx.DiGraph, Dict[str, Any]]:
         """
         Import temporal graph from time-stamped edge list.
@@ -750,8 +763,7 @@ class DirectedAnalysis:
         if time_window:
             min_time, max_time = time_window
             filtered_edges = [
-                (u, v, t) for u, v, t in edge_list
-                if min_time <= t <= max_time
+                (u, v, t) for u, v, t in edge_list if min_time <= t <= max_time
             ]
         else:
             filtered_edges = edge_list
@@ -781,7 +793,7 @@ class DirectedAnalysis:
             "time_span": max(timestamps) - min(timestamps) if timestamps else 0,
             "earliest_time": min(timestamps) if timestamps else None,
             "latest_time": max(timestamps) if timestamps else None,
-            "duplicate_edges_collapsed": len(filtered_edges) - G.number_of_edges()
+            "duplicate_edges_collapsed": len(filtered_edges) - G.number_of_edges(),
         }
 
         return G, metadata
@@ -791,7 +803,7 @@ class DirectedAnalysis:
         temporal_edges: List[Tuple[Any, Any, float]],
         centrality_type: str = "degree",
         time_slices: int = 10,
-        **_params
+        **_params,
     ) -> Dict[str, Any]:
         """
         Calculate time-dependent centrality measures.
@@ -827,8 +839,7 @@ class DirectedAnalysis:
 
             # Build graph for this time slice
             G, _ = DirectedAnalysis.temporal_graph_import(
-                temporal_edges,
-                time_window=(start_time, end_time)
+                temporal_edges, time_window=(start_time, end_time)
             )
 
             # Calculate centrality
@@ -849,13 +860,15 @@ class DirectedAnalysis:
             else:
                 centrality = {}
 
-            slices.append({
-                "time_range": (start_time, end_time),
-                "slice_index": i,
-                "num_nodes": G.number_of_nodes(),
-                "num_edges": G.number_of_edges(),
-                "centrality": centrality
-            })
+            slices.append(
+                {
+                    "time_range": (start_time, end_time),
+                    "slice_index": i,
+                    "num_nodes": G.number_of_nodes(),
+                    "num_edges": G.number_of_edges(),
+                    "centrality": centrality,
+                }
+            )
 
         # Track evolution of top nodes
         all_nodes = set()
@@ -865,16 +878,14 @@ class DirectedAnalysis:
         evolution = {}
         for node in all_nodes:
             evolution[node] = [
-                slice_data["centrality"].get(node, 0)
-                for slice_data in slices
+                slice_data["centrality"].get(node, 0) for slice_data in slices
             ]
 
         # Find nodes with highest average centrality
-        avg_centrality = {
-            node: np.mean(values)
-            for node, values in evolution.items()
-        }
-        top_nodes = sorted(avg_centrality.keys(), key=avg_centrality.get, reverse=True)[:10]
+        avg_centrality = {node: np.mean(values) for node, values in evolution.items()}
+        top_nodes = sorted(avg_centrality.keys(), key=avg_centrality.get, reverse=True)[
+            :10
+        ]
 
         return {
             "centrality_type": centrality_type,
@@ -882,7 +893,7 @@ class DirectedAnalysis:
             "slice_data": slices,
             "node_evolution": {node: evolution[node] for node in top_nodes},
             "top_nodes": top_nodes,
-            "time_range": (min_time, max_time)
+            "time_range": (min_time, max_time),
         }
 
     @staticmethod
@@ -890,7 +901,7 @@ class DirectedAnalysis:
         temporal_edges: List[Tuple[Any, Any, float]],
         source: Any,
         target: Any,
-        **_params
+        **_params,
     ) -> Dict[str, Any]:
         """
         Find time-respecting paths in temporal graph.
@@ -944,16 +955,22 @@ class DirectedAnalysis:
             else:
                 duration = 0
 
-            valid_paths.append({
-                "path": [node for node, _ in clean_path],
-                "timestamps": [t for _, t in clean_path[1:]],
-                "length": len(clean_path) - 1,
-                "duration": duration
-            })
+            valid_paths.append(
+                {
+                    "path": [node for node, _ in clean_path],
+                    "timestamps": [t for _, t in clean_path[1:]],
+                    "length": len(clean_path) - 1,
+                    "duration": duration,
+                }
+            )
 
         # Sort by various criteria
-        shortest_path = min(valid_paths, key=lambda p: p["length"]) if valid_paths else None
-        fastest_path = min(valid_paths, key=lambda p: p["duration"]) if valid_paths else None
+        shortest_path = (
+            min(valid_paths, key=lambda p: p["length"]) if valid_paths else None
+        )
+        fastest_path = (
+            min(valid_paths, key=lambda p: p["duration"]) if valid_paths else None
+        )
 
         return {
             "source": source,
@@ -962,7 +979,7 @@ class DirectedAnalysis:
             "paths": valid_paths[:10],  # Limit to 10 paths
             "shortest_path": shortest_path,
             "fastest_path": fastest_path,
-            "reachable": len(valid_paths) > 0
+            "reachable": len(valid_paths) > 0,
         }
 
     @staticmethod
@@ -970,7 +987,7 @@ class DirectedAnalysis:
         temporal_edges: List[Tuple[Any, Any, float]],
         method: str = "snapshots",
         time_slices: int = 10,
-        **_params
+        **_params,
     ) -> Dict[str, Any]:
         """
         Detect dynamic communities in temporal networks.
@@ -1010,8 +1027,7 @@ class DirectedAnalysis:
 
                 # Build graph for this time slice
                 G, _ = DirectedAnalysis.temporal_graph_import(
-                    temporal_edges,
-                    time_window=(start_time, end_time)
+                    temporal_edges, time_window=(start_time, end_time)
                 )
 
                 # Detect communities
@@ -1019,20 +1035,25 @@ class DirectedAnalysis:
                     # Convert to undirected for community detection
                     G_undirected = G.to_undirected()
                     comm_result = CommunityDetection.detect_communities(
-                        G_undirected,
-                        algorithm="louvain"
+                        G_undirected, algorithm="louvain"
                     )
                     communities = comm_result["communities"]
                 else:
                     communities = []
 
-                slices.append({
-                    "time_range": (start_time, end_time),
-                    "slice_index": i,
-                    "communities": communities,
-                    "num_communities": len(communities),
-                    "modularity": comm_result.get("modularity", 0) if G.number_of_nodes() > 0 else 0
-                })
+                slices.append(
+                    {
+                        "time_range": (start_time, end_time),
+                        "slice_index": i,
+                        "communities": communities,
+                        "num_communities": len(communities),
+                        "modularity": (
+                            comm_result.get("modularity", 0)
+                            if G.number_of_nodes() > 0
+                            else 0
+                        ),
+                    }
+                )
 
             # Track community evolution
             # Simple matching based on overlap
@@ -1055,25 +1076,24 @@ class DirectedAnalysis:
                             best_overlap = overlap
                             best_match = k
 
-                    if best_match is not None and best_overlap > COMMUNITY_OVERLAP_THRESHOLD:
-                        transitions.append({
-                            "from": j,
-                            "to": best_match,
-                            "overlap": best_overlap
-                        })
+                    if (
+                        best_match is not None
+                        and best_overlap > COMMUNITY_OVERLAP_THRESHOLD
+                    ):
+                        transitions.append(
+                            {"from": j, "to": best_match, "overlap": best_overlap}
+                        )
 
-                evolution.append({
-                    "from_slice": i,
-                    "to_slice": i + 1,
-                    "transitions": transitions
-                })
+                evolution.append(
+                    {"from_slice": i, "to_slice": i + 1, "transitions": transitions}
+                )
 
             return {
                 "method": "snapshots",
                 "time_slices": time_slices,
                 "slice_data": slices,
                 "evolution": evolution,
-                "time_range": (min_time, max_time)
+                "time_range": (min_time, max_time),
             }
 
         else:
@@ -1082,5 +1102,5 @@ class DirectedAnalysis:
             return {
                 "method": method,
                 "error": "Method not fully implemented",
-                "available_methods": ["snapshots"]
+                "available_methods": ["snapshots"],
             }

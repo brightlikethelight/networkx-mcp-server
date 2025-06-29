@@ -33,7 +33,9 @@ class TestGraphValidationErrors:
         """Test handling of invalid file paths."""
         for invalid_path in error_scenarios["invalid_file_paths"]:
             if invalid_path is not None:
-                valid, error = GraphValidator.validate_file_format(invalid_path, ["json"])
+                valid, error = GraphValidator.validate_file_format(
+                    invalid_path, ["json"]
+                )
                 assert valid is False
                 assert error is not None
 
@@ -236,15 +238,13 @@ class TestAlgorithmErrors:
         # Invalid centrality measure
         with pytest.raises(ValueError):
             await centrality_measures(
-                graph_id="connected",
-                measures=["invalid_measure"]
+                graph_id="connected", measures=["invalid_measure"]
             )
 
         # Eigenvector centrality on disconnected graph may not converge
         try:
             result = await centrality_measures(
-                graph_id="disconnected",
-                measures=["eigenvector"]
+                graph_id="disconnected", measures=["eigenvector"]
             )
             # Should either work or handle convergence failure gracefully
             assert "eigenvector_centrality" in result
@@ -260,8 +260,7 @@ class TestAlgorithmErrors:
         # Create directed graph for flow
         await create_graph(graph_id="flow_test", graph_type="DiGraph")
         await add_nodes(graph_id="flow_test", nodes=["s", "t"])
-        await add_edges(graph_id="flow_test",
-                       edges=[("s", "t", {"capacity": 10})])
+        await add_edges(graph_id="flow_test", edges=[("s", "t", {"capacity": 10})])
 
         # Test with undirected graph (should fail)
         await create_graph(graph_id="undirected_flow", graph_type="Graph")
@@ -269,19 +268,11 @@ class TestAlgorithmErrors:
         await add_edges(graph_id="undirected_flow", edges=[("s", "t")])
 
         with pytest.raises(ValueError):
-            await network_flow(
-                graph_id="undirected_flow",
-                source="s",
-                sink="t"
-            )
+            await network_flow(graph_id="undirected_flow", source="s", sink="t")
 
         # Non-existent source/sink
         with pytest.raises(ValueError):
-            await network_flow(
-                graph_id="flow_test",
-                source="nonexistent",
-                sink="t"
-            )
+            await network_flow(graph_id="flow_test", source="nonexistent", sink="t")
 
     @pytest.mark.asyncio
     async def test_spanning_tree_errors(self):
@@ -314,15 +305,13 @@ class TestIOErrors:
             await import_graph(
                 format="json",
                 path="/nonexistent/path/file.json",
-                graph_id="test_import"
+                graph_id="test_import",
             )
 
         # Invalid format
         with pytest.raises(ValueError):
             await import_graph(
-                format="invalid_format",
-                path="dummy_path",
-                graph_id="test_import"
+                format="invalid_format", path="dummy_path", graph_id="test_import"
             )
 
     @pytest.mark.asyncio
@@ -332,17 +321,11 @@ class TestIOErrors:
 
         # Export non-existent graph
         with pytest.raises(ValueError):
-            await export_graph(
-                graph_id="nonexistent_graph",
-                format="json"
-            )
+            await export_graph(graph_id="nonexistent_graph", format="json")
 
         # Invalid export format
         with pytest.raises(ValueError):
-            await export_graph(
-                graph_id="connected",
-                format="invalid_format"
-            )
+            await export_graph(graph_id="connected", format="invalid_format")
 
     def test_malformed_file_content(self):
         """Test handling of malformed file content."""
@@ -358,6 +341,7 @@ class TestIOErrors:
                 GraphIOHandler.import_from_file(malformed_path, "json")
         finally:
             import os
+
             os.unlink(malformed_path)
 
     def test_unsupported_file_extensions(self):
@@ -372,6 +356,7 @@ class TestIOErrors:
                 GraphIOHandler.import_from_file(unsupported_path, "auto")
         finally:
             import os
+
             os.unlink(unsupported_path)
 
 
@@ -386,10 +371,7 @@ class TestVisualizationErrors:
         await create_graph(graph_id="empty_viz", graph_type="Graph")
 
         # Should handle empty graph gracefully
-        result = await visualize_graph(
-            graph_id="empty_viz",
-            layout="spring"
-        )
+        result = await visualize_graph(graph_id="empty_viz", layout="spring")
 
         # Should not crash and provide some result
         assert "layout_used" in result or "error" in result
@@ -404,8 +386,7 @@ class TestVisualizationErrors:
 
         # Invalid layout should fall back to default
         result = await layout_calculation(
-            graph_id="layout_test",
-            algorithm="invalid_layout"
+            graph_id="layout_test", algorithm="invalid_layout"
         )
 
         # Should fallback to spring layout or handle gracefully
@@ -553,9 +534,9 @@ class TestDataIntegrityErrors:
 
         # Create circular structure
         manager.add_nodes_from("circular_test", ["A", "B", "C"])
-        manager.add_edges_from("circular_test", [
-            ("A", "B"), ("B", "C"), ("C", "A")  # Circular
-        ])
+        manager.add_edges_from(
+            "circular_test", [("A", "B"), ("B", "C"), ("C", "A")]  # Circular
+        )
 
         graph = manager.get_graph("circular_test")
 

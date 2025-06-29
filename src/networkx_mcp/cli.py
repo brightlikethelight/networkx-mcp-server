@@ -83,7 +83,9 @@ class NetworkXCLI:
 
         try:
             self.graph_manager.create_graph(graph_id, graph_type)
-            console.print(f"[green]✓ Created graph '{graph_id}' (type: {graph_type})[/green]")
+            console.print(
+                f"[green]✓ Created graph '{graph_id}' (type: {graph_type})[/green]"
+            )
             self.current_graph = graph_id
         except Exception as e:
             console.print(f"[red]✗ Error: {e}[/red]")
@@ -109,7 +111,7 @@ class NetworkXCLI:
                 graph["graph_type"],
                 str(graph["num_nodes"]),
                 str(graph["num_edges"]),
-                graph["metadata"]["created_at"][:19]
+                graph["metadata"]["created_at"][:19],
             )
 
         console.print(table)
@@ -210,7 +212,9 @@ Degree Stats:
                 # Display top nodes
                 centrality = result.get(f"{measure}_centrality", {})
                 if centrality:
-                    sorted_nodes = sorted(centrality.items(), key=lambda x: x[1], reverse=True)[:10]
+                    sorted_nodes = sorted(
+                        centrality.items(), key=lambda x: x[1], reverse=True
+                    )[:10]
 
                     table = Table(title=f"{measure.title()} Centrality")
                     table.add_column("Node", style="cyan")
@@ -238,7 +242,9 @@ Degree Stats:
 
             elif analysis_type == "components":
                 result = GraphAlgorithms.connected_components(graph)
-                console.print(f"[green]Connected components: {result['num_components']}[/green]")
+                console.print(
+                    f"[green]Connected components: {result['num_components']}[/green]"
+                )
                 console.print(f"Is connected: {result.get('is_connected', 'N/A')}")
 
                 if result["num_components"] > 1:
@@ -267,7 +273,9 @@ Radius: {stats['radius']}
 
             elif analysis_type == "communities":
                 result = GraphAlgorithms.community_detection(graph)
-                console.print(f"[green]Communities found: {result['num_communities']}[/green]")
+                console.print(
+                    f"[green]Communities found: {result['num_communities']}[/green]"
+                )
                 console.print(f"Modularity: {result.get('modularity', 'N/A'):.4f}")
 
                 # Show community sizes
@@ -298,13 +306,15 @@ Radius: {stats['radius']}
                 op,
                 str(stats["count"]),
                 f"{stats['mean_ms']:.2f}",
-                f"{stats['total_ms']:.2f}"
+                f"{stats['total_ms']:.2f}",
             )
 
         console.print(perf_table)
 
         # Operation counts
-        console.print(f"\n[bold]Total Operations:[/bold] {op_counts['total_operations']}")
+        console.print(
+            f"\n[bold]Total Operations:[/bold] {op_counts['total_operations']}"
+        )
         console.print(f"[bold]Error Rate:[/bold] {op_counts['error_rate']:.2f}%")
         console.print(f"[bold]Uptime:[/bold] {op_counts['uptime']}")
 
@@ -318,6 +328,7 @@ Radius: {stats['radius']}
 
         # Add nodes
         import time
+
         start = time.time()
         nodes = list(range(size))
         self.graph_manager.add_nodes_from(test_id, nodes)
@@ -325,6 +336,7 @@ Radius: {stats['radius']}
 
         # Add random edges
         import random  # Using for non-cryptographic test data generation only
+
         edges = []
         for _ in range(size * 2):
             u, v = random.sample(nodes, 2)
@@ -374,9 +386,11 @@ Total: {(node_time + edge_time + centrality_time + component_time)*1000:.2f} ms
 
             # Add friendships
             friendships = [
-                ("Alice", "Bob"), ("Alice", "Charlie"),
-                ("Bob", "Diana"), ("Charlie", "Diana"),
-                ("Diana", "Eve")
+                ("Alice", "Bob"),
+                ("Alice", "Charlie"),
+                ("Bob", "Diana"),
+                ("Charlie", "Diana"),
+                ("Diana", "Eve"),
             ]
             self.graph_manager.add_edges_from("demo_social", friendships)
 
@@ -394,9 +408,12 @@ Total: {(node_time + edge_time + centrality_time + component_time)*1000:.2f} ms
 
             # Add routes with times
             routes = [
-                ("A", "B", {"time": 5}), ("B", "C", {"time": 3}),
-                ("A", "D", {"time": 10}), ("D", "C", {"time": 2}),
-                ("B", "E", {"time": 4}), ("C", "E", {"time": 3})
+                ("A", "B", {"time": 5}),
+                ("B", "C", {"time": 3}),
+                ("A", "D", {"time": 10}),
+                ("D", "C", {"time": 2}),
+                ("B", "E", {"time": 4}),
+                ("C", "E", {"time": 3}),
             ]
             self.graph_manager.add_edges_from("demo_transport", routes)
 
@@ -413,7 +430,11 @@ Total: {(node_time + edge_time + centrality_time + component_time)*1000:.2f} ms
         while True:
             try:
                 # Show prompt
-                prompt = f"[{self.current_graph or 'no graph'}]> " if self.current_graph else "> "
+                prompt = (
+                    f"[{self.current_graph or 'no graph'}]> "
+                    if self.current_graph
+                    else "> "
+                )
                 command = console.input(prompt).strip()
 
                 if not command:
@@ -443,7 +464,9 @@ Total: {(node_time + edge_time + centrality_time + component_time)*1000:.2f} ms
                 elif cmd == "select":
                     if args:
                         self.current_graph = args[0]
-                        console.print(f"[green]Selected graph: {self.current_graph}[/green]")
+                        console.print(
+                            f"[green]Selected graph: {self.current_graph}[/green]"
+                        )
                     else:
                         console.print("[red]Usage: select <graph_id>[/red]")
 
@@ -464,7 +487,9 @@ Total: {(node_time + edge_time + centrality_time + component_time)*1000:.2f} ms
                     if graph_id:
                         try:
                             self.graph_manager.clear_graph(graph_id)
-                            console.print(f"[green]✓ Cleared graph '{graph_id}'[/green]")
+                            console.print(
+                                f"[green]✓ Cleared graph '{graph_id}'[/green]"
+                            )
                         except Exception as e:
                             console.print(f"[red]✗ Error: {e}[/red]")
                     else:
@@ -498,15 +523,19 @@ Total: {(node_time + edge_time + centrality_time + component_time)*1000:.2f} ms
                     if len(args) >= 2:
                         format_type, filepath = args[0], args[1]
                         try:
-                            graph = GraphIOHandler.import_graph(format_type, path=filepath)
+                            graph = GraphIOHandler.import_graph(
+                                format_type, path=filepath
+                            )
                             graph_id = Path(filepath).stem
                             self.graph_manager.graphs[graph_id] = graph
                             self.graph_manager.metadata[graph_id] = {
                                 "created_at": "imported",
-                                "graph_type": type(graph).__name__
+                                "graph_type": type(graph).__name__,
                             }
                             self.current_graph = graph_id
-                            console.print(f"[green]✓ Imported graph as '{graph_id}'[/green]")
+                            console.print(
+                                f"[green]✓ Imported graph as '{graph_id}'[/green]"
+                            )
                         except Exception as e:
                             console.print(f"[red]✗ Error: {e}[/red]")
                     else:
@@ -534,13 +563,14 @@ Total: {(node_time + edge_time + centrality_time + component_time)*1000:.2f} ms
                 console.print(f"[red]Error: {e}[/red]")
 
 
-def main():
+def main() -> None:
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(description="NetworkX MCP Server CLI")
     parser.add_argument("--batch", action="store_true", help="Run in batch mode")
     parser.add_argument("--benchmark", type=int, help="Run benchmark with N nodes")
-    parser.add_argument("--demo", choices=["social", "transport", "citation"],
-                       help="Run demonstration")
+    parser.add_argument(
+        "--demo", choices=["social", "transport", "citation"], help="Run demonstration"
+    )
 
     args = parser.parse_args()
 

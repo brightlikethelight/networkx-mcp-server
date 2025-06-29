@@ -22,7 +22,7 @@ class TestMCPToolsCore:
         result = await create_graph(
             graph_id="test_graph",
             graph_type="Graph",
-            params={"name": "Test Graph", "description": "A test graph"}
+            params={"name": "Test Graph", "description": "A test graph"},
         )
 
         assert result["graph_id"] == "test_graph"
@@ -31,10 +31,7 @@ class TestMCPToolsCore:
         assert "created_at" in result
 
         # Test directed graph
-        result = await create_graph(
-            graph_id="directed_test",
-            graph_type="DiGraph"
-        )
+        result = await create_graph(graph_id="directed_test", graph_type="DiGraph")
         assert result["graph_type"] == "DiGraph"
 
         # Test error case - duplicate ID
@@ -51,9 +48,7 @@ class TestMCPToolsCore:
 
         # Test adding nodes
         result = await add_nodes(
-            graph_id="test",
-            nodes=["A", "B", "C"],
-            params={"color": "red"}
+            graph_id="test", nodes=["A", "B", "C"], params={"color": "red"}
         )
 
         assert result["nodes_added"] == 3
@@ -62,8 +57,7 @@ class TestMCPToolsCore:
 
         # Test adding nodes with individual attributes
         result = await add_nodes(
-            graph_id="test",
-            nodes=[("D", {"weight": 1}), ("E", {"weight": 2})]
+            graph_id="test", nodes=[("D", {"weight": 1}), ("E", {"weight": 2})]
         )
         assert result["nodes_added"] == 2
         assert result["total_nodes"] == 5
@@ -81,7 +75,7 @@ class TestMCPToolsCore:
         result = await add_edges(
             graph_id="test",
             edges=[("A", "B"), ("B", "C"), ("C", "D")],
-            params={"weight": 1.0}
+            params={"weight": 1.0},
         )
 
         assert result["edges_added"] == 3
@@ -90,7 +84,7 @@ class TestMCPToolsCore:
         # Test adding edges with individual attributes
         result = await add_edges(
             graph_id="test",
-            edges=[("A", "C", {"weight": 2.5}), ("B", "D", {"weight": 1.8})]
+            edges=[("A", "C", {"weight": 2.5}), ("B", "D", {"weight": 1.8})],
         )
         assert result["edges_added"] == 2
         assert result["total_edges"] == 5
@@ -172,8 +166,8 @@ class TestMCPToolsAlgorithms:
                 ("C", "D", {"weight": 1.5}),
                 ("D", "E", {"weight": 1.0}),
                 ("E", "A", {"weight": 2.5}),
-                ("A", "C", {"weight": 3.0})
-            ]
+                ("A", "C", {"weight": 3.0}),
+            ],
         )
 
     @pytest.mark.asyncio
@@ -183,10 +177,7 @@ class TestMCPToolsAlgorithms:
 
         # Test single path
         result = await shortest_path(
-            graph_id="algo_test",
-            source="A",
-            target="D",
-            weight="weight"
+            graph_id="algo_test", source="A", target="D", weight="weight"
         )
 
         assert result["source"] == "A"
@@ -197,10 +188,7 @@ class TestMCPToolsAlgorithms:
         assert result["path"][-1] == "D"
 
         # Test all paths from source
-        result = await shortest_path(
-            graph_id="algo_test",
-            source="A"
-        )
+        result = await shortest_path(graph_id="algo_test", source="A")
 
         assert "paths" in result
         assert "lengths" in result
@@ -215,7 +203,7 @@ class TestMCPToolsAlgorithms:
         result = await centrality_measures(
             graph_id="algo_test",
             measures=["degree", "betweenness", "closeness"],
-            top_k=3
+            top_k=3,
         )
 
         assert "degree_centrality" in result
@@ -266,9 +254,7 @@ class TestMCPToolsAlgorithms:
         from networkx_mcp.server import minimum_spanning_tree
 
         result = await minimum_spanning_tree(
-            graph_id="algo_test",
-            weight="weight",
-            algorithm="kruskal"
+            graph_id="algo_test", weight="weight", algorithm="kruskal"
         )
 
         assert "mst_edges" in result
@@ -293,17 +279,25 @@ class TestMCPToolsAdvanced:
         await create_graph(graph_id="community_test", graph_type="Graph")
 
         # Add two communities
-        await add_nodes(graph_id="community_test",
-                       nodes=[f"A{i}" for i in range(5)] + [f"B{i}" for i in range(5)])
+        await add_nodes(
+            graph_id="community_test",
+            nodes=[f"A{i}" for i in range(5)] + [f"B{i}" for i in range(5)],
+        )
 
         # Dense connections within communities
-        community_a_edges = [(f"A{i}", f"A{j}") for i in range(5) for j in range(i+1, 5)]
-        community_b_edges = [(f"B{i}", f"B{j}") for i in range(5) for j in range(i+1, 5)]
+        community_a_edges = [
+            (f"A{i}", f"A{j}") for i in range(5) for j in range(i + 1, 5)
+        ]
+        community_b_edges = [
+            (f"B{i}", f"B{j}") for i in range(5) for j in range(i + 1, 5)
+        ]
         # Sparse connections between communities
         inter_edges = [("A0", "B0"), ("A2", "B3")]
 
-        await add_edges(graph_id="community_test",
-                       edges=community_a_edges + community_b_edges + inter_edges)
+        await add_edges(
+            graph_id="community_test",
+            edges=community_a_edges + community_b_edges + inter_edges,
+        )
 
     @pytest.mark.asyncio
     async def test_community_detection_tool(self):
@@ -311,9 +305,7 @@ class TestMCPToolsAdvanced:
         from networkx_mcp.server import advanced_community_detection
 
         result = await advanced_community_detection(
-            graph_id="community_test",
-            algorithm="louvain",
-            params={"resolution": 1.0}
+            graph_id="community_test", algorithm="louvain", params={"resolution": 1.0}
         )
 
         assert "communities" in result
@@ -341,7 +333,7 @@ class TestMCPToolsAdvanced:
         result = await generate_graph(
             graph_id="generated_er",
             generator_type="erdos_renyi",
-            params={"n": 20, "p": 0.1, "seed": 42}
+            params={"n": 20, "p": 0.1, "seed": 42},
         )
 
         assert result["graph_id"] == "generated_er"
@@ -357,7 +349,7 @@ class TestMCPToolsAdvanced:
         result = await generate_graph(
             graph_id="generated_ba",
             generator_type="barabasi_albert",
-            params={"n": 50, "m": 3, "seed": 42}
+            params={"n": 50, "m": 3, "seed": 42},
         )
 
         assert result["generator_type"] == "barabasi_albert"
@@ -379,15 +371,12 @@ class TestMCPToolsAdvanced:
                 ("s", "b", {"capacity": 8}),
                 ("a", "t", {"capacity": 5}),
                 ("b", "t", {"capacity": 7}),
-                ("a", "b", {"capacity": 3})
-            ]
+                ("a", "b", {"capacity": 3}),
+            ],
         )
 
         result = await network_flow(
-            graph_id="flow_test",
-            source="s",
-            sink="t",
-            capacity="capacity"
+            graph_id="flow_test", source="s", sink="t", capacity="capacity"
         )
 
         assert "flow_value" in result
@@ -411,11 +400,18 @@ class TestMCPToolsAdvanced:
 
         # Create bipartite graph
         await create_graph(graph_id="bipartite_test", graph_type="Graph")
-        await add_nodes(graph_id="bipartite_test",
-                       nodes=[("A1", {"bipartite": 0}), ("A2", {"bipartite": 0}),
-                             ("B1", {"bipartite": 1}), ("B2", {"bipartite": 1})])
-        await add_edges(graph_id="bipartite_test",
-                       edges=[("A1", "B1"), ("A1", "B2"), ("A2", "B1")])
+        await add_nodes(
+            graph_id="bipartite_test",
+            nodes=[
+                ("A1", {"bipartite": 0}),
+                ("A2", {"bipartite": 0}),
+                ("B1", {"bipartite": 1}),
+                ("B2", {"bipartite": 1}),
+            ],
+        )
+        await add_edges(
+            graph_id="bipartite_test", edges=[("A1", "B1"), ("A1", "B2"), ("A2", "B1")]
+        )
 
         result = await bipartite_analysis(graph_id="bipartite_test")
 
@@ -438,13 +434,21 @@ class TestMCPToolsVisualization:
         await create_graph(graph_id="viz_test", graph_type="Graph")
         await add_nodes(
             graph_id="viz_test",
-            nodes=[("A", {"color": "red"}), ("B", {"color": "blue"}),
-                  ("C", {"color": "green"}), ("D", {"color": "yellow"})]
+            nodes=[
+                ("A", {"color": "red"}),
+                ("B", {"color": "blue"}),
+                ("C", {"color": "green"}),
+                ("D", {"color": "yellow"}),
+            ],
         )
         await add_edges(
             graph_id="viz_test",
-            edges=[("A", "B", {"weight": 1}), ("B", "C", {"weight": 2}),
-                  ("C", "D", {"weight": 1}), ("D", "A", {"weight": 3})]
+            edges=[
+                ("A", "B", {"weight": 1}),
+                ("B", "C", {"weight": 2}),
+                ("C", "D", {"weight": 1}),
+                ("D", "A", {"weight": 3}),
+            ],
         )
 
     @pytest.mark.asyncio
@@ -458,8 +462,8 @@ class TestMCPToolsVisualization:
             params={
                 "node_color_attr": "color",
                 "edge_width_attr": "weight",
-                "show_labels": True
-            }
+                "show_labels": True,
+            },
         )
 
         assert "visualization_type" in result
@@ -478,9 +482,7 @@ class TestMCPToolsVisualization:
         from networkx_mcp.server import layout_calculation
 
         result = await layout_calculation(
-            graph_id="viz_test",
-            algorithm="circular",
-            params={}
+            graph_id="viz_test", algorithm="circular", params={}
         )
 
         assert "layout" in result
@@ -511,10 +513,7 @@ class TestMCPToolsIO:
         await add_edges(graph_id="export_test", edges=[("X", "Y"), ("Y", "Z")])
 
         # Test JSON export
-        result = await export_graph(
-            graph_id="export_test",
-            format="json"
-        )
+        result = await export_graph(graph_id="export_test", format="json")
 
         assert "data" in result
         assert "format" in result
@@ -535,9 +534,7 @@ class TestMCPToolsIO:
 
         # Test JSON import
         result = await import_graph(
-            format="json",
-            path=temp_files["json"],
-            graph_id="imported_test"
+            format="json", path=temp_files["json"], graph_id="imported_test"
         )
 
         assert "graph_id" in result
@@ -558,7 +555,7 @@ class TestMCPToolsIO:
             source_type="csv",
             source_path=temp_files["csv"],
             graph_id="pipeline_test",
-            params={"type_inference": True}
+            params={"type_inference": True},
         )
 
         assert "graph_id" in result
@@ -598,8 +595,7 @@ class TestMCPToolsErrorHandling:
         # Test invalid centrality measure
         with pytest.raises(ValueError):
             await centrality_measures(
-                graph_id="error_test",
-                measures=["invalid_measure"]
+                graph_id="error_test", measures=["invalid_measure"]
             )
 
     @pytest.mark.asyncio
@@ -723,7 +719,9 @@ async def test_tool_parameter_validation():
         await create_graph(graph_id=123, graph_type="Graph")  # Invalid ID type
 
     with pytest.raises((ValueError, TypeError)):
-        await create_graph(graph_id="test", graph_type="InvalidType")  # Invalid graph type
+        await create_graph(
+            graph_id="test", graph_type="InvalidType"
+        )  # Invalid graph type
 
 
 if __name__ == "__main__":

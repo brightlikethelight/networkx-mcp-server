@@ -16,15 +16,14 @@ class TestMCPServerIntegration:
         server = NetworkXMCPServer()
 
         # Server should have tools registered
-        assert hasattr(server, 'tools')
+        assert hasattr(server, "tools")
         assert len(server.tools) > 30  # Should have 39+ tools
 
     async def test_create_and_analyze_graph(self, mcp_server):
         """Test creating a graph and running analysis."""
         # Create a graph
         create_result = await mcp_server.handle_tool_call(
-            "create_graph",
-            {"graph_type": "undirected"}
+            "create_graph", {"graph_type": "undirected"}
         )
 
         assert create_result["success"] is True
@@ -35,22 +34,19 @@ class TestMCPServerIntegration:
         # Add nodes
         for i in range(5):
             await mcp_server.handle_tool_call(
-                "add_node",
-                {"graph_id": graph_id, "node_id": i}
+                "add_node", {"graph_id": graph_id, "node_id": i}
             )
 
         # Add edges
         edges = [(0, 1), (1, 2), (2, 3), (3, 4), (4, 0)]
         for u, v in edges:
             await mcp_server.handle_tool_call(
-                "add_edge",
-                {"graph_id": graph_id, "source": u, "target": v}
+                "add_edge", {"graph_id": graph_id, "source": u, "target": v}
             )
 
         # Get graph info
         info_result = await mcp_server.handle_tool_call(
-            "get_graph_info",
-            {"graph_id": graph_id}
+            "get_graph_info", {"graph_id": graph_id}
         )
 
         assert info_result["nodes"] == 5
@@ -58,8 +54,7 @@ class TestMCPServerIntegration:
 
         # Run analysis
         analysis_result = await mcp_server.handle_tool_call(
-            "analyze_graph",
-            {"graph_id": graph_id, "analyses": ["basic", "centrality"]}
+            "analyze_graph", {"graph_id": graph_id, "analyses": ["basic", "centrality"]}
         )
 
         assert "basic_stats" in analysis_result
@@ -70,8 +65,7 @@ class TestMCPServerIntegration:
         """Test importing and exporting graphs."""
         # Create a graph
         create_result = await mcp_server.handle_tool_call(
-            "create_graph",
-            {"graph_type": "directed"}
+            "create_graph", {"graph_type": "directed"}
         )
 
         graph_id = create_result["graph_id"]
@@ -79,13 +73,12 @@ class TestMCPServerIntegration:
         # Add some data
         await mcp_server.handle_tool_call(
             "add_edge",
-            {"graph_id": graph_id, "source": "A", "target": "B", "weight": 1.5}
+            {"graph_id": graph_id, "source": "A", "target": "B", "weight": 1.5},
         )
 
         # Export to JSON
         export_result = await mcp_server.handle_tool_call(
-            "export_graph",
-            {"graph_id": graph_id, "format": "json"}
+            "export_graph", {"graph_id": graph_id, "format": "json"}
         )
 
         assert "data" in export_result
@@ -93,23 +86,18 @@ class TestMCPServerIntegration:
         assert json.loads(export_result["data"]) is not None
 
         # Delete the graph
-        await mcp_server.handle_tool_call(
-            "delete_graph",
-            {"graph_id": graph_id}
-        )
+        await mcp_server.handle_tool_call("delete_graph", {"graph_id": graph_id})
 
         # Import it back
         import_result = await mcp_server.handle_tool_call(
-            "import_graph",
-            {"format": "json", "data": export_result["data"]}
+            "import_graph", {"format": "json", "data": export_result["data"]}
         )
 
         new_graph_id = import_result["graph_id"]
 
         # Verify it's the same
         info = await mcp_server.handle_tool_call(
-            "get_graph_info",
-            {"graph_id": new_graph_id}
+            "get_graph_info", {"graph_id": new_graph_id}
         )
 
         assert info["directed"] is True
@@ -122,8 +110,7 @@ class TestMCPServerIntegration:
 
         # Create a large graph
         create_result = await mcp_server.handle_tool_call(
-            "create_graph",
-            {"graph_type": "undirected"}
+            "create_graph", {"graph_type": "undirected"}
         )
 
         graph_id = create_result["graph_id"]
@@ -137,8 +124,8 @@ class TestMCPServerIntegration:
                 "graph_id": graph_id,
                 "generator": "random",
                 "n": performance_config["medium_graph_size"],
-                "p": 0.01
-            }
+                "p": 0.01,
+            },
         )
 
         generation_time = time.time() - start_time
@@ -149,11 +136,12 @@ class TestMCPServerIntegration:
         algo_start = time.time()
 
         analysis = await mcp_server.handle_tool_call(
-            "analyze_graph",
-            {"graph_id": graph_id, "analyses": ["basic"]}
+            "analyze_graph", {"graph_id": graph_id, "analyses": ["basic"]}
         )
 
         algo_time = time.time() - algo_start
 
         assert algo_time < performance_config["timeout"]
-        assert analysis["basic_stats"]["nodes"] == performance_config["medium_graph_size"]
+        assert (
+            analysis["basic_stats"]["nodes"] == performance_config["medium_graph_size"]
+        )

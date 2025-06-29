@@ -10,6 +10,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
+
 class TestRedisPersistence:
     """Test Redis-based persistence functionality."""
 
@@ -59,10 +60,8 @@ class TestRedisPersistence:
                 graphs_created[graph_id] = {
                     "nodes": info["num_nodes"],
                     "edges": info["num_edges"],
-                    "type": info["graph_type"]
+                    "type": info["graph_type"],
                 }
-
-
 
             # Phase 2: Simulate restart by clearing memory
 
@@ -72,7 +71,6 @@ class TestRedisPersistence:
 
             graph_manager.graphs.clear()
             graph_manager.metadata.clear()
-
 
             # Phase 3: Verify data recovery
 
@@ -86,8 +84,7 @@ class TestRedisPersistence:
                 # Try to load from persistent storage
                 if hasattr(graph_manager, "_storage"):
                     stored_graph = graph_manager._storage.load_graph(
-                        graph_manager._default_user,
-                        graph_id
+                        graph_manager._default_user, graph_id
                     )
 
                     if stored_graph is not None:
@@ -96,14 +93,16 @@ class TestRedisPersistence:
                         graph_manager.metadata[graph_id] = {
                             "created_at": "recovered",
                             "graph_type": type(stored_graph).__name__,
-                            "attributes": {}
+                            "attributes": {},
                         }
 
                         # Verify data integrity
                         info = graph_manager.get_graph_info(graph_id)
 
-                        if (info["num_nodes"] == expected_data["nodes"] and
-                            info["num_edges"] == expected_data["edges"]):
+                        if (
+                            info["num_nodes"] == expected_data["nodes"]
+                            and info["num_edges"] == expected_data["edges"]
+                        ):
                             recovered_count += 1
                         else:
                             pass
@@ -187,6 +186,7 @@ class TestRedisPersistence:
         except Exception:
             return False
 
+
 async def main():
     """Run all Redis persistence tests."""
 
@@ -206,7 +206,7 @@ async def main():
     checks = [
         ("Redis available", redis_available),
         ("Data survives restart", persistence_works),
-        ("Concurrent access safe", concurrent_safe)
+        ("Concurrent access safe", concurrent_safe),
     ]
 
     passed = 0
@@ -214,13 +214,13 @@ async def main():
         if result:
             passed += 1
 
-
     if passed == len(checks):
         pass
     else:
         pass
 
     return passed == len(checks)
+
 
 if __name__ == "__main__":
     success = asyncio.run(main())

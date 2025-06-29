@@ -29,7 +29,7 @@ class GraphGenerators:
         m: Optional[int] = None,
         seed: Optional[int] = None,
         directed: bool = False,
-        **_params
+        **_params,
     ) -> Tuple[nx.Graph, Dict[str, Any]]:
         """
         Generate random graphs using various models.
@@ -72,8 +72,12 @@ class GraphGenerators:
                 "generator": "erdos_renyi_gnp",
                 "n": n,
                 "p": p,
-                "expected_edges": n * (n - 1) * p / MIN_EDGES_FACTOR if not directed else n * (n - 1) * p,
-                "directed": directed
+                "expected_edges": (
+                    n * (n - 1) * p / MIN_EDGES_FACTOR
+                    if not directed
+                    else n * (n - 1) * p
+                ),
+                "directed": directed,
             }
 
         elif graph_type == "gnm":
@@ -96,7 +100,7 @@ class GraphGenerators:
                 "m": m,
                 "max_possible_edges": max_edges,
                 "density": m / max_edges if max_edges > 0 else 0,
-                "directed": directed
+                "directed": directed,
             }
 
         else:
@@ -122,7 +126,7 @@ class GraphGenerators:
         delta_out: float = 0.2,
         seed: Optional[int] = None,
         model: str = "barabasi_albert",
-        **params
+        **params,
     ) -> Tuple[nx.Graph, Dict[str, Any]]:
         """
         Generate scale-free graphs using various models.
@@ -160,14 +164,12 @@ class GraphGenerators:
                 "n": n,
                 "m": m,
                 "expected_edges": m0 * (m0 - 1) / MIN_EDGES_FACTOR + m * (n - m0),
-                "model": "preferential_attachment"
+                "model": "preferential_attachment",
             }
 
         elif model == "extended_ba":
             # Extended Barabási-Albert with additional mechanisms
-            G = nx.extended_barabasi_albert_graph(
-                n, m, p=alpha, q=beta, seed=seed
-            )
+            G = nx.extended_barabasi_albert_graph(n, m, p=alpha, q=beta, seed=seed)
 
             metadata = {
                 "generator": "extended_barabasi_albert",
@@ -175,7 +177,7 @@ class GraphGenerators:
                 "m": m,
                 "p": alpha,
                 "q": beta,
-                "model": "extended_preferential_attachment"
+                "model": "extended_preferential_attachment",
             }
 
         elif model == "powerlaw_cluster":
@@ -188,7 +190,7 @@ class GraphGenerators:
                 "n": n,
                 "m": m,
                 "triangle_probability": p,
-                "model": "powerlaw_with_clustering"
+                "model": "powerlaw_with_clustering",
             }
 
         elif model == "directed_scale_free":
@@ -200,7 +202,7 @@ class GraphGenerators:
                 gamma=gamma,
                 delta_in=delta_in,
                 delta_out=delta_out,
-                seed=seed
+                seed=seed,
             )
 
             metadata = {
@@ -211,7 +213,7 @@ class GraphGenerators:
                 "gamma": gamma,
                 "delta_in": delta_in,
                 "delta_out": delta_out,
-                "model": "directed_preferential_attachment"
+                "model": "directed_preferential_attachment",
             }
 
         else:
@@ -227,8 +229,11 @@ class GraphGenerators:
 
             if len(log_degrees) > MIN_DEGREE_SAMPLES_FOR_ANALYSIS:
                 # Linear regression in log-log space
-                slope, _ = np.polyfit(log_ranks[:len(log_ranks)//MIN_EDGES_FACTOR],
-                                    log_degrees[:len(log_degrees)//MIN_EDGES_FACTOR], 1)
+                slope, _ = np.polyfit(
+                    log_ranks[: len(log_ranks) // MIN_EDGES_FACTOR],
+                    log_degrees[: len(log_degrees) // MIN_EDGES_FACTOR],
+                    1,
+                )
                 metadata["estimated_exponent"] = -slope
 
         return G, metadata
@@ -241,7 +246,7 @@ class GraphGenerators:
         tries: int = 100,
         seed: Optional[int] = None,
         model: str = "watts_strogatz",
-        **_params
+        **_params,
     ) -> Tuple[nx.Graph, Dict[str, Any]]:
         """
         Generate small-world graphs.
@@ -275,7 +280,7 @@ class GraphGenerators:
                 "k": k,
                 "p": p,
                 "expected_edges": n * k // MIN_EDGES_FACTOR,
-                "model": "ring_rewiring"
+                "model": "ring_rewiring",
             }
 
         elif model == "newman_watts_strogatz":
@@ -287,8 +292,9 @@ class GraphGenerators:
                 "n": n,
                 "k": k,
                 "p": p,
-                "expected_edges": n * k // MIN_EDGES_FACTOR + n * k * p // MIN_EDGES_FACTOR,
-                "model": "ring_addition"
+                "expected_edges": n * k // MIN_EDGES_FACTOR
+                + n * k * p // MIN_EDGES_FACTOR,
+                "model": "ring_addition",
             }
 
         elif model == "connected_watts_strogatz":
@@ -301,7 +307,7 @@ class GraphGenerators:
                 "k": k,
                 "p": p,
                 "tries": tries,
-                "model": "connected_ring_rewiring"
+                "model": "connected_ring_rewiring",
             }
 
         else:
@@ -340,7 +346,7 @@ class GraphGenerators:
         d: int,
         seed: Optional[int] = None,
         graph_type: str = "random_regular",
-        **params
+        **params,
     ) -> Tuple[nx.Graph, Dict[str, Any]]:
         """
         Generate regular graphs where every node has the same degree.
@@ -375,7 +381,7 @@ class GraphGenerators:
                 "n": n,
                 "d": d,
                 "edges": n * d // MIN_EDGES_FACTOR,
-                "is_regular": True
+                "is_regular": True,
             }
 
         elif graph_type == "circulant":
@@ -395,7 +401,7 @@ class GraphGenerators:
                 "n": n,
                 "offsets": offsets,
                 "is_regular": True,
-                "is_vertex_transitive": True
+                "is_vertex_transitive": True,
             }
 
         elif graph_type == "cycle":
@@ -408,7 +414,7 @@ class GraphGenerators:
                 "d": 2,
                 "edges": n,
                 "is_regular": True,
-                "diameter": n // 2 if n % 2 == 0 else (n - 1) // 2
+                "diameter": n // 2 if n % 2 == 0 else (n - 1) // 2,
             }
 
         elif graph_type == "complete":
@@ -421,7 +427,7 @@ class GraphGenerators:
                 "d": n - 1,
                 "edges": n * (n - 1) // 2,
                 "is_regular": True,
-                "diameter": 1
+                "diameter": 1,
             }
 
         else:
@@ -436,7 +442,7 @@ class GraphGenerators:
         tree_type: str = "random",
         branching: int = 2,
         seed: Optional[int] = None,
-        **params
+        **params,
     ) -> Tuple[nx.Graph, Dict[str, Any]]:
         """
         Generate tree graphs.
@@ -463,14 +469,16 @@ class GraphGenerators:
             if n <= 0:
                 G = nx.empty_graph(0)
             else:
-                sequence = [random.randint(0, n-1) for _ in range(n-2)]  # noqa: S311
+                sequence = [
+                    random.randint(0, n - 1) for _ in range(n - 2)
+                ]  # noqa: S311
                 G = nx.from_prufer_sequence(sequence)
 
             metadata = {
                 "generator": "random_tree",
                 "n": n,
                 "edges": n - 1 if n > 0 else 0,
-                "is_tree": True
+                "is_tree": True,
             }
 
         elif tree_type == "balanced":
@@ -489,7 +497,7 @@ class GraphGenerators:
                 "n": G.number_of_nodes(),
                 "branching": r,
                 "height": height,
-                "is_tree": True
+                "is_tree": True,
             }
 
         elif tree_type == "star":
@@ -501,7 +509,7 @@ class GraphGenerators:
                 "n": n,
                 "edges": n - 1,
                 "diameter": 2 if n > 2 else 1,  # noqa: PLR2004
-                "is_tree": True
+                "is_tree": True,
             }
 
         elif tree_type == "path":
@@ -513,7 +521,7 @@ class GraphGenerators:
                 "n": n,
                 "edges": n - 1 if n > 0 else 0,
                 "diameter": n - 1 if n > 0 else 0,
-                "is_tree": True
+                "is_tree": True,
             }
 
         elif tree_type == "caterpillar":
@@ -534,7 +542,7 @@ class GraphGenerators:
                 "n": G.number_of_nodes(),
                 "backbone_size": backbone_size,
                 "leaves": G.number_of_nodes() - backbone_size,
-                "is_tree": True
+                "is_tree": True,
             }
 
         else:
@@ -563,7 +571,7 @@ class GraphGenerators:
         p: float = 2,
         seed: Optional[int] = None,
         graph_type: str = "random_geometric",
-        **params
+        **params,
     ) -> Tuple[nx.Graph, Dict[str, Any]]:
         """
         Generate geometric graphs.
@@ -610,7 +618,9 @@ class GraphGenerators:
                 "radius": radius,
                 "dimension": dim,
                 "metric": f"L{p}" if p != 2 else "Euclidean",  # noqa: PLR2004
-                "expected_degree": n * (np.pi * radius**2) if dim == 2 else "varies"  # noqa: PLR2004
+                "expected_degree": (
+                    n * (np.pi * radius**2) if dim == 2 else "varies"
+                ),  # noqa: PLR2004
             }
 
         elif graph_type == "soft_random_geometric":
@@ -619,7 +629,12 @@ class GraphGenerators:
                 pos = {i: np.random.rand(dim) for i in range(n)}
 
             G = nx.soft_random_geometric_graph(
-                n, radius, dim=dim, pos=pos, p_dist=params.get("p_dist", None), seed=seed
+                n,
+                radius,
+                dim=dim,
+                pos=pos,
+                p_dist=params.get("p_dist", None),
+                seed=seed,
             )
 
             metadata = {
@@ -627,7 +642,7 @@ class GraphGenerators:
                 "n": n,
                 "radius": radius,
                 "dimension": dim,
-                "connection_function": "probabilistic"
+                "connection_function": "probabilistic",
             }
 
         elif graph_type == "geographical_threshold":
@@ -642,7 +657,7 @@ class GraphGenerators:
                 "n": n,
                 "theta": theta,
                 "dimension": dim,
-                "model": "weight_distance_threshold"
+                "model": "weight_distance_threshold",
             }
 
         elif graph_type == "knn":
@@ -661,7 +676,9 @@ class GraphGenerators:
                 distances = []
                 for j in range(n):
                     if i != j:
-                        dist = np.linalg.norm(np.array(pos[i]) - np.array(pos[j]), ord=p)
+                        dist = np.linalg.norm(
+                            np.array(pos[i]) - np.array(pos[j]), ord=p
+                        )
                         distances.append((dist, j))
 
                 distances.sort()
@@ -676,7 +693,7 @@ class GraphGenerators:
                 "n": n,
                 "k": k,
                 "dimension": dim,
-                "directed": False
+                "directed": False,
             }
 
         else:
@@ -718,7 +735,7 @@ class GraphGenerators:
         tau2: float = 1.5,
         mu: float = 0.1,
         seed: Optional[int] = None,
-        **params
+        **params,
     ) -> Tuple[nx.Graph, Dict[str, Any]]:
         """
         Generate social network models.
@@ -785,7 +802,7 @@ class GraphGenerators:
                 "community_sizes": sizes,
                 "p_in": p_in,
                 "p_out": p_out,
-                "expected_modularity": (p_in - p_out) * (1 - 1/communities)
+                "expected_modularity": (p_in - p_out) * (1 - 1 / communities),
             }
 
         elif model == "lfr_benchmark":
@@ -801,7 +818,7 @@ class GraphGenerators:
                     max_degree=params.get("max_degree", None),
                     min_community=params.get("min_community", 10),
                     max_community=params.get("max_community", n // 5),
-                    seed=seed
+                    seed=seed,
                 )
 
                 # Extract communities
@@ -815,15 +832,19 @@ class GraphGenerators:
                     "tau2": tau2,
                     "mu": mu,
                     "communities_found": num_communities,
-                    "model": "powerlaw_degree_community_size"
+                    "model": "powerlaw_degree_community_size",
                 }
 
             except Exception as e:
                 # Fallback to stochastic block model
                 logger.warning(f"LFR generation failed, falling back to SBM: {e}")
                 return GraphGenerators.social_network_graph(
-                    n, model="stochastic_block", communities=communities,
-                    p_in=p_in, p_out=p_out, seed=seed
+                    n,
+                    model="stochastic_block",
+                    communities=communities,
+                    p_in=p_in,
+                    p_out=p_out,
+                    seed=seed,
                 )
 
         elif model == "caveman":
@@ -840,14 +861,16 @@ class GraphGenerators:
                 "n": G.number_of_nodes(),
                 "communities": communities,
                 "clique_size": clique_size,
-                "model": "ring_of_cliques"
+                "model": "ring_of_cliques",
             }
 
         elif model == "relaxed_caveman":
             # Relaxed caveman graph
             clique_size = n // communities
             p_relaxation = params.get("p_relaxation", 0.1)
-            G = nx.relaxed_caveman_graph(communities, clique_size, p_relaxation, seed=seed)
+            G = nx.relaxed_caveman_graph(
+                communities, clique_size, p_relaxation, seed=seed
+            )
 
             # Add community labels
             for i, node in enumerate(G.nodes()):
@@ -859,7 +882,7 @@ class GraphGenerators:
                 "communities": communities,
                 "clique_size": clique_size,
                 "p_relaxation": p_relaxation,
-                "model": "relaxed_ring_of_cliques"
+                "model": "relaxed_ring_of_cliques",
             }
 
         else:
@@ -879,9 +902,7 @@ class GraphGenerators:
             # Calculate modularity
             if comm_nodes:
                 communities_list = list(comm_nodes.values())
-                modularity = nx.algorithms.community.modularity(
-                    G, communities_list
-                )
+                modularity = nx.algorithms.community.modularity(G, communities_list)
                 metadata["actual_modularity"] = modularity
 
                 # Calculate mixing parameter (fraction of inter-community edges)
@@ -904,7 +925,7 @@ class GraphGenerators:
         method: str = "configuration",
         create_using: Optional[nx.Graph] = None,
         seed: Optional[int] = None,
-        **_params
+        **_params,
     ) -> Tuple[nx.Graph, Dict[str, Any]]:
         """
         Generate graph from a given degree sequence.
@@ -948,12 +969,14 @@ class GraphGenerators:
                 G = nx.Graph(G)
                 G.remove_edges_from(nx.selfloop_edges(G))
             else:
-                G = nx.configuration_model(degree_sequence, create_using=create_using, seed=seed)
+                G = nx.configuration_model(
+                    degree_sequence, create_using=create_using, seed=seed
+                )
 
             metadata = {
                 "generator": "configuration_model",
                 "method": "stub_matching",
-                "graphical": is_graphical
+                "graphical": is_graphical,
             }
 
         elif method == "expected_degree":
@@ -970,7 +993,7 @@ class GraphGenerators:
             metadata = {
                 "generator": "expected_degree_graph",
                 "method": "probabilistic",
-                "graphical": is_graphical
+                "graphical": is_graphical,
             }
 
         elif method == "havel_hakimi":
@@ -980,7 +1003,7 @@ class GraphGenerators:
             metadata = {
                 "generator": "havel_hakimi",
                 "method": "deterministic",
-                "graphical": True
+                "graphical": True,
             }
 
         else:
@@ -988,23 +1011,27 @@ class GraphGenerators:
             raise ValueError(msg)
 
         # Add degree sequence statistics
-        metadata.update({
-            "n": n,
-            "degree_sequence_sum": sum(degree_sequence),
-            "degree_sequence_min": min(degree_sequence),
-            "degree_sequence_max": max(degree_sequence),
-            "degree_sequence_mean": np.mean(degree_sequence),
-            "degree_sequence_std": np.std(degree_sequence)
-        })
+        metadata.update(
+            {
+                "n": n,
+                "degree_sequence_sum": sum(degree_sequence),
+                "degree_sequence_min": min(degree_sequence),
+                "degree_sequence_max": max(degree_sequence),
+                "degree_sequence_mean": np.mean(degree_sequence),
+                "degree_sequence_std": np.std(degree_sequence),
+            }
+        )
 
         # Compare actual degrees with requested
         actual_degrees = [G.degree(i) for i in range(n)]
         degree_errors = [abs(actual_degrees[i] - degree_sequence[i]) for i in range(n)]
 
-        metadata.update({
-            "degree_error_mean": np.mean(degree_errors),
-            "degree_error_max": max(degree_errors),
-            "exact_degree_match": all(e == 0 for e in degree_errors)
-        })
+        metadata.update(
+            {
+                "degree_error_mean": np.mean(degree_errors),
+                "degree_error_max": max(degree_errors),
+                "exact_degree_match": all(e == 0 for e in degree_errors),
+            }
+        )
 
         return G, metadata
