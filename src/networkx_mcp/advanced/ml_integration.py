@@ -202,7 +202,7 @@ class MLIntegration:
 
                     if len(walk) == 1:
                         # First step: uniform random
-                        next_node = random.choice(neighbors)
+                        next_node = random.choice(neighbors)  # noqa: S311
                     else:
                         # Biased walk
                         prev = walk[-2]
@@ -437,13 +437,12 @@ class MLIntegration:
                         "spectral_radius": max(abs(eigenvalues)),
                         "algebraic_connectivity": eigenvalues[-2] if len(eigenvalues) > 1 else 0
                     }
-                else:
+                elif HAS_SCIPY_SPARSE:
                     # Use sparse methods for larger graphs
-                    if HAS_SCIPY_SPARSE:
-                        eigenvalues, _ = eigs(adj_matrix.asfptype(), k=min(6, graph.number_of_nodes()-1))
-                        eigenvalues = sorted(eigenvalues.real, reverse=True)
+                    eigenvalues, _ = eigs(adj_matrix.asfptype(), k=min(6, graph.number_of_nodes()-1))
+                    eigenvalues = sorted(eigenvalues.real, reverse=True)
 
-                        features["spectral"] = {
+                    features["spectral"] = {
                             "largest_eigenvalue": eigenvalues[0],
                             "second_largest_eigenvalue": eigenvalues[1] if len(eigenvalues) > 1 else 0,
                             "spectral_gap": eigenvalues[0] - eigenvalues[1] if len(eigenvalues) > 1 else 0
@@ -452,7 +451,7 @@ class MLIntegration:
                         features["spectral"] = {"error": "scipy.sparse required for large graphs"}
             except Exception as e:
                 logger.debug(f"Failed to compute spectral features: {e}")
-                features["spectral"] = {"error": f"Could not compute spectral features: {str(e)}"}
+                features["spectral"] = {"error": f"Could not compute spectral features: {e!s}"}
 
         if "graphlet" in feature_types and graph.number_of_nodes() < MAX_NODES_FOR_EXPENSIVE_COMPUTATION:
             # Graphlet features (small subgraph counts)
@@ -545,9 +544,10 @@ class MLIntegration:
             subgraph = graph.subgraph(nodes_subset)
             edges = subgraph.number_of_edges()
 
-            if edges == 6:
+            FOUR_CLIQUE_EDGES = 6  # noqa: PLR2004
+            if edges == FOUR_CLIQUE_EDGES:
                 features["4_cliques"] += 1
-            elif edges == 4:
+            elif edges == 4:  # noqa: PLR2004
                 # Could be 4-cycle or other pattern
                 degrees = [subgraph.degree(n) for n in nodes_subset]
                 if all(d == 2 for d in degrees):

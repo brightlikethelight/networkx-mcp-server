@@ -599,7 +599,8 @@ class GraphGenerators:
         if radius is None:
             if dim == 2:  # noqa: PLR2004
                 # Area of circle = πr², expected degree ≈ n * πr²
-                expected_degree = np.log(n) if n > 1 else 2  # noqa: PLR2004
+                DEFAULT_DEGREE = 2
+                expected_degree = np.log(n) if n > 1 else DEFAULT_DEGREE
                 radius = np.sqrt(expected_degree / (n * np.pi))
             else:
                 # Rough approximation for higher dimensions

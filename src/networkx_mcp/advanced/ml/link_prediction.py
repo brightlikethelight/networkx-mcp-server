@@ -29,13 +29,13 @@ class LinkPredictor(GraphMLModel):
             # Jaccard coefficient
             try:
                 jaccard = next(iter(nx.jaccard_coefficient(self.graph, [(u, v)])))[2]
-            except (StopIteration, nx.NetworkXError) as e:
+            except (StopIteration, nx.NetworkXError):
                 jaccard = 0
 
             # Adamic-Adar index
             try:
                 adamic_adar = next(iter(nx.adamic_adar_index(self.graph, [(u, v)])))[2]
-            except (StopIteration, nx.NetworkXError) as e:
+            except (StopIteration, nx.NetworkXError):
                 adamic_adar = 0
 
             features.append([common_neighbors, jaccard, adamic_adar])
@@ -70,7 +70,8 @@ class LinkPredictor(GraphMLModel):
             if i < len(features):
                 # Simple scoring based on features
                 score = np.sum(features[i])  # Sum of all features
-                predictions[(u, v)] = score > 0.1  # Threshold
+                PREDICTION_THRESHOLD = 0.1  # noqa: PLR2004
+                predictions[(u, v)] = score > PREDICTION_THRESHOLD  # Threshold
                 confidence[(u, v)] = min(1.0, score / 2.0)  # Normalize
 
         return MLResult(
@@ -88,8 +89,9 @@ async def predict_links(graph: nx.Graph, num_predictions: int = 10) -> List[Tupl
     nodes = list(graph.nodes())
     candidates = [(u, v) for u in nodes for v in nodes if u < v and not graph.has_edge(u, v)]
 
-    if len(candidates) > 100:  # Limit for performance
-        candidates = candidates[:100]
+    MAX_CANDIDATES = 100  # noqa: PLR2004
+    if len(candidates) > MAX_CANDIDATES:  # Limit for performance
+        candidates = candidates[:MAX_CANDIDATES]
 
     result = await predictor.predict(candidates)
 
