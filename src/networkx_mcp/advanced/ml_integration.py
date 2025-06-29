@@ -544,15 +544,15 @@ class MLIntegration:
             subgraph = graph.subgraph(nodes_subset)
             edges = subgraph.number_of_edges()
 
-            FOUR_CLIQUE_EDGES = 6  # noqa: PLR2004
+            FOUR_CLIQUE_EDGES = 6
             if edges == FOUR_CLIQUE_EDGES:
                 features["4_cliques"] += 1
             elif edges == 4:  # noqa: PLR2004
                 # Could be 4-cycle or other pattern
                 degrees = [subgraph.degree(n) for n in nodes_subset]
-                if all(d == 2 for d in degrees):
+                if all(d == 2 for d in degrees):  # noqa: PLR2004
                     features["4_cycles"] += 1
-            elif edges == 3:
+            elif edges == 3:  # noqa: PLR2004
                 # Could be 4-path or 4-star
                 degrees = sorted([subgraph.degree(n) for n in nodes_subset])
                 if degrees == [1, 1, 2, 2]:
@@ -640,7 +640,7 @@ class MLIntegration:
                 }
             except Exception as e:
                 logger.debug(f"Failed to compute spectral similarity: {e}")
-                results["spectral"] = {"error": f"Could not compute spectral similarity: {str(e)}"}
+                results["spectral"] = {"error": f"Could not compute spectral similarity: {e!s}"}
 
         if "feature" in metrics:
             # Feature-based similarity
@@ -826,7 +826,8 @@ class MLIntegration:
 
         # Edge anomalies (for small graphs)
         edge_anomalies = []
-        if graph.number_of_edges() < 10000:
+        MAX_EDGES_FOR_ANOMALY = 10000
+        if graph.number_of_edges() < MAX_EDGES_FOR_ANOMALY:
             edge_scores = {}
 
             for u, v in graph.edges():

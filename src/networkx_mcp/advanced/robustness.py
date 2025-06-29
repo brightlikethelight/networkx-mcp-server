@@ -70,7 +70,7 @@ class RobustnessAnalysis:
 
         elif attack_type == "targeted_betweenness":
             # Remove highest betweenness nodes first
-            if G.number_of_nodes() < 1000:
+            if G.number_of_nodes() < MAX_NODES_FOR_EXPENSIVE_ANALYSIS:
                 betweenness = nx.betweenness_centrality(G)
                 nodes_to_remove = sorted(
                     betweenness.keys(),
@@ -207,7 +207,7 @@ class RobustnessAnalysis:
 
         if measure in {"efficiency", "all"}:
             # Global efficiency
-            if graph.number_of_nodes() < 1000:
+            if graph.number_of_nodes() < MAX_NODES_FOR_EXPENSIVE_ANALYSIS:
                 metrics["global_efficiency"] = nx.global_efficiency(graph)
             else:
                 # Approximate for large graphs
@@ -393,7 +393,7 @@ class RobustnessAnalysis:
                     # Site percolation: randomly remove nodes
                     nodes_to_keep = [
                         node for node in G.nodes()
-                        if random.random() < p
+                        if random.random() < p  # noqa: S311
                     ]
                     nodes_to_remove = set(G.nodes()) - set(nodes_to_keep)
                     G.remove_nodes_from(nodes_to_remove)
@@ -402,7 +402,7 @@ class RobustnessAnalysis:
                     # Bond percolation: randomly remove edges
                     edges_to_remove = [
                         edge for edge in G.edges()
-                        if random.random() > p
+                        if random.random() > p  # noqa: S311
                     ]
                     G.remove_edges_from(edges_to_remove)
 
@@ -563,7 +563,8 @@ class RobustnessAnalysis:
             threshold = params.get("threshold", 0.5)
 
             step = 0
-            while step < 100:  # Prevent infinite loops
+            MAX_STEPS = 100  # noqa: PLR2004
+            while step < MAX_STEPS:  # Prevent infinite loops
                 step += 1
                 new_failures = []
 
@@ -613,7 +614,8 @@ class RobustnessAnalysis:
                 del capacities[node]
 
             step = 0
-            while step < 100:
+            MAX_STEPS = 100  # noqa: PLR2004
+            while step < MAX_STEPS:
                 step += 1
 
                 # Redistribute loads (simplified: equally among neighbors)
@@ -659,14 +661,15 @@ class RobustnessAnalysis:
             step = 0
             infected = set(initial_failures)
 
-            while step < 100:
+            MAX_STEPS = 100  # noqa: PLR2004
+            while step < MAX_STEPS:
                 step += 1
                 new_infections = []
 
                 for node in infected:
                     if node in G:
                         for neighbor in G.neighbors(node):
-                            if neighbor not in failed_nodes and random.random() < infection_prob:
+                            if neighbor not in failed_nodes and random.random() < infection_prob:  # noqa: S311
                                 new_infections.append(neighbor)
 
                 if not new_infections:
@@ -739,7 +742,7 @@ class RobustnessAnalysis:
             conn_metrics = {}
 
             # Algebraic connectivity (Fiedler value)
-            if not graph.is_directed() and nx.is_connected(graph) and graph.number_of_nodes() < 1000:
+            if not graph.is_directed() and nx.is_connected(graph) and graph.number_of_nodes() < MAX_NODES_FOR_EXPENSIVE_ANALYSIS:
                 try:
                     conn_metrics["algebraic_connectivity"] = nx.algebraic_connectivity(graph)
                 except Exception as e:
@@ -747,7 +750,7 @@ class RobustnessAnalysis:
                     conn_metrics["algebraic_connectivity"] = None
 
             # Node and edge connectivity
-            if graph.number_of_nodes() < 1000:
+            if graph.number_of_nodes() < MAX_NODES_FOR_EXPENSIVE_ANALYSIS:
                 if graph.is_directed():
                     conn_metrics["node_connectivity"] = nx.node_connectivity(graph)
                     conn_metrics["edge_connectivity"] = nx.edge_connectivity(graph)
@@ -762,7 +765,8 @@ class RobustnessAnalysis:
             redundancy_metrics = {}
 
             # Average number of node-disjoint paths (sample)
-            if graph.number_of_nodes() < 100:
+            SMALL_GRAPH_NODES = 100  # noqa: PLR2004
+            if graph.number_of_nodes() < SMALL_GRAPH_NODES:
                 path_counts = []
                 nodes = list(graph.nodes())
 
@@ -787,7 +791,8 @@ class RobustnessAnalysis:
                 )
 
             # Cycle basis
-            if not graph.is_directed() and graph.number_of_edges() < 1000:
+            if not graph.is_directed() CYCLE_BASIS_EDGE_LIMIT = 1000  # noqa: PLR2004
+            if not graph.is_directed() and graph.number_of_edges() < CYCLE_BASIS_EDGE_LIMIT:
                 cycle_basis = nx.cycle_basis(graph)
                 redundancy_metrics["num_cycles"] = len(cycle_basis)
                 redundancy_metrics["cycle_density"] = (
@@ -810,7 +815,8 @@ class RobustnessAnalysis:
                 if clustering_values:
                     cluster_metrics["clustering_std"] = np.std(clustering_values)
                     cluster_metrics["high_clustering_nodes"] = sum(
-                        1 for c in clustering_values if c > 0.5
+                        1 for c in clustering_values HIGH_CLUSTERING_THRESHOLD = 0.5  # noqa: PLR2004
+                        1 for c in clustering_values if c > HIGH_CLUSTERING_THRESHOLD
                     )
 
             results["clustering"] = cluster_metrics
@@ -819,7 +825,7 @@ class RobustnessAnalysis:
             # Efficiency metrics
             efficiency_metrics = {}
 
-            if graph.number_of_nodes() < 1000:
+            if graph.number_of_nodes() < MAX_NODES_FOR_EXPENSIVE_ANALYSIS:
                 efficiency_metrics["global_efficiency"] = nx.global_efficiency(graph)
 
                 if not graph.is_directed():

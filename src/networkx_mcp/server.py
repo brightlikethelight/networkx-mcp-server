@@ -3527,7 +3527,7 @@ def main():
 
     # Get port from environment or command line (for SSE transport)
     port = 8765  # Changed default port to avoid conflicts
-    
+
     # Get host from environment or default to localhost for security
     host = os.environ.get("MCP_HOST", "127.0.0.1")
 

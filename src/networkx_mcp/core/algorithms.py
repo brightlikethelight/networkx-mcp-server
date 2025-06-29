@@ -266,7 +266,7 @@ class GraphAlgorithms:
         if not HAS_COMMUNITY:
             msg = "Community detection algorithms not available in this NetworkX version"
             raise ImportError(msg)
-        
+
         if method == "louvain":
             communities = nx_comm.louvain_communities(graph)
         elif method == "label_propagation":

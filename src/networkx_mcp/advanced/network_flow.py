@@ -72,9 +72,11 @@ class NetworkFlow:
         # Auto-select algorithm
         if algorithm == "auto":
             num_edges = G.number_of_edges()
-            if num_edges < 1000:
+            SMALL_GRAPH_EDGES = 1000
+            LARGE_GRAPH_EDGES = 10000
+            if num_edges < SMALL_GRAPH_EDGES:
                 algorithm = "edmonds_karp"  # Good for small graphs
-            elif num_edges < 10000:
+            elif num_edges < LARGE_GRAPH_EDGES:
                 algorithm = "dinic"  # Better for medium graphs
             else:
                 algorithm = "preflow_push"  # Best for large graphs

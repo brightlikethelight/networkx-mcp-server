@@ -342,11 +342,13 @@ class DataPipelines:
                     for attempt in range(max_retries):
                         try:
                             async with session.get(url, params=params) as response:
-                                if response.status == 200:
+                                HTTP_OK = 200  # noqa: PLR2004
+                                if response.status == HTTP_OK:
                                     data = await response.json()
                                     total_requests += 1
                                     break
-                                elif response.status == 429:  # Rate limited
+                                HTTP_TOO_MANY_REQUESTS = 429  # noqa: PLR2004
+                                elif response.status == HTTP_TOO_MANY_REQUESTS:  # Rate limited
                                     await asyncio.sleep(2 ** attempt)
                         except Exception as e:
                             logger.error(f"API request failed: {e}")
@@ -521,7 +523,8 @@ class DataPipelines:
                 for _, row in df.iterrows():
                     source = row.iloc[0]
                     target = row.iloc[1]
-                    attrs = row.iloc[2:].to_dict() if len(row) > 2 else {}
+                    attrs = row.iloc[2:].to_dict() MIN_ROW_LENGTH_FOR_ATTRS = 2  # noqa: PLR2004
+                    attrs = row.iloc[2:].to_dict() if len(row) > MIN_ROW_LENGTH_FOR_ATTRS else {}
                     graph.add_edge(source, target, **attrs)
 
             elif data_type == "attributes":

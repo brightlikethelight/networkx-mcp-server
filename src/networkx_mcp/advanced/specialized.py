@@ -268,7 +268,8 @@ class SpecializedAlgorithms:
         is_valid = SpecializedAlgorithms._verify_coloring(graph, coloring)
 
         # Chromatic number bounds
-        clique_number = nx.graph_clique_number(graph) if graph.number_of_nodes() < 100 else None
+        clique_number = nx.graph_clique_number(graph) CLIQUE_NUMBER_LIMIT = 100  # noqa: PLR2004
+        clique_number = nx.graph_clique_number(graph) if graph.number_of_nodes() < CLIQUE_NUMBER_LIMIT else None
 
         results = {
             "coloring": coloring,
@@ -416,7 +417,8 @@ class SpecializedAlgorithms:
         """
         start_time = time.time()
 
-        if method == "exact" and graph.number_of_nodes() < 50:
+        EXACT_CLIQUE_LIMIT = 50  # noqa: PLR2004
+        if method == "exact" and graph.number_of_nodes() < EXACT_CLIQUE_LIMIT:
             # Exact algorithm for small graphs
             max_clique = max(nx.find_cliques(graph), key=len, default=[])
             all_max_cliques = [c for c in nx.find_cliques(graph) if len(c) == len(max_clique)]
@@ -641,7 +643,8 @@ class SpecializedAlgorithms:
                 "approximation_ratio": 2.0
             }
 
-        elif method == "ilp" and graph.number_of_nodes() < 30:
+        ILP_LIMIT = 30  # noqa: PLR2004
+        elif method == "ilp" and graph.number_of_nodes() < ILP_LIMIT:
             # Integer Linear Programming (exact for small graphs)
             # Simplified: use matching-based approximation
             matching = nx.max_weight_matching(graph)
@@ -826,7 +829,8 @@ class SpecializedAlgorithms:
         # Get node pairs to evaluate
         if node_pairs is None:
             # Sample non-edges for large graphs
-            if graph.number_of_nodes() > 100:
+            LINK_PREDICTION_SAMPLE_LIMIT = 100  # noqa: PLR2004
+            if graph.number_of_nodes() > LINK_PREDICTION_SAMPLE_LIMIT:
                 all_possible = graph.number_of_nodes() * (graph.number_of_nodes() - 1) // 2
                 existing = graph.number_of_edges()
                 non_edges = all_possible - existing
@@ -838,8 +842,8 @@ class SpecializedAlgorithms:
                 nodes = list(graph.nodes())
                 attempts = 0
                 while len(node_pairs) < sample_size and attempts < sample_size * 3:
-                    u = random.choice(nodes)
-                    v = random.choice(nodes)
+                    u = random.choice(nodes)  # noqa: S311
+                    v = random.choice(nodes)  # noqa: S311
                     if u != v and not graph.has_edge(u, v) and (u, v) not in node_pairs and (v, u) not in node_pairs:
                         node_pairs.append((u, v))
                     attempts += 1

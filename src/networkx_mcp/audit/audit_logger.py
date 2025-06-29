@@ -118,6 +118,25 @@ class SecurityAlert:
 
 
 class AuditLogger:
+
+    # Threshold constants
+    DELETE_THRESHOLD = 10
+    EXPORT_THRESHOLD = 20
+    AUTH_FAILED_THRESHOLD = 5
+    LARGE_FILE_THRESHOLD = 50
+    HIGH_ACTIVITY_THRESHOLD = 1000
+    MODERATE_ACTIVITY_THRESHOLD = 100
+    BRUTE_FORCE_THRESHOLD = 10
+    EXFILTRATION_SIZE_THRESHOLD = 100
+    RISK_SCORE_CRITICAL = 80
+    RISK_SCORE_HIGH = 60
+    RISK_SCORE_MEDIUM = 40
+    RISK_SCORE_LOW = 20
+    HIGH_RISK_USER_THRESHOLD = 60
+    ACTIVITY_VOLUME_HIGH = 1000
+    ACTIVITY_VOLUME_MEDIUM = 500
+    ACTIVITY_VOLUME_LOW = 200
+
     """Comprehensive audit logging for compliance and security monitoring."""
 
     def __init__(self, storage: StorageBackend):

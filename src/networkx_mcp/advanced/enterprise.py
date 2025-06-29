@@ -398,7 +398,7 @@ class EnterpriseFeatures:
         Job ID
         """
         # Using MD5 for non-cryptographic job ID generation (not security sensitive)
-        job_id = hashlib.md5(  # noqa: S324
+        job_id = hashlib.md5(
             json.dumps(job_config, sort_keys=True).encode()
         ).hexdigest()[:8]
 
@@ -482,7 +482,7 @@ class EnterpriseFeatures:
         Version ID
         """
         # Using MD5 for non-cryptographic version ID generation (not security sensitive)
-        version_id = hashlib.md5(  # noqa: S324
+        version_id = hashlib.md5(
             f"{version_name}_{datetime.now(tz=timezone.utc).isoformat()}".encode()
         ).hexdigest()[:12]
 
@@ -624,12 +624,12 @@ class EnterpriseFeatures:
     def _get_cache_key(self, graph: nx.Graph, operation: str, params: Dict) -> str:
         """Generate cache key for operation."""
         # Using MD5 for non-cryptographic cache key generation (not security sensitive)
-        graph_hash = hashlib.md5(  # noqa: S324
+        graph_hash = hashlib.md5(
             f"{graph.number_of_nodes()}_{graph.number_of_edges()}".encode()
         ).hexdigest()[:8]
 
         # Using MD5 for non-cryptographic params hash (not security sensitive)
-        params_hash = hashlib.md5(  # noqa: S324
+        params_hash = hashlib.md5(
             json.dumps(params, sort_keys=True).encode()
         ).hexdigest()[:8]
 
