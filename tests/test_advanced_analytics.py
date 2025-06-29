@@ -4,10 +4,16 @@
 import networkx as nx
 import pytest
 
-from networkx_mcp.advanced import (BipartiteAnalysis, CommunityDetection,
-                                   DirectedAnalysis, GraphGenerators,
-                                   MLIntegration, NetworkFlow,
-                                   RobustnessAnalysis, SpecializedAlgorithms)
+from networkx_mcp.advanced import (
+    BipartiteAnalysis,
+    CommunityDetection,
+    DirectedAnalysis,
+    GraphGenerators,
+    MLIntegration,
+    NetworkFlow,
+    RobustnessAnalysis,
+    SpecializedAlgorithms,
+)
 
 
 class TestCommunityDetection:

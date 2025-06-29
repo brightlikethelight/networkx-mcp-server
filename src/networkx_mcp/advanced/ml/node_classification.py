@@ -5,8 +5,7 @@ from typing import Any, Dict, List, Optional
 import networkx as nx
 import numpy as np
 
-from networkx_mcp.advanced.ml.base import (GraphMLModel, MLResult,
-                                           extract_node_features)
+from networkx_mcp.advanced.ml.base import GraphMLModel, MLResult, extract_node_features
 
 
 class NodeClassifier(GraphMLModel):

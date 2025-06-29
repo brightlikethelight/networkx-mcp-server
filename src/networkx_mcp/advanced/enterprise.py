@@ -20,8 +20,14 @@ from jinja2 import Template
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch
-from reportlab.platypus import (Image, PageBreak, Paragraph, SimpleDocTemplate,
-                                Spacer, Table)
+from reportlab.platypus import (
+    Image,
+    PageBreak,
+    Paragraph,
+    SimpleDocTemplate,
+    Spacer,
+    Table,
+)
 
 # Performance thresholds
 MAX_NODES_FOR_EXPENSIVE_METRICS = 1000

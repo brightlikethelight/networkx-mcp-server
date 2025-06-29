@@ -98,8 +98,7 @@ class TestMCPToolsCore:
     @pytest.mark.asyncio
     async def test_graph_info_tool(self):
         """Test graph_info MCP tool."""
-        from networkx_mcp.server import (add_edges, add_nodes, create_graph,
-                                         graph_info)
+        from networkx_mcp.server import add_edges, add_nodes, create_graph, graph_info
 
         # Create graph with data
         await create_graph(graph_id="info_test", graph_type="DiGraph")
@@ -368,8 +367,7 @@ class TestMCPToolsAdvanced:
     @pytest.mark.asyncio
     async def test_network_flow_tool(self):
         """Test network_flow MCP tool."""
-        from networkx_mcp.server import (add_edges, add_nodes, create_graph,
-                                         network_flow)
+        from networkx_mcp.server import add_edges, add_nodes, create_graph, network_flow
 
         # Create flow network
         await create_graph(graph_id="flow_test", graph_type="DiGraph")
@@ -404,8 +402,12 @@ class TestMCPToolsAdvanced:
     @pytest.mark.asyncio
     async def test_bipartite_analysis_tool(self):
         """Test bipartite_analysis MCP tool."""
-        from networkx_mcp.server import (add_edges, add_nodes,
-                                         bipartite_analysis, create_graph)
+        from networkx_mcp.server import (
+            add_edges,
+            add_nodes,
+            bipartite_analysis,
+            create_graph,
+        )
 
         # Create bipartite graph
         await create_graph(graph_id="bipartite_test", graph_type="Graph")
@@ -501,8 +503,7 @@ class TestMCPToolsIO:
     @pytest.mark.asyncio
     async def test_export_graph_tool(self, temp_files):
         """Test export_graph MCP tool."""
-        from networkx_mcp.server import (add_edges, add_nodes, create_graph,
-                                         export_graph)
+        from networkx_mcp.server import add_edges, add_nodes, create_graph, export_graph
 
         # Create graph to export
         await create_graph(graph_id="export_test", graph_type="Graph")
@@ -604,8 +605,11 @@ class TestMCPToolsErrorHandling:
     @pytest.mark.asyncio
     async def test_empty_graph_operations(self):
         """Test operations on empty graphs."""
-        from networkx_mcp.server import (centrality_measures,
-                                         connected_components, create_graph)
+        from networkx_mcp.server import (
+            centrality_measures,
+            connected_components,
+            create_graph,
+        )
 
         # Create empty graph
         await create_graph(graph_id="empty_test", graph_type="Graph")
@@ -629,8 +633,12 @@ class TestMCPToolsPerformance:
         """Test performance with moderately large graphs."""
         import time
 
-        from networkx_mcp.server import (add_edges, add_nodes,
-                                         centrality_measures, create_graph)
+        from networkx_mcp.server import (
+            add_edges,
+            add_nodes,
+            centrality_measures,
+            create_graph,
+        )
 
         # Create large graph
         start_time = time.time()

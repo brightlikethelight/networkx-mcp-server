@@ -294,8 +294,7 @@ class RedisRealityCheck:
             # Test 1: Verify Redis backend is available
             print("📝 Test 1: Checking Redis backend availability...")
             try:
-                from src.networkx_mcp.storage.redis_backend import \
-                    RedisGraphStorage
+                from src.networkx_mcp.storage.redis_backend import RedisGraphStorage
                 print("✅ Redis backend module exists")
             except ImportError:
                 print("❌ Redis backend module not found!")

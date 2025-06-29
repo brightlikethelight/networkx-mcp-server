@@ -4,7 +4,7 @@ import asyncio
 import shutil
 import tempfile
 from pathlib import Path
-from typing import AsyncGenerator, Generator
+from typing import Generator
 
 import networkx as nx
 import pytest
@@ -61,7 +61,7 @@ async def mcp_server():
     """Create an MCP server instance."""
     # Since server.py doesn't export a class, we'll mock the functionality
     from networkx_mcp.core.graph_operations import GraphManager
-    
+
     manager = GraphManager()
     yield manager
 

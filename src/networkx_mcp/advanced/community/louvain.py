@@ -5,8 +5,7 @@ from typing import List, Set
 
 import networkx as nx
 
-from networkx_mcp.advanced.community.base import (CommunityDetector,
-                                                  CommunityResult)
+from networkx_mcp.advanced.community.base import CommunityDetector, CommunityResult
 
 
 class LouvainCommunityDetector(CommunityDetector):

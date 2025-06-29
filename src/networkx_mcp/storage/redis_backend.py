@@ -16,8 +16,14 @@ except ImportError:
     import aioredis as redis  # Fallback for older versions
 
 from ..security.validator import SecurityValidator
-from .base import (GraphNotFoundError, StorageBackend, StorageError,
-                   StorageQuotaExceededError, Transaction, TransactionError)
+from .base import (
+    GraphNotFoundError,
+    StorageBackend,
+    StorageError,
+    StorageQuotaExceededError,
+    Transaction,
+    TransactionError,
+)
 
 
 class RedisTransaction(Transaction):

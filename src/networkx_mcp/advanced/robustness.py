@@ -10,6 +10,12 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
+# Constants for robustness analysis
+MAX_NODES_FOR_EXPENSIVE_ANALYSIS = 1000
+MAX_NODES_FOR_METRIC_CALCULATION = 10000
+DEFAULT_NUM_SAMPLES = 10
+METRIC_PRECISION = 4
+
 
 class RobustnessAnalysis:
     """Network robustness and resilience analysis tools."""

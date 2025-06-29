@@ -1,21 +1,26 @@
 """Graph data schemas for NetworkX MCP server."""
 
-from networkx_mcp.schemas.graph_schemas import (AddEdgeRequest,
+from networkx_mcp.schemas.graph_schemas import (
+                                                AddEdgeRequest,
                                                 AddEdgesRequest,
                                                 AddNodeRequest,
                                                 AddNodesRequest,
                                                 AlgorithmResponse,
                                                 CentralityRequest,
                                                 CommunityDetectionRequest,
-                                                CreateGraphRequest, EdgeSchema,
+                                                CreateGraphRequest,
+                                                EdgeSchema,
                                                 ExportGraphRequest,
                                                 GraphAttributesRequest,
-                                                GraphInfoResponse, GraphSchema,
+                                                GraphInfoResponse,
+                                                GraphSchema,
                                                 ImportGraphRequest,
-                                                LayoutRequest, NodeSchema,
+                                                LayoutRequest,
+                                                NodeSchema,
                                                 ShortestPathRequest,
                                                 SubgraphRequest,
-                                                VisualizationData)
+                                                VisualizationData,
+)
 
 __all__ = [
     "AddEdgeRequest",

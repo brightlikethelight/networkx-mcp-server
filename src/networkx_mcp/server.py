@@ -29,10 +29,16 @@ except ImportError:
 from mcp.types import TextContent
 
 # Phase 2 Advanced Analytics imports
-from networkx_mcp.advanced import (BipartiteAnalysis, CommunityDetection,
-                                   DirectedAnalysis, GraphGenerators,
-                                   MLIntegration, NetworkFlow,
-                                   RobustnessAnalysis, SpecializedAlgorithms)
+from networkx_mcp.advanced import (
+    BipartiteAnalysis,
+    CommunityDetection,
+    DirectedAnalysis,
+    GraphGenerators,
+    MLIntegration,
+    NetworkFlow,
+    RobustnessAnalysis,
+    SpecializedAlgorithms,
+)
 from networkx_mcp.advanced.enterprise import EnterpriseFeatures
 from networkx_mcp.core.algorithms import GraphAlgorithms
 from networkx_mcp.core.graph_operations import GraphManager
@@ -41,10 +47,14 @@ from networkx_mcp.integration import DataPipelines
 from networkx_mcp.utils.formatters import GraphFormatter
 from networkx_mcp.utils.monitoring import OperationCounter, PerformanceMonitor
 from networkx_mcp.utils.validators import GraphValidator
+
 # Phase 3 Visualization & Integration imports
-from networkx_mcp.visualization import (MatplotlibVisualizer, PlotlyVisualizer,
-                                        PyvisVisualizer,
-                                        SpecializedVisualizations)
+from networkx_mcp.visualization import (
+    MatplotlibVisualizer,
+    PlotlyVisualizer,
+    PyvisVisualizer,
+    SpecializedVisualizations,
+)
 
 # Constants for edge and data validation
 MIN_EDGE_ELEMENTS = 2
