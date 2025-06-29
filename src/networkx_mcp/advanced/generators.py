@@ -469,7 +469,7 @@ class GraphGenerators:
             if n <= 0:
                 G = nx.empty_graph(0)
             else:
-                sequence = [random.randint(0, n-1) for _ in range(n-2)]
+                sequence = [random.randint(0, n-1) for _ in range(n-2)]  # noqa: S311
                 G = nx.from_prufer_sequence(sequence)
 
             metadata = {
@@ -506,7 +506,7 @@ class GraphGenerators:
                 "generator": "star",
                 "n": n,
                 "edges": n - 1,
-                "diameter": 2 if n > 2 else 1,
+                "diameter": 2 if n > 2 else 1,  # noqa: PLR2004
                 "is_tree": True
             }
 
@@ -597,9 +597,9 @@ class GraphGenerators:
 
         # Default radius to achieve expected average degree ~log(n)
         if radius is None:
-            if dim == 2:
+            if dim == 2:  # noqa: PLR2004
                 # Area of circle = πr², expected degree ≈ n * πr²
-                expected_degree = np.log(n) if n > 1 else 2
+                expected_degree = np.log(n) if n > 1 else 2  # noqa: PLR2004
                 radius = np.sqrt(expected_degree / (n * np.pi))
             else:
                 # Rough approximation for higher dimensions
@@ -614,8 +614,8 @@ class GraphGenerators:
                 "n": n,
                 "radius": radius,
                 "dimension": dim,
-                "metric": f"L{p}" if p != 2 else "Euclidean",
-                "expected_degree": n * (np.pi * radius**2) if dim == 2 else "varies"
+                "metric": f"L{p}" if p != 2 else "Euclidean",  # noqa: PLR2004
+                "expected_degree": n * (np.pi * radius**2) if dim == 2 else "varies"  # noqa: PLR2004
             }
 
         elif graph_type == "soft_random_geometric":
