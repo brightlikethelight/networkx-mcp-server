@@ -443,12 +443,12 @@ class MLIntegration:
                     eigenvalues = sorted(eigenvalues.real, reverse=True)
 
                     features["spectral"] = {
-                            "largest_eigenvalue": eigenvalues[0],
-                            "second_largest_eigenvalue": eigenvalues[1] if len(eigenvalues) > 1 else 0,
-                            "spectral_gap": eigenvalues[0] - eigenvalues[1] if len(eigenvalues) > 1 else 0
-                        }
-                    else:
-                        features["spectral"] = {"error": "scipy.sparse required for large graphs"}
+                        "largest_eigenvalue": eigenvalues[0],
+                        "second_largest_eigenvalue": eigenvalues[1] if len(eigenvalues) > 1 else 0,
+                        "spectral_gap": eigenvalues[0] - eigenvalues[1] if len(eigenvalues) > 1 else 0
+                    }
+                else:
+                    features["spectral"] = {"error": "scipy.sparse required for large graphs"}
             except Exception as e:
                 logger.debug(f"Failed to compute spectral features: {e}")
                 features["spectral"] = {"error": f"Could not compute spectral features: {e!s}"}

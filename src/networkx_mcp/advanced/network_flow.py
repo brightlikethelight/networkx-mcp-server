@@ -65,7 +65,7 @@ class NetworkFlow:
             G = graph.copy()
 
         # Set default capacities if not present
-        for u, v, data in G.edges(data=True):
+        for _, _, data in G.edges(data=True):
             if capacity not in data:
                 data[capacity] = 1
 

@@ -70,7 +70,7 @@ class LinkPredictor(GraphMLModel):
             if i < len(features):
                 # Simple scoring based on features
                 score = np.sum(features[i])  # Sum of all features
-                PREDICTION_THRESHOLD = 0.1  # noqa: PLR2004
+                PREDICTION_THRESHOLD = 0.1
                 predictions[(u, v)] = score > PREDICTION_THRESHOLD  # Threshold
                 confidence[(u, v)] = min(1.0, score / 2.0)  # Normalize
 
@@ -89,7 +89,7 @@ async def predict_links(graph: nx.Graph, num_predictions: int = 10) -> List[Tupl
     nodes = list(graph.nodes())
     candidates = [(u, v) for u in nodes for v in nodes if u < v and not graph.has_edge(u, v)]
 
-    MAX_CANDIDATES = 100  # noqa: PLR2004
+    MAX_CANDIDATES = 100
     if len(candidates) > MAX_CANDIDATES:  # Limit for performance
         candidates = candidates[:MAX_CANDIDATES]
 
