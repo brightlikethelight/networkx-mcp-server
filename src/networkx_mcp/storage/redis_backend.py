@@ -52,7 +52,7 @@ class RedisTransaction(Transaction):
             self._committed = True
         except Exception as e:
             msg = f"Failed to commit transaction: {e}"
-            raise TransactionError(msg)
+            raise TransactionError(msg) from e
 
     async def rollback(self) -> None:
         """Discard all commands in the transaction."""
@@ -152,7 +152,7 @@ class RedisBackend(StorageBackend):
             graph_data = pickle.dumps(graph, protocol=5)
         except Exception as e:
             msg = f"Failed to serialize graph: {e}"
-            raise StorageError(msg)
+            raise StorageError(msg) from e
 
         # Compress
         compressed = zlib.compress(graph_data, level=self.compression_level)
@@ -251,14 +251,14 @@ class RedisBackend(StorageBackend):
             graph_data = zlib.decompress(compressed)
         except Exception as e:
             msg = f"Failed to decompress graph: {e}"
-            raise StorageError(msg)
+            raise StorageError(msg) from e
 
         # Deserialize
         try:
             graph = pickle.loads(graph_data)
         except Exception as e:
             msg = f"Failed to deserialize graph: {e}"
-            raise StorageError(msg)
+            raise StorageError(msg) from e
 
         # Update access time
         if not tx:

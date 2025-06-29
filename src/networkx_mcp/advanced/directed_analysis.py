@@ -14,6 +14,22 @@ import networkx as nx
 import numpy as np
 
 
+try:
+    from networkx_mcp.advanced.community_detection import CommunityDetection
+except ImportError:
+    # Fallback if community detection is not available
+    CommunityDetection = None
+
+
+# Constants for algorithm thresholds
+MAX_CYCLES_LIMIT = 100
+MAX_NODES_FOR_ALL_PATHS = 100
+MAX_EDGES_FOR_TRANSITIVE_REDUCTION = 1000
+MAX_LONGEST_PATHS_DISPLAY = 10
+MAX_CONDENSATION_NODES = 1000
+MAX_EDGES_FOR_EXACT_FAS = 50
+COMMUNITY_OVERLAP_THRESHOLD = 0.3
+
 logger = logging.getLogger(__name__)
 
 
@@ -23,7 +39,7 @@ class DirectedAnalysis:
     @staticmethod
     def dag_analysis(
         graph: nx.DiGraph,
-        **params
+        **_params
     ) -> Dict[str, Any]:
         """
         Analyze Directed Acyclic Graph (DAG) properties.
@@ -47,12 +63,13 @@ class DirectedAnalysis:
             try:
                 cycles = list(nx.simple_cycles(graph))
                 # Limit cycles for large graphs
-                if len(cycles) > 100:
-                    cycles = cycles[:100]
+                if len(cycles) > MAX_CYCLES_LIMIT:
+                    cycles = cycles[:MAX_CYCLES_LIMIT]
                     cycles_truncated = True
                 else:
                     cycles_truncated = False
-            except:
+            except Exception as e:
+                logger.warning(f"Error finding cycles: {e}")
                 cycles = []
                 cycles_truncated = False
 
@@ -97,12 +114,13 @@ class DirectedAnalysis:
             results["longest_path_length"] = longest_path_length
 
             # All longest paths (if graph is small)
-            if graph.number_of_nodes() < 100:
+            if graph.number_of_nodes() < MAX_NODES_FOR_ALL_PATHS:
                 all_longest = DirectedAnalysis._find_all_longest_paths(graph)
-                results["all_longest_paths"] = all_longest[:10]  # Limit to 10
+                results["all_longest_paths"] = all_longest[:MAX_LONGEST_PATHS_DISPLAY]
                 results["num_longest_paths"] = len(all_longest)
 
-        except:
+        except Exception as e:
+            logger.warning(f"Error computing longest path: {e}")
             results["longest_path"] = None
             results["longest_path_length"] = 0
 
@@ -120,7 +138,7 @@ class DirectedAnalysis:
             results["width"] = max(results["nodes_per_level"].values()) if results["nodes_per_level"] else 0
 
         # Transitive reduction
-        if graph.number_of_edges() < 1000:  # Only for smaller graphs
+        if graph.number_of_edges() < MAX_EDGES_FOR_TRANSITIVE_REDUCTION:
             try:
                 transitive_reduction = nx.transitive_reduction(graph)
                 results["transitive_reduction_edges"] = transitive_reduction.number_of_edges()
@@ -128,8 +146,8 @@ class DirectedAnalysis:
                     1 - transitive_reduction.number_of_edges() / graph.number_of_edges()
                     if graph.number_of_edges() > 0 else 0
                 )
-            except:
-                pass
+            except Exception as e:
+                logger.warning(f"Error computing transitive reduction: {e}")
 
         execution_time = (time.time() - start_time) * 1000
         results["execution_time_ms"] = execution_time
@@ -181,7 +199,7 @@ class DirectedAnalysis:
         graph: nx.DiGraph,
         algorithm: str = "tarjan",
         return_condensation: bool = False,
-        **params
+        **_params
     ) -> Dict[str, Any]:
         """
         Find strongly connected components using various algorithms.
@@ -247,7 +265,7 @@ class DirectedAnalysis:
             }
 
             # Analyze condensation
-            if condensation.number_of_nodes() < 1000:
+            if condensation.number_of_nodes() < MAX_CONDENSATION_NODES:
                 # Component relationships
                 results["condensation_graph"]["longest_path_length"] = (
                     nx.dag_longest_path_length(condensation)
@@ -262,7 +280,7 @@ class DirectedAnalysis:
     @staticmethod
     def condensation_graph(
         graph: nx.DiGraph,
-        **params
+        **_params
     ) -> Tuple[nx.DiGraph, Dict[str, Any]]:
         """
         Create and analyze the condensation graph (SCC condensation).
@@ -327,7 +345,7 @@ class DirectedAnalysis:
     @staticmethod
     def tournament_analysis(
         graph: nx.DiGraph,
-        **params
+        **_params
     ) -> Dict[str, Any]:
         """
         Analyze tournament graph properties.
@@ -372,7 +390,8 @@ class DirectedAnalysis:
         try:
             ham_path = nx.tournament_hamiltonian_path(graph)
             results["hamiltonian_path"] = ham_path
-        except:
+        except Exception as e:
+            logger.warning(f"Error finding Hamiltonian path: {e}")
             results["hamiltonian_path"] = None
 
         # Transitivity
@@ -460,7 +479,7 @@ class DirectedAnalysis:
     def feedback_arc_set(
         graph: nx.DiGraph,
         method: str = "greedy",
-        **params
+        **_params
     ) -> Dict[str, Any]:
         """
         Find minimum feedback arc set.
@@ -482,7 +501,7 @@ class DirectedAnalysis:
             # Greedy approximation
             fas = DirectedAnalysis._greedy_feedback_arc_set(graph)
 
-        elif method == "exact" and graph.number_of_edges() < 50:
+        elif method == "exact" and graph.number_of_edges() < MAX_EDGES_FOR_EXACT_FAS:
             # Exact solution for small graphs (exponential time)
             fas = DirectedAnalysis._exact_feedback_arc_set(graph)
 
@@ -609,7 +628,7 @@ class DirectedAnalysis:
     def bow_tie_structure(
         graph: nx.DiGraph,
         largest_scc_only: bool = True,
-        **params
+        **_params
     ) -> Dict[str, Any]:
         """
         Analyze bow-tie structure of directed graph (common in web graphs).
@@ -778,7 +797,7 @@ class DirectedAnalysis:
         temporal_edges: List[Tuple[Any, Any, float]],
         centrality_type: str = "degree",
         time_slices: int = 10,
-        **params
+        **_params
     ) -> Dict[str, Any]:
         """
         Calculate time-dependent centrality measures.
@@ -830,7 +849,8 @@ class DirectedAnalysis:
             elif centrality_type == "pagerank":
                 try:
                     centrality = nx.pagerank(G)
-                except:
+                except Exception as e:
+                    logger.warning(f"PageRank calculation failed: {e}")
                     centrality = {}
             else:
                 centrality = {}
@@ -876,7 +896,7 @@ class DirectedAnalysis:
         temporal_edges: List[Tuple[Any, Any, float]],
         source: Any,
         target: Any,
-        **params
+        **_params
     ) -> Dict[str, Any]:
         """
         Find time-respecting paths in temporal graph.
@@ -956,7 +976,7 @@ class DirectedAnalysis:
         temporal_edges: List[Tuple[Any, Any, float]],
         method: str = "snapshots",
         time_slices: int = 10,
-        **params
+        **_params
     ) -> Dict[str, Any]:
         """
         Detect dynamic communities in temporal networks.
@@ -974,7 +994,8 @@ class DirectedAnalysis:
         --------
         Dict containing temporal community evolution
         """
-        from networkx_mcp.community_detection import CommunityDetection
+        if CommunityDetection is None:
+            return {"error": "Community detection module not available"}
 
         if not temporal_edges:
             return {"error": "No temporal edges provided"}
@@ -1040,7 +1061,7 @@ class DirectedAnalysis:
                             best_overlap = overlap
                             best_match = k
 
-                    if best_match is not None and best_overlap > 0.3:
+                    if best_match is not None and best_overlap > COMMUNITY_OVERLAP_THRESHOLD:
                         transitions.append({
                             "from": j,
                             "to": best_match,

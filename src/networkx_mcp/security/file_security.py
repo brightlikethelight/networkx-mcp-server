@@ -44,7 +44,7 @@ class SecureFileHandler:
                     self.allowed_dirs.append(resolved)
                 except Exception as e:
                     msg = f"Invalid allowed directory '{dir_path}': {e}"
-                    raise FileSecurityError(msg)
+                    raise FileSecurityError(msg) from e
 
             # Always include secure temp
             self.temp_dir = Path(tempfile.mkdtemp(prefix="networkx_mcp_secure_"))
@@ -60,7 +60,7 @@ class SecureFileHandler:
             requested = Path(filepath).resolve(strict=False)
         except Exception as e:
             msg = f"Invalid path '{filepath}': {e}"
-            raise FileSecurityError(msg)
+            raise FileSecurityError(msg) from e
 
         # Check for null bytes (path injection)
         if "\x00" in str(filepath):
@@ -72,9 +72,9 @@ class SecureFileHandler:
             # Resolve symlink target
             try:
                 target = requested.resolve(strict=True)
-            except Exception:
+            except Exception as e:
                 msg = "Cannot resolve symlink target"
-                raise FileSecurityError(msg)
+                raise FileSecurityError(msg) from e
 
             # Symlink target must also be in allowed dirs
             requested = target
@@ -111,9 +111,9 @@ class SecureFileHandler:
 
         return requested
 
-    def validate_format(self, format: str) -> str:
+    def validate_format(self, file_format: str) -> str:
         """Validate file format is safe."""
-        return SecurityValidator.validate_file_format(format)
+        return SecurityValidator.validate_file_format(file_format)
 
     def create_secure_temp_file(self, suffix: str = "", prefix: str = "graph_") -> Path:
         """Create a secure temporary file."""
@@ -144,11 +144,11 @@ class SecureFileHandler:
 
         return secure_path
 
-    def safe_read_graph(self, filepath: Union[str, Path], format: str) -> nx.Graph:
+    def safe_read_graph(self, filepath: Union[str, Path], file_format: str) -> nx.Graph:
         """Safely read graph from file."""
         # Validate inputs
         secure_path = self.validate_path(filepath)
-        safe_format = self.validate_format(format)
+        safe_format = self.validate_format(file_format)
 
         # Check file exists and is readable
         if not secure_path.exists():
@@ -191,14 +191,14 @@ class SecureFileHandler:
             # Sanitize error message
             safe_error = SecurityValidator.sanitize_error_message(e)
             msg = f"Failed to read graph: {safe_error}"
-            raise FileSecurityError(msg)
+            raise FileSecurityError(msg) from e
 
     def safe_write_graph(self, graph: nx.Graph, filepath: Union[str, Path],
-                         format: str) -> Path:
+                         file_format: str) -> Path:
         """Safely write graph to file."""
         # Validate inputs
         secure_path = self.validate_path(filepath)
-        safe_format = self.validate_format(format)
+        safe_format = self.validate_format(file_format)
 
         # Ensure parent directory exists
         secure_path.parent.mkdir(parents=True, exist_ok=True)
@@ -236,7 +236,7 @@ class SecureFileHandler:
             # Sanitize error message
             safe_error = SecurityValidator.sanitize_error_message(e)
             msg = f"Failed to write graph: {safe_error}"
-            raise FileSecurityError(msg)
+            raise FileSecurityError(msg) from e
 
     def _read_json_graph(self, filepath: Path) -> nx.Graph:
         """Read graph from JSON with validation."""
@@ -249,7 +249,7 @@ class SecureFileHandler:
             data = json.loads(content)
         except json.JSONDecodeError as e:
             msg = f"Invalid JSON: {e}"
-            raise FileSecurityError(msg)
+            raise FileSecurityError(msg) from e
 
         # Validate structure
         if not isinstance(data, dict):

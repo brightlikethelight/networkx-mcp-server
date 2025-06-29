@@ -22,9 +22,17 @@ try:
 except ImportError:
     community_louvain = None
 
+try:
+    from sklearn.cluster import SpectralClustering
+except ImportError:
+    SpectralClustering = None
+
 # Constants for algorithm selection
 SMALL_GRAPH_THRESHOLD = 100
 MEDIUM_GRAPH_THRESHOLD = 10000
+LARGE_GRAPH_THRESHOLD_CONSENSUS = 500
+XLARGE_GRAPH_THRESHOLD_CONSENSUS = 1000
+CO_OCCURRENCE_THRESHOLD = 0.5
 
 # Suppress warnings for optional dependencies
 warnings.filterwarnings("ignore", category=ImportWarning)
@@ -189,10 +197,12 @@ class CommunityDetection:
     @staticmethod
     def _spectral_clustering(graph: nx.Graph, num_communities: Optional[int] = None, **kwargs) -> List[Set]:
         """Spectral clustering for community detection."""
-        try:
-            from scipy.sparse import csr_matrix
-            from sklearn.cluster import SpectralClustering
+        if SpectralClustering is None:
+            logger.warning("scikit-learn not available for spectral clustering")
+            # Fallback to modularity optimization
+            return CommunityDetection._modularity_optimization(graph, **kwargs)
 
+        try:
             # Convert to adjacency matrix
             adj_matrix = nx.adjacency_matrix(graph)
 
@@ -221,8 +231,8 @@ class CommunityDetection:
 
             return list(communities.values())
 
-        except ImportError:
-            logger.warning("scikit-learn not available for spectral clustering")
+        except Exception as e:
+            logger.warning(f"Spectral clustering failed: {e}")
             # Fallback to modularity optimization
             return CommunityDetection._modularity_optimization(graph, **kwargs)
 
@@ -473,7 +483,7 @@ class CommunityDetection:
     def _divisive_hierarchy(
         graph: nx.Graph,
         max_levels: int,
-        **params
+        **_params
     ) -> Dict[str, Any]:
         """Generate hierarchy using divisive approach (Girvan-Newman)."""
         levels = []
@@ -546,9 +556,9 @@ class CommunityDetection:
         """
         if algorithms is None:
             algorithms = ["louvain", "label_propagation", "modularity"]
-            if graph.number_of_nodes() < 500:
+            if graph.number_of_nodes() < LARGE_GRAPH_THRESHOLD_CONSENSUS:
                 algorithms.append("girvan_newman")
-            if graph.number_of_nodes() < 1000:
+            if graph.number_of_nodes() < XLARGE_GRAPH_THRESHOLD_CONSENSUS:
                 algorithms.append("spectral")
 
         results = {}
@@ -619,7 +629,8 @@ class CommunityDetection:
                     )
                     modularities.append(result["modularity"])
                     community_counts.append(result["num_communities"])
-                except:
+                except Exception as e:
+                    logger.warning(f"Algorithm {algo} failed: {e}")
                     continue
 
             if modularities:
@@ -740,7 +751,7 @@ class CommunityDetection:
 
         # Mutual information
         mi = 0
-        for i, comm1 in enumerate(communities1):
+        for _i, comm1 in enumerate(communities1):
             for _j, comm2 in enumerate(communities2):
                 intersection = len(comm1 & comm2)
                 if intersection > 0:
@@ -804,7 +815,7 @@ class CommunityDetection:
 
             for j, other_node in enumerate(nodes_list):
                 if i != j and other_node not in visited:
-                    if co_occurrence[i, j] > 0.5:
+                    if co_occurrence[i, j] > CO_OCCURRENCE_THRESHOLD:
                         community.add(other_node)
                         visited.add(other_node)
 

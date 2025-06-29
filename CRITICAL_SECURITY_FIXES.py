@@ -38,7 +38,7 @@ def apply_critical_security_fixes():
 _original_import_graph = GraphIOHandler.import_graph
 _original_export_graph = GraphIOHandler.export_graph
 
-def secure_import_graph(filepath: str, format: str = "auto") -> nx.Graph:
+def secure_import_graph(filepath: str, file_format: str = "auto") -> nx.Graph:
     """Patched import with path validation."""
     # Validate path - no directory traversal!
     if '../' in filepath or filepath.startswith('/'):
@@ -54,7 +54,7 @@ def secure_import_graph(filepath: str, format: str = "auto") -> nx.Graph:
         raise ValueError("File path must be within current directory")
     
     # Never allow pickle format (arbitrary code execution!)
-    if format.lower() in ['pickle', 'pkl']:
+    if file_format.lower() in ['pickle', 'pkl']:
         raise ValueError("Pickle format is disabled for security")
     
     # Validate file exists and is reasonable size
@@ -65,9 +65,9 @@ def secure_import_graph(filepath: str, format: str = "auto") -> nx.Graph:
     if file_size > 100 * 1024 * 1024:  # 100MB limit
         raise ValueError(f"File too large: {file_size} bytes")
     
-    return _original_import_graph(str(safe_path), format)
+    return _original_import_graph(str(safe_path), file_format)
 
-def secure_export_graph(graph_id: str, filepath: str, format: str = "graphml") -> Dict[str, Any]:
+def secure_export_graph(graph_id: str, filepath: str, file_format: str = "graphml") -> Dict[str, Any]:
     """Patched export with path validation."""
     # Same path validation
     if '../' in filepath or filepath.startswith('/'):
@@ -82,13 +82,13 @@ def secure_export_graph(graph_id: str, filepath: str, format: str = "graphml") -
         raise ValueError("File path must be within current directory")
     
     # Never allow pickle
-    if format.lower() in ['pickle', 'pkl']:
+    if file_format.lower() in ['pickle', 'pkl']:
         raise ValueError("Pickle format is disabled for security")
     
     # Create parent directory safely
     safe_path.parent.mkdir(parents=True, exist_ok=True)
     
-    return _original_export_graph(graph_id, str(safe_path), format)
+    return _original_export_graph(graph_id, str(safe_path), file_format)
 
 # Apply patches
 GraphIOHandler.import_graph = staticmethod(secure_import_graph)

@@ -1,6 +1,7 @@
 """Output formatting utilities for NetworkX MCP server."""
 
 from datetime import datetime
+from datetime import timezone
 from typing import Any
 from typing import Dict
 from typing import List
@@ -166,7 +167,7 @@ class GraphFormatter:
             "error": True,
             "error_type": error_type,
             "message": message,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(tz=timezone.utc).isoformat()
         }
 
         if details:
@@ -185,7 +186,7 @@ class GraphFormatter:
             "success": True,
             "operation": operation,
             "message": message,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(tz=timezone.utc).isoformat()
         }
 
         if data:
@@ -224,7 +225,7 @@ class GraphFormatter:
         """Format algorithm execution result."""
         result = {
             "algorithm": algorithm,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(tz=timezone.utc).isoformat()
         }
 
         if execution_time is not None:

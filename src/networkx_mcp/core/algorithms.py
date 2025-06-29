@@ -1,5 +1,7 @@
 """Graph algorithms implementation for NetworkX MCP server."""
 
+import logging
+
 from collections import defaultdict
 from typing import Any
 from typing import Dict
@@ -9,6 +11,20 @@ from typing import Union
 
 import networkx as nx
 import numpy as np
+
+
+logger = logging.getLogger(__name__)
+
+# Try to import community algorithms - they might not be available in all NetworkX versions
+try:
+    import networkx.algorithms.community as nx_comm
+
+    from networkx.algorithms.community import modularity
+    HAS_COMMUNITY = True
+except ImportError:
+    HAS_COMMUNITY = False
+    nx_comm = None
+    modularity = None
 
 
 class GraphAlgorithms:
@@ -88,7 +104,7 @@ class GraphAlgorithms:
             paths = dict(nx.all_pairs_shortest_path(graph))
 
         # Convert to serializable format
-        lengths_dict = {str(u): {str(v): l for v, l in d.items()} for u, d in lengths.items()}
+        lengths_dict = {str(u): {str(v): length for v, length in d.items()} for u, d in lengths.items()}
         paths_dict = {str(u): {str(v): p for v, p in d.items()} for u, d in paths.items()}
 
         return {
@@ -247,14 +263,15 @@ class GraphAlgorithms:
         method: str = "louvain"
     ) -> Dict[str, Any]:
         """Detect communities in a graph."""
+        if not HAS_COMMUNITY:
+            msg = "Community detection algorithms not available in this NetworkX version"
+            raise ImportError(msg)
+        
         if method == "louvain":
-            import networkx.algorithms.community as nx_comm
             communities = nx_comm.louvain_communities(graph)
         elif method == "label_propagation":
-            import networkx.algorithms.community as nx_comm
             communities = list(nx_comm.label_propagation_communities(graph))
         elif method == "greedy_modularity":
-            import networkx.algorithms.community as nx_comm
             communities = list(nx_comm.greedy_modularity_communities(graph))
         else:
             msg = f"Unknown method: {method}"
@@ -264,7 +281,6 @@ class GraphAlgorithms:
         communities_list = [list(comm) for comm in communities]
 
         # Calculate modularity
-        from networkx.algorithms.community import modularity
         mod_score = modularity(graph, communities)
 
         return {
@@ -289,7 +305,8 @@ class GraphAlgorithms:
                     cycles = list(nx.simple_cycles(graph))
                     result["cycles"] = cycles[:10]  # Limit to first 10 cycles
                     result["num_cycles_found"] = len(cycles)
-                except:
+                except (RecursionError, MemoryError) as e:
+                    logger.debug(f"Failed to enumerate cycles: {e}")
                     result["cycles"] = []
                     result["error"] = "Too many cycles to enumerate"
 
@@ -300,7 +317,8 @@ class GraphAlgorithms:
                 result["cycle_basis"] = cycle_basis
                 result["num_independent_cycles"] = len(cycle_basis)
                 result["has_cycle"] = len(cycle_basis) > 0
-            except:
+            except Exception as e:
+                logger.debug(f"Failed to find cycle basis: {e}")
                 result["has_cycle"] = False
                 result["cycle_basis"] = []
 

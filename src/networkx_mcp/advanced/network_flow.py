@@ -29,7 +29,7 @@ class NetworkFlow:
         sink: Any,
         capacity: str = "capacity",
         algorithm: str = "auto",
-        **params
+        **_params
     ) -> Dict[str, Any]:
         """
         Analyze maximum flow using various algorithms.
@@ -373,7 +373,7 @@ class NetworkFlow:
     def _find_min_cut(
         graph: nx.DiGraph,
         source: Any,
-        sink: Any,
+        _sink: Any,
         flow_dict: Dict,
         capacity: str
     ) -> Tuple[Set, Set]:
@@ -509,7 +509,8 @@ class NetworkFlow:
                             if flow_value < min_cut_value:
                                 min_cut_value = flow_value
                                 best_cut = (s, t)
-                        except:
+                        except (nx.NetworkXError, ValueError) as e:
+                            logger.debug(f"Failed to compute flow between {s} and {t}: {e}")
                             continue
 
                 if best_cut:
@@ -527,7 +528,7 @@ class NetworkFlow:
         graph: Union[nx.Graph, nx.DiGraph],
         demands: List[Tuple[Any, Any, float]],
         capacity: str = "capacity",
-        **params
+        **_params
     ) -> Dict[str, Any]:
         """
         Solve multi-commodity flow problem.
@@ -633,7 +634,7 @@ class NetworkFlow:
 
     @staticmethod
     def flow_decomposition(
-        graph: Union[nx.Graph, nx.DiGraph],
+        _graph: Union[nx.Graph, nx.DiGraph],
         flow_dict: Dict[Any, Dict[Any, float]],
         source: Any,
         sink: Any
@@ -813,7 +814,7 @@ class NetworkFlow:
         graph: Union[nx.Graph, nx.DiGraph],
         demands: Dict[Any, float],
         capacity: str = "capacity",
-        **params
+        **_params
     ) -> Dict[str, Any]:
         """
         Check feasibility of circulation with demands.

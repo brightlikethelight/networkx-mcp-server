@@ -1,7 +1,7 @@
 """Specialized graph algorithms and advanced analysis."""
 
 import logging
-import random
+import random  # Using for non-cryptographic algorithm simulation only
 import time
 
 from collections import defaultdict
@@ -379,7 +379,7 @@ class SpecializedAlgorithms:
         return coloring
 
     @staticmethod
-    def _brooks_coloring(graph: nx.Graph, max_colors: int) -> Dict[Any, int]:
+    def _brooks_coloring(graph: nx.Graph, _max_colors: int) -> Dict[Any, int]:
         """Attempt to color with at most max_degree colors (Brooks' theorem)."""
         # This is a simplified version
         # Full Brooks' algorithm is more complex
@@ -398,7 +398,7 @@ class SpecializedAlgorithms:
     def maximum_clique(
         graph: nx.Graph,
         method: str = "approximation",
-        **params
+        **_params
     ) -> Dict[str, Any]:
         """
         Find maximum clique using exact or approximate algorithms.
@@ -459,7 +459,8 @@ class SpecializedAlgorithms:
             # Simplified upper bound using max degree
             max_degree = max(dict(graph.degree()).values()) if graph.number_of_nodes() > 0 else 0
             upper_bound = min(max_degree + 1, graph.number_of_nodes())
-        except:
+        except Exception as e:
+            logger.debug(f"Failed to compute upper bound for chromatic number: {e}")
             upper_bound = graph.number_of_nodes()
 
         results.update({
@@ -512,7 +513,7 @@ class SpecializedAlgorithms:
         graph: nx.Graph,
         matching_type: str = "maximum",
         weight: Optional[str] = None,
-        **params
+        **_params
     ) -> Dict[str, Any]:
         """
         Find various types of graph matchings.
@@ -611,7 +612,7 @@ class SpecializedAlgorithms:
     def vertex_cover(
         graph: nx.Graph,
         method: str = "approximation",
-        **params
+        **_params
     ) -> Dict[str, Any]:
         """
         Find minimum vertex cover.
@@ -711,7 +712,7 @@ class SpecializedAlgorithms:
     def dominating_set(
         graph: nx.Graph,
         method: str = "greedy",
-        **params
+        **_params
     ) -> Dict[str, Any]:
         """
         Find minimum dominating set.
@@ -800,7 +801,7 @@ class SpecializedAlgorithms:
         method: str = "common_neighbors",
         node_pairs: Optional[List[Tuple]] = None,
         top_k: int = 10,
-        **params
+        **_params
     ) -> Dict[str, Any]:
         """
         Predict missing links in the graph.

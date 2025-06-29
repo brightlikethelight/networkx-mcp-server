@@ -185,7 +185,7 @@ class GraphValidator:
         return measure in valid_measures
 
     @staticmethod
-    def validate_file_format(format: str, operation: str = "export") -> bool:
+    def validate_file_format(file_format: str, operation: str = "export") -> bool:
         """Validate file format for import/export."""
         if operation == "export":
             valid_formats = {
@@ -198,7 +198,7 @@ class GraphValidator:
                 "pickle", "pajek", "yaml"
             }
 
-        return format.lower() in valid_formats
+        return file_format.lower() in valid_formats
 
     @staticmethod
     def validate_layout_algorithm(algorithm: str) -> bool:

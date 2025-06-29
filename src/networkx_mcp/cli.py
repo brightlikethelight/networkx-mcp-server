@@ -327,7 +327,7 @@ Radius: {stats['radius']}
         node_time = time.time() - start
 
         # Add random edges
-        import random
+        import random  # Using for non-cryptographic test data generation only
         edges = []
         for _ in range(size * 2):
             u, v = random.sample(nodes, 2)

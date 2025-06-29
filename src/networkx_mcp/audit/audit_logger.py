@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import logging
 import uuid
 
 from collections import defaultdict
@@ -16,6 +17,8 @@ from typing import Optional
 from ..storage.base import StorageBackend
 from ..storage.base import Transaction
 
+
+logger = logging.getLogger(__name__)
 
 # Context variables for request tracking
 request_id_var: ContextVar[str] = ContextVar("request_id", default="")
@@ -330,7 +333,8 @@ class AuditLogger:
                     try:
                         event_data = json.loads(event_json)
                         stored_activity[event_data["action"]] += 1
-                    except:
+                    except (json.JSONDecodeError, KeyError) as e:
+                        logger.debug(f"Failed to parse event data: {e}")
                         continue
         else:
             stored_activity = recent

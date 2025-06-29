@@ -32,7 +32,7 @@ class GraphMLReader(GraphReader):
 
         except Exception as e:
             msg = f"Failed to read GraphML file {path}: {e}"
-            raise RuntimeError(msg)
+            raise RuntimeError(msg) from e
 
 class GraphMLWriter(GraphWriter):
     """Write graphs to GraphML format."""
@@ -55,7 +55,7 @@ class GraphMLWriter(GraphWriter):
 
         except Exception as e:
             msg = f"Failed to write GraphML file {path}: {e}"
-            raise RuntimeError(msg)
+            raise RuntimeError(msg) from e
 
 async def read_graphml(filepath: Union[str, Path]) -> nx.Graph:
     """Simple function interface for reading GraphML."""

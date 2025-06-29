@@ -29,13 +29,13 @@ class LinkPredictor(GraphMLModel):
             # Jaccard coefficient
             try:
                 jaccard = next(iter(nx.jaccard_coefficient(self.graph, [(u, v)])))[2]
-            except:
+            except (StopIteration, nx.NetworkXError) as e:
                 jaccard = 0
 
             # Adamic-Adar index
             try:
                 adamic_adar = next(iter(nx.adamic_adar_index(self.graph, [(u, v)])))[2]
-            except:
+            except (StopIteration, nx.NetworkXError) as e:
                 adamic_adar = 0
 
             features.append([common_neighbors, jaccard, adamic_adar])

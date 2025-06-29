@@ -55,7 +55,7 @@ def apply_critical_patches():
         # Store original
         _original_import = GraphIOHandler.import_graph
         
-        def secure_import_graph(filepath: str, format: str = "auto"):
+        def secure_import_graph(filepath: str, file_format: str = "auto"):
             # Validate path
             if '../' in filepath or filepath.startswith('/'):
                 raise ValueError("Invalid file path - no directory traversal")
@@ -68,10 +68,10 @@ def apply_critical_patches():
                     raise ValueError(f"File too large: {size} bytes")
             
             # Disable pickle
-            if format.lower() in ['pickle', 'pkl']:
+            if file_format.lower() in ['pickle', 'pkl']:
                 raise ValueError("Pickle format disabled for security")
             
-            return _original_import(filepath, format)
+            return _original_import(filepath, file_format)
         
         # Apply patch
         GraphIOHandler.import_graph = staticmethod(secure_import_graph)

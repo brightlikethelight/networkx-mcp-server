@@ -1,7 +1,7 @@
 """Network robustness and resilience analysis."""
 
 import logging
-import random
+import random  # Using for non-cryptographic network simulation purposes only
 import time
 
 from typing import Any
@@ -97,8 +97,9 @@ class RobustnessAnalysis:
                     key=lambda x: eigenvector[x],
                     reverse=True
                 )[:num_nodes]
-            except:
+            except (nx.PowerIterationFailedConvergence, ValueError) as e:
                 # Fallback to degree-based
+                logger.debug(f"Eigenvector centrality failed, using degree-based: {e}")
                 node_degrees = dict(G.degree())
                 nodes_to_remove = sorted(
                     node_degrees.keys(),
@@ -741,7 +742,8 @@ class RobustnessAnalysis:
             if not graph.is_directed() and nx.is_connected(graph) and graph.number_of_nodes() < 1000:
                 try:
                     conn_metrics["algebraic_connectivity"] = nx.algebraic_connectivity(graph)
-                except:
+                except Exception as e:
+                    logger.debug(f"Failed to compute algebraic connectivity: {e}")
                     conn_metrics["algebraic_connectivity"] = None
 
             # Node and edge connectivity
@@ -776,7 +778,8 @@ class RobustnessAnalysis:
                                     graph, nodes[i], nodes[j]
                                 )
                             path_counts.append(num_paths)
-                        except:
+                        except Exception as e:
+                            logger.debug(f"Failed to compute node connectivity between nodes: {e}")
                             path_counts.append(0)
 
                 redundancy_metrics["avg_node_disjoint_paths"] = (

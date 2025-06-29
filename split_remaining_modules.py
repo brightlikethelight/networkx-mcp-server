@@ -2,7 +2,9 @@
 """Split remaining large modules into focused components."""
 
 import sys
+
 from pathlib import Path
+
 
 # Add project to path
 project_root = Path(__file__).parent
@@ -11,11 +13,11 @@ sys.path.insert(0, str(project_root))
 def split_visualization_modules():
     """Split visualization into focused modules."""
     print("🔧 SPLITTING: Visualization Modules")
-    
+
     # Create visualization package structure
     viz_dir = Path("src/networkx_mcp/visualization")
     viz_dir.mkdir(parents=True, exist_ok=True)
-    
+
     # Base visualization interfaces
     base_viz_content = '''"""Base interfaces for graph visualization."""
 
@@ -104,7 +106,7 @@ def prepare_graph_data(graph: nx.Graph, pos: Dict[str, Tuple[float, float]]) -> 
         "multigraph": graph.is_multigraph()
     }
 '''
-    
+
     # Matplotlib visualizer
     matplotlib_viz_content = '''"""Matplotlib-based graph visualization."""
 
@@ -178,13 +180,13 @@ class MatplotlibVisualizer(BaseVisualizer):
             plt.close(fig)
             
             # Create HTML with embedded image
-            html_output = f'''<div class="graph-visualization">
-    <img src="data:image/png;base64,{image_base64}" 
+            html_output = """<div class="graph-visualization">
+    <img src="data:image/png;base64,{}" 
          alt="Graph Visualization" style="max-width: 100%; height: auto;">
     <div class="graph-info">
-        <p>Layout: {layout} | Nodes: {len(graph.nodes())} | Edges: {len(graph.edges())}</p>
+        <p>Layout: {} | Nodes: {} | Edges: {}</p>
     </div>
-</div>'''
+</div>""".format(image_base64, layout, len(graph.nodes()), len(graph.edges()))
             
             return VisualizationResult(
                 output=html_output,
@@ -212,7 +214,7 @@ async def create_matplotlib_visualization(graph: nx.Graph, layout: str = "spring
     result = await visualizer.render(graph, layout, **options)
     return result.output
 '''
-    
+
     # Interactive HTML visualizer
     interactive_viz_content = '''"""Interactive HTML/D3.js graph visualization."""
 
@@ -252,22 +254,23 @@ class InteractiveVisualizer(BaseVisualizer):
             graph_data = prepare_graph_data(graph, pos)
             
             # Create interactive HTML
-            html_template = '''<!DOCTYPE html>
+            html_template = """<!DOCTYPE html>
 <html>
 <head>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         .node {{ stroke: #fff; stroke-width: 1.5px; cursor: pointer; }}
         .link {{ stroke: {link_color}; stroke-opacity: 0.6; }}
-        .node-label {{ font: 12px sans-serif; pointer-events: none; text-anchor: middle; }}
+        .node-label {{ font-family: sans-serif; font-size: 12px; pointer-events: none; text-anchor: middle; }}
         #graph-container {{ border: 1px solid #ddd; }}
         .tooltip {{
             position: absolute;
             text-align: center;
             padding: 8px;
-            font: 12px sans-serif;
+            font-family: sans-serif;
+            font-size: 12px;
             background: lightsteelblue;
-            border: 0px;
+            border: none;
             border-radius: 8px;
             pointer-events: none;
             opacity: 0;
@@ -371,23 +374,23 @@ class InteractiveVisualizer(BaseVisualizer):
     </script>
 </body>
 </html>
-            '''
+            """
             
             # Generate labels code
             if opts["show_labels"]:
-                labels_code = '''
+                labels_code = """
                 const label = svg.append("g")
                     .selectAll("text")
                     .data(graphData.nodes)
                     .enter().append("text")
                     .attr("class", "node-label")
                     .text(d => d.id);
-                '''
-                label_update_code = '''
+                """
+                label_update_code = """
                 label
                     .attr("x", d => d.x)
                     .attr("y", d => d.y + 4);
-                '''
+                """
             else:
                 labels_code = "// Labels disabled"
                 label_update_code = "// No labels to update"
@@ -436,7 +439,7 @@ async def create_interactive_visualization(graph: nx.Graph, **options) -> str:
     result = await visualizer.render(graph, "force", **options)
     return result.output
 '''
-    
+
     # Package __init__.py
     viz_init_content = '''"""Graph visualization modules.
 
@@ -479,7 +482,7 @@ def get_visualizer(backend: str = "matplotlib"):
     
     return visualizers[backend]()
 '''
-    
+
     # Write visualization modules
     viz_modules = [
         ("base.py", base_viz_content),
@@ -487,24 +490,24 @@ def get_visualizer(backend: str = "matplotlib"):
         ("interactive.py", interactive_viz_content),
         ("__init__.py", viz_init_content)
     ]
-    
+
     modules_created = []
     for filename, content in viz_modules:
         with open(viz_dir / filename, "w") as f:
             f.write(content)
         modules_created.append(filename)
         print(f"  ✅ Created visualization/{filename}")
-    
+
     return modules_created
 
 def split_io_handlers():
     """Split IO handlers into focused modules."""
     print("\n🔧 SPLITTING: IO Handlers")
-    
+
     # Create IO package structure
     io_dir = Path("src/networkx_mcp/io")
     io_dir.mkdir(parents=True, exist_ok=True)
-    
+
     # Base IO interfaces
     base_io_content = '''"""Base interfaces for graph I/O operations."""
 
@@ -577,7 +580,7 @@ def detect_format(filepath: Union[str, Path]) -> str:
     
     return format_map.get(extension, 'unknown')
 '''
-    
+
     # GraphML handler
     graphml_content = '''"""GraphML format I/O operations."""
 
@@ -641,7 +644,7 @@ async def write_graphml(graph: nx.Graph, filepath: Union[str, Path]) -> bool:
     writer = GraphMLWriter()
     return await writer.write(graph, filepath)
 '''
-    
+
     # JSON handler
     json_content = '''"""JSON format I/O operations."""
 
@@ -799,7 +802,7 @@ async def write_json(graph: nx.Graph, filepath: Union[str, Path], format_style: 
     writer = JSONWriter()
     return await writer.write(graph, filepath, format_style=format_style)
 '''
-    
+
     # Package __init__.py
     io_init_content = '''"""Graph I/O operations.
 
@@ -859,7 +862,7 @@ def get_writer(format_name: str):
     
     return writers[format_name]()
 '''
-    
+
     # Write IO modules
     io_modules = [
         ("base.py", base_io_content),
@@ -867,20 +870,20 @@ def get_writer(format_name: str):
         ("json_io.py", json_content),
         ("__init__.py", io_init_content)
     ]
-    
+
     modules_created = []
     for filename, content in io_modules:
         with open(io_dir / filename, "w") as f:
             f.write(content)
         modules_created.append(filename)
         print(f"  ✅ Created io/{filename}")
-    
+
     return modules_created
 
 def test_all_modules():
     """Test that all new modules can be imported and work."""
     print("\n🧪 TESTING ALL NEW MODULES")
-    
+
     tests = [
         ("Community Detection", "from src.networkx_mcp.advanced.community import louvain_communities"),
         ("ML Integration", "from src.networkx_mcp.advanced.ml import NodeClassifier"),
@@ -888,7 +891,7 @@ def test_all_modules():
         ("IO Handlers", "from src.networkx_mcp.io import read_json"),
         ("Interfaces", "from src.networkx_mcp.interfaces import BaseGraphTool"),
     ]
-    
+
     passed = 0
     for test_name, import_statement in tests:
         try:
@@ -897,71 +900,72 @@ def test_all_modules():
             passed += 1
         except Exception as e:
             print(f"  ❌ {test_name}: Import failed - {e}")
-    
+
     # Functional test
     try:
         print("  🧪 Testing community detection functionality...")
         import networkx as nx
+
         from src.networkx_mcp.advanced.community import louvain_communities
-        
+
         G = nx.karate_club_graph()
         communities = louvain_communities(G)
         print(f"    ✅ Found {len(communities)} communities in test graph")
         passed += 1
-        
+
     except Exception as e:
         print(f"  ❌ Community detection test failed: {e}")
-    
+
     return passed
 
 def main():
     """Execute remaining module splits."""
     print("🏗️ COMPLETING PROFESSIONAL ARCHITECTURE")
     print("=" * 60)
-    
+
     # Split remaining modules
     viz_modules = split_visualization_modules()
-    io_modules = split_io_handlers() 
-    
+    io_modules = split_io_handlers()
+
     # Test everything
     test_results = test_all_modules()
-    
+
     # Generate final report
     print("\n📊 ARCHITECTURE COMPLETION REPORT")
     print("=" * 60)
-    
+
     total_modules = len(viz_modules) + len(io_modules)
-    
-    print(f"📈 Additional Modules Created:")
+
+    print("📈 Additional Modules Created:")
     print(f"  Visualization modules: {len(viz_modules)}")
     print(f"  I/O handler modules: {len(io_modules)}")
     print(f"  Total new modules: {total_modules}")
-    
-    print(f"\n🏗️ Complete Architecture Overview:")
-    print(f"  📦 src/networkx_mcp/advanced/community/ - Community detection algorithms")
-    print(f"  📦 src/networkx_mcp/advanced/ml/ - Machine learning on graphs")
-    print(f"  📦 src/networkx_mcp/visualization/ - Graph visualization backends")
-    print(f"  📦 src/networkx_mcp/io/ - Graph I/O operations")
-    print(f"  📦 src/networkx_mcp/interfaces/ - Public interfaces and plugin system")
-    
-    print(f"\n✅ Professional Standards Achieved:")
-    print(f"  ✅ Single Responsibility Principle")
-    print(f"  ✅ Clean interfaces and protocols")
-    print(f"  ✅ Plugin architecture")
-    print(f"  ✅ Focused modules (~50-100 lines each)")
-    print(f"  ✅ Easy unit testing")
-    print(f"  ✅ Team development ready")
-    print(f"  ✅ Open-source project structure")
-    
+
+    print("\n🏗️ Complete Architecture Overview:")
+    print("  📦 src/networkx_mcp/advanced/community/ - Community detection algorithms")
+    print("  📦 src/networkx_mcp/advanced/ml/ - Machine learning on graphs")
+    print("  📦 src/networkx_mcp/visualization/ - Graph visualization backends")
+    print("  📦 src/networkx_mcp/io/ - Graph I/O operations")
+    print("  📦 src/networkx_mcp/interfaces/ - Public interfaces and plugin system")
+
+    print("\n✅ Professional Standards Achieved:")
+    print("  ✅ Single Responsibility Principle")
+    print("  ✅ Clean interfaces and protocols")
+    print("  ✅ Plugin architecture")
+    print("  ✅ Focused modules (~50-100 lines each)")
+    print("  ✅ Easy unit testing")
+    print("  ✅ Team development ready")
+    print("  ✅ Open-source project structure")
+
     if test_results >= 5:
-        print(f"\n🎖️ ARCHITECTURE TRANSFORMATION COMPLETE!")
-        print(f"🚀 The NetworkX MCP Server now follows professional open-source standards")
-        print(f"📈 Ready for production deployment and community contributions")
+        print("\n🎖️ ARCHITECTURE TRANSFORMATION COMPLETE!")
+        print("🚀 The NetworkX MCP Server now follows professional open-source standards")
+        print("📈 Ready for production deployment and community contributions")
         return True
     else:
-        print(f"\n⚠️ Some modules need fixes:")
+        print("\n⚠️ Some modules need fixes:")
         print(f"  Test results: {test_results}/6 passed")
-        print(f"  Manual review recommended")
+        print("  Manual review recommended")
         return False
 
 if __name__ == "__main__":

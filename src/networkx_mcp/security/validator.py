@@ -305,22 +305,22 @@ class SecurityValidator:
         return graph_type
 
     @classmethod
-    def validate_file_format(cls, format: Any) -> str:
+    def validate_file_format(cls, file_format: Any) -> str:
         """Validate file format for import/export."""
         safe_formats = {
             "graphml", "gml", "pajek", "edgelist",
             "adjlist", "json", "yaml", "gexf"
         }
 
-        if not isinstance(format, str):
-            msg = f"Format must be string, got {type(format).__name__}"
+        if not isinstance(file_format, str):
+            msg = f"Format must be string, got {type(file_format).__name__}"
             raise ValidationError(msg)
 
-        format_lower = format.lower()
+        format_lower = file_format.lower()
 
         if format_lower not in safe_formats:
             msg = (
-                f"Unsafe format '{format}'. "
+                f"Unsafe format '{file_format}'. "
                 f"Allowed formats: {', '.join(sorted(safe_formats))}"
             )
             raise ValidationError(
@@ -330,7 +330,7 @@ class SecurityValidator:
         # Never allow pickle or other executable formats
         dangerous_formats = {"pickle", "pkl", "python", "py", "pyc", "pyo"}
         if format_lower in dangerous_formats:
-            msg = f"Format '{format}' is not allowed for security reasons"
+            msg = f"Format '{file_format}' is not allowed for security reasons"
             raise SecurityError(msg)
 
         return format_lower

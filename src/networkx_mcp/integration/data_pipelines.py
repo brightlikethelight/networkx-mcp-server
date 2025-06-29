@@ -8,6 +8,7 @@ import time
 
 from collections.abc import Iterator
 from datetime import datetime
+from datetime import timezone
 from typing import Any
 from typing import Dict
 from typing import List
@@ -94,11 +95,11 @@ class DataPipelines:
                 # Try to convert to numeric
                 try:
                     df[col] = pd.to_numeric(df[col])
-                except:
+                except (ValueError, TypeError):
                     # Try to convert to datetime
                     try:
                         df[col] = pd.to_datetime(df[col])
-                    except:
+                    except (ValueError, TypeError):
                         pass  # Keep as string
 
         # Add edges with attributes
@@ -459,7 +460,7 @@ class DataPipelines:
                     "num_edges": graph.number_of_edges(),
                     "total_items_processed": total_items,
                     "window_size": len(window) if window_size else None,
-                    "timestamp": datetime.now().isoformat()
+                    "timestamp": datetime.now(tz=timezone.utc).isoformat()
                 }
                 last_update = current_time
 

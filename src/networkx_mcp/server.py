@@ -1,11 +1,16 @@
 """NetworkX MCP Server implementation using FastMCP."""
 
+import base64
 import json
 import logging
+import os
+import random  # Using for non-cryptographic graph sampling only
+import sys
 import time
 import traceback
 
 from datetime import datetime
+from datetime import timezone
 from typing import Any
 from typing import Dict
 from typing import List
@@ -15,6 +20,12 @@ from typing import Union
 
 import networkx as nx
 import numpy as np
+
+
+try:
+    from networkx.algorithms.simple_paths import shortest_simple_paths
+except ImportError:
+    shortest_simple_paths = None
 
 from fastmcp import FastMCP
 from mcp.types import TextContent
@@ -44,6 +55,36 @@ from networkx_mcp.visualization import PlotlyVisualizer
 from networkx_mcp.visualization import PyvisVisualizer
 from networkx_mcp.visualization import SpecializedVisualizations
 
+
+# Constants for edge and data validation
+MIN_EDGE_ELEMENTS = 2
+WEIGHTED_EDGE_ELEMENTS = 3
+
+# Memory estimation constants
+BYTES_PER_NODE = 100
+BYTES_PER_EDGE = 50
+
+# Performance and size thresholds
+HISTOGRAM_DEFAULT_BINS = 10
+MILLISECONDS_PER_SECOND = 1000
+KILOBYTES_PER_MEGABYTE = 1024
+MAX_ITERATION_DEFAULT = 1000
+MAX_ITERATION_SMALL = 100
+MAX_PATHS_DEFAULT = 100
+
+# Analysis thresholds
+MIN_NODES_FOR_DEGREE_ANALYSIS = 10
+MIN_DEGREE_TYPES_FOR_POWER_LAW = 3
+MAX_DEGREE_SAMPLES_FOR_POWER_LAW = 10
+MIN_NODES_FOR_CONNECTIVITY = 2
+TRIANGLE_DIVISION_FACTOR = 3
+MAX_DISPLAY_ITEMS = 10
+
+# Centrality calculation constants
+IN_OUT_CENTRALITY_AVERAGE_FACTOR = 2
+
+# Precision constants
+DECIMAL_PLACES = 2
 
 # Configure logging
 logging.basicConfig(
@@ -126,7 +167,7 @@ async def create_graph(
 
             if "edge_list" in from_data:
                 edges = from_data["edge_list"]
-                if edges and len(edges[0]) == 3:  # Weighted edges
+                if edges and len(edges[0]) == WEIGHTED_EDGE_ELEMENTS:  # Weighted edges
                     graph.add_weighted_edges_from(edges)
                 else:
                     graph.add_edges_from(edges)
@@ -160,11 +201,11 @@ async def create_graph(
         # Calculate memory estimate
         graph = graph_manager.get_graph(graph_id)
         memory_estimate = (
-            graph.number_of_nodes() * 100 +  # Rough estimate: 100 bytes per node
+            graph.number_of_nodes() * BYTES_PER_NODE +  # Rough estimate per node
             graph.number_of_edges() * 50     # 50 bytes per edge
         ) / 1024  # Convert to KB
 
-        result["memory_estimate_kb"] = round(memory_estimate, 2)
+        result["memory_estimate_kb"] = round(memory_estimate, DECIMAL_PLACES)
         result["num_nodes"] = graph.number_of_nodes()
         result["num_edges"] = graph.number_of_edges()
 
@@ -260,25 +301,25 @@ async def get_graph_info(graph_id: str) -> Dict[str, Any]:
 
         # Memory usage estimation
         memory_estimate = (
-            graph.number_of_nodes() * 100 +  # ~100 bytes per node
+            graph.number_of_nodes() * BYTES_PER_NODE +  # bytes per node
             graph.number_of_edges() * 50 +   # ~50 bytes per edge
             len(str(graph.nodes(data=True))) +  # Node attributes
             len(str(graph.edges(data=True)))    # Edge attributes
         ) / 1024  # Convert to KB
 
-        info["memory_usage_kb"] = round(memory_estimate, 2)
+        info["memory_usage_kb"] = round(memory_estimate, DECIMAL_PLACES)
 
         # Add degree distribution summary
         if graph.number_of_nodes() > 0:
             degrees = [d for n, d in graph.degree()]
             info["degree_distribution"] = {
-                "values": np.histogram(degrees, bins=min(10, len(set(degrees))))[0].tolist(),
-                "bins": np.histogram(degrees, bins=min(10, len(set(degrees))))[1].tolist()
+                "values": np.histogram(degrees, bins=min(HISTOGRAM_DEFAULT_BINS, len(set(degrees))))[0].tolist(),
+                "bins": np.histogram(degrees, bins=min(HISTOGRAM_DEFAULT_BINS, len(set(degrees))))[1].tolist()
             }
 
         # Performance metrics
         elapsed_time = time.time() - start_time
-        info["query_time_ms"] = round(elapsed_time * 1000, 2)
+        info["query_time_ms"] = round(elapsed_time * MILLISECONDS_PER_SECOND, DECIMAL_PLACES)
 
         operation_counter.increment("get_graph_info")
 
@@ -372,7 +413,7 @@ async def add_nodes(
 
         # Performance metrics
         elapsed_time = time.time() - start_time
-        result["execution_time_ms"] = round(elapsed_time * 1000, 2)
+        result["execution_time_ms"] = round(elapsed_time * MILLISECONDS_PER_SECOND, DECIMAL_PLACES)
 
         performance_monitor.record_operation("add_nodes", elapsed_time)
         operation_counter.increment("add_nodes", len(nodes))
@@ -451,7 +492,7 @@ async def add_edges(
                 processed_edges.append((source, target, attrs) if attrs else (source, target))
 
             elif isinstance(edge, (tuple, list)):
-                if len(edge) < 2:
+                if len(edge) < MIN_EDGE_ELEMENTS:
                     msg = f"Edge at index {i} must have at least source and target"
                     raise ValueError(msg)
 
@@ -460,14 +501,14 @@ async def add_edges(
                 if source == target:
                     self_loops += 1
 
-                if len(edge) == 3:
+                if len(edge) == WEIGHTED_EDGE_ELEMENTS:
                     # (source, target, weight) format
-                    attrs = {"weight": edge[2]}
+                    attrs = {"weight": edge[WEIGHTED_EDGE_ELEMENTS - 1]}
                     if edge_attributes:
                         attrs.update(edge_attributes)
                     weighted_edges += 1
                     processed_edges.append((source, target, attrs))
-                elif len(edge) == 2 and edge_attributes:
+                elif len(edge) == MIN_EDGE_ELEMENTS and edge_attributes:
                     # Apply default attributes
                     if "weight" in edge_attributes:
                         weighted_edges += 1
@@ -504,7 +545,7 @@ async def add_edges(
 
         # Performance metrics
         elapsed_time = time.time() - start_time
-        result["execution_time_ms"] = round(elapsed_time * 1000, 2)
+        result["execution_time_ms"] = round(elapsed_time * MILLISECONDS_PER_SECOND, DECIMAL_PLACES)
 
         performance_monitor.record_operation("add_edges", elapsed_time)
         operation_counter.increment("add_edges", len(edges))
@@ -605,7 +646,9 @@ async def shortest_path(
         elif k_paths and k_paths > 1 and target:
             # K-shortest paths
             try:
-                from networkx.algorithms.simple_paths import shortest_simple_paths
+                if shortest_simple_paths is None:
+                    result["error"] = "shortest_simple_paths not available"
+                    return result
 
                 k_shortest = []
                 path_gen = shortest_simple_paths(graph, source, target, weight=weight)
@@ -653,7 +696,7 @@ async def shortest_path(
 
         # Add performance metrics
         elapsed_time = time.time() - start_time
-        result["computation_time_ms"] = round(elapsed_time * 1000, 2)
+        result["computation_time_ms"] = round(elapsed_time * MILLISECONDS_PER_SECOND, DECIMAL_PLACES)
 
         # Handle negative cycles for Bellman-Ford
         if method == "bellman-ford":
@@ -661,7 +704,7 @@ async def shortest_path(
                 negative_cycle = nx.negative_edge_cycle(graph, weight=weight)
                 result["has_negative_cycle"] = True
                 result["negative_cycle"] = list(negative_cycle)
-            except:
+            except nx.NetworkXError:
                 result["has_negative_cycle"] = False
 
         performance_monitor.record_operation("shortest_path", elapsed_time)
@@ -690,7 +733,7 @@ async def shortest_path(
 async def calculate_centrality(
     graph_id: str,
     centrality_type: Union[str, List[str]] = "degree",
-    top_n: Optional[int] = 10,
+    top_n: Optional[int] = MAX_DISPLAY_ITEMS,
     include_statistics: bool = True,
     weight: Optional[str] = None
 ) -> Dict[str, Any]:
@@ -752,7 +795,7 @@ async def calculate_centrality(
                     if graph.is_directed():
                         in_cent = nx.in_degree_centrality(graph)
                         out_cent = nx.out_degree_centrality(graph)
-                        centrality = {n: (in_cent[n] + out_cent[n]) / 2 for n in graph.nodes()}
+                        centrality = {n: (in_cent[n] + out_cent[n]) / IN_OUT_CENTRALITY_AVERAGE_FACTOR for n in graph.nodes()}
                         centrality_data["in_degree_centrality"] = in_cent
                         centrality_data["out_degree_centrality"] = out_cent
                     else:
@@ -780,7 +823,7 @@ async def calculate_centrality(
                             centrality = nx.eigenvector_centrality(
                                 graph,
                                 weight=weight,
-                                max_iter=1000,
+                                max_iter=MAX_ITERATION_DEFAULT,
                                 tol=1e-06
                             )
                         except nx.PowerIterationFailedConvergence:
@@ -792,7 +835,7 @@ async def calculate_centrality(
                         graph,
                         weight=weight,
                         alpha=0.85,
-                        max_iter=100
+                        max_iter=MAX_ITERATION_SMALL
                     )
 
                 elif ctype == "katz":
@@ -802,8 +845,9 @@ async def calculate_centrality(
                             weight=weight,
                             normalized=True
                         )
-                    except:
+                    except (nx.PowerIterationFailedConvergence, ValueError) as e:
                         # Fallback with smaller alpha
+                        logger.debug(f"Katz centrality failed with default alpha, using smaller value: {e}")
                         centrality = nx.katz_centrality(
                             graph,
                             alpha=0.01,
@@ -871,7 +915,7 @@ async def calculate_centrality(
                 "num_edges": graph.number_of_edges(),
                 "is_directed": graph.is_directed()
             },
-            "computation_time_ms": round(elapsed_time * 1000, 2)
+            "computation_time_ms": round(elapsed_time * MILLISECONDS_PER_SECOND, DECIMAL_PLACES)
         }
 
         performance_monitor.record_operation("calculate_centrality", elapsed_time)
@@ -1023,7 +1067,7 @@ async def import_graph(
         graph_type = type(graph).__name__
         graph_manager.graphs[graph_id] = graph
         graph_manager.metadata[graph_id] = {
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.now(tz=timezone.utc).isoformat(),
             "graph_type": graph_type,
             "imported_from": format
         }
@@ -1059,7 +1103,6 @@ async def visualize_graph_simple(
         Visualization data or file path
     """
     try:
-        import networkx as nx
         graph = graph_manager.get_graph(graph_id)
 
         # Calculate layout
@@ -1147,7 +1190,7 @@ async def graph_metrics(
             "is_directed": graph.is_directed(),
             "is_multigraph": graph.is_multigraph(),
             "has_self_loops": any(u == v for u, v in graph.edges()),
-            "memory_estimate_kb": round((n * 100 + m * 50) / 1024, 2)
+            "memory_estimate_kb": round((n * BYTES_PER_NODE + m * BYTES_PER_EDGE) / KILOBYTES_PER_MEGABYTE, DECIMAL_PLACES)
         }
 
         # Degree statistics
@@ -1156,10 +1199,10 @@ async def graph_metrics(
 
         if n > 0:
             metrics["degree"] = {
-                "average": round(sum(degree_values) / n, 2),
+                "average": round(sum(degree_values) / n, DECIMAL_PLACES),
                 "min": min(degree_values),
                 "max": max(degree_values),
-                "std": round(np.std(degree_values), 2),
+                "std": round(np.std(degree_values), DECIMAL_PLACES),
                 "median": np.median(degree_values)
             }
 
@@ -1176,23 +1219,24 @@ async def graph_metrics(
                 metrics["degree"]["assortativity"] = round(
                     nx.degree_assortativity_coefficient(graph), 4
                 )
-            except:
+            except (ValueError, nx.NetworkXError) as e:
+                logger.debug(f"Failed to compute degree assortativity: {e}")
                 metrics["degree"]["assortativity"] = None
 
             # Power law analysis
-            if n > 10:  # Need enough nodes
+            if n > MIN_NODES_FOR_DEGREE_ANALYSIS:  # Need enough nodes
                 unique_degrees = sorted(set(degree_values), reverse=True)
                 degree_counts = [degree_values.count(d) for d in unique_degrees]
 
                 # Simple power law check: log-log linearity
-                if len(unique_degrees) > 3:
-                    log_degrees = np.log(unique_degrees[:10] if len(unique_degrees) > 10 else unique_degrees)
-                    log_counts = np.log(degree_counts[:10] if len(degree_counts) > 10 else degree_counts)
+                if len(unique_degrees) > MIN_DEGREE_TYPES_FOR_POWER_LAW:
+                    log_degrees = np.log(unique_degrees[:MAX_DEGREE_SAMPLES_FOR_POWER_LAW] if len(unique_degrees) > MAX_DEGREE_SAMPLES_FOR_POWER_LAW else unique_degrees)
+                    log_counts = np.log(degree_counts[:MAX_DEGREE_SAMPLES_FOR_POWER_LAW] if len(degree_counts) > MAX_DEGREE_SAMPLES_FOR_POWER_LAW else degree_counts)
 
                     # Linear regression in log-log space
                     if len(log_degrees) > 1:
                         slope, intercept = np.polyfit(log_degrees, log_counts, 1)
-                        metrics["degree"]["power_law_exponent"] = round(-slope, 2)
+                        metrics["degree"]["power_law_exponent"] = round(-slope, DECIMAL_PLACES)
 
         # For directed graphs
         if graph.is_directed():
@@ -1200,13 +1244,13 @@ async def graph_metrics(
             out_degrees = dict(graph.out_degree())
 
             metrics["in_degree"] = {
-                "average": round(sum(in_degrees.values()) / n, 2) if n > 0 else 0,
+                "average": round(sum(in_degrees.values()) / n, DECIMAL_PLACES) if n > 0 else 0,
                 "min": min(in_degrees.values()) if in_degrees else 0,
                 "max": max(in_degrees.values()) if in_degrees else 0
             }
 
             metrics["out_degree"] = {
-                "average": round(sum(out_degrees.values()) / n, 2) if n > 0 else 0,
+                "average": round(sum(out_degrees.values()) / n, DECIMAL_PLACES) if n > 0 else 0,
                 "min": min(out_degrees.values()) if out_degrees else 0,
                 "max": max(out_degrees.values()) if out_degrees else 0
             }
@@ -1226,7 +1270,7 @@ async def graph_metrics(
                     "diameter": nx.diameter(graph),
                     "radius": nx.radius(graph),
                     "average_shortest_path_length": round(
-                        nx.average_shortest_path_length(graph), 2
+                        nx.average_shortest_path_length(graph), DECIMAL_PLACES
                     )
                 }
 
@@ -1235,7 +1279,7 @@ async def graph_metrics(
                 metrics["distance"]["eccentricity"] = {
                     "min": min(eccentricities.values()),
                     "max": max(eccentricities.values()),
-                    "average": round(sum(eccentricities.values()) / len(eccentricities), 2)
+                    "average": round(sum(eccentricities.values()) / len(eccentricities), DECIMAL_PLACES)
                 }
             else:
                 metrics["distance"] = {"connected": False}
@@ -1255,11 +1299,12 @@ async def graph_metrics(
             }
 
             # Additional connectivity metrics for undirected
-            if n > 2:
+            if n > MIN_NODES_FOR_CONNECTIVITY:
                 try:
                     metrics["connectivity"]["node_connectivity"] = nx.node_connectivity(graph)
                     metrics["connectivity"]["edge_connectivity"] = nx.edge_connectivity(graph)
-                except:
+                except Exception as e:
+                    logger.debug(f"Failed to compute connectivity metrics: {e}")
                     pass
 
                 # Articulation points and bridges
@@ -1270,11 +1315,12 @@ async def graph_metrics(
                     metrics["connectivity"]["num_articulation_points"] = len(articulation_points)
                     metrics["connectivity"]["num_bridges"] = len(bridges)
 
-                    if len(articulation_points) <= 10:
+                    if len(articulation_points) <= MAX_DISPLAY_ITEMS:
                         metrics["connectivity"]["articulation_points"] = articulation_points
-                    if len(bridges) <= 10:
+                    if len(bridges) <= MAX_DISPLAY_ITEMS:
                         metrics["connectivity"]["bridges"] = bridges
-                except:
+                except Exception as e:
+                    logger.debug(f"Failed to compute articulation points/bridges: {e}")
                     pass
 
         # Clustering and triangles
@@ -1289,15 +1335,16 @@ async def graph_metrics(
 
             # Triangle count
             try:
-                triangles = sum(nx.triangles(graph).values()) // 3
+                triangles = sum(nx.triangles(graph).values()) // TRIANGLE_DIVISION_FACTOR
                 metrics["clustering"]["num_triangles"] = triangles
-            except:
+            except Exception as e:
+                logger.debug(f"Failed to compute triangle count: {e}")
                 pass
 
         # Performance metrics
         elapsed_time = time.time() - start_time
         metrics["performance"] = {
-            "calculation_time_ms": round(elapsed_time * 1000, 2),
+            "calculation_time_ms": round(elapsed_time * MILLISECONDS_PER_SECOND, DECIMAL_PLACES),
             "metrics_calculated": len(metrics)
         }
 
@@ -1344,8 +1391,8 @@ async def monitoring_stats() -> Dict[str, Any]:
         for graph_info in graph_manager.list_graphs():
             graph_id = graph_info["graph_id"]
             graph = graph_manager.get_graph(graph_id)
-            memory_est = (graph.number_of_nodes() * 100 + graph.number_of_edges() * 50) / 1024
-            graph_memories[graph_id] = round(memory_est, 2)
+            memory_est = (graph.number_of_nodes() * BYTES_PER_NODE + graph.number_of_edges() * BYTES_PER_EDGE) / KILOBYTES_PER_MEGABYTE
+            graph_memories[graph_id] = round(memory_est, DECIMAL_PLACES)
             total_memory_kb += memory_est
 
         # Combine all statistics
@@ -1359,8 +1406,8 @@ async def monitoring_stats() -> Dict[str, Any]:
             "operations": operation_stats,
             "performance": performance_stats,
             "memory": {
-                "total_memory_kb": round(total_memory_kb, 2),
-                "total_memory_mb": round(total_memory_kb / 1024, 2),
+                "total_memory_kb": round(total_memory_kb, DECIMAL_PLACES),
+                "total_memory_mb": round(total_memory_kb / KILOBYTES_PER_MEGABYTE, DECIMAL_PLACES),
                 "graphs": graph_memories
             },
             "slow_operations": performance_monitor.get_slow_operations(threshold_ms=500)
@@ -1444,7 +1491,7 @@ async def clustering_analysis(
             }
 
             # Distribution
-            hist, bins = np.histogram(clustering_values, bins=10)
+            hist, bins = np.histogram(clustering_values, bins=HISTOGRAM_DEFAULT_BINS)
             result["clustering_distribution"] = {
                 "counts": hist.tolist(),
                 "bins": [round(b, 4) for b in bins.tolist()]
@@ -1454,13 +1501,13 @@ async def clustering_analysis(
         if include_triangles:
             triangles = nx.triangles(graph_undirected)
             result["node_triangles"] = triangles
-            result["total_triangles"] = sum(triangles.values()) // 3
+            result["total_triangles"] = sum(triangles.values()) // TRIANGLE_DIVISION_FACTOR
 
             # Find nodes with most triangles
             sorted_triangles = sorted(triangles.items(), key=lambda x: x[1], reverse=True)
             result["top_triangle_nodes"] = [
                 {"node": node, "triangles": count, "rank": i + 1}
-                for i, (node, count) in enumerate(sorted_triangles[:10])
+                for i, (node, count) in enumerate(sorted_triangles[:MAX_DISPLAY_ITEMS])
             ]
 
         # For directed graphs, add directed-specific metrics
@@ -1472,7 +1519,7 @@ async def clustering_analysis(
 
         # Performance metrics
         elapsed_time = time.time() - start_time
-        result["computation_time_ms"] = round(elapsed_time * 1000, 2)
+        result["computation_time_ms"] = round(elapsed_time * MILLISECONDS_PER_SECOND, DECIMAL_PLACES)
 
         performance_monitor.record_operation("clustering_analysis", elapsed_time)
         operation_counter.increment("clustering_analysis")
@@ -1573,8 +1620,8 @@ async def connected_components(
 
             # Size distribution
             result["size_statistics"] = {
-                "mean": round(np.mean(sizes), 2),
-                "std": round(np.std(sizes), 2),
+                "mean": round(np.mean(sizes), DECIMAL_PLACES),
+                "std": round(np.std(sizes), DECIMAL_PLACES),
                 "median": np.median(sizes)
             }
 
@@ -1597,7 +1644,7 @@ async def connected_components(
         # Additional connectivity metrics
         if not graph.is_directed():
             # For undirected graphs, add articulation points and bridges
-            if graph.number_of_nodes() > 2:
+            if graph.number_of_nodes() > MIN_NODES_FOR_CONNECTIVITY:
                 try:
                     articulation_points = list(nx.articulation_points(graph))
                     bridges = list(nx.bridges(graph))
@@ -1606,12 +1653,13 @@ async def connected_components(
                     result["num_articulation_points"] = len(articulation_points)
                     result["bridges"] = bridges[:20]  # Limit to 20
                     result["num_bridges"] = len(bridges)
-                except:
+                except Exception as e:
+                    logger.debug(f"Failed to compute critical nodes: {e}")
                     pass
 
         # Performance metrics
         elapsed_time = time.time() - start_time
-        result["computation_time_ms"] = round(elapsed_time * 1000, 2)
+        result["computation_time_ms"] = round(elapsed_time * MILLISECONDS_PER_SECOND, DECIMAL_PLACES)
 
         performance_monitor.record_operation("connected_components", elapsed_time)
         operation_counter.increment("connected_components")
@@ -1635,7 +1683,7 @@ async def find_all_paths(
     source: Union[str, int],
     target: Union[str, int],
     max_length: Optional[int] = None,
-    max_paths: int = 100
+    max_paths: int = MAX_PATHS_DEFAULT
 ) -> Dict[str, Any]:
     """
     Find all simple paths between two nodes with constraints.
@@ -1705,13 +1753,13 @@ async def find_all_paths(
                 length_counts[length] = length_counts.get(length, 0) + 1
 
             result["length_distribution"] = [
-                {"length": l, "count": c, "percentage": round(c / len(paths) * 100, 2)}
-                for l, c in sorted(length_counts.items())
+                {"length": length, "count": c, "percentage": round(c / len(paths) * 100, DECIMAL_PLACES)}
+                for length, c in sorted(length_counts.items())
             ]
 
             result["shortest_path_length"] = min(path_lengths)
             result["longest_path_length"] = max(path_lengths)
-            result["average_path_length"] = round(sum(path_lengths) / len(path_lengths), 2)
+            result["average_path_length"] = round(sum(path_lengths) / len(path_lengths), DECIMAL_PLACES)
 
         # Add graph context
         result["graph_info"] = {
@@ -1722,7 +1770,7 @@ async def find_all_paths(
 
         # Performance metrics
         elapsed_time = time.time() - start_time
-        result["computation_time_ms"] = round(elapsed_time * 1000, 2)
+        result["computation_time_ms"] = round(elapsed_time * MILLISECONDS_PER_SECOND, DECIMAL_PLACES)
 
         performance_monitor.record_operation("find_all_paths", elapsed_time)
         operation_counter.increment("find_all_paths")
@@ -1813,8 +1861,8 @@ async def path_analysis(
             # Eccentricity statistics
             ecc_values = list(eccentricity.values())
             result["eccentricity_stats"] = {
-                "mean": round(np.mean(ecc_values), 2),
-                "std": round(np.std(ecc_values), 2),
+                "mean": round(np.mean(ecc_values), DECIMAL_PLACES),
+                "std": round(np.std(ecc_values), DECIMAL_PLACES),
                 "min": min(ecc_values),
                 "max": max(ecc_values)
             }
@@ -1870,7 +1918,7 @@ async def path_analysis(
 
         # Performance metrics
         elapsed_time = time.time() - start_time
-        result["computation_time_ms"] = round(elapsed_time * 1000, 2)
+        result["computation_time_ms"] = round(elapsed_time * MILLISECONDS_PER_SECOND, DECIMAL_PLACES)
 
         performance_monitor.record_operation("path_analysis", elapsed_time)
         operation_counter.increment("path_analysis")
@@ -1954,12 +2002,12 @@ async def cycle_detection(
                         # Cycle length distribution
                         lengths = [len(c) for c in cycles]
                         length_counts = {}
-                        for l in lengths:
-                            length_counts[l] = length_counts.get(l, 0) + 1
+                        for length in lengths:
+                            length_counts[length] = length_counts.get(length, 0) + 1
 
                         result["cycle_length_distribution"] = [
-                            {"length": l, "count": c}
-                            for l, c in sorted(length_counts.items())
+                            {"length": length, "count": c}
+                            for length, c in sorted(length_counts.items())
                         ]
 
                 except Exception as e:
@@ -1973,7 +2021,8 @@ async def cycle_detection(
                         nodes_in_cycles.update(cycle)
                     result["nodes_in_cycles"] = len(nodes_in_cycles)
                     result["fraction_in_cycles"] = len(nodes_in_cycles) / graph.number_of_nodes()
-                except:
+                except Exception as e:
+                    logger.debug(f"Failed to compute cycle metrics: {e}")
                     pass
 
         else:
@@ -1995,7 +2044,7 @@ async def cycle_detection(
                     # Cycle length distribution
                     lengths = [len(c) for c in cycle_basis]
                     result["basis_length_stats"] = {
-                        "mean": round(np.mean(lengths), 2),
+                        "mean": round(np.mean(lengths), DECIMAL_PLACES),
                         "min": min(lengths),
                         "max": max(lengths)
                     }
@@ -2016,7 +2065,7 @@ async def cycle_detection(
 
         # Performance metrics
         elapsed_time = time.time() - start_time
-        result["computation_time_ms"] = round(elapsed_time * 1000, 2)
+        result["computation_time_ms"] = round(elapsed_time * MILLISECONDS_PER_SECOND, DECIMAL_PLACES)
 
         performance_monitor.record_operation("cycle_detection", elapsed_time)
         operation_counter.increment("cycle_detection")
@@ -2156,12 +2205,13 @@ async def flow_paths(
                 "edge_connectivity": edge_connectivity,
                 "node_connectivity": node_connectivity
             }
-        except:
+        except Exception as e:
+            logger.debug(f"Failed to compute connectivity metrics: {e}")
             pass
 
         # Performance metrics
         elapsed_time = time.time() - start_time
-        result["computation_time_ms"] = round(elapsed_time * 1000, 2)
+        result["computation_time_ms"] = round(elapsed_time * MILLISECONDS_PER_SECOND, DECIMAL_PLACES)
 
         performance_monitor.record_operation("flow_paths", elapsed_time)
         operation_counter.increment("flow_paths")
@@ -2368,7 +2418,7 @@ async def subgraph_extraction(
                 # Convert value to appropriate type
                 try:
                     value = float(value)
-                except:
+                except ValueError:
                     pass  # Keep as string
 
                 # Apply condition to nodes
@@ -2455,7 +2505,7 @@ async def subgraph_extraction(
                 graph_type = type(graph).__name__
                 graph_manager.graphs[new_graph_id] = subgraph
                 graph_manager.metadata[new_graph_id] = {
-                    "created_at": datetime.utcnow().isoformat(),
+                    "created_at": datetime.now(tz=timezone.utc).isoformat(),
                     "graph_type": graph_type,
                     "parent_graph": graph_id,
                     "extraction_method": method
@@ -2466,7 +2516,7 @@ async def subgraph_extraction(
 
         # Performance metrics
         elapsed_time = time.time() - start_time
-        result["computation_time_ms"] = round(elapsed_time * 1000, 2)
+        result["computation_time_ms"] = round(elapsed_time * MILLISECONDS_PER_SECOND, DECIMAL_PLACES)
 
         performance_monitor.record_operation("subgraph_extraction", elapsed_time)
         operation_counter.increment("subgraph_extraction")
@@ -2926,7 +2976,6 @@ async def robustness_analysis(
             initial_failures = robustness_params.get("initial_failures", [])
             if not initial_failures:
                 # Default to random node
-                import random
                 initial_failures = [random.choice(list(graph.nodes()))]
             result = RobustnessAnalysis.cascading_failure(graph, initial_failures, **robustness_params)
         elif analysis_type == "resilience":
@@ -3198,8 +3247,8 @@ async def batch_graph_analysis(
             try:
                 graph = graph_manager.get_graph(gid)
                 graphs.append((gid, graph))
-            except:
-                logger.warning(f"Graph {gid} not found, skipping")
+            except Exception as e:
+                logger.warning(f"Graph {gid} not found, skipping: {e}")
 
         # Run batch analysis
         batch_params = params or {}
@@ -3353,7 +3402,7 @@ async def setup_monitoring(
         monitoring_config = {
             "graph_id": graph_id,
             "alert_rules": alert_rules,
-            "created_at": datetime.now().isoformat(),
+            "created_at": datetime.now(tz=timezone.utc).isoformat(),
             "initial_alerts": triggered_alerts
         }
 
@@ -3470,11 +3519,6 @@ async def list_graphs_resource() -> List[TextContent]:
 
 def main():
     """Run the NetworkX MCP server."""
-    import os
-    import sys
-
-    from datetime import datetime
-
     # Import datetime for the import_graph tool
     globals()["datetime"] = datetime
 
@@ -3483,6 +3527,9 @@ def main():
 
     # Get port from environment or command line (for SSE transport)
     port = 8765  # Changed default port to avoid conflicts
+    
+    # Get host from environment or default to localhost for security
+    host = os.environ.get("MCP_HOST", "127.0.0.1")
 
     # Check for port in environment
     if os.environ.get("MCP_PORT"):
@@ -3510,7 +3557,11 @@ def main():
 
     if transport in ["sse", "streamable-http"]:
         logger.info(f"Port: {port}")
-        logger.info(f"Server will be available at http://localhost:{port}")
+        logger.info(f"Host: {host}")
+        if host == "0.0.0.0":
+            logger.warning("SECURITY WARNING: Server is binding to all interfaces (0.0.0.0)")
+            logger.warning("This exposes the server to external connections. Use 127.0.0.1 for localhost only.")
+        logger.info(f"Server will be available at http://{host}:{port}")
     else:
         logger.info("Using stdio transport - communicate via standard input/output")
 
@@ -3521,9 +3572,11 @@ def main():
         if transport == "stdio":
             mcp.run()
         elif transport == "sse":
-            mcp.run(transport="sse", port=port, host="0.0.0.0")
+            # WARNING: Set MCP_HOST=0.0.0.0 to bind to all interfaces (security risk)
+            mcp.run(transport="sse", port=port, host=host)
         elif transport == "streamable-http":
-            mcp.run(transport="streamable-http", port=port, host="0.0.0.0")
+            # WARNING: Set MCP_HOST=0.0.0.0 to bind to all interfaces (security risk)
+            mcp.run(transport="streamable-http", port=port, host=host)
         else:
             logger.error(f"Unknown transport: {transport}")
             logger.info("Valid transports: stdio, sse, streamable-http")

@@ -255,7 +255,7 @@ class ResourceManager:
 
             return result
 
-        except asyncio.TimeoutError:
+        except asyncio.TimeoutError as e:
             self.operation_counts[f"{operation}_timeout"] += 1
             msg = (
                 f"Operation '{operation}' timed out after "
@@ -263,7 +263,7 @@ class ResourceManager:
             )
             raise OperationTimeout(
                 msg
-            )
+            ) from e
         except Exception:
             self.operation_counts[f"{operation}_error"] += 1
             raise

@@ -20,6 +20,22 @@ import pandas as pd
 import yaml
 
 
+# Optional imports - not all may be available
+try:
+    from scipy.sparse import coo_matrix
+    HAS_SCIPY = True
+except ImportError:
+    HAS_SCIPY = False
+    coo_matrix = None
+
+try:
+    from networkx.drawing.nx_agraph import to_agraph
+    HAS_AGRAPH = True
+except ImportError:
+    HAS_AGRAPH = False
+    to_agraph = None
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -46,10 +62,10 @@ class GraphIOHandler:
         path = Path(filepath)
         ext = path.suffix.lower()
 
-        for format_name, extensions in GraphIOHandler.FORMAT_EXTENSIONS.items():
+        for fmt_name, extensions in GraphIOHandler.FORMAT_EXTENSIONS.items():
             if ext in extensions:
-                logger.info(f"Auto-detected format '{format_name}' from extension '{ext}'")
-                return format_name
+                logger.info(f"Auto-detected format '{fmt_name}' from extension '{ext}'")
+                return fmt_name
 
         # Default fallback based on common patterns
         if "edge" in path.stem.lower():
@@ -63,52 +79,52 @@ class GraphIOHandler:
     @staticmethod
     def export_graph(
         graph: nx.Graph,
-        format: str,
+        output_format: str,
         path: Optional[Union[str, Path]] = None,
         **kwargs
     ) -> Union[str, bytes, Dict[str, Any]]:
         """Export graph to various formats with validation."""
-        logger.info(f"Exporting graph to {format} format")
+        logger.info(f"Exporting graph to {output_format} format")
 
         # Validate format
-        format = format.lower()
+        output_format = output_format.lower()
         valid_formats = ["json", "graphml", "gexf", "edgelist", "adjacency",
                         "pickle", "dot", "pajek", "yaml", "csv"]
 
-        if format not in valid_formats:
-            msg = f"Unsupported export format: {format}. Valid formats: {valid_formats}"
+        if output_format not in valid_formats:
+            msg = f"Unsupported export format: {output_format}. Valid formats: {valid_formats}"
             raise ValueError(msg)
 
         # Handle pretty printing option
         pretty_print = kwargs.pop("pretty_print", True)
 
-        if format == "json":
+        if output_format == "json":
             return GraphIOHandler._export_json(graph, pretty_print=pretty_print, **kwargs)
-        elif format == "yaml":
+        elif output_format == "yaml":
             return GraphIOHandler._export_yaml(graph, path, **kwargs)
-        elif format == "csv":
+        elif output_format == "csv":
             return GraphIOHandler._export_csv(graph, path, **kwargs)
-        elif format == "graphml":
+        elif output_format == "graphml":
             return GraphIOHandler._export_graphml(graph, path, **kwargs)
-        elif format == "gexf":
+        elif output_format == "gexf":
             return GraphIOHandler._export_gexf(graph, path, **kwargs)
-        elif format == "edgelist":
+        elif output_format == "edgelist":
             return GraphIOHandler._export_edgelist(graph, path, **kwargs)
-        elif format == "adjacency":
+        elif output_format == "adjacency":
             return GraphIOHandler._export_adjacency(graph, **kwargs)
-        elif format == "pickle":
+        elif output_format == "pickle":
             return GraphIOHandler._export_pickle(graph, path)
-        elif format == "dot":
+        elif output_format == "dot":
             return GraphIOHandler._export_dot(graph, **kwargs)
-        elif format == "pajek":
+        elif output_format == "pajek":
             return GraphIOHandler._export_pajek(graph, path)
         else:
-            msg = f"Unsupported export format: {format}"
+            msg = f"Unsupported export format: {output_format}"
             raise ValueError(msg)
 
     @staticmethod
     def import_graph(
-        format: Optional[str] = None,
+        input_format: Optional[str] = None,
         data: Optional[Union[str, bytes, Dict[str, Any]]] = None,
         path: Optional[Union[str, Path]] = None,
         auto_detect: bool = True,
@@ -116,22 +132,22 @@ class GraphIOHandler:
     ) -> nx.Graph:
         """Import graph from various formats with auto-detection."""
         # Auto-detect format if not provided
-        if format is None and path and auto_detect:
-            format = GraphIOHandler.detect_format(path)
+        if input_format is None and path and auto_detect:
+            input_format = GraphIOHandler.detect_format(path)
 
-        if format is None:
+        if input_format is None:
             msg = "Format must be specified or auto-detected from filepath"
             raise ValueError(msg)
 
-        logger.info(f"Importing graph from {format} format")
+        logger.info(f"Importing graph from {input_format} format")
 
         # Validate format
-        format = format.lower()
+        input_format = input_format.lower()
         valid_formats = ["json", "graphml", "gexf", "edgelist", "adjacency",
                         "pickle", "pajek", "yaml", "csv"]
 
-        if format not in valid_formats:
-            msg = f"Unsupported import format: {format}. Valid formats: {valid_formats}"
+        if input_format not in valid_formats:
+            msg = f"Unsupported import format: {input_format}. Valid formats: {valid_formats}"
             raise ValueError(msg)
 
         # Validate file existence
@@ -147,26 +163,26 @@ class GraphIOHandler:
                 msg = f"File is empty: {path}"
                 raise ValueError(msg)
 
-        if format == "json":
+        if input_format == "json":
             return GraphIOHandler._import_json(data, path, **kwargs)
-        elif format == "yaml":
+        elif input_format == "yaml":
             return GraphIOHandler._import_yaml(data, path, **kwargs)
-        elif format == "csv":
+        elif input_format == "csv":
             return GraphIOHandler._import_csv(path, **kwargs)
-        elif format == "graphml":
+        elif input_format == "graphml":
             return GraphIOHandler._import_graphml(path)
-        elif format == "gexf":
+        elif input_format == "gexf":
             return GraphIOHandler._import_gexf(path)
-        elif format == "edgelist":
+        elif input_format == "edgelist":
             return GraphIOHandler._import_edgelist(path, **kwargs)
-        elif format == "adjacency":
+        elif input_format == "adjacency":
             return GraphIOHandler._import_adjacency(data, path, **kwargs)
-        elif format == "pickle":
+        elif input_format == "pickle":
             return GraphIOHandler._import_pickle(path)
-        elif format == "pajek":
+        elif input_format == "pajek":
             return GraphIOHandler._import_pajek(path)
         else:
-            msg = f"Unsupported import format: {format}"
+            msg = f"Unsupported import format: {input_format}"
             raise ValueError(msg)
 
     @staticmethod
@@ -481,7 +497,7 @@ class GraphIOHandler:
     @staticmethod
     def export_for_streaming(
         graph: nx.Graph,
-        format: str,
+        output_format: str,
         output_stream: TextIO,
         chunk_size: int = 1000,
         **kwargs
@@ -490,7 +506,7 @@ class GraphIOHandler:
 
         Args:
             graph: Graph to export
-            format: Export format (currently supports 'edgelist', 'csv')
+            output_format: Export format (currently supports 'edgelist', 'csv')
             output_stream: Output stream to write to
             chunk_size: Number of edges to process at a time
             **kwargs: Format-specific options
@@ -498,9 +514,9 @@ class GraphIOHandler:
         Returns:
             Number of edges exported
         """
-        logger.info(f"Starting streaming export in {format} format")
+        logger.info(f"Starting streaming export in {output_format} format")
 
-        if format == "edgelist":
+        if output_format == "edgelist":
             # Write header if needed
             if kwargs.get("header", True):
                 output_stream.write("# NetworkX edge list\n")
@@ -539,9 +555,8 @@ class GraphIOHandler:
             logger.info(f"Streaming export complete: {edge_count} edges")
             return edge_count
 
-        elif format == "csv":
+        elif output_format == "csv":
             # CSV writer
-            import csv
             writer = csv.writer(output_stream)
 
             # Write header
@@ -585,7 +600,7 @@ class GraphIOHandler:
             return edge_count
 
         else:
-            msg = f"Streaming not supported for format: {format}"
+            msg = f"Streaming not supported for format: {output_format}"
             raise ValueError(msg)
 
     @staticmethod
@@ -693,8 +708,12 @@ class GraphIOHandler:
 
         if is_sparse and kwargs.get("sparse_format", False):
             # Return sparse representation
-            from scipy.sparse import coo_matrix
-            sparse = coo_matrix(matrix)
+            if not HAS_SCIPY:
+                logger.warning("scipy not available, returning dense matrix")
+                result["format"] = "dense"
+                result["matrix"] = matrix.tolist()
+            else:
+                sparse = coo_matrix(matrix)
             result["format"] = "sparse_coo"
             result["row"] = sparse.row.tolist()
             result["col"] = sparse.col.tolist()
@@ -725,7 +744,9 @@ class GraphIOHandler:
 
         # Handle sparse format
         if data.get("format") == "sparse_coo":
-            from scipy.sparse import coo_matrix
+            if not HAS_SCIPY:
+                msg = "scipy required for sparse matrix import"
+                raise ImportError(msg)
             n = data["shape"][0]
             matrix = coo_matrix(
                 (data["data"], (data["row"], data["col"])),
@@ -776,7 +797,9 @@ class GraphIOHandler:
     @staticmethod
     def _export_dot(graph: nx.Graph, **kwargs) -> str:
         """Export graph to DOT format."""
-        from networkx.drawing.nx_agraph import to_agraph
+        if not HAS_AGRAPH:
+            msg = "pygraphviz required for DOT format export"
+            raise ImportError(msg)
 
         A = to_agraph(graph)
         return A.to_string()

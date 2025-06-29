@@ -11,6 +11,7 @@ import time
 
 from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime
+from datetime import timezone
 from pathlib import Path
 from typing import Any
 from typing import Callable
@@ -21,6 +22,7 @@ from typing import Tuple
 from typing import Union
 
 import networkx as nx
+import numpy as np
 import schedule
 
 from jinja2 import Template
@@ -34,6 +36,20 @@ from reportlab.platypus import Paragraph
 from reportlab.platypus import SimpleDocTemplate
 from reportlab.platypus import Spacer
 from reportlab.platypus import Table
+
+
+# Performance thresholds
+MAX_NODES_FOR_EXPENSIVE_METRICS = 1000
+DISPLAY_LIMIT_FOR_ITEMS = 5
+
+
+# Optional imports
+try:
+    import community as community_louvain
+    HAS_LOUVAIN = True
+except ImportError:
+    HAS_LOUVAIN = False
+    community_louvain = None
 
 
 logger = logging.getLogger(__name__)
@@ -226,7 +242,7 @@ class EnterpriseFeatures:
         --------
         Report content (bytes for PDF, string for HTML)
         """
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        timestamp = datetime.now(tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
 
         if format == "html":
             return self._generate_html_report(
@@ -306,7 +322,7 @@ class EnterpriseFeatures:
                         "value": value,
                         "threshold": threshold,
                         "operator": operator,
-                        "timestamp": datetime.now().isoformat(),
+                        "timestamp": datetime.now(tz=timezone.utc).isoformat(),
                         "severity": rule.get("severity", "medium")
                     }
                     triggered_alerts.append(alert)
@@ -333,7 +349,7 @@ class EnterpriseFeatures:
                         "mean": mean,
                         "std": std,
                         "z_score": (current_value - mean) / std if std > 0 else 0,
-                        "timestamp": datetime.now().isoformat(),
+                        "timestamp": datetime.now(tz=timezone.utc).isoformat(),
                         "severity": rule.get("severity", "high")
                     }
                     triggered_alerts.append(alert)
@@ -351,7 +367,7 @@ class EnterpriseFeatures:
                             "type": "pattern",
                             "pattern": pattern,
                             "num_components": nx.number_connected_components(graph),
-                            "timestamp": datetime.now().isoformat(),
+                            "timestamp": datetime.now(tz=timezone.utc).isoformat(),
                             "severity": rule.get("severity", "high")
                         }
                         triggered_alerts.append(alert)
@@ -381,12 +397,13 @@ class EnterpriseFeatures:
         --------
         Job ID
         """
+        # Using MD5 for non-cryptographic job ID generation (not security sensitive)
         job_id = hashlib.md5(
             json.dumps(job_config, sort_keys=True).encode()
         ).hexdigest()[:8]
 
         job_config["job_id"] = job_id
-        job_config["created_at"] = datetime.now().isoformat()
+        job_config["created_at"] = datetime.now(tz=timezone.utc).isoformat()
         job_config["last_run"] = None
         job_config["next_run"] = None
         job_config["run_count"] = 0
@@ -464,14 +481,15 @@ class EnterpriseFeatures:
         --------
         Version ID
         """
+        # Using MD5 for non-cryptographic version ID generation (not security sensitive)
         version_id = hashlib.md5(
-            f"{version_name}_{datetime.now().isoformat()}".encode()
+            f"{version_name}_{datetime.now(tz=timezone.utc).isoformat()}".encode()
         ).hexdigest()[:12]
 
         version_data = {
             "version_id": version_id,
             "version_name": version_name,
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(tz=timezone.utc).isoformat(),
             "graph_info": {
                 "num_nodes": graph.number_of_nodes(),
                 "num_edges": graph.number_of_edges(),
@@ -557,8 +575,7 @@ class EnterpriseFeatures:
     def _detect_communities(self, graph: nx.Graph, **params) -> Dict[str, Any]:
         """Detect communities in graph."""
         # Simplified community detection
-        try:
-            import community as community_louvain
+        if HAS_LOUVAIN:
             partition = community_louvain.best_partition(graph)
 
             communities = {}
@@ -572,7 +589,7 @@ class EnterpriseFeatures:
                 "communities": communities,
                 "modularity": community_louvain.modularity(partition, graph)
             }
-        except ImportError:
+        else:
             # Fallback to connected components
             if graph.is_directed():
                 components = list(nx.weakly_connected_components(graph))
@@ -594,7 +611,7 @@ class EnterpriseFeatures:
             "is_connected": nx.is_connected(graph) if not graph.is_directed() else nx.is_weakly_connected(graph)
         }
 
-        if metrics["is_connected"] and graph.number_of_nodes() < 1000:
+        if metrics["is_connected"] and graph.number_of_nodes() < MAX_NODES_FOR_EXPENSIVE_METRICS:
             metrics["diameter"] = nx.diameter(graph)
             metrics["radius"] = nx.radius(graph)
 
@@ -606,10 +623,12 @@ class EnterpriseFeatures:
 
     def _get_cache_key(self, graph: nx.Graph, operation: str, params: Dict) -> str:
         """Generate cache key for operation."""
+        # Using MD5 for non-cryptographic cache key generation (not security sensitive)
         graph_hash = hashlib.md5(
             f"{graph.number_of_nodes()}_{graph.number_of_edges()}".encode()
         ).hexdigest()[:8]
 
+        # Using MD5 for non-cryptographic params hash (not security sensitive)
         params_hash = hashlib.md5(
             json.dumps(params, sort_keys=True).encode()
         ).hexdigest()[:8]
@@ -819,10 +838,10 @@ class EnterpriseFeatures:
                     format_dict(value, indent + 1)
                 elif isinstance(value, list) and len(value) > 0 and isinstance(value[0], (list, tuple)):
                     lines.append("  " * indent + f"{key}:")
-                    for item in value[:5]:  # Limit to first 5
+                    for item in value[:DISPLAY_LIMIT_FOR_ITEMS]:  # Limit to first items
                         lines.append("  " * (indent + 1) + str(item))
-                    if len(value) > 5:
-                        lines.append("  " * (indent + 1) + f"... and {len(value) - 5} more")
+                    if len(value) > DISPLAY_LIMIT_FOR_ITEMS:
+                        lines.append("  " * (indent + 1) + f"... and {len(value) - DISPLAY_LIMIT_FOR_ITEMS} more")
                 else:
                     lines.append("  " * indent + f"{key}: {value}")
 
@@ -869,7 +888,7 @@ class EnterpriseFeatures:
             result = self._execute_operation(**operation)
 
             # Update job metadata
-            job["last_run"] = datetime.now().isoformat()
+            job["last_run"] = datetime.now(tz=timezone.utc).isoformat()
             job["run_count"] += 1
             job["last_result"] = result
 
@@ -878,7 +897,7 @@ class EnterpriseFeatures:
                 results_dir = self.cache_dir / "job_results" / job_id
                 results_dir.mkdir(parents=True, exist_ok=True)
 
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                timestamp = datetime.now(tz=timezone.utc).strftime("%Y%m%d_%H%M%S")
                 with open(results_dir / f"result_{timestamp}.json", "w") as f:
                     json.dump(result, f, indent=2)
 

@@ -1,7 +1,7 @@
 """Graph generators for creating various types of synthetic networks."""
 
 import logging
-import random
+import random  # Using for non-cryptographic graph generation purposes only
 
 from typing import Any
 from typing import Dict
@@ -15,6 +15,14 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
+# Analysis thresholds
+MIN_DEGREE_SAMPLES_FOR_ANALYSIS = 10
+MAX_NODES_FOR_DETAILED_ANALYSIS = 1000
+DEFAULT_EDGE_PROBABILITY = 0.5
+MIN_EDGES_FACTOR = 2
+DEFAULT_REWIRING_PROBABILITY = 0.1
+DEFAULT_NEIGHBORS = 4
+
 
 class GraphGenerators:
     """Various graph generators for creating synthetic networks."""
@@ -27,7 +35,7 @@ class GraphGenerators:
         m: Optional[int] = None,
         seed: Optional[int] = None,
         directed: bool = False,
-        **params
+        **_params
     ) -> Tuple[nx.Graph, Dict[str, Any]]:
         """
         Generate random graphs using various models.
@@ -59,7 +67,7 @@ class GraphGenerators:
             # Erdős-Rényi G(n,p) model
             if p is None:
                 # Default to average degree of log(n)
-                p = np.log(n) / n if n > 1 else 0.5
+                p = np.log(n) / n if n > 1 else DEFAULT_EDGE_PROBABILITY
 
             if directed:
                 G = nx.erdos_renyi_graph(n, p, directed=True, seed=seed)
@@ -70,7 +78,7 @@ class GraphGenerators:
                 "generator": "erdos_renyi_gnp",
                 "n": n,
                 "p": p,
-                "expected_edges": n * (n - 1) * p / 2 if not directed else n * (n - 1) * p,
+                "expected_edges": n * (n - 1) * p / MIN_EDGES_FACTOR if not directed else n * (n - 1) * p,
                 "directed": directed
             }
 
@@ -80,7 +88,7 @@ class GraphGenerators:
                 # Default to n * log(n) edges
                 m = int(n * np.log(n))
 
-            max_edges = n * (n - 1) // 2 if not directed else n * (n - 1)
+            max_edges = n * (n - 1) // MIN_EDGES_FACTOR if not directed else n * (n - 1)
             m = min(m, max_edges)
 
             if directed:
@@ -111,7 +119,7 @@ class GraphGenerators:
     @staticmethod
     def scale_free_graph(
         n: int,
-        m: int = 2,
+        m: int = MIN_EDGES_FACTOR,
         m0: Optional[int] = None,
         alpha: float = 0.41,
         beta: float = 0.54,
@@ -157,7 +165,7 @@ class GraphGenerators:
                 "generator": "barabasi_albert",
                 "n": n,
                 "m": m,
-                "expected_edges": m0 * (m0 - 1) / 2 + m * (n - m0),
+                "expected_edges": m0 * (m0 - 1) / MIN_EDGES_FACTOR + m * (n - m0),
                 "model": "preferential_attachment"
             }
 
@@ -223,10 +231,10 @@ class GraphGenerators:
             log_degrees = np.log(sorted(degrees, reverse=True)[1:])  # Exclude max
             log_ranks = np.log(np.arange(1, len(log_degrees) + 1))
 
-            if len(log_degrees) > 10:
+            if len(log_degrees) > MIN_DEGREE_SAMPLES_FOR_ANALYSIS:
                 # Linear regression in log-log space
-                slope, _ = np.polyfit(log_ranks[:len(log_ranks)//2],
-                                    log_degrees[:len(log_degrees)//2], 1)
+                slope, _ = np.polyfit(log_ranks[:len(log_ranks)//MIN_EDGES_FACTOR],
+                                    log_degrees[:len(log_degrees)//MIN_EDGES_FACTOR], 1)
                 metadata["estimated_exponent"] = -slope
 
         return G, metadata
@@ -234,12 +242,12 @@ class GraphGenerators:
     @staticmethod
     def small_world_graph(
         n: int,
-        k: int = 4,
-        p: float = 0.1,
+        k: int = DEFAULT_NEIGHBORS,
+        p: float = DEFAULT_REWIRING_PROBABILITY,
         tries: int = 100,
         seed: Optional[int] = None,
         model: str = "watts_strogatz",
-        **params
+        **_params
     ) -> Tuple[nx.Graph, Dict[str, Any]]:
         """
         Generate small-world graphs.
@@ -272,7 +280,7 @@ class GraphGenerators:
                 "n": n,
                 "k": k,
                 "p": p,
-                "expected_edges": n * k // 2,
+                "expected_edges": n * k // MIN_EDGES_FACTOR,
                 "model": "ring_rewiring"
             }
 
@@ -285,7 +293,7 @@ class GraphGenerators:
                 "n": n,
                 "k": k,
                 "p": p,
-                "expected_edges": n * k // 2 + n * k * p // 2,
+                "expected_edges": n * k // MIN_EDGES_FACTOR + n * k * p // MIN_EDGES_FACTOR,
                 "model": "ring_addition"
             }
 
@@ -307,7 +315,7 @@ class GraphGenerators:
             raise ValueError(msg)
 
         # Calculate small-world metrics
-        if n < 1000:  # Only for smaller graphs
+        if n < MAX_NODES_FOR_DETAILED_ANALYSIS:  # Only for smaller graphs
             try:
                 # Average shortest path length
                 if nx.is_connected(G):
@@ -326,7 +334,8 @@ class GraphGenerators:
                 random_clustering = k / n if n > 0 else 0
                 metadata["random_graph_clustering"] = random_clustering
 
-            except:
+            except Exception as e:
+                logger.debug(f"Failed to compute clustering coefficient: {e}")
                 pass
 
         return G, metadata
@@ -361,7 +370,7 @@ class GraphGenerators:
 
         if graph_type == "random_regular":
             # Random d-regular graph
-            if n * d % 2 != 0:
+            if n * d % MIN_EDGES_FACTOR != 0:
                 msg = "n * d must be even for regular graphs"
                 raise ValueError(msg)
 
@@ -371,7 +380,7 @@ class GraphGenerators:
                 "generator": "random_regular",
                 "n": n,
                 "d": d,
-                "edges": n * d // 2,
+                "edges": n * d // MIN_EDGES_FACTOR,
                 "is_regular": True
             }
 
@@ -381,7 +390,7 @@ class GraphGenerators:
                 offsets = params["offsets"]
             else:
                 # Default offsets for d-regular circulant
-                offsets = list(range(1, d // 2 + 1))
+                offsets = list(range(1, d // MIN_EDGES_FACTOR + 1))
                 if d % 2 == 0:
                     offsets[-1] = n // 2  # For even d, connect to opposite node
 
@@ -814,9 +823,9 @@ class GraphGenerators:
                     "model": "powerlaw_degree_community_size"
                 }
 
-            except:
+            except Exception as e:
                 # Fallback to stochastic block model
-                logger.warning("LFR generation failed, falling back to SBM")
+                logger.warning(f"LFR generation failed, falling back to SBM: {e}")
                 return GraphGenerators.social_network_graph(
                     n, model="stochastic_block", communities=communities,
                     p_in=p_in, p_out=p_out, seed=seed
@@ -900,7 +909,7 @@ class GraphGenerators:
         method: str = "configuration",
         create_using: Optional[nx.Graph] = None,
         seed: Optional[int] = None,
-        **params
+        **_params
     ) -> Tuple[nx.Graph, Dict[str, Any]]:
         """
         Generate graph from a given degree sequence.
