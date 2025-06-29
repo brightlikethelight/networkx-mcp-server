@@ -4,9 +4,7 @@
 import asyncio
 import sys
 import time
-
 from pathlib import Path
-
 
 # Add project to path
 project_root = Path(__file__).parent.parent
@@ -23,9 +21,9 @@ class TestRedisPersistence:
 
         try:
             # Import server components
-            import add_persistence
             import security_patches
 
+            import add_persistence
             from src.networkx_mcp.server import graph_manager
 
             # Apply security and persistence
@@ -153,9 +151,9 @@ class TestRedisPersistence:
         """Test that concurrent access to persistence is safe."""
 
         try:
-            import add_persistence
             import security_patches
 
+            import add_persistence
             from src.networkx_mcp.server import graph_manager
 
             # Apply security and persistence

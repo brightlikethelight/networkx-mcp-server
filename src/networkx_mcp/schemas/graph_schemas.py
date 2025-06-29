@@ -1,15 +1,8 @@
 """Pydantic schemas for graph data validation."""
 
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Literal
-from typing import Optional
-from typing import Union
+from typing import Any, Dict, List, Literal, Optional, Union
 
-from pydantic import BaseModel
-from pydantic import Field
-from pydantic import validator
+from pydantic import BaseModel, Field, validator
 
 
 class NodeSchema(BaseModel):

@@ -2,7 +2,6 @@
 
 import argparse
 import asyncio
-
 from pathlib import Path
 from typing import Optional
 
@@ -13,9 +12,7 @@ from rich.table import Table
 from networkx_mcp.core.algorithms import GraphAlgorithms
 from networkx_mcp.core.graph_operations import GraphManager
 from networkx_mcp.core.io_handlers import GraphIOHandler
-from networkx_mcp.utils.monitoring import OperationCounter
-from networkx_mcp.utils.monitoring import PerformanceMonitor
-
+from networkx_mcp.utils.monitoring import OperationCounter, PerformanceMonitor
 
 console = Console()
 

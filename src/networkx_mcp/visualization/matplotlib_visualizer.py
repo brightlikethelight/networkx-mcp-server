@@ -2,20 +2,13 @@
 
 import base64
 import logging
-
 from io import BytesIO
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Tuple
-from typing import Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
-
 
 logger = logging.getLogger(__name__)
 

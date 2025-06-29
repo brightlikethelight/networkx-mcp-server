@@ -1,14 +1,12 @@
 """Louvain algorithm for community detection."""
 
 import asyncio
-
-from typing import List
-from typing import Set
+from typing import List, Set
 
 import networkx as nx
 
-from networkx_mcp.advanced.community.base import CommunityDetector
-from networkx_mcp.advanced.community.base import CommunityResult
+from networkx_mcp.advanced.community.base import (CommunityDetector,
+                                                  CommunityResult)
 
 
 class LouvainCommunityDetector(CommunityDetector):

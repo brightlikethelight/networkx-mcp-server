@@ -9,7 +9,6 @@ from networkx_mcp.advanced.network_flow import NetworkFlow
 from networkx_mcp.advanced.robustness import RobustnessAnalysis
 from networkx_mcp.advanced.specialized import SpecializedAlgorithms
 
-
 __all__ = [
     "BipartiteAnalysis",
     "CommunityDetection",

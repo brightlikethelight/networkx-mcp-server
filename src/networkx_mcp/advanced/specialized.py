@@ -3,19 +3,11 @@
 import logging
 import random  # Using for non-cryptographic algorithm simulation only
 import time
-
 from collections import defaultdict
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Set
-from typing import Tuple
-from typing import Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import networkx as nx
 import numpy as np
-
 
 logger = logging.getLogger(__name__)
 
@@ -268,7 +260,7 @@ class SpecializedAlgorithms:
         is_valid = SpecializedAlgorithms._verify_coloring(graph, coloring)
 
         # Chromatic number bounds
-        clique_number = nx.graph_clique_number(graph) CLIQUE_NUMBER_LIMIT = 100  # noqa: PLR2004
+        CLIQUE_NUMBER_LIMIT = 100  # noqa: PLR2004
         clique_number = nx.graph_clique_number(graph) if graph.number_of_nodes() < CLIQUE_NUMBER_LIMIT else None
 
         results = {
@@ -632,6 +624,8 @@ class SpecializedAlgorithms:
         """
         start_time = time.time()
 
+        ILP_LIMIT = 30  # noqa: PLR2004
+
         if method == "approximation":
             # 2-approximation algorithm
             cover = nx.approximation.min_weighted_vertex_cover(graph)
@@ -643,7 +637,6 @@ class SpecializedAlgorithms:
                 "approximation_ratio": 2.0
             }
 
-        ILP_LIMIT = 30  # noqa: PLR2004
         elif method == "ilp" and graph.number_of_nodes() < ILP_LIMIT:
             # Integer Linear Programming (exact for small graphs)
             # Simplified: use matching-based approximation

@@ -2,15 +2,9 @@
 
 import json
 import time
-
-from collections import defaultdict
-from collections import deque
-from datetime import datetime
-from datetime import timezone
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
+from collections import defaultdict, deque
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
 
 
 class PerformanceMonitor:

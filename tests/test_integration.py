@@ -104,8 +104,7 @@ class TestDataPipelinesIntegration:
     @pytest.mark.asyncio
     async def test_api_pipeline_mock(self):
         """Test API pipeline with mocked responses."""
-        from unittest.mock import AsyncMock
-        from unittest.mock import patch
+        from unittest.mock import AsyncMock, patch
 
         # Mock API responses
         mock_response_data = {
@@ -254,12 +253,10 @@ class TestEndToEndWorkflows:
     @pytest.mark.asyncio
     async def test_complete_analysis_workflow(self, temp_files):
         """Test complete workflow: import -> analyze -> visualize -> export."""
-        from networkx_mcp.server import centrality_measures
-        from networkx_mcp.server import community_detection
-        from networkx_mcp.server import export_graph
-        from networkx_mcp.server import graph_info
-        from networkx_mcp.server import import_graph
-        from networkx_mcp.server import visualize_graph
+        from networkx_mcp.server import (centrality_measures,
+                                         community_detection, export_graph,
+                                         graph_info, import_graph,
+                                         visualize_graph)
 
         # Step 1: Import graph from file
         import_result = await import_graph(
@@ -316,12 +313,10 @@ class TestEndToEndWorkflows:
     @pytest.mark.asyncio
     async def test_social_network_analysis_workflow(self):
         """Test social network analysis workflow."""
-        from networkx_mcp.server import add_edges
-        from networkx_mcp.server import add_nodes
-        from networkx_mcp.server import centrality_measures
-        from networkx_mcp.server import community_detection
-        from networkx_mcp.server import create_graph
-        from networkx_mcp.server import graph_info
+        from networkx_mcp.server import (add_edges, add_nodes,
+                                         centrality_measures,
+                                         community_detection, create_graph,
+                                         graph_info)
 
         # Create social network
         await create_graph(
@@ -382,11 +377,8 @@ class TestEndToEndWorkflows:
     @pytest.mark.asyncio
     async def test_transport_network_workflow(self):
         """Test transportation network analysis workflow."""
-        from networkx_mcp.server import add_edges
-        from networkx_mcp.server import add_nodes
-        from networkx_mcp.server import create_graph
-        from networkx_mcp.server import minimum_spanning_tree
-        from networkx_mcp.server import shortest_path
+        from networkx_mcp.server import (add_edges, add_nodes, create_graph,
+                                         minimum_spanning_tree, shortest_path)
 
         # Create transportation network
         await create_graph(
@@ -457,11 +449,9 @@ class TestEndToEndWorkflows:
     @pytest.mark.asyncio
     async def test_research_citation_workflow(self):
         """Test research citation network workflow."""
-        from networkx_mcp.server import add_edges
-        from networkx_mcp.server import add_nodes
-        from networkx_mcp.server import centrality_measures
-        from networkx_mcp.server import connected_components
-        from networkx_mcp.server import create_graph
+        from networkx_mcp.server import (add_edges, add_nodes,
+                                         centrality_measures,
+                                         connected_components, create_graph)
 
         # Create citation network
         await create_graph(

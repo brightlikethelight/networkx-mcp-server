@@ -8,35 +8,20 @@ import logging
 import multiprocessing as mp
 import threading
 import time
-
 from concurrent.futures import ProcessPoolExecutor
-from datetime import datetime
-from datetime import timezone
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
-from typing import Callable
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Tuple
-from typing import Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import networkx as nx
 import numpy as np
 import schedule
-
 from jinja2 import Template
 from reportlab.lib.pagesizes import letter
-from reportlab.lib.styles import ParagraphStyle
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch
-from reportlab.platypus import Image
-from reportlab.platypus import PageBreak
-from reportlab.platypus import Paragraph
-from reportlab.platypus import SimpleDocTemplate
-from reportlab.platypus import Spacer
-from reportlab.platypus import Table
-
+from reportlab.platypus import (Image, PageBreak, Paragraph, SimpleDocTemplate,
+                                Spacer, Table)
 
 # Performance thresholds
 MAX_NODES_FOR_EXPENSIVE_METRICS = 1000
@@ -67,7 +52,7 @@ class EnterpriseFeatures:
         self._scheduler_thread = None
         self._scheduled_jobs = []
 
-    async def batch_analysis(
+    def batch_analysis(
         self,
         graphs: List[Tuple[str, nx.Graph]],
         operations: List[Dict[str, Any]],
@@ -378,24 +363,21 @@ class EnterpriseFeatures:
 
         return triggered_alerts
 
-    def scheduling(
-        self,
-        job_config: Dict[str, Any],
-        start_immediately: bool = False
-    ) -> str:
+    def schedule_job(self, job_config: Dict[str, Any], start_immediately: bool = True) -> str:
         """
-        Schedule periodic analysis execution.
-
+        Schedule a job for execution.
+        
         Parameters:
         -----------
         job_config : dict
             Job configuration including schedule and operation
         start_immediately : bool
             Start scheduler immediately
-
+            
         Returns:
         --------
-        Job ID
+        str
+            Job ID
         """
         # Using MD5 for non-cryptographic job ID generation (not security sensitive)
         job_id = hashlib.md5(
@@ -459,15 +441,10 @@ class EnterpriseFeatures:
 
         return job_id
 
-    def versioning(
-        self,
-        graph: nx.Graph,
-        version_name: str,
-        metadata: Optional[Dict[str, Any]] = None
-    ) -> str:
+    def save_graph_version(self, graph: nx.Graph, version_name: str, metadata: Optional[Dict[str, Any]] = None) -> str:
         """
-        Graph version control.
-
+        Save a versioned snapshot of a graph.
+        
         Parameters:
         -----------
         graph : nx.Graph

@@ -2,16 +2,15 @@
 
 import asyncio
 import json
-from typing import Dict, Any
 
 
 async def demonstrate_basic_operations():
     """Demonstrate basic graph operations."""
     print("=== NetworkX MCP Server Basic Usage ===\n")
-    
+
     # Note: In actual usage, these would be MCP client calls
     # This example shows the expected inputs and outputs
-    
+
     # 1. Create a graph
     print("1. Creating a new graph:")
     create_request = {
@@ -21,7 +20,7 @@ async def demonstrate_basic_operations():
     }
     print(f"Request: {json.dumps(create_request, indent=2)}")
     print("Expected Response: Graph created successfully\n")
-    
+
     # 2. Add nodes
     print("2. Adding nodes to the graph:")
     nodes = [
@@ -37,7 +36,7 @@ async def demonstrate_basic_operations():
     }
     print(f"Request: {json.dumps(add_nodes_request, indent=2)}")
     print("Expected Response: 5 nodes added\n")
-    
+
     # 3. Add edges (friendships)
     print("3. Adding edges (friendships):")
     edges = [
@@ -59,7 +58,7 @@ async def demonstrate_basic_operations():
 async def demonstrate_algorithms():
     """Demonstrate graph algorithms."""
     print("\n=== Graph Algorithms ===\n")
-    
+
     # 1. Shortest path
     print("1. Finding shortest path:")
     shortest_path_request = {
@@ -69,7 +68,7 @@ async def demonstrate_algorithms():
     }
     print(f"Request: {json.dumps(shortest_path_request, indent=2)}")
     print("Expected Response: Path: Alice -> Charlie -> Eve (length: 2)\n")
-    
+
     # 2. Centrality measures
     print("2. Calculating centrality measures:")
     centrality_request = {
@@ -79,7 +78,7 @@ async def demonstrate_algorithms():
     }
     print(f"Request: {json.dumps(centrality_request, indent=2)}")
     print("Expected Response: Top 3 nodes by centrality scores\n")
-    
+
     # 3. Community detection
     print("3. Detecting communities:")
     community_request = {
@@ -93,7 +92,7 @@ async def demonstrate_algorithms():
 async def demonstrate_advanced_features():
     """Demonstrate advanced features."""
     print("\n=== Advanced Features ===\n")
-    
+
     # 1. Create weighted directed graph
     print("1. Creating a weighted directed graph (transportation network):")
     create_digraph_request = {
@@ -102,7 +101,7 @@ async def demonstrate_advanced_features():
         "description": "City transportation network"
     }
     print(f"Request: {json.dumps(create_digraph_request, indent=2)}")
-    
+
     # Add cities and routes
     cities = ["NYC", "Boston", "Philadelphia", "Washington DC", "Baltimore"]
     routes = [
@@ -115,7 +114,7 @@ async def demonstrate_advanced_features():
     ]
     print(f"Cities: {cities}")
     print(f"Routes: {len(routes)} directed edges\n")
-    
+
     # 2. Weighted shortest path
     print("2. Finding shortest path by distance:")
     weighted_path_request = {
@@ -127,7 +126,7 @@ async def demonstrate_advanced_features():
     }
     print(f"Request: {json.dumps(weighted_path_request, indent=2)}")
     print("Expected: NYC -> Philadelphia -> Washington DC (235 miles)\n")
-    
+
     # 3. Export/Import operations
     print("3. Export and import graph data:")
     export_request = {
@@ -141,7 +140,7 @@ async def demonstrate_advanced_features():
 async def demonstrate_visualization():
     """Demonstrate visualization features."""
     print("\n=== Visualization ===\n")
-    
+
     print("1. Generate visualization data:")
     viz_request = {
         "graph_id": "social_network",
@@ -150,7 +149,7 @@ async def demonstrate_visualization():
     }
     print(f"Request: {json.dumps(viz_request, indent=2)}")
     print("Expected: Node positions and visualization data\n")
-    
+
     print("2. Layout algorithms available:")
     layouts = ["spring", "circular", "kamada_kawai", "spectral", "random"]
     for layout in layouts:
@@ -172,7 +171,7 @@ def get_layout_description(layout: str) -> str:
 async def demonstrate_analysis_workflow():
     """Demonstrate a complete analysis workflow."""
     print("\n\n=== Complete Analysis Workflow ===\n")
-    
+
     print("Analyzing a collaboration network:")
     print("1. Load graph from file")
     print("2. Calculate basic statistics")
@@ -180,7 +179,7 @@ async def demonstrate_analysis_workflow():
     print("4. Detect research groups (communities)")
     print("5. Analyze connectivity patterns")
     print("6. Export results\n")
-    
+
     # Example workflow steps
     workflow = [
         {
@@ -209,7 +208,7 @@ async def demonstrate_analysis_workflow():
             "params": {"format": "gexf", "path": "results.gexf"}
         }
     ]
-    
+
     for i, step in enumerate(workflow, 1):
         print(f"{i}. {step['step']}")
         print(f"   Tool: {step['tool']}")
@@ -229,14 +228,14 @@ def main():
     print("Note: These are example requests and expected responses.")
     print("In actual usage, you would use an MCP client to connect")
     print("to the running server.\n")
-    
+
     # Run demonstrations
     asyncio.run(demonstrate_basic_operations())
     asyncio.run(demonstrate_algorithms())
     asyncio.run(demonstrate_advanced_features())
     asyncio.run(demonstrate_visualization())
     asyncio.run(demonstrate_analysis_workflow())
-    
+
     print("\n=== Starting the Server ===\n")
     print("To start the NetworkX MCP server, run:")
     print("  python -m networkx_mcp.server")

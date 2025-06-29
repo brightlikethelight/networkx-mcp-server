@@ -1,16 +1,12 @@
 """Node classification algorithms."""
 
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
+from typing import Any, Dict, List, Optional
 
 import networkx as nx
 import numpy as np
 
-from networkx_mcp.advanced.ml.base import GraphMLModel
-from networkx_mcp.advanced.ml.base import MLResult
-from networkx_mcp.advanced.ml.base import extract_node_features
+from networkx_mcp.advanced.ml.base import (GraphMLModel, MLResult,
+                                           extract_node_features)
 
 
 class NodeClassifier(GraphMLModel):

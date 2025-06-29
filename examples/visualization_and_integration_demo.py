@@ -18,17 +18,18 @@ Requirements:
 import asyncio
 import json
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any, Dict
+
 
 # In a real implementation, you would use an MCP client library
 # For this demo, we'll simulate the client calls
 class MCPClient:
     """Simulated MCP client for demonstration purposes."""
-    
+
     def __init__(self, server_url: str):
         self.server_url = server_url
         print(f"Connected to NetworkX MCP Server at {server_url}")
-    
+
     async def call_tool(self, tool_name: str, params: Dict[str, Any]) -> Dict[str, Any]:
         """Simulate calling an MCP tool."""
         print(f"\n🔧 Calling tool: {tool_name}")
@@ -42,14 +43,14 @@ class MCPClient:
 async def phase3_demo():
     """Demonstrate Phase 3 visualization and integration features."""
     client = MCPClient("http://localhost:8000")
-    
+
     print("\n" + "="*80)
     print("NetworkX MCP Server - Phase 3: Visualization & Integration Demo")
     print("="*80)
-    
+
     # Step 1: Import data from multiple sources
     print("\n📊 Step 1: Importing data from multiple sources...")
-    
+
     # Import from CSV
     csv_result = await client.call_tool("import_from_source", {
         "source_type": "csv",
@@ -60,7 +61,7 @@ async def phase3_demo():
         "delimiter": ","
     })
     print(f"✅ Imported CSV: {csv_result.get('num_nodes', 'N/A')} nodes, {csv_result.get('num_edges', 'N/A')} edges")
-    
+
     # Import from JSON
     json_result = await client.call_tool("import_from_source", {
         "source_type": "json",
@@ -69,7 +70,7 @@ async def phase3_demo():
         "format_type": "node_link"
     })
     print(f"✅ Imported JSON: {json_result.get('format_detected', 'N/A')} format detected")
-    
+
     # Import from database (simulated)
     db_result = await client.call_tool("import_from_source", {
         "source_type": "database",
@@ -78,11 +79,11 @@ async def phase3_demo():
         "db_type": "sqlite",
         "graph_id": "db_network"
     })
-    print(f"✅ Imported from database: Query executed successfully")
-    
+    print("✅ Imported from database: Query executed successfully")
+
     # Step 2: Batch analysis of multiple graphs
     print("\n🔍 Step 2: Running batch analysis on imported graphs...")
-    
+
     batch_result = await client.call_tool("batch_graph_analysis", {
         "graph_ids": ["social_data", "json_network", "db_network"],
         "operations": [
@@ -109,10 +110,10 @@ async def phase3_demo():
         "batch_size": 10
     })
     print("✅ Batch analysis completed for all graphs")
-    
+
     # Step 3: Create visualizations
     print("\n🎨 Step 3: Creating visualizations...")
-    
+
     # Static visualization with custom styling
     static_viz = await client.call_tool("visualize_graph", {
         "graph_id": "social_data",
@@ -128,7 +129,7 @@ async def phase3_demo():
         "figsize": [12, 8]
     })
     print(f"✅ Static visualization saved to: {static_viz.get('file_path', 'N/A')}")
-    
+
     # Interactive physics-based visualization
     interactive_viz = await client.call_tool("visualize_graph", {
         "graph_id": "json_network",
@@ -141,7 +142,7 @@ async def phase3_demo():
         "show_labels": True
     })
     print(f"✅ Interactive visualization created: {interactive_viz.get('file_path', 'N/A')}")
-    
+
     # 3D visualization
     viz_3d = await client.call_tool("visualize_3d", {
         "graph_id": "db_network",
@@ -154,7 +155,7 @@ async def phase3_demo():
         }
     })
     print(f"✅ 3D visualization created: {viz_3d.get('file_path', 'N/A')}")
-    
+
     # Specialized visualization - heatmap
     heatmap_viz = await client.call_tool("visualize_graph", {
         "graph_id": "social_data",
@@ -164,10 +165,10 @@ async def phase3_demo():
         "show_values": True
     })
     print("✅ Heatmap visualization created")
-    
+
     # Step 4: Create analysis workflow
     print("\n⚙️ Step 4: Creating and executing analysis workflow...")
-    
+
     workflow_result = await client.call_tool("create_analysis_workflow", {
         "graph_id": "social_data",
         "workflow": [
@@ -210,10 +211,10 @@ async def phase3_demo():
         "save_results": True
     })
     print(f"✅ Workflow completed: {workflow_result.get('steps_completed', 0)} steps executed")
-    
+
     # Step 5: Generate comprehensive report
     print("\n📄 Step 5: Generating comprehensive analysis report...")
-    
+
     report = await client.call_tool("generate_report", {
         "graph_id": "social_data",
         "format": "pdf",
@@ -236,10 +237,10 @@ async def phase3_demo():
     })
     print(f"✅ Report generated: {report.get('file_path', 'N/A')}")
     print(f"   Format: {report.get('format', 'N/A')}, Pages: {report.get('pages', 'N/A')}")
-    
+
     # Step 6: Create interactive dashboard
     print("\n📊 Step 6: Creating interactive dashboard...")
-    
+
     dashboard = await client.call_tool("create_dashboard", {
         "graph_id": "social_data",
         "components": [
@@ -276,10 +277,10 @@ async def phase3_demo():
         "refresh_interval": 300  # 5 minutes
     })
     print(f"✅ Dashboard created: {dashboard.get('url', 'N/A')}")
-    
+
     # Step 7: Setup monitoring and alerts
     print("\n🚨 Step 7: Setting up monitoring and alerts...")
-    
+
     monitoring = await client.call_tool("setup_monitoring", {
         "graph_id": "social_data",
         "alert_rules": [
@@ -318,10 +319,10 @@ async def phase3_demo():
     })
     print(f"✅ Monitoring configured: {monitoring.get('rules_configured', 0)} rules active")
     print(f"   Monitoring ID: {monitoring.get('monitoring_id', 'N/A')}")
-    
+
     # Step 8: Advanced use case - Multi-source integration with streaming
     print("\n🌊 Step 8: Demonstrating advanced integration patterns...")
-    
+
     # Create a workflow that combines data from multiple sources
     integration_workflow = await client.call_tool("create_analysis_workflow", {
         "graph_id": "integrated_network",
@@ -357,7 +358,7 @@ async def phase3_demo():
         ]
     })
     print("✅ Multi-source integration workflow completed")
-    
+
     # Generate final summary
     print("\n" + "="*80)
     print("📈 Phase 3 Demo Summary")
@@ -371,7 +372,7 @@ async def phase3_demo():
     print("✓ Interactive analytics dashboard creation")
     print("✓ Real-time monitoring with multiple alert types")
     print("✓ Advanced multi-source data integration")
-    
+
     print("\n🎉 Phase 3 demonstration completed successfully!")
     print("\nKey capabilities showcased:")
     print("- Intelligent data pipelines with type inference")
@@ -379,7 +380,7 @@ async def phase3_demo():
     print("- Multiple visualization backends for different use cases")
     print("- Enterprise-grade reporting and monitoring")
     print("- Workflow orchestration with conditional logic")
-    
+
     return {
         "graphs_created": 4,
         "visualizations": 4,
@@ -394,7 +395,7 @@ async def phase3_demo():
 async def streaming_demo(client: MCPClient):
     """Demonstrate real-time streaming data integration."""
     print("\n🌊 Streaming Data Integration Demo")
-    
+
     # Simulate a stream of network updates
     async def generate_stream():
         """Simulate streaming network data."""
@@ -407,7 +408,7 @@ async def streaming_demo(client: MCPClient):
                 "weight": 0.5 + i * 0.1
             }
             await asyncio.sleep(0.5)
-    
+
     # Process streaming data
     print("Processing streaming updates...")
     async for update in generate_stream():
@@ -417,7 +418,7 @@ async def streaming_demo(client: MCPClient):
 async def enterprise_workflow_demo(client: MCPClient):
     """Demonstrate enterprise workflow with versioning and scheduling."""
     print("\n🏢 Enterprise Workflow Demo")
-    
+
     # Create versioned analysis
     version_result = await client.call_tool("create_version", {
         "graph_id": "production_network",
@@ -429,7 +430,7 @@ async def enterprise_workflow_demo(client: MCPClient):
         }
     })
     print(f"✅ Created version: {version_result.get('version_id', 'N/A')}")
-    
+
     # Schedule periodic analysis
     schedule_result = await client.call_tool("schedule_analysis", {
         "job_name": "daily_network_health_check",
@@ -450,16 +451,16 @@ async def enterprise_workflow_demo(client: MCPClient):
 # Main execution
 if __name__ == "__main__":
     print("Starting NetworkX MCP Server Phase 3 Demo...")
-    
+
     # Create example data directory
     data_dir = Path("examples/data")
     data_dir.mkdir(exist_ok=True)
-    
+
     # Run the main demo
     results = asyncio.run(phase3_demo())
-    
+
     # Optional: Run additional demos
     # asyncio.run(streaming_demo(MCPClient("http://localhost:8000")))
     # asyncio.run(enterprise_workflow_demo(MCPClient("http://localhost:8000")))
-    
+
     print("\n✨ Demo completed! Check the output files and dashboards.")

@@ -5,11 +5,9 @@ import asyncio
 import random
 import sys
 import time
-
 from pathlib import Path
 
 import psutil
-
 
 # Add project to path
 project_root = Path(__file__).parent.parent
@@ -105,9 +103,9 @@ class TestLoadCapacity:
         """Find breaking point for concurrent users."""
 
         try:
-            import add_persistence
             import security_patches
 
+            import add_persistence
             from src.networkx_mcp.server import graph_manager
 
             # Apply security and persistence
@@ -186,9 +184,9 @@ class TestLoadCapacity:
         """Verify memory limits are enforced properly."""
 
         try:
-            import add_persistence
             import security_patches
 
+            import add_persistence
             from src.networkx_mcp.server import graph_manager
 
             # Apply security and persistence
@@ -267,9 +265,9 @@ class TestLoadCapacity:
         """Test operation latency under normal conditions."""
 
         try:
-            import add_persistence
             import security_patches
 
+            import add_persistence
             from src.networkx_mcp.server import graph_manager
 
             # Apply security and persistence

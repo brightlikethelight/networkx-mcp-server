@@ -1,16 +1,10 @@
 """Base interfaces for community detection algorithms."""
 
-from abc import ABC
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Set
+from typing import Any, Dict, List, Optional, Set
 
 import networkx as nx
-
 
 # Constants
 MIN_NODES_FOR_COMMUNITY_DETECTION = 2

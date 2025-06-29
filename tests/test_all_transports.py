@@ -2,9 +2,8 @@
 """Test all NetworkX MCP Server transport methods."""
 
 import subprocess
-import time
 import sys
-import json
+import time
 
 print("🧪 Testing All NetworkX MCP Server Transports")
 print("=" * 50)
@@ -49,7 +48,7 @@ time.sleep(3)
 
 if process.poll() is None:
     print("   ✅ SSE server started successfully on port 8767")
-    
+
     # Try to connect
     try:
         import requests
@@ -57,7 +56,7 @@ if process.poll() is None:
         print(f"   📡 SSE endpoint responded with status: {response.status_code}")
     except:
         print("   ⚠️  Could not connect to SSE endpoint (requests module may be missing)")
-    
+
     process.terminate()
     process.wait()
 else:

@@ -1,13 +1,8 @@
 """Base interfaces for machine learning on graphs."""
 
-from abc import ABC
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Union
+from typing import Any, Dict, List, Optional, Union
 
 import networkx as nx
 import numpy as np

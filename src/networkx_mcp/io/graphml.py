@@ -5,9 +5,7 @@ from typing import Union
 
 import networkx as nx
 
-from networkx_mcp.io.base import GraphReader
-from networkx_mcp.io.base import GraphWriter
-from networkx_mcp.io.base import validate_file_path
+from networkx_mcp.io.base import GraphReader, GraphWriter, validate_file_path
 
 
 class GraphMLReader(GraphReader):

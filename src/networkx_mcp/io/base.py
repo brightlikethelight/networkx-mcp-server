@@ -1,10 +1,8 @@
 """Base interfaces for graph I/O operations."""
 
-from abc import ABC
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List
-from typing import Union
+from typing import List, Union
 
 import networkx as nx
 

@@ -1,16 +1,14 @@
 """Comprehensive tests for Phase 3 visualization functionality."""
 
 import base64
-
 from unittest.mock import patch
 
 import networkx as nx
 import pytest
 
-from networkx_mcp.visualization import MatplotlibVisualizer
-from networkx_mcp.visualization import PlotlyVisualizer
-from networkx_mcp.visualization import PyvisVisualizer
-from networkx_mcp.visualization import SpecializedVisualizations
+from networkx_mcp.visualization import (MatplotlibVisualizer, PlotlyVisualizer,
+                                        PyvisVisualizer,
+                                        SpecializedVisualizations)
 
 
 class TestMatplotlibVisualizer:

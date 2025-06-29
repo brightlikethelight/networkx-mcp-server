@@ -1,16 +1,12 @@
 """Girvan-Newman algorithm for community detection."""
 
 import asyncio
-
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Set
+from typing import Dict, List, Optional, Set
 
 import networkx as nx
 
-from networkx_mcp.advanced.community.base import CommunityDetector
-from networkx_mcp.advanced.community.base import CommunityResult
+from networkx_mcp.advanced.community.base import (CommunityDetector,
+                                                  CommunityResult)
 
 
 class GirvanNewmanDetector(CommunityDetector):

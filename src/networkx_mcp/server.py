@@ -8,53 +8,43 @@ import random  # Using for non-cryptographic graph sampling only
 import sys
 import time
 import traceback
-
-from datetime import datetime
-from datetime import timezone
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Tuple
-from typing import Union
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import networkx as nx
 import numpy as np
-
 
 try:
     from networkx.algorithms.simple_paths import shortest_simple_paths
 except ImportError:
     shortest_simple_paths = None
 
-from fastmcp import FastMCP
+try:
+    from fastmcp import FastMCP
+    HAS_FASTMCP = True
+except ImportError:
+    HAS_FASTMCP = False
+    from mcp import Server
+    from mcp.server.models import InitializationOptions
 from mcp.types import TextContent
 
 # Phase 2 Advanced Analytics imports
-from networkx_mcp.advanced import BipartiteAnalysis
-from networkx_mcp.advanced import CommunityDetection
-from networkx_mcp.advanced import DirectedAnalysis
-from networkx_mcp.advanced import GraphGenerators
-from networkx_mcp.advanced import MLIntegration
-from networkx_mcp.advanced import NetworkFlow
-from networkx_mcp.advanced import RobustnessAnalysis
-from networkx_mcp.advanced import SpecializedAlgorithms
+from networkx_mcp.advanced import (BipartiteAnalysis, CommunityDetection,
+                                   DirectedAnalysis, GraphGenerators,
+                                   MLIntegration, NetworkFlow,
+                                   RobustnessAnalysis, SpecializedAlgorithms)
 from networkx_mcp.advanced.enterprise import EnterpriseFeatures
 from networkx_mcp.core.algorithms import GraphAlgorithms
 from networkx_mcp.core.graph_operations import GraphManager
 from networkx_mcp.core.io_handlers import GraphIOHandler
 from networkx_mcp.integration import DataPipelines
 from networkx_mcp.utils.formatters import GraphFormatter
-from networkx_mcp.utils.monitoring import OperationCounter
-from networkx_mcp.utils.monitoring import PerformanceMonitor
+from networkx_mcp.utils.monitoring import OperationCounter, PerformanceMonitor
 from networkx_mcp.utils.validators import GraphValidator
-
 # Phase 3 Visualization & Integration imports
-from networkx_mcp.visualization import MatplotlibVisualizer
-from networkx_mcp.visualization import PlotlyVisualizer
-from networkx_mcp.visualization import PyvisVisualizer
-from networkx_mcp.visualization import SpecializedVisualizations
-
+from networkx_mcp.visualization import (MatplotlibVisualizer, PlotlyVisualizer,
+                                        PyvisVisualizer,
+                                        SpecializedVisualizations)
 
 # Constants for edge and data validation
 MIN_EDGE_ELEMENTS = 2
@@ -98,7 +88,11 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Initialize the MCP server
-mcp = FastMCP("NetworkX Graph Analysis Server")
+if HAS_FASTMCP:
+    mcp = FastMCP("NetworkX Graph Analysis Server")
+else:
+    mcp = Server("NetworkX Graph Analysis Server")
+    mcp.request_context = InitializationOptions()
 
 # Global state management
 # TODO: For production, implement proper state management (Redis, PostgreSQL, etc.)

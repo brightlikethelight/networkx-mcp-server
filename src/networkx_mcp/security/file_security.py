@@ -4,19 +4,13 @@ import hashlib
 import json
 import os
 import tempfile
-
 from pathlib import Path
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Union
+from typing import Any, Dict, List, Optional, Union
 
 import networkx as nx
 import yaml
 
-from .validator import SecurityError
-from .validator import SecurityValidator
+from .validator import SecurityError, SecurityValidator
 
 
 class FileSecurityError(SecurityError):

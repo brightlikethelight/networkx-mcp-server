@@ -4,21 +4,13 @@ import csv
 import json
 import logging
 import pickle
-
 from pathlib import Path
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import TextIO
-from typing import Tuple
-from typing import Union
+from typing import Any, Dict, List, Optional, TextIO, Tuple, Union
 
 import networkx as nx
 import numpy as np
 import pandas as pd
 import yaml
-
 
 # Optional imports - not all may be available
 try:

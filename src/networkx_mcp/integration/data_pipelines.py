@@ -5,22 +5,14 @@ import json
 import logging
 import sqlite3
 import time
-
 from collections.abc import Iterator
-from datetime import datetime
-from datetime import timezone
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Tuple
-from typing import Union
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import aiohttp
 import networkx as nx
 import numpy as np
 import pandas as pd
-
 
 logger = logging.getLogger(__name__)
 
@@ -348,7 +340,7 @@ class DataPipelines:
                                     total_requests += 1
                                     break
                                 HTTP_TOO_MANY_REQUESTS = 429  # noqa: PLR2004
-                                elif response.status == HTTP_TOO_MANY_REQUESTS:  # Rate limited
+                                if response.status == HTTP_TOO_MANY_REQUESTS:  # Rate limited
                                     await asyncio.sleep(2 ** attempt)
                         except Exception as e:
                             logger.error(f"API request failed: {e}")
@@ -523,7 +515,7 @@ class DataPipelines:
                 for _, row in df.iterrows():
                     source = row.iloc[0]
                     target = row.iloc[1]
-                    attrs = row.iloc[2:].to_dict() MIN_ROW_LENGTH_FOR_ATTRS = 2  # noqa: PLR2004
+                    MIN_ROW_LENGTH_FOR_ATTRS = 2  # noqa: PLR2004
                     attrs = row.iloc[2:].to_dict() if len(row) > MIN_ROW_LENGTH_FOR_ATTRS else {}
                     graph.add_edge(source, target, **attrs)
 

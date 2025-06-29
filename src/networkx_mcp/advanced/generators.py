@@ -2,16 +2,10 @@
 
 import logging
 import random  # Using for non-cryptographic graph generation purposes only
-
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import networkx as nx
 import numpy as np
-
 
 logger = logging.getLogger(__name__)
 

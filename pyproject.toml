@@ -5,24 +5,14 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "networkx-mcp-server"
 version = "1.0.0"
-description = "Production-ready MCP server for graph analysis powered by NetworkX"
+description = "Production-ready MCP server for NetworkX graph analysis"
 readme = "README.md"
-requires-python = ">=3.8"
 license = {text = "MIT"}
-authors = [
-    {name = "NetworkX MCP Server Contributors", email = "networkx-mcp@example.com"},
-]
-maintainers = [
-    {name = "NetworkX MCP Server Team", email = "maintainers@networkx-mcp.org"},
-]
-keywords = ["mcp", "networkx", "graph", "network", "analysis", "visualization", "algorithms"]
+authors = [{name = "Bright Liu", email = "brightliu@example.com"}]
+maintainers = [{name = "Bright Liu", email = "brightliu@example.com"}]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
-    "Intended Audience :: Science/Research",
-    "Topic :: Scientific/Engineering :: Information Analysis",
-    "Topic :: Scientific/Engineering :: Visualization",
-    "Topic :: Software Development :: Libraries :: Python Modules",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
@@ -30,266 +20,91 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-
+requires-python = ">=3.8"
 dependencies = [
-    "fastmcp>=0.1.0",
     "networkx>=3.0",
-    "numpy>=1.20",
-    "pandas>=1.3",
-    "matplotlib>=3.3",
-    "plotly>=5.0",
-    "pyvis>=0.3",
-    "redis>=4.0",
-    "python-louvain>=0.16",
-    "scikit-learn>=1.0",
-    "seaborn>=0.11",
-    "scipy>=1.7",
+    "mcp>=0.5.0",
+    "numpy>=1.20.0",
+    "scipy>=1.7.0",
+    "matplotlib>=3.3.0",
+    "plotly>=5.0.0",
+    "pandas>=1.3.0",
+    "redis>=4.0.0",
+    "aiofiles>=0.8.0",
+    "pyyaml>=6.0",
+    "python-dotenv>=0.19.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.4.0",
-    "pytest-cov>=4.1.0",
-    "pytest-asyncio>=0.21.0",
-    "pytest-benchmark>=4.0.0",
-    "black>=23.0.0",
-    "mypy>=1.5.0",
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.20.0",
+    "pytest-cov>=4.0.0",
+    "black>=22.0.0",
     "ruff>=0.1.0",
-    "pre-commit>=3.4.0",
-    "bandit>=1.7.0",
-    "safety>=2.3.0",
-    "pip-audit>=2.6.0",
+    "mypy>=1.0.0",
+    "sphinx>=5.0.0",
+    "sphinx-rtd-theme>=1.0.0",
 ]
-security = [
-    "bandit>=1.7.0",
-    "safety>=2.3.0",
-    "pip-audit>=2.6.0",
+ml = [
+    "scikit-learn>=1.0.0",
+    "torch>=2.0.0",
+    "sentence-transformers>=2.0.0",
 ]
-docs = [
-    "sphinx>=7.0.0",
-    "sphinx-rtd-theme>=1.3.0",
-    "myst-parser>=2.0.0",
-    "sphinxcontrib-mermaid>=0.9.0",
-]
-performance = [
-    "numba>=0.58.0",
-    "cython>=3.0.0",
+visualization = [
+    "pyvis>=0.3.0",
+    "seaborn>=0.12.0",
+    "pygraphviz>=1.9",
 ]
 all = [
-    "networkx-mcp-server[dev,security,docs,performance]",
+    "networkx-mcp-server[dev,ml,visualization]",
 ]
-
-[project.scripts]
-networkx-mcp-server = "networkx_mcp.server:main"
-networkx-mcp = "networkx_mcp.server:main"
 
 [project.urls]
 Homepage = "https://github.com/Bright-L01/networkx-mcp-server"
 Documentation = "https://networkx-mcp-server.readthedocs.io"
-Repository = "https://github.com/Bright-L01/networkx-mcp-server.git"
+Repository = "https://github.com/Bright-L01/networkx-mcp-server"
 Issues = "https://github.com/Bright-L01/networkx-mcp-server/issues"
-Discussions = "https://github.com/Bright-L01/networkx-mcp-server/discussions"
-Changelog = "https://github.com/Bright-L01/networkx-mcp-server/blob/main/CHANGELOG.md"
-Funding = "https://github.com/sponsors/Bright-L01"
+
+[project.scripts]
+networkx-mcp-server = "networkx_mcp.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-
-[tool.setuptools.package-data]
-networkx_mcp = ["py.typed"]
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = ["test_*.py", "*_test.py"]
-python_classes = ["Test*"]
-python_functions = ["test_*"]
-asyncio_mode = "auto"
-addopts = [
-    "--strict-markers",
-    "--strict-config",
-    "--disable-warnings",
-    "-ra",
-]
-markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-    "integration: marks tests as integration tests",
-    "benchmark: marks tests as performance benchmarks",
-    "security: marks tests as security-related",
-]
-filterwarnings = [
-    "error",
-    "ignore::UserWarning",
-    "ignore::DeprecationWarning",
-]
-
-[tool.coverage.run]
-source = ["src"]
-branch = true
-parallel = true
-omit = [
-    "src/networkx_mcp/__about__.py",
-    "tests/*",
-    "scripts/*",
-]
-
-[tool.coverage.paths]
-networkx_mcp = ["src/networkx_mcp", "*/networkx-mcp-server/src/networkx_mcp"]
-
-[tool.coverage.report]
-exclude_lines = [
-    "no cov",
-    "if __name__ == .__main__.:",
-    "if TYPE_CHECKING:",
-    "pragma: no cover",
-    "def __repr__",
-    "raise AssertionError",
-    "raise NotImplementedError",
-    "if 0:",
-    "class .*\\bProtocol\\):",
-    "@(abc\\.)?abstractmethod",
-]
-show_missing = true
-precision = 2
-skip_covered = false
-skip_empty = false
-
-[tool.coverage.html]
-directory = "htmlcov"
+include = ["networkx_mcp*"]
 
 [tool.black]
 line-length = 88
-target-version = ["py38", "py39", "py310", "py311", "py312"]
+target-version = ['py38']
 include = '\.pyi?$'
-extend-exclude = '''
-/(
-  \.eggs
-  | \.git
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | _build
-  | buck-out
-  | build
-  | dist
-  | docs
-)/
-'''
 
 [tool.ruff]
 line-length = 88
-target-version = "py38"
-src = ["src", "tests"]
-
-[tool.ruff.lint]
 select = [
-    "A",     # flake8-builtins
-    "ARG",   # flake8-unused-arguments
-    "B",     # flake8-bugbear
-    "C",     # flake8-comprehensions
-    "DTZ",   # flake8-datetimez
-    "E",     # pycodestyle errors
-    "EM",    # flake8-errmsg
-    "F",     # pyflakes
-    "FBT",   # flake8-boolean-trap
-    "I",     # isort
-    "ICN",   # flake8-import-conventions
-    "ISC",   # flake8-implicit-str-concat
-    "N",     # pep8-naming
-    "PLC",   # pylint convention
-    "PLE",   # pylint error
-    "PLR",   # pylint refactor
-    "PLW",   # pylint warning
-    "Q",     # flake8-quotes
-    "RUF",   # Ruff-specific rules
-    "S",     # flake8-bandit
-    "T",     # flake8-debugger
-    "TID",   # flake8-tidy-imports
-    "UP",    # pyupgrade
-    "W",     # pycodestyle warnings
-    "YTT",   # flake8-2020
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
 ]
-ignore = [
-    "A003",    # Class attribute is shadowing a python builtin
-    "ARG001",  # Unused function argument
-    "ARG002",  # Unused method argument
-    "B008",    # Do not perform function calls in argument defaults
-    "C901",    # Too complex
-    "E501",    # Line too long (Black handles this)
-    "FBT001",  # Boolean typed positional argument in function definition
-    "FBT002",  # Boolean default positional argument in function definition
-    "N803",    # Argument name should be lowercase
-    "N806",    # Variable in function should be lowercase
-    "PLR0911", # Too many return statements
-    "PLR0912", # Too many branches
-    "PLR0913", # Too many arguments to function call
-    "PLR0915", # Too many statements
-    "S101",    # Use of assert detected
-    "S603",    # subprocess call: check for execution of untrusted input
-    "S607",    # Starting a process with a partial executable path
-]
-
-[tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["F401"]
-"tests/*" = ["S101", "PLR2004", "PLR0913", "ARG001", "ARG002"]
-"scripts/*" = ["S101", "T201"]
-
-[tool.ruff.lint.isort]
-force-single-line = true
-lines-between-types = 1
-lines-after-imports = 2
-
-[tool.ruff.lint.flake8-tidy-imports]
-ban-relative-imports = "all"
+ignore = ["E501", "B008", "C901", "W191"]
+target-version = "py38"
 
 [tool.mypy]
 python_version = "3.8"
-platform = "linux"
-strict = true
 warn_return_any = true
 warn_unused_configs = true
-disallow_any_generics = true
-disallow_any_unimported = true
-disallow_incomplete_defs = true
-disallow_subclassing_any = true
-disallow_untyped_calls = true
 disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
 disallow_untyped_decorators = true
 no_implicit_optional = true
-no_implicit_reexport = true
-strict_equality = true
 warn_redundant_casts = true
 warn_unused_ignores = true
 warn_no_return = true
-warn_unreachable = true
-strict_optional = true
-show_error_codes = true
-show_column_numbers = true
-pretty = true
-
-[[tool.mypy.overrides]]
-module = [
-    "networkx.*",
-    "matplotlib.*",
-    "plotly.*",
-    "pyvis.*",
-    "redis.*",
-    "seaborn.*",
-    "scipy.*",
-    "sklearn.*",
-    "community.*",
-    "fastmcp.*",
-    "mcp.*",
-    "pandas.*",
-    "numpy.*",
-]
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = ["tests.*"]
-ignore_errors = true
-
-[tool.bandit]
-exclude_dirs = ["tests", "scripts"]
-skips = ["B101", "B601"]
+follow_imports = "normal"

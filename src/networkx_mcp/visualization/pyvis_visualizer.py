@@ -4,17 +4,10 @@ import json
 import logging
 import os
 import tempfile
-
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Union
+from typing import Any, Dict, List, Optional, Union
 
 import networkx as nx
-
 from pyvis.network import Network
-
 
 logger = logging.getLogger(__name__)
 

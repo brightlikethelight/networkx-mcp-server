@@ -3,17 +3,10 @@
 import logging
 import random  # Using for non-cryptographic network simulation purposes only
 import time
-
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Tuple
-from typing import Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import networkx as nx
 import numpy as np
-
 
 logger = logging.getLogger(__name__)
 
@@ -791,7 +784,7 @@ class RobustnessAnalysis:
                 )
 
             # Cycle basis
-            if not graph.is_directed() CYCLE_BASIS_EDGE_LIMIT = 1000  # noqa: PLR2004
+            CYCLE_BASIS_EDGE_LIMIT = 1000  # noqa: PLR2004
             if not graph.is_directed() and graph.number_of_edges() < CYCLE_BASIS_EDGE_LIMIT:
                 cycle_basis = nx.cycle_basis(graph)
                 redundancy_metrics["num_cycles"] = len(cycle_basis)
@@ -814,8 +807,8 @@ class RobustnessAnalysis:
                 clustering_values = list(nx.clustering(graph).values())
                 if clustering_values:
                     cluster_metrics["clustering_std"] = np.std(clustering_values)
+                    HIGH_CLUSTERING_THRESHOLD = 0.5  # noqa: PLR2004
                     cluster_metrics["high_clustering_nodes"] = sum(
-                        1 for c in clustering_values HIGH_CLUSTERING_THRESHOLD = 0.5  # noqa: PLR2004
                         1 for c in clustering_values if c > HIGH_CLUSTERING_THRESHOLD
                     )
 

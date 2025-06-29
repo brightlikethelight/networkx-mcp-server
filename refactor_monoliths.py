@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """Split large monolithic files into focused, maintainable modules."""
 
-import os
 import ast
 import sys
 from pathlib import Path
-from typing import Dict, List, Tuple, Any
+from typing import Any, Dict
 
 # Add project to path
 project_root = Path(__file__).parent
@@ -13,29 +12,29 @@ sys.path.insert(0, str(project_root))
 
 class ModuleRefactorer:
     """Systematically refactor large files into focused modules."""
-    
+
     def __init__(self):
         self.splits_performed = []
         self.imports_updated = []
-        
+
     def analyze_file_structure(self, file_path: Path) -> Dict[str, Any]:
         """Analyze a Python file's structure for refactoring."""
         print(f"🔍 Analyzing {file_path}...")
-        
-        with open(file_path, 'r') as f:
+
+        with open(file_path) as f:
             content = f.read()
-            
+
         try:
             tree = ast.parse(content)
         except SyntaxError as e:
             print(f"❌ Syntax error in {file_path}: {e}")
             return {}
-        
+
         # Extract components
         classes = []
         functions = []
         imports = []
-        
+
         for node in ast.walk(tree):
             if isinstance(node, ast.ClassDef):
                 classes.append({
@@ -51,7 +50,7 @@ class ModuleRefactorer:
                 })
             elif isinstance(node, (ast.Import, ast.ImportFrom)):
                 imports.append(ast.unparse(node))
-        
+
         return {
             'file_path': file_path,
             'line_count': len(content.splitlines()),
@@ -60,22 +59,22 @@ class ModuleRefactorer:
             'imports': imports[:10],  # First 10 imports
             'content': content
         }
-    
+
     def split_community_detection(self):
         """Split community_detection.py into focused modules."""
         print("\n🔧 SPLITTING: community_detection.py")
-        
+
         source_file = Path("src/networkx_mcp/advanced/community_detection.py")
         if not source_file.exists():
             print(f"❌ {source_file} not found")
             return False
-        
+
         analysis = self.analyze_file_structure(source_file)
-        
+
         # Create community detection package
         community_dir = Path("src/networkx_mcp/advanced/community")
         community_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Module splits based on functionality
         modules = {
             'louvain.py': {
@@ -84,7 +83,7 @@ class ModuleRefactorer:
                 'functions': ['louvain_communities', 'modularity_optimization']
             },
             'girvan_newman.py': {
-                'description': 'Girvan-Newman algorithm implementation', 
+                'description': 'Girvan-Newman algorithm implementation',
                 'classes': ['GirvanNewmanDetector'],
                 'functions': ['girvan_newman_communities', 'edge_betweenness_centrality']
             },
@@ -104,7 +103,7 @@ class ModuleRefactorer:
                 'functions': ['validate_communities', 'format_community_result']
             }
         }
-        
+
         # Create base module first
         base_content = '''"""Base interfaces for community detection algorithms."""
 
@@ -164,7 +163,7 @@ def format_community_result(communities: List[Set[str]], algorithm: str, modular
         "smallest_community_size": min(len(c) for c in communities) if communities else 0
     }
 '''
-        
+
         # Create louvain module
         louvain_content = '''"""Louvain algorithm for community detection."""
 
@@ -217,7 +216,7 @@ def modularity_optimization(graph: nx.Graph, communities: List[Set[str]]) -> flo
     """Calculate modularity for given community partition."""
     return nx.community.modularity(graph, communities)
 '''
-        
+
         # Create girvan_newman module
         girvan_newman_content = '''"""Girvan-Newman algorithm for community detection."""
 
@@ -286,7 +285,7 @@ def edge_betweenness_centrality(graph: nx.Graph) -> Dict[tuple, float]:
     """Calculate edge betweenness centrality (used in Girvan-Newman)."""
     return nx.edge_betweenness_centrality(graph)
 '''
-        
+
         # Create package __init__.py
         init_content = '''"""Community detection algorithms for NetworkX MCP Server."""
 
@@ -318,56 +317,56 @@ def get_community_detector(algorithm: str, graph):
     
     return detectors[algorithm](graph)
 '''
-        
+
         # Write all modules
         modules_created = []
-        
+
         # Write base module
         with open(community_dir / "base.py", "w") as f:
             f.write(base_content)
         modules_created.append("base.py")
-        
+
         # Write louvain module
         with open(community_dir / "louvain.py", "w") as f:
             f.write(louvain_content)
         modules_created.append("louvain.py")
-        
+
         # Write girvan_newman module
         with open(community_dir / "girvan_newman.py", "w") as f:
             f.write(girvan_newman_content)
         modules_created.append("girvan_newman.py")
-        
+
         # Write __init__.py
         with open(community_dir / "__init__.py", "w") as f:
             f.write(init_content)
         modules_created.append("__init__.py")
-        
+
         print(f"  ✅ Created {len(modules_created)} focused modules:")
         for module in modules_created:
             print(f"    📄 {module}")
-        
+
         self.splits_performed.append({
             'original': str(source_file),
             'new_package': str(community_dir),
             'modules': modules_created,
             'original_lines': analysis['line_count']
         })
-        
+
         return True
-    
+
     def split_ml_integration(self):
         """Split ml_integration.py into focused ML modules."""
         print("\n🔧 SPLITTING: ml_integration.py")
-        
+
         source_file = Path("src/networkx_mcp/advanced/ml_integration.py")
         if not source_file.exists():
             print(f"❌ {source_file} not found")
             return False
-        
+
         # Create ML package
         ml_dir = Path("src/networkx_mcp/advanced/ml")
         ml_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Base ML interfaces
         base_content = '''"""Base interfaces for machine learning on graphs."""
 
@@ -429,7 +428,7 @@ def extract_node_features(graph: nx.Graph, feature_types: List[str] = None) -> D
     
     return features
 '''
-        
+
         # Node classification module
         node_classification_content = '''"""Node classification algorithms."""
 
@@ -517,7 +516,7 @@ async def classify_nodes(graph: nx.Graph, labeled_nodes: Dict[str, str], target_
     result = await classifier.predict(target_nodes)
     return result.predictions
 '''
-        
+
         # Link prediction module
         link_prediction_content = '''"""Link prediction algorithms."""
 
@@ -615,7 +614,7 @@ async def predict_links(graph: nx.Graph, num_predictions: int = 10) -> List[Tupl
     
     return scored_links[:num_predictions]
 '''
-        
+
         # Package __init__.py
         ml_init_content = '''"""Machine learning algorithms for graphs."""
 
@@ -645,7 +644,7 @@ def get_ml_model(model_type: str, graph):
     
     return models[model_type](graph)
 '''
-        
+
         # Write all ML modules
         ml_modules = [
             ("base.py", base_content),
@@ -653,30 +652,30 @@ def get_ml_model(model_type: str, graph):
             ("link_prediction.py", link_prediction_content),
             ("__init__.py", ml_init_content)
         ]
-        
+
         modules_created = []
         for filename, content in ml_modules:
             with open(ml_dir / filename, "w") as f:
                 f.write(content)
             modules_created.append(filename)
             print(f"  ✅ Created ml/{filename}")
-        
+
         self.splits_performed.append({
             'original': str(source_file),
             'new_package': str(ml_dir),
             'modules': modules_created,
             'original_lines': 825
         })
-        
+
         return True
-    
+
     def create_interfaces_package(self):
         """Create clean public interfaces package."""
         print("\n🔧 CREATING: Clean Public Interfaces")
-        
+
         interfaces_dir = Path("src/networkx_mcp/interfaces")
         interfaces_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Main interfaces module
         interfaces_content = '''"""Public interfaces for NetworkX MCP Server."""
 
@@ -772,7 +771,7 @@ class ToolRegistry(Protocol):
         """List all registered tools."""
         ...
 '''
-        
+
         # Plugin interface
         plugin_content = '''"""Plugin interface for extending NetworkX MCP Server."""
 
@@ -862,7 +861,7 @@ class PluginManager:
         """Get a tool from any plugin."""
         return self.tool_registry.get(name)
 '''
-        
+
         # Package __init__.py
         init_content = '''"""Public interfaces for NetworkX MCP Server.
 
@@ -916,32 +915,32 @@ __all__ = [
 
 __version__ = "1.0.0"
 '''
-        
+
         # Write interface modules
         interface_modules = [
             ("base.py", interfaces_content),
             ("plugin.py", plugin_content),
             ("__init__.py", init_content)
         ]
-        
+
         for filename, content in interface_modules:
             with open(interfaces_dir / filename, "w") as f:
                 f.write(content)
             print(f"  ✅ Created interfaces/{filename}")
-        
+
         return True
-    
+
     def update_imports_and_test(self):
         """Update imports throughout codebase and test everything works."""
         print("\n🔄 UPDATING IMPORTS AND TESTING")
-        
+
         # Test new modules can be imported
         tests = [
             ("Community Detection", "from src.networkx_mcp.advanced.community import LouvainCommunityDetector"),
             ("ML Integration", "from src.networkx_mcp.advanced.ml import NodeClassifier"),
             ("Interfaces", "from src.networkx_mcp.interfaces import BaseGraphTool"),
         ]
-        
+
         passed = 0
         for test_name, import_statement in tests:
             try:
@@ -950,55 +949,56 @@ __version__ = "1.0.0"
                 passed += 1
             except Exception as e:
                 print(f"  ❌ {test_name}: Import failed - {e}")
-        
+
         # Test functionality
         try:
             print("  🧪 Testing community detection...")
             import networkx as nx
+
             from src.networkx_mcp.advanced.community import louvain_communities
-            
+
             # Create test graph
             G = nx.karate_club_graph()
             communities = louvain_communities(G)
-            
+
             if len(communities) > 1:
                 print(f"    ✅ Found {len(communities)} communities")
                 passed += 1
             else:
                 print(f"    ⚠️ Only found {len(communities)} communities")
-                
+
         except Exception as e:
             print(f"  ❌ Community detection test failed: {e}")
-        
+
         return passed
-    
+
     def generate_refactoring_report(self):
         """Generate a comprehensive refactoring report."""
         print("\n📊 REFACTORING REPORT")
         print("=" * 60)
-        
+
         total_original_lines = sum(split['original_lines'] for split in self.splits_performed)
         total_modules_created = sum(len(split['modules']) for split in self.splits_performed)
-        
-        print(f"📈 Transformation Summary:")
+
+        print("📈 Transformation Summary:")
         print(f"  Original monolithic files: {len(self.splits_performed)}")
         print(f"  Total original lines: {total_original_lines:,}")
         print(f"  New focused modules created: {total_modules_created}")
         print(f"  Average module size: ~{50} lines (estimated)")
-        
-        print(f"\n📁 New Architecture:")
+
+        print("\n📁 New Architecture:")
         for split in self.splits_performed:
             print(f"  📦 {split['new_package']}")
             for module in split['modules']:
                 print(f"    📄 {module}")
-        
-        print(f"\n✅ Benefits Achieved:")
-        print(f"  • Single Responsibility: Each module has one clear purpose")
-        print(f"  • Maintainability: Files under 100 lines each")
-        print(f"  • Testability: Easy to unit test individual modules")
-        print(f"  • Extensibility: Plugin architecture established")
-        print(f"  • Team Development: Multiple developers can work on different modules")
-        
+
+        print("\n✅ Benefits Achieved:")
+        print("  • Single Responsibility: Each module has one clear purpose")
+        print("  • Maintainability: Files under 100 lines each")
+        print("  • Testability: Easy to unit test individual modules")
+        print("  • Extensibility: Plugin architecture established")
+        print("  • Team Development: Multiple developers can work on different modules")
+
         return True
 
 def main():
@@ -1007,63 +1007,63 @@ def main():
     print("=" * 70)
     print("🎯 Goal: Transform from monoliths to focused, maintainable modules")
     print()
-    
+
     refactorer = ModuleRefactorer()
-    
+
     # Phase 1: Split large files
     print("📋 PHASE 1: SPLITTING MONOLITHIC FILES")
     print("-" * 40)
-    
+
     community_success = refactorer.split_community_detection()
     ml_success = refactorer.split_ml_integration()
-    
+
     # Phase 2: Create interfaces
     print("\n📋 PHASE 2: CREATING CLEAN INTERFACES")
     print("-" * 40)
-    
+
     interfaces_success = refactorer.create_interfaces_package()
-    
+
     # Phase 3: Test everything
     print("\n📋 PHASE 3: VALIDATION AND TESTING")
     print("-" * 40)
-    
+
     tests_passed = refactorer.update_imports_and_test()
-    
+
     # Phase 4: Generate report
     refactorer.generate_refactoring_report()
-    
+
     # Final verdict
     total_operations = 3  # community, ml, interfaces
     successful_operations = sum([community_success, ml_success, interfaces_success])
-    
+
     print("\n" + "=" * 70)
     print("🎖️ ARCHITECTURE TRANSFORMATION COMPLETE")
     print("=" * 70)
-    
-    print(f"📊 Results:")
+
+    print("📊 Results:")
     print(f"  Successful splits: {successful_operations}/{total_operations}")
     print(f"  Import tests passed: {tests_passed}")
-    print(f"  New packages created: 3 (community, ml, interfaces)")
-    print(f"  Modules created: ~12 focused modules")
-    
+    print("  New packages created: 3 (community, ml, interfaces)")
+    print("  Modules created: ~12 focused modules")
+
     if successful_operations == total_operations and tests_passed >= 3:
-        print(f"\n✅ TRANSFORMATION SUCCESSFUL!")
-        print(f"🚀 Code architecture now follows professional standards:")
-        print(f"  ✅ Single Responsibility Principle")
-        print(f"  ✅ Clean interfaces and protocols")
-        print(f"  ✅ Plugin architecture")
-        print(f"  ✅ Maintainable module sizes")
-        print(f"  ✅ Professional open-source structure")
-        
+        print("\n✅ TRANSFORMATION SUCCESSFUL!")
+        print("🚀 Code architecture now follows professional standards:")
+        print("  ✅ Single Responsibility Principle")
+        print("  ✅ Clean interfaces and protocols")
+        print("  ✅ Plugin architecture")
+        print("  ✅ Maintainable module sizes")
+        print("  ✅ Professional open-source structure")
+
         return True
     else:
-        print(f"\n⚠️ Some issues detected:")
+        print("\n⚠️ Some issues detected:")
         if successful_operations < total_operations:
-            print(f"  • File splitting incomplete")
+            print("  • File splitting incomplete")
         if tests_passed < 3:
-            print(f"  • Import/functionality tests failing")
-        print(f"  • Manual review recommended")
-        
+            print("  • Import/functionality tests failing")
+        print("  • Manual review recommended")
+
         return False
 
 if __name__ == "__main__":

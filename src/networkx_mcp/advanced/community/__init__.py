@@ -1,14 +1,13 @@
 """Community detection algorithms for NetworkX MCP Server."""
 
-from networkx_mcp.advanced.community.base import CommunityDetector
-from networkx_mcp.advanced.community.base import CommunityResult
-from networkx_mcp.advanced.community.base import format_community_result
-from networkx_mcp.advanced.community.base import validate_communities
-from networkx_mcp.advanced.community.girvan_newman import GirvanNewmanDetector
-from networkx_mcp.advanced.community.girvan_newman import girvan_newman_communities
-from networkx_mcp.advanced.community.louvain import LouvainCommunityDetector
-from networkx_mcp.advanced.community.louvain import louvain_communities
-
+from networkx_mcp.advanced.community.base import (CommunityDetector,
+                                                  CommunityResult,
+                                                  format_community_result,
+                                                  validate_communities)
+from networkx_mcp.advanced.community.girvan_newman import (
+    GirvanNewmanDetector, girvan_newman_communities)
+from networkx_mcp.advanced.community.louvain import (LouvainCommunityDetector,
+                                                     louvain_communities)
 
 __all__ = [
     "CommunityDetector",

@@ -1,14 +1,11 @@
 """Link prediction algorithms."""
 
-from typing import List
-from typing import Optional
-from typing import Tuple
+from typing import List, Optional, Tuple
 
 import networkx as nx
 import numpy as np
 
-from networkx_mcp.advanced.ml.base import GraphMLModel
-from networkx_mcp.advanced.ml.base import MLResult
+from networkx_mcp.advanced.ml.base import GraphMLModel, MLResult
 
 
 class LinkPredictor(GraphMLModel):

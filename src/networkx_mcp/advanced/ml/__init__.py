@@ -1,13 +1,11 @@
 """Machine learning algorithms for graphs."""
 
-from networkx_mcp.advanced.ml.base import GraphMLModel
-from networkx_mcp.advanced.ml.base import MLResult
-from networkx_mcp.advanced.ml.base import extract_node_features
-from networkx_mcp.advanced.ml.link_prediction import LinkPredictor
-from networkx_mcp.advanced.ml.link_prediction import predict_links
-from networkx_mcp.advanced.ml.node_classification import NodeClassifier
-from networkx_mcp.advanced.ml.node_classification import classify_nodes
-
+from networkx_mcp.advanced.ml.base import (GraphMLModel, MLResult,
+                                           extract_node_features)
+from networkx_mcp.advanced.ml.link_prediction import (LinkPredictor,
+                                                      predict_links)
+from networkx_mcp.advanced.ml.node_classification import (NodeClassifier,
+                                                          classify_nodes)
 
 __all__ = [
     "GraphMLModel",

@@ -3,20 +3,13 @@
 import logging
 import random  # Using for non-cryptographic ML training purposes only
 import time
-
 from collections import defaultdict
 from itertools import combinations
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Union
+from typing import Any, Dict, List, Optional, Union
 
 import networkx as nx
 import numpy as np
-
 from sklearn.preprocessing import StandardScaler
-
 
 # Performance thresholds and constants
 MAX_NODES_FOR_EXPENSIVE_COMPUTATION = 1000

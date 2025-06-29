@@ -2,17 +2,10 @@
 
 import logging
 import re
-
 from pathlib import Path
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Tuple
-from typing import Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import networkx as nx
-
 
 logger = logging.getLogger(__name__)
 

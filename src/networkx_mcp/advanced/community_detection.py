@@ -3,18 +3,11 @@
 import logging
 import time
 import warnings
-
 from collections import defaultdict
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Set
-from typing import Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import networkx as nx
 import numpy as np
-
 
 # Optional dependencies
 try:

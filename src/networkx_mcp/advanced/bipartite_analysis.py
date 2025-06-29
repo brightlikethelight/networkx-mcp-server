@@ -2,22 +2,13 @@
 
 import logging
 import time
-
 from collections import defaultdict
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Set
-from typing import Tuple
-from typing import Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import networkx as nx
 import numpy as np
-
 from networkx.algorithms import bipartite
 from networkx.algorithms.community import greedy_modularity_communities
-
 
 logger = logging.getLogger(__name__)
 

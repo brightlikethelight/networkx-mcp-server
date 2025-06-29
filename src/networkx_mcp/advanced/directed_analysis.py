@@ -2,17 +2,11 @@
 
 import logging
 import time
-
 from collections import defaultdict
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import networkx as nx
 import numpy as np
-
 
 try:
     from networkx_mcp.advanced.community_detection import CommunityDetection

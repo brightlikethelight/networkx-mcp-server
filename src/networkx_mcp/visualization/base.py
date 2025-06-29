@@ -1,46 +1,4 @@
-"""Base interfaces for graph visualization."""
-
-from abc import ABC
-from abc import abstractmethod
-from dataclasses import dataclass
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Tuple
-
-import networkx as nx
-
-
-@dataclass
-class VisualizationResult:
-    """Result from visualization rendering."""
-    output: str  # HTML, SVG, or file path
-    format: str  # "html", "svg", "png", etc.
-    metadata: Dict[str, Any]
-    success: bool = True
-    error: Optional[str] = None
-
-class BaseVisualizer(ABC):
-    """Base class for all visualization backends."""
-
-    def __init__(self, name: str, output_format: str):
-        self.name = name
-        self.output_format = output_format
-        self.default_options = {}
-
-    @abstractmethod
-    async def render(self, graph: nx.Graph, layout: str = "spring", **options) -> VisualizationResult:
-        """Render a graph visualization."""
-        pass
-
-    def get_supported_layouts(self) -> List[str]:
-        """Get list of supported layout algorithms."""
-        return ["spring", "circular", "random"]
-
-    def validate_options(self, options: Dict[str, Any]) -> bool:
-        """Validate visualization options."""
-        return True
+"""Helper functions for graph visualization."""
 
 def calculate_layout(graph: nx.Graph, layout: str, **params) -> Dict[str, Tuple[float, float]]:
     """Calculate node positions for given layout algorithm."""

@@ -2,19 +2,10 @@
 
 import logging
 import time
-
-from collections import defaultdict
-from collections import deque
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Set
-from typing import Tuple
-from typing import Union
+from collections import defaultdict, deque
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import networkx as nx
-
 
 logger = logging.getLogger(__name__)
 

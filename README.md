@@ -30,15 +30,15 @@ pip install networkx-mcp-server
 
 ### From Source (Development)
 ```bash
-git clone https://github.com/yourusername/networkx-mcp-server
+git clone https://github.com/Bright-L01/networkx-mcp-server
 cd networkx-mcp-server
 pip install -e ".[dev]"
 ```
 
 ### Docker Deployment
 ```bash
-docker pull yourusername/networkx-mcp-server:latest
-docker run -p 8765:8765 yourusername/networkx-mcp-server
+docker pull Bright-L01/networkx-mcp-server:latest
+docker run -p 8765:8765 Bright-L01/networkx-mcp-server
 ```
 
 ## 🎯 Quick Start
