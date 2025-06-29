@@ -372,14 +372,14 @@ class EnterpriseFeatures:
     def schedule_job(self, job_config: Dict[str, Any], start_immediately: bool = True) -> str:
         """
         Schedule a job for execution.
-        
+
         Parameters:
         -----------
         job_config : dict
             Job configuration including schedule and operation
         start_immediately : bool
             Start scheduler immediately
-            
+
         Returns:
         --------
         str
@@ -450,7 +450,7 @@ class EnterpriseFeatures:
     def save_graph_version(self, graph: nx.Graph, version_name: str, metadata: Optional[Dict[str, Any]] = None) -> str:
         """
         Save a versioned snapshot of a graph.
-        
+
         Parameters:
         -----------
         graph : nx.Graph

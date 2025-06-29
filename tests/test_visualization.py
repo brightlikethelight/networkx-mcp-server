@@ -732,7 +732,7 @@ class TestVisualizationPerformance:
 
         # All visualizations should succeed
         assert len(results) == len(graph_names)
-        for name, result in results.items():
+        for _name, result in results.items():
             assert "formats" in result
 
 

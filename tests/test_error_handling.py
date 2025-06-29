@@ -1,5 +1,6 @@
 """Comprehensive tests for error handling and edge cases."""
 
+import json
 import tempfile
 from unittest.mock import patch
 
@@ -136,7 +137,7 @@ class TestGraphOperationErrors:
             self.manager.remove_edge("test", "A", "C")  # C doesn't exist
 
         # Add edge with non-existent nodes
-        with pytest.raises(Exception):  # NetworkX will raise an error
+        with pytest.raises(ValueError):  # NetworkX will raise an error
             self.manager.add_edge("test", "A", "nonexistent")
 
         # Get attributes of non-existent edge
@@ -212,19 +213,19 @@ class TestAlgorithmErrors:
         from networkx_mcp.server import shortest_path
 
         # Non-existent source node
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             await shortest_path(graph_id="connected", source="X", target="A")
 
         # Non-existent target node
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             await shortest_path(graph_id="connected", source="A", target="X")
 
         # Path in disconnected graph
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             await shortest_path(graph_id="disconnected", source="A", target="C")
 
         # Empty graph
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             await shortest_path(graph_id="empty", source="A", target="B")
 
     @pytest.mark.asyncio
@@ -233,7 +234,7 @@ class TestAlgorithmErrors:
         from networkx_mcp.server import centrality_measures
 
         # Invalid centrality measure
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             await centrality_measures(
                 graph_id="connected",
                 measures=["invalid_measure"]
@@ -267,7 +268,7 @@ class TestAlgorithmErrors:
         await add_nodes(graph_id="undirected_flow", nodes=["s", "t"])
         await add_edges(graph_id="undirected_flow", edges=[("s", "t")])
 
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             await network_flow(
                 graph_id="undirected_flow",
                 source="s",
@@ -275,7 +276,7 @@ class TestAlgorithmErrors:
             )
 
         # Non-existent source/sink
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             await network_flow(
                 graph_id="flow_test",
                 source="nonexistent",
@@ -288,7 +289,7 @@ class TestAlgorithmErrors:
         from networkx_mcp.server import minimum_spanning_tree
 
         # MST on disconnected graph
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             await minimum_spanning_tree(graph_id="disconnected")
 
         # MST on directed graph
@@ -296,7 +297,7 @@ class TestAlgorithmErrors:
         self.manager.add_nodes_from("directed_mst", ["A", "B", "C"])
         self.manager.add_edges_from("directed_mst", [("A", "B"), ("B", "C")])
 
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             await minimum_spanning_tree(graph_id="directed_mst")
 
 
@@ -309,7 +310,7 @@ class TestIOErrors:
         from networkx_mcp.server import import_graph
 
         # Non-existent file
-        with pytest.raises(Exception):
+        with pytest.raises((ValueError, FileNotFoundError)):
             await import_graph(
                 format="json",
                 path="/nonexistent/path/file.json",
@@ -317,7 +318,7 @@ class TestIOErrors:
             )
 
         # Invalid format
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             await import_graph(
                 format="invalid_format",
                 path="dummy_path",
@@ -330,14 +331,14 @@ class TestIOErrors:
         from networkx_mcp.server import export_graph
 
         # Export non-existent graph
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             await export_graph(
                 graph_id="nonexistent_graph",
                 format="json"
             )
 
         # Invalid export format
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             await export_graph(
                 graph_id="connected",
                 format="invalid_format"
@@ -353,7 +354,7 @@ class TestIOErrors:
             malformed_path = f.name
 
         try:
-            with pytest.raises(Exception):
+            with pytest.raises((ValueError, json.JSONDecodeError)):
                 GraphIOHandler.import_from_file(malformed_path, "json")
         finally:
             import os
@@ -367,7 +368,7 @@ class TestIOErrors:
             unsupported_path = f.name
 
         try:
-            with pytest.raises(Exception):
+            with pytest.raises(ValueError):
                 GraphIOHandler.import_from_file(unsupported_path, "auto")
         finally:
             import os

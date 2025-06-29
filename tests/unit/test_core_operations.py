@@ -15,7 +15,7 @@ class TestNodeOperations:
         ops = NodeOperations()
         initial_nodes = sample_graph.number_of_nodes()
 
-        result = ops.add_node(sample_graph, 10, color="green", weight=2.5)
+        ops.add_node(sample_graph, 10, color="green", weight=2.5)
 
         assert sample_graph.number_of_nodes() == initial_nodes + 1
         assert 10 in sample_graph
@@ -26,7 +26,7 @@ class TestNodeOperations:
         """Test adding a duplicate node updates attributes."""
         ops = NodeOperations()
 
-        result = ops.add_node(sample_graph, 1, color="green")
+        ops.add_node(sample_graph, 1, color="green")
 
         assert sample_graph.nodes[1]["color"] == "green"
 
@@ -36,7 +36,7 @@ class TestNodeOperations:
         initial_nodes = sample_graph.number_of_nodes()
         initial_edges = sample_graph.number_of_edges()
 
-        result = ops.remove_node(sample_graph, 1)
+        ops.remove_node(sample_graph, 1)
 
         assert sample_graph.number_of_nodes() == initial_nodes - 1
         assert 1 not in sample_graph
@@ -69,7 +69,7 @@ class TestEdgeOperations:
         ops = EdgeOperations()
         initial_edges = sample_graph.number_of_edges()
 
-        result = ops.add_edge(sample_graph, 5, 4, weight=3.0)
+        ops.add_edge(sample_graph, 5, 4, weight=3.0)
 
         assert sample_graph.number_of_edges() == initial_edges + 1
         assert sample_graph.has_edge(5, 4)
@@ -79,7 +79,7 @@ class TestEdgeOperations:
         """Test that adding an edge creates missing nodes."""
         ops = EdgeOperations()
 
-        result = ops.add_edge(sample_graph, 10, 11)
+        ops.add_edge(sample_graph, 10, 11)
 
         assert 10 in sample_graph
         assert 11 in sample_graph
@@ -90,7 +90,7 @@ class TestEdgeOperations:
         ops = EdgeOperations()
         initial_edges = sample_graph.number_of_edges()
 
-        result = ops.remove_edge(sample_graph, 1, 2)
+        ops.remove_edge(sample_graph, 1, 2)
 
         assert sample_graph.number_of_edges() == initial_edges - 1
         assert not sample_graph.has_edge(1, 2)

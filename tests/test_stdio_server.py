@@ -64,7 +64,7 @@ try:
                     response_lines.append(line)
                 else:
                     break
-            except:
+            except Exception:
                 break
 
         if response_lines:

@@ -580,7 +580,7 @@ class TestMCPToolsErrorHandling:
         from networkx_mcp.server import graph_info
 
         # Test non-existent graph
-        with pytest.raises(Exception):  # Should raise appropriate error
+        with pytest.raises(ValueError):  # Should raise appropriate error
             await graph_info(graph_id="nonexistent_graph")
 
     @pytest.mark.asyncio
@@ -589,14 +589,14 @@ class TestMCPToolsErrorHandling:
         from networkx_mcp.server import centrality_measures, create_graph
 
         # Test invalid graph type
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             await create_graph(graph_id="invalid_test", graph_type="InvalidType")
 
         # Create valid graph for further testing
         await create_graph(graph_id="error_test", graph_type="Graph")
 
         # Test invalid centrality measure
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             await centrality_measures(
                 graph_id="error_test",
                 measures=["invalid_measure"]

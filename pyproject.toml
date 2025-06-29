@@ -83,6 +83,9 @@ include = '\.pyi?$'
 
 [tool.ruff]
 line-length = 88
+target-version = "py38"
+
+[tool.ruff.lint]
 select = [
     "E",  # pycodestyle errors
     "W",  # pycodestyle warnings
@@ -93,7 +96,6 @@ select = [
     "UP", # pyupgrade
 ]
 ignore = ["E501", "B008", "C901", "W191"]
-target-version = "py38"
 
 [tool.mypy]
 python_version = "3.8"

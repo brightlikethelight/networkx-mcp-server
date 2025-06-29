@@ -514,7 +514,7 @@ class RobustnessAnalysis:
         max_gc = max(r["giant_component_fraction"] for r in results)
 
         if threshold is None and max_gc > 0:
-            for i, r in enumerate(results):
+            for _i, r in enumerate(results):
                 if r["giant_component_fraction"] >= 0.5 * max_gc:
                     threshold = r["probability"]
                     break

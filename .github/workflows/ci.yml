@@ -108,7 +108,7 @@ jobs:
       run: pytest tests/performance -v -m performance
     
     - name: Upload performance results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: performance-results
         path: performance_results/
@@ -136,7 +136,7 @@ jobs:
         twine check dist/*
     
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: dist
         path: dist/
@@ -150,7 +150,7 @@ jobs:
     - uses: actions/checkout@v4
     
     - name: Download artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: dist
         path: dist/

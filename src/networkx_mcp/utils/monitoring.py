@@ -176,7 +176,7 @@ class OperationCounter:
                 error_rates[operation] = {"errors": 0, "total": self.counts.get(operation, 0)}
             error_rates[operation]["errors"] += count
 
-        for op, data in error_rates.items():
+        for _op, data in error_rates.items():
             if data["total"] > 0:
                 data["error_rate"] = round((data["errors"] / data["total"]) * 100, 2)
             else:

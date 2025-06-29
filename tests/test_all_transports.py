@@ -54,7 +54,7 @@ if process.poll() is None:
         import requests
         response = requests.get("http://localhost:8767/sse", timeout=2)
         print(f"   📡 SSE endpoint responded with status: {response.status_code}")
-    except:
+    except Exception:
         print("   ⚠️  Could not connect to SSE endpoint (requests module may be missing)")
 
     process.terminate()

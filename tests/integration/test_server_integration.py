@@ -89,7 +89,8 @@ class TestMCPServerIntegration:
         )
 
         assert "data" in export_result
-        json_data = json.loads(export_result["data"])
+        # Verify export can be parsed
+        assert json.loads(export_result["data"]) is not None
 
         # Delete the graph
         await mcp_server.handle_tool_call(
@@ -130,7 +131,7 @@ class TestMCPServerIntegration:
         # Generate a random graph
         start_time = time.time()
 
-        generate_result = await mcp_server.handle_tool_call(
+        await mcp_server.handle_tool_call(
             "generate_graph",
             {
                 "graph_id": graph_id,

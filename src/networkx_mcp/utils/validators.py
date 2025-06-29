@@ -281,7 +281,7 @@ class GraphValidator:
         return True, None
 
     @staticmethod
-    def validate_file_format(
+    def validate_file_path_format(
         filepath: Union[str, Path],
         expected_formats: Optional[List[str]] = None
     ) -> Tuple[bool, Optional[str]]:

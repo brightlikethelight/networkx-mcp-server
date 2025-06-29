@@ -244,7 +244,7 @@ class TestLoadCapacity:
                     graph_id = f"small_graph_{i}"
                     try:
                         graph_manager.delete_graph(graph_id)
-                    except:
+                    except Exception:
                         pass  # Ignore errors during cleanup
 
                 # Check if memory is reasonable (should be < 200MB for 1000 small graphs)
@@ -384,7 +384,7 @@ async def main():
     # Summary
 
     passed = 0
-    for test_name, result in results:
+    for _test_name, result in results:
         if result:
             passed += 1
 

@@ -122,7 +122,6 @@ def test_real_redis_persistence():
 
         print("  💥 Clearing in-memory graphs...")
         original_graphs = graph_manager.graphs.copy()
-        original_metadata = graph_manager.metadata.copy()
 
         # Clear everything
         graph_manager.graphs.clear()
@@ -241,7 +240,7 @@ def test_real_redis_persistence():
         for graph_id in test_data.keys():
             try:
                 graph_manager.delete_graph(graph_id)
-            except:
+            except Exception:
                 pass  # Ignore cleanup errors
 
         # Final verdict

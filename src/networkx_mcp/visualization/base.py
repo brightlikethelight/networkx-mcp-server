@@ -4,6 +4,7 @@ from typing import Any, Dict, Tuple
 
 import networkx as nx
 
+
 def calculate_layout(graph: nx.Graph, layout: str, **params) -> Dict[str, Tuple[float, float]]:
     """Calculate node positions for given layout algorithm."""
     layout_funcs = {
