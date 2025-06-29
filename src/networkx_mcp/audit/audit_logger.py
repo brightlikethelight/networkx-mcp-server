@@ -47,6 +47,7 @@ class AuditEvent:
 
         # System info
         from ..__version__ import __version__
+
         self.server_version = __version__
         self.server_node = os.environ.get("MCP_SERVER_NODE", "server-1")
 
