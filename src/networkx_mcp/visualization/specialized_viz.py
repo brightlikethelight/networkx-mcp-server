@@ -70,7 +70,7 @@ class SpecializedVisualizations:
             msg = ("Plotly is required for interactive heatmap visualization. "
                    "Install with: pip install plotly")
             raise ImportError(msg)
-        
+
         # Get adjacency matrix
         if node_order is None:
             node_order = list(graph.nodes())
@@ -166,7 +166,7 @@ class SpecializedVisualizations:
         if not HAS_PLOTLY:
             msg = "Plotly is required for chord diagram visualization. Install with: pip install plotly"
             raise ImportError(msg)
-        
+
         # Filter nodes if needed
         if top_nodes and graph.number_of_nodes() > top_nodes:
             degrees = dict(graph.degree())
@@ -298,7 +298,7 @@ class SpecializedVisualizations:
         if not HAS_PLOTLY:
             msg = "Plotly is required for Sankey diagram visualization. Install with: pip install plotly"
             raise ImportError(msg)
-        
+
         if not graph.is_directed():
             msg = "Sankey diagram requires a directed graph"
             raise ValueError(msg)
@@ -396,7 +396,7 @@ class SpecializedVisualizations:
         if not HAS_MATPLOTLIB:
             msg = "Matplotlib and scipy are required for dendrogram visualization. Install with: pip install matplotlib scipy"
             raise ImportError(msg)
-        
+
         # Create feature matrix from graph structure
         nodes = list(graph.nodes())
         n = len(nodes)
@@ -514,7 +514,7 @@ class SpecializedVisualizations:
         if not HAS_PLOTLY:
             msg = "Plotly is required for dashboard visualization. Install with: pip install plotly"
             raise ImportError(msg)
-        
+
         if visualizations is None:
             visualizations = ["adjacency", "degree_dist", "centrality", "components"]
 

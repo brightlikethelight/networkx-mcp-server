@@ -5,9 +5,8 @@ import json
 import logging
 import sqlite3
 import time
-from collections.abc import Iterator
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import networkx as nx
 import numpy as np

@@ -7,7 +7,12 @@ import sys
 import time
 from pathlib import Path
 
-import psutil
+try:
+    import psutil
+    HAS_PSUTIL = True
+except ImportError:
+    HAS_PSUTIL = False
+    psutil = None
 
 # Add project to path
 project_root = Path(__file__).parent.parent
@@ -23,6 +28,13 @@ class TestLoadCapacity:
 
     def get_system_stats(self):
         """Get current system resource usage."""
+        if not HAS_PSUTIL:
+            return {
+                "memory_mb": 0,
+                "cpu_percent": 0,
+                "threads": 0,
+                "open_files": 0,
+            }
         process = psutil.Process()
         return {
             "memory_mb": process.memory_info().rss / 1024 / 1024,
