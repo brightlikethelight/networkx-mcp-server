@@ -7,13 +7,24 @@ import tempfile
 from typing import Any, Dict, List, Optional, Union
 
 import networkx as nx
-from pyvis.network import Network
+
+try:
+    from pyvis.network import Network
+    HAS_PYVIS = True
+except ImportError:
+    HAS_PYVIS = False
+    Network = None
 
 logger = logging.getLogger(__name__)
 
 
 class PyvisVisualizer:
     """Create interactive graph visualizations using PyVis with physics simulation."""
+    
+    def __init__(self):
+        """Initialize PyvisVisualizer."""
+        if not HAS_PYVIS:
+            raise ImportError("pyvis is required for PyvisVisualizer. Install with: pip install pyvis")
 
     # Default physics configurations
     PHYSICS_CONFIGS = {

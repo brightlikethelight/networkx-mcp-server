@@ -5,16 +5,28 @@ import logging
 from io import BytesIO
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import matplotlib.patches as mpatches
-import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
+
+try:
+    import matplotlib.patches as mpatches
+    import matplotlib.pyplot as plt
+    HAS_MATPLOTLIB = True
+except ImportError:
+    HAS_MATPLOTLIB = False
+    mpatches = None
+    plt = None
 
 logger = logging.getLogger(__name__)
 
 
 class MatplotlibVisualizer:
     """Create high-quality static graph visualizations using matplotlib."""
+    
+    def __init__(self):
+        """Initialize MatplotlibVisualizer."""
+        if not HAS_MATPLOTLIB:
+            raise ImportError("matplotlib is required for MatplotlibVisualizer. Install with: pip install matplotlib")
 
     # Available layout algorithms
     LAYOUT_ALGORITHMS = {

@@ -5,13 +5,24 @@ from typing import Any, Dict, List, Optional, Union
 
 import networkx as nx
 import numpy as np
-import plotly.graph_objects as go
+
+try:
+    import plotly.graph_objects as go
+    HAS_PLOTLY = True
+except ImportError:
+    HAS_PLOTLY = False
+    go = None
 
 logger = logging.getLogger(__name__)
 
 
 class PlotlyVisualizer:
     """Create interactive graph visualizations using Plotly."""
+    
+    def __init__(self):
+        """Initialize PlotlyVisualizer."""
+        if not HAS_PLOTLY:
+            raise ImportError("plotly is required for PlotlyVisualizer. Install with: pip install plotly")
 
     @staticmethod
     def create_interactive_plot(
