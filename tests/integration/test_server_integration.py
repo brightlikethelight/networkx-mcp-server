@@ -1,7 +1,6 @@
 """Integration tests for the MCP server."""
 
 import pytest
-
 from networkx_mcp.server import mcp
 
 
@@ -45,12 +44,13 @@ class TestMCPServerIntegration:
 
         algorithms = GraphAlgorithms()
 
-        # Check if graph is cyclic
+        # Check if graph has cycles
         graph = graph_manager.get_graph(graph_id)
-        assert algorithms.is_cyclic(graph) is True
+        cycle_info = algorithms.cycles_detection(graph)
+        assert cycle_info["has_cycle"] is True
 
         # Calculate centrality
-        centrality = algorithms.centrality_analysis(graph, ["degree"])
+        centrality = algorithms.centrality_measures(graph, ["degree"])
         assert "degree" in centrality
         assert len(centrality["degree"]) == 5
 
