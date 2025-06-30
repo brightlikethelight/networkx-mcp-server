@@ -210,9 +210,9 @@ class RobustnessAnalysis:
                 metrics["global_efficiency"] = nx.global_efficiency(graph)
             else:
                 # Approximate for large graphs
-                metrics[
-                    "global_efficiency"
-                ] = RobustnessAnalysis._approximate_efficiency(graph)
+                metrics["global_efficiency"] = (
+                    RobustnessAnalysis._approximate_efficiency(graph)
+                )
 
             # Local efficiency (clustering-based approximation)
             if not graph.is_directed():
@@ -390,9 +390,7 @@ class RobustnessAnalysis:
                 if percolation_type == "site":
                     # Site percolation: randomly remove nodes
                     nodes_to_keep = [
-                        node
-                        for node in G.nodes()
-                        if random.random() < p  # noqa: S311
+                        node for node in G.nodes() if random.random() < p  # noqa: S311
                     ]
                     nodes_to_remove = set(G.nodes()) - set(nodes_to_keep)
                     G.remove_nodes_from(nodes_to_remove)
@@ -400,9 +398,7 @@ class RobustnessAnalysis:
                 elif percolation_type == "bond":
                     # Bond percolation: randomly remove edges
                     edges_to_remove = [
-                        edge
-                        for edge in G.edges()
-                        if random.random() > p  # noqa: S311
+                        edge for edge in G.edges() if random.random() > p  # noqa: S311
                     ]
                     G.remove_edges_from(edges_to_remove)
 
@@ -864,9 +860,9 @@ class RobustnessAnalysis:
                     efficiency_metrics["local_efficiency"] = nx.local_efficiency(graph)
             else:
                 # Approximate for large graphs
-                efficiency_metrics[
-                    "global_efficiency"
-                ] = RobustnessAnalysis._approximate_efficiency(graph)
+                efficiency_metrics["global_efficiency"] = (
+                    RobustnessAnalysis._approximate_efficiency(graph)
+                )
 
             results["efficiency"] = efficiency_metrics
 
@@ -886,9 +882,9 @@ class RobustnessAnalysis:
                 )
 
                 # Degree assortativity (positive = robust)
-                robustness_metrics[
-                    "degree_assortativity"
-                ] = nx.degree_assortativity_coefficient(graph)
+                robustness_metrics["degree_assortativity"] = (
+                    nx.degree_assortativity_coefficient(graph)
+                )
 
             # Core number distribution
             if not graph.is_directed():

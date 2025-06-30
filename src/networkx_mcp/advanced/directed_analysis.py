@@ -136,9 +136,9 @@ class DirectedAnalysis:
         if graph.number_of_edges() < MAX_EDGES_FOR_TRANSITIVE_REDUCTION:
             try:
                 transitive_reduction = nx.transitive_reduction(graph)
-                results[
-                    "transitive_reduction_edges"
-                ] = transitive_reduction.number_of_edges()
+                results["transitive_reduction_edges"] = (
+                    transitive_reduction.number_of_edges()
+                )
                 results["edge_reduction_ratio"] = (
                     1 - transitive_reduction.number_of_edges() / graph.number_of_edges()
                     if graph.number_of_edges() > 0
