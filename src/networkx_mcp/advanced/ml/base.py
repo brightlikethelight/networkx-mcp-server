@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 import networkx as nx
 import numpy as np
@@ -12,10 +12,10 @@ import numpy as np
 class MLResult:
     """Result from ML algorithm on graphs."""
 
-    predictions: Union[Dict[str, Any], List[Any]]
-    confidence: Optional[Dict[str, float]] = None
-    model_info: Optional[Dict[str, Any]] = None
-    features_used: Optional[List[str]] = None
+    predictions: Union[dict[str, Any], list[Any]]
+    confidence: Optional[dict[str, float]] = None
+    model_info: Optional[dict[str, Any]] = None
+    features_used: Optional[list[str]] = None
 
 
 class GraphMLModel(ABC):
@@ -27,21 +27,21 @@ class GraphMLModel(ABC):
         self.is_trained = False
 
     @abstractmethod
-    async def extract_features(self, nodes: Optional[List[str]] = None) -> np.ndarray:
+    async def extract_features(self, nodes: Optional[list[str]] = None) -> np.ndarray:
         """Extract features from graph nodes."""
 
     @abstractmethod
-    async def train(self, labels: Dict[str, Any], **params) -> bool:
+    async def train(self, labels: dict[str, Any], **params) -> bool:
         """Train the model."""
 
     @abstractmethod
-    async def predict(self, nodes: List[str]) -> MLResult:
+    async def predict(self, nodes: list[str]) -> MLResult:
         """Make predictions for given nodes."""
 
 
 def extract_node_features(
-    graph: nx.Graph, feature_types: Optional[List[str]] = None
-) -> Dict[str, np.ndarray]:
+    graph: nx.Graph, feature_types: Optional[list[str]] = None
+) -> dict[str, np.ndarray]:
     """Extract standard node features from graph."""
     if feature_types is None:
         feature_types = ["degree", "clustering", "betweenness"]

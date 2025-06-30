@@ -3,7 +3,7 @@
 import logging
 import time
 from collections import defaultdict, deque
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Optional, Union
 
 import networkx as nx
 
@@ -21,7 +21,7 @@ class NetworkFlow:
         capacity: str = "capacity",
         algorithm: str = "auto",
         **_params,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Analyze maximum flow using various algorithms.
 
@@ -133,7 +133,7 @@ class NetworkFlow:
     @staticmethod
     def _ford_fulkerson(
         graph: nx.DiGraph, source: Any, sink: Any, capacity: str
-    ) -> Tuple[float, Dict]:
+    ) -> tuple[float, dict]:
         """Ford-Fulkerson algorithm implementation."""
         # Create residual graph
         residual = graph.copy()
@@ -208,7 +208,7 @@ class NetworkFlow:
     @staticmethod
     def _edmonds_karp(
         graph: nx.DiGraph, source: Any, sink: Any, capacity: str
-    ) -> Tuple[float, Dict]:
+    ) -> tuple[float, dict]:
         """Edmonds-Karp algorithm (BFS-based Ford-Fulkerson)."""
         # Create residual graph
         residual = graph.copy()
@@ -284,7 +284,7 @@ class NetworkFlow:
     @staticmethod
     def _dinic(
         graph: nx.DiGraph, source: Any, sink: Any, capacity: str
-    ) -> Tuple[float, Dict]:
+    ) -> tuple[float, dict]:
         """Dinic's algorithm with level graph optimization."""
         # Create residual graph
         residual = graph.copy()
@@ -362,8 +362,8 @@ class NetworkFlow:
 
     @staticmethod
     def _find_min_cut(
-        graph: nx.DiGraph, source: Any, _sink: Any, flow_dict: Dict, capacity: str
-    ) -> Tuple[Set, Set]:
+        graph: nx.DiGraph, source: Any, _sink: Any, flow_dict: dict, capacity: str
+    ) -> tuple[set, set]:
         """Find minimum cut given maximum flow."""
         # Build residual graph from flow
         residual = nx.DiGraph()
@@ -399,8 +399,8 @@ class NetworkFlow:
 
     @staticmethod
     def _get_cut_edges(
-        graph: nx.DiGraph, source_set: Set, sink_set: Set
-    ) -> List[Tuple]:
+        graph: nx.DiGraph, source_set: set, sink_set: set
+    ) -> list[tuple]:
         """Get edges in the cut."""
         cut_edges = []
 
@@ -418,7 +418,7 @@ class NetworkFlow:
         sink: Optional[Any] = None,
         capacity: str = "capacity",
         **params,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Find minimum cut sets in the graph.
 
@@ -513,10 +513,10 @@ class NetworkFlow:
     @staticmethod
     def multi_commodity_flow(
         graph: Union[nx.Graph, nx.DiGraph],
-        demands: List[Tuple[Any, Any, float]],
+        demands: list[tuple[Any, Any, float]],
         capacity: str = "capacity",
         **_params,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Solve multi-commodity flow problem.
 
@@ -623,10 +623,10 @@ class NetworkFlow:
     @staticmethod
     def flow_decomposition(
         _graph: Union[nx.Graph, nx.DiGraph],
-        flow_dict: Dict[Any, Dict[Any, float]],
+        flow_dict: dict[Any, dict[Any, float]],
         source: Any,
         sink: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Decompose a flow into path flows.
 
@@ -727,7 +727,7 @@ class NetworkFlow:
     @staticmethod
     def _find_flow_path(
         flow_graph: nx.DiGraph, source: Any, sink: Any
-    ) -> Optional[List]:
+    ) -> Optional[list]:
         """Find a path from source to sink in flow graph using DFS."""
         visited = set()
         path = []
@@ -753,7 +753,7 @@ class NetworkFlow:
         return None
 
     @staticmethod
-    def _find_flow_cycle(flow_graph: nx.DiGraph) -> Optional[List]:
+    def _find_flow_cycle(flow_graph: nx.DiGraph) -> Optional[list]:
         """Find a cycle in flow graph."""
         visited = set()
         rec_stack = set()
@@ -786,7 +786,7 @@ class NetworkFlow:
         return None
 
     @staticmethod
-    def _count_by_key(items: List[Dict], key: str) -> Dict:
+    def _count_by_key(items: list[dict], key: str) -> dict:
         """Count items by a specific key."""
         counts = defaultdict(int)
         for item in items:
@@ -796,10 +796,10 @@ class NetworkFlow:
     @staticmethod
     def circulation_analysis(
         graph: Union[nx.Graph, nx.DiGraph],
-        demands: Dict[Any, float],
+        demands: dict[Any, float],
         capacity: str = "capacity",
         **_params,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Check feasibility of circulation with demands.
 
@@ -907,8 +907,8 @@ class NetworkFlow:
 
     @staticmethod
     def _verify_circulation(
-        graph: nx.DiGraph, circulation: Dict, demands: Dict, capacity: str
-    ) -> Dict[str, Any]:
+        graph: nx.DiGraph, circulation: dict, demands: dict, capacity: str
+    ) -> dict[str, Any]:
         """Verify that a circulation satisfies all constraints."""
         violations = []
 

@@ -4,7 +4,7 @@ import logging
 import random  # Using for non-cryptographic algorithm simulation only
 import time
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Optional, Union
 
 import networkx as nx
 import numpy as np
@@ -22,7 +22,7 @@ class SpecializedAlgorithms:
         weight: Optional[str] = "weight",
         k: int = 1,
         **params,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Find minimum/maximum spanning trees using various algorithms.
 
@@ -148,7 +148,7 @@ class SpecializedAlgorithms:
     @staticmethod
     def _find_k_spanning_trees(
         graph: nx.Graph, k: int, weight: str
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Find k different spanning trees."""
         trees = []
         used_edge_sets = set()
@@ -200,7 +200,7 @@ class SpecializedAlgorithms:
     @staticmethod
     def graph_coloring(
         graph: nx.Graph, strategy: str = "greedy", **params
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Color graph nodes using various strategies.
 
@@ -300,7 +300,7 @@ class SpecializedAlgorithms:
         return results
 
     @staticmethod
-    def _smallest_last_ordering(graph: nx.Graph) -> List:
+    def _smallest_last_ordering(graph: nx.Graph) -> list:
         """Smallest-last vertex ordering."""
         G = graph.copy()
         ordering = []
@@ -314,7 +314,7 @@ class SpecializedAlgorithms:
         return list(reversed(ordering))
 
     @staticmethod
-    def _welsh_powell_coloring(graph: nx.Graph) -> Dict[Any, int]:
+    def _welsh_powell_coloring(graph: nx.Graph) -> dict[Any, int]:
         """Welsh-Powell coloring algorithm."""
         # Sort vertices by degree (descending)
         vertices = sorted(graph.nodes(), key=lambda x: graph.degree(x), reverse=True)
@@ -347,7 +347,7 @@ class SpecializedAlgorithms:
         return coloring
 
     @staticmethod
-    def _dsatur_coloring(graph: nx.Graph) -> Dict[Any, int]:
+    def _dsatur_coloring(graph: nx.Graph) -> dict[Any, int]:
         """DSatur (Degree of Saturation) coloring algorithm."""
         coloring = {}
         saturation = dict.fromkeys(graph.nodes(), 0)
@@ -390,14 +390,14 @@ class SpecializedAlgorithms:
         return coloring
 
     @staticmethod
-    def _brooks_coloring(graph: nx.Graph, _max_colors: int) -> Dict[Any, int]:
+    def _brooks_coloring(graph: nx.Graph, _max_colors: int) -> dict[Any, int]:
         """Attempt to color with at most max_degree colors (Brooks' theorem)."""
         # This is a simplified version
         # Full Brooks' algorithm is more complex
         return nx.coloring.greedy_color(graph, strategy="saturation_largest_first")
 
     @staticmethod
-    def _verify_coloring(graph: nx.Graph, coloring: Dict[Any, int]) -> bool:
+    def _verify_coloring(graph: nx.Graph, coloring: dict[Any, int]) -> bool:
         """Verify that coloring is valid."""
         for u, v in graph.edges():
             if u in coloring and v in coloring:
@@ -408,7 +408,7 @@ class SpecializedAlgorithms:
     @staticmethod
     def maximum_clique(
         graph: nx.Graph, method: str = "approximation", **_params
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Find maximum clique using exact or approximate algorithms.
 
@@ -489,7 +489,7 @@ class SpecializedAlgorithms:
         return results
 
     @staticmethod
-    def _greedy_clique_heuristic(graph: nx.Graph) -> Set:
+    def _greedy_clique_heuristic(graph: nx.Graph) -> set:
         """Greedy heuristic for finding large clique."""
         # Start with highest degree node
         nodes_by_degree = sorted(
@@ -534,7 +534,7 @@ class SpecializedAlgorithms:
         matching_type: str = "maximum",
         weight: Optional[str] = None,
         **_params,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Find various types of graph matchings.
 
@@ -636,7 +636,7 @@ class SpecializedAlgorithms:
     @staticmethod
     def vertex_cover(
         graph: nx.Graph, method: str = "approximation", **_params
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Find minimum vertex cover.
 
@@ -714,7 +714,7 @@ class SpecializedAlgorithms:
         return results
 
     @staticmethod
-    def _greedy_vertex_cover(graph: nx.Graph) -> Set:
+    def _greedy_vertex_cover(graph: nx.Graph) -> set:
         """Greedy vertex cover heuristic."""
         G = graph.copy()
         cover = set()
@@ -728,7 +728,7 @@ class SpecializedAlgorithms:
         return cover
 
     @staticmethod
-    def _verify_vertex_cover(graph: nx.Graph, cover: Set) -> bool:
+    def _verify_vertex_cover(graph: nx.Graph, cover: set) -> bool:
         """Verify that cover covers all edges."""
         for u, v in graph.edges():
             if u not in cover and v not in cover:
@@ -738,7 +738,7 @@ class SpecializedAlgorithms:
     @staticmethod
     def dominating_set(
         graph: nx.Graph, method: str = "greedy", **_params
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Find minimum dominating set.
 
@@ -791,7 +791,7 @@ class SpecializedAlgorithms:
         return results
 
     @staticmethod
-    def _greedy_dominating_set(graph: nx.Graph) -> Set:
+    def _greedy_dominating_set(graph: nx.Graph) -> set:
         """Greedy dominating set heuristic."""
         dominated = set()
         dom_set = set()
@@ -828,10 +828,10 @@ class SpecializedAlgorithms:
     def link_prediction(
         graph: nx.Graph,
         method: str = "common_neighbors",
-        node_pairs: Optional[List[Tuple]] = None,
+        node_pairs: Optional[list[tuple]] = None,
         top_k: int = 10,
         **_params,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Predict missing links in the graph.
 

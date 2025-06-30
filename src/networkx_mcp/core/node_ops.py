@@ -1,6 +1,6 @@
 """Focused node operations module."""
 
-from typing import Any, Dict, List, Union
+from typing import Any, Union
 
 import networkx as nx
 
@@ -18,13 +18,13 @@ class NodeOperations:
         self.graph.add_node(node_id, **attrs)
         return True
 
-    def bulk_add_nodes(self, nodes: List[Union[str, int, tuple]]) -> int:
+    def bulk_add_nodes(self, nodes: list[Union[str, int, tuple]]) -> int:
         """Efficiently add multiple nodes."""
         initial_count = self.graph.number_of_nodes()
         self.graph.add_nodes_from(nodes)
         return self.graph.number_of_nodes() - initial_count
 
-    def get_node_summary(self, node_id: Union[str, int]) -> Dict[str, Any]:
+    def get_node_summary(self, node_id: Union[str, int]) -> dict[str, Any]:
         """Get comprehensive node information."""
         if node_id not in self.graph:
             msg = f"Node {node_id} not found"

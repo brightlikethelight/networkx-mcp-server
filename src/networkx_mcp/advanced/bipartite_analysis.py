@@ -3,7 +3,7 @@
 import logging
 import time
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Optional, Union
 
 import networkx as nx
 import numpy as np
@@ -19,7 +19,7 @@ class BipartiteAnalysis:
     @staticmethod
     def is_bipartite(
         graph: nx.Graph, return_sets: bool = True
-    ) -> Union[bool, Tuple[bool, Optional[Tuple[Set, Set]]]]:
+    ) -> Union[bool, tuple[bool, Optional[tuple[set, set]]]]:
         """
         Check if graph is bipartite and optionally return the bipartition.
 
@@ -57,10 +57,10 @@ class BipartiteAnalysis:
     @staticmethod
     def bipartite_projection(
         graph: nx.Graph,
-        nodes: Set[Any],
+        nodes: set[Any],
         weight_function: Optional[str] = "overlap",
         **_params,
-    ) -> Tuple[nx.Graph, Dict[str, Any]]:
+    ) -> tuple[nx.Graph, dict[str, Any]]:
         """
         Create weighted or unweighted projection onto one node set.
 
@@ -174,8 +174,8 @@ class BipartiteAnalysis:
 
     @staticmethod
     def bipartite_clustering(
-        graph: nx.Graph, nodes: Optional[Set[Any]] = None, mode: str = "dot", **_params
-    ) -> Dict[str, Any]:
+        graph: nx.Graph, nodes: Optional[set[Any]] = None, mode: str = "dot", **_params
+    ) -> dict[str, Any]:
         """
         Calculate bipartite clustering coefficients.
 
@@ -266,7 +266,7 @@ class BipartiteAnalysis:
         centrality_type: str = "degree",
         normalized: bool = True,
         **_params,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Calculate adapted centrality measures for bipartite graphs.
 
@@ -377,9 +377,9 @@ class BipartiteAnalysis:
     def maximum_matching(
         graph: nx.Graph,
         weight: Optional[str] = None,
-        top_nodes: Optional[Set[Any]] = None,
+        top_nodes: Optional[set[Any]] = None,
         **_params,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Find maximum matching using Hungarian algorithm.
 
@@ -473,7 +473,7 @@ class BipartiteAnalysis:
     @staticmethod
     def bipartite_community_detection(
         graph: nx.Graph, method: str = "label_propagation", **_params
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Detect communities in bipartite graphs using specialized algorithms.
 
@@ -572,8 +572,8 @@ class BipartiteAnalysis:
 
     @staticmethod
     def _bipartite_label_propagation(
-        graph: nx.Graph, set0: Set, set1: Set, max_iterations: int = 100, **_params
-    ) -> List[Set]:
+        graph: nx.Graph, set0: set, set1: set, max_iterations: int = 100, **_params
+    ) -> list[set]:
         """Bipartite-aware label propagation."""
         # Initialize each node with its own label
         labels = {node: i for i, node in enumerate(graph.nodes())}
@@ -620,8 +620,8 @@ class BipartiteAnalysis:
 
     @staticmethod
     def _barber_modularity(
-        graph: nx.Graph, set0: Set, set1: Set, _resolution: float = 1.0, **_params
-    ) -> List[Set]:
+        graph: nx.Graph, set0: set, set1: set, _resolution: float = 1.0, **_params
+    ) -> list[set]:
         """Barber's bipartite modularity optimization (simplified)."""
         # This is a simplified greedy approach
         # Full implementation would use more sophisticated optimization
@@ -674,7 +674,7 @@ class BipartiteAnalysis:
 
     @staticmethod
     def _calculate_bipartite_modularity(
-        graph: nx.Graph, communities: List[Set], set0: Set, set1: Set
+        graph: nx.Graph, communities: list[set], set0: set, set1: set
     ) -> float:
         """Calculate Barber's bipartite modularity."""
         m = graph.number_of_edges()

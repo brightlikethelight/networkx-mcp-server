@@ -1,7 +1,6 @@
 """Louvain algorithm for community detection."""
 
 import asyncio
-from typing import List, Set
 
 import networkx as nx
 
@@ -44,13 +43,13 @@ class LouvainCommunityDetector(CommunityDetector):
             raise RuntimeError(msg) from e
 
 
-def louvain_communities(graph: nx.Graph, resolution: float = 1.0) -> List[Set[str]]:
+def louvain_communities(graph: nx.Graph, resolution: float = 1.0) -> list[set[str]]:
     """Simple function interface for Louvain communities."""
     detector = LouvainCommunityDetector(graph)
     result = asyncio.run(detector.detect_communities(resolution=resolution))
     return result.communities
 
 
-def modularity_optimization(graph: nx.Graph, communities: List[Set[str]]) -> float:
+def modularity_optimization(graph: nx.Graph, communities: list[set[str]]) -> float:
     """Calculate modularity for given community partition."""
     return nx.community.modularity(graph, communities)

@@ -1,7 +1,7 @@
 """Resource monitoring utilities."""
 
 import logging
-from typing import Any, Dict
+from typing import Any
 
 try:
     import psutil
@@ -14,7 +14,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-def get_system_metrics() -> Dict[str, Any]:
+def get_system_metrics() -> dict[str, Any]:
     """Get current system resource metrics."""
     if not HAS_PSUTIL:
         return {

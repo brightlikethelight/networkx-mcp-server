@@ -8,7 +8,7 @@ import uuid
 from collections import defaultdict
 from contextvars import ContextVar
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from ..storage.base import StorageBackend, Transaction
 
@@ -29,7 +29,7 @@ class AuditEvent:
         action: str,
         user_id: str,
         status: str = "success",
-        details: Optional[Dict[str, Any]] = None,
+        details: Optional[dict[str, Any]] = None,
         error: Optional[str] = None,
     ):
         self.event_id = str(uuid.uuid4())
@@ -51,7 +51,7 @@ class AuditEvent:
         self.server_version = __version__
         self.server_node = os.environ.get("MCP_SERVER_NODE", "server-1")
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for storage."""
         return {
             "event_id": self.event_id,
@@ -84,7 +84,7 @@ class SecurityAlert:
         severity: str,
         user_id: str,
         description: str,
-        evidence: Dict[str, Any],
+        evidence: dict[str, Any],
     ):
         self.alert_id = str(uuid.uuid4())
         self.timestamp = datetime.now(timezone.utc).isoformat()
@@ -97,7 +97,7 @@ class SecurityAlert:
         self.assigned_to = None
         self.resolution = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "alert_id": self.alert_id,
@@ -146,7 +146,7 @@ class AuditLogger:
         action: str,
         user_id: str,
         status: str = "success",
-        details: Optional[Dict[str, Any]] = None,
+        details: Optional[dict[str, Any]] = None,
         error: Optional[str] = None,
         tx: Optional[Transaction] = None,
     ) -> str:
@@ -319,7 +319,7 @@ class AuditLogger:
 
     async def get_user_activity_summary(
         self, user_id: str, hours: int = 24
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Get user activity summary."""
         # Get from cache
         recent = dict(self._user_activity.get(user_id, {}))
@@ -359,7 +359,7 @@ class AuditLogger:
             "risk_level": self._risk_level(risk_score),
         }
 
-    def _calculate_risk_score(self, activity: Dict[str, int]) -> float:
+    def _calculate_risk_score(self, activity: dict[str, int]) -> float:
         """Calculate user risk score (0-100)."""
         score = 0.0
 
@@ -402,7 +402,7 @@ class AuditLogger:
         else:
             return "minimal"
 
-    async def get_system_metrics(self) -> Dict[str, Any]:
+    async def get_system_metrics(self) -> dict[str, Any]:
         """Get system-wide audit metrics."""
         return {
             "total_events": sum(self._metrics.values()),

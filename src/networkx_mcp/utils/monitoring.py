@@ -4,7 +4,7 @@ import json
 import time
 from collections import defaultdict, deque
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 
 class PerformanceMonitor:
@@ -17,13 +17,13 @@ class PerformanceMonitor:
             max_history: Maximum number of operations to keep in history
         """
         self.max_history = max_history
-        self.operations: Dict[str, deque] = defaultdict(
+        self.operations: dict[str, deque] = defaultdict(
             lambda: deque(maxlen=max_history)
         )
         self.start_time = time.time()
 
     def record_operation(
-        self, operation: str, duration: float, metadata: Optional[Dict] = None
+        self, operation: str, duration: float, metadata: Optional[dict] = None
     ):
         """Record an operation's performance metrics.
 
@@ -39,7 +39,7 @@ class PerformanceMonitor:
         }
         self.operations[operation].append(record)
 
-    def get_statistics(self, operation: Optional[str] = None) -> Dict[str, Any]:
+    def get_statistics(self, operation: Optional[str] = None) -> dict[str, Any]:
         """Get performance statistics.
 
         Args:
@@ -83,7 +83,7 @@ class PerformanceMonitor:
                 "total_operations": sum(len(ops) for ops in self.operations.values()),
             }
 
-    def get_slow_operations(self, threshold_ms: float = 1000) -> List[Dict[str, Any]]:
+    def get_slow_operations(self, threshold_ms: float = 1000) -> list[dict[str, Any]]:
         """Get operations that exceeded a duration threshold.
 
         Args:
@@ -125,12 +125,12 @@ class OperationCounter:
 
     def __init__(self):
         """Initialize operation counter."""
-        self.counts: Dict[str, int] = defaultdict(int)
-        self.hourly_counts: Dict[str, Dict[int, int]] = defaultdict(
+        self.counts: dict[str, int] = defaultdict(int)
+        self.hourly_counts: dict[str, dict[int, int]] = defaultdict(
             lambda: defaultdict(int)
         )
         self.start_time = datetime.now(timezone.utc).replace(tzinfo=None)
-        self.errors: Dict[str, int] = defaultdict(int)
+        self.errors: dict[str, int] = defaultdict(int)
 
     def increment(self, operation: str, count: int = 1):
         """Increment operation count.
@@ -153,7 +153,7 @@ class OperationCounter:
         error_key = f"{operation}:{error_type}"
         self.errors[error_key] += 1
 
-    def get_counts(self) -> Dict[str, Any]:
+    def get_counts(self) -> dict[str, Any]:
         """Get operation counts and statistics.
 
         Returns:
@@ -209,7 +209,7 @@ class OperationCounter:
             "hourly_patterns": hourly_patterns,
             "error_rates": error_rates,
             "top_operations": sorted(
-                [(op, count) for op, count in self.counts.items()],
+                self.counts.items(),
                 key=lambda x: x[1],
                 reverse=True,
             )[:10],
@@ -241,7 +241,7 @@ class MemoryMonitor:
     """Monitor memory usage of graphs."""
 
     @staticmethod
-    def estimate_graph_memory(graph) -> Dict[str, Any]:
+    def estimate_graph_memory(graph) -> dict[str, Any]:
         """Estimate memory usage of a graph.
 
         Args:

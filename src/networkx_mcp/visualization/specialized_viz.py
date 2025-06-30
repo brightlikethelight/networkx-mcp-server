@@ -3,7 +3,7 @@
 import base64
 import logging
 from io import BytesIO
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import networkx as nx
 import numpy as np
@@ -41,13 +41,13 @@ class SpecializedVisualizations:
     @staticmethod
     def heatmap_adjacency(
         graph: Union[nx.Graph, nx.DiGraph],
-        node_order: Optional[List] = None,
+        node_order: Optional[list] = None,
         cmap: str = "viridis",
-        figsize: Tuple[int, int] = (10, 8),
+        figsize: tuple[int, int] = (10, 8),
         title: str = "Adjacency Matrix Heatmap",
         show_labels: bool = True,
         **kwargs,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Create adjacency matrix heatmap visualization.
 
@@ -152,7 +152,7 @@ class SpecializedVisualizations:
         min_weight: float = 0,
         title: str = "Network Chord Diagram",
         **kwargs,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Create chord diagram for network relationships.
 
@@ -277,12 +277,12 @@ class SpecializedVisualizations:
     @staticmethod
     def sankey_diagram(
         graph: nx.DiGraph,
-        source_nodes: Optional[List] = None,
-        target_nodes: Optional[List] = None,
+        source_nodes: Optional[list] = None,
+        target_nodes: Optional[list] = None,
         flow_attribute: str = "weight",
         title: str = "Network Flow Sankey Diagram",
         **kwargs,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Create Sankey diagram for flow visualization.
 
@@ -379,10 +379,10 @@ class SpecializedVisualizations:
         graph: Union[nx.Graph, nx.DiGraph],
         method: str = "average",
         metric: str = "euclidean",
-        figsize: Tuple[int, int] = (12, 8),
+        figsize: tuple[int, int] = (12, 8),
         title: str = "Hierarchical Clustering Dendrogram",
         **kwargs,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Create dendrogram for hierarchical clustering visualization.
 
@@ -500,9 +500,9 @@ class SpecializedVisualizations:
     @staticmethod
     def create_dashboard(
         graph: Union[nx.Graph, nx.DiGraph],
-        visualizations: Optional[List[str]] = None,
+        visualizations: Optional[list[str]] = None,
         **kwargs,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Create a dashboard with multiple visualizations.
 

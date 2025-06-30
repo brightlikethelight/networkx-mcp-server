@@ -1,26 +1,26 @@
 """Formatting utilities for graph data."""
 
 import json
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 
 class GraphFormatter:
     """Formatter for graph-related responses."""
 
     @staticmethod
-    def format_success(data: Any, message: str = "Success") -> Dict[str, Any]:
+    def format_success(data: Any, message: str = "Success") -> dict[str, Any]:
         """Format successful response."""
         return {"success": True, "message": message, "data": data}
 
     @staticmethod
-    def format_error(error_type: str, message: str) -> Dict[str, Any]:
+    def format_error(error_type: str, message: str) -> dict[str, Any]:
         """Format error response."""
         return {"success": False, "error": error_type, "message": message}
 
     @staticmethod
     def format_algorithm_result(
         algorithm: str, result: Any, execution_time: Optional[float] = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Format algorithm result."""
         response = {"algorithm": algorithm, "result": result}
         if execution_time is not None:
@@ -28,7 +28,7 @@ class GraphFormatter:
         return response
 
     @staticmethod
-    def format_community_results(communities: Any) -> Dict[str, Any]:
+    def format_community_results(communities: Any) -> dict[str, Any]:
         """Format community detection results."""
         return {
             "communities": communities,
@@ -39,8 +39,8 @@ class GraphFormatter:
 
     @staticmethod
     def format_visualization_data(
-        graph, layout: Dict[str, Any], options: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+        graph, layout: dict[str, Any], options: Optional[dict[str, Any]] = None
+    ) -> dict[str, Any]:
         """Format visualization data."""
         nodes = []
         for node in graph.nodes():
@@ -64,7 +64,7 @@ class GraphFormatter:
         }
 
 
-def format_graph_summary(graph) -> Dict[str, Any]:
+def format_graph_summary(graph) -> dict[str, Any]:
     """Format graph summary information."""
     return {
         "nodes": graph.number_of_nodes(),
@@ -92,6 +92,6 @@ def format_json_output(data: Any, pretty: bool = True) -> str:
     return json.dumps(data, default=str)
 
 
-def format_error_response(error: Exception, context: str = "") -> Dict[str, str]:
+def format_error_response(error: Exception, context: str = "") -> dict[str, str]:
     """Format error as response dict."""
     return {"error": str(error), "type": type(error).__name__, "context": context}

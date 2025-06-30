@@ -1,6 +1,6 @@
 """Link prediction algorithms."""
 
-from typing import List, Optional, Tuple
+from typing import Optional
 
 import networkx as nx
 import numpy as np
@@ -12,7 +12,7 @@ class LinkPredictor(GraphMLModel):
     """Link prediction using graph topology."""
 
     async def extract_features(
-        self, node_pairs: Optional[List[Tuple[str, str]]] = None
+        self, node_pairs: Optional[list[tuple[str, str]]] = None
     ) -> np.ndarray:
         """Extract features for link prediction."""
         if node_pairs is None:
@@ -48,8 +48,8 @@ class LinkPredictor(GraphMLModel):
 
     async def train(
         self,
-        positive_edges: List[Tuple[str, str]],
-        negative_edges: List[Tuple[str, str]],
+        positive_edges: list[tuple[str, str]],
+        negative_edges: list[tuple[str, str]],
         **params,
     ) -> bool:
         """Train link predictor."""
@@ -68,7 +68,7 @@ class LinkPredictor(GraphMLModel):
         except Exception:
             return False
 
-    async def predict(self, node_pairs: List[Tuple[str, str]]) -> MLResult:
+    async def predict(self, node_pairs: list[tuple[str, str]]) -> MLResult:
         """Predict likelihood of links."""
         features = await self.extract_features(node_pairs)
 
@@ -96,7 +96,7 @@ class LinkPredictor(GraphMLModel):
 
 async def predict_links(
     graph: nx.Graph, num_predictions: int = 10
-) -> List[Tuple[str, str, float]]:
+) -> list[tuple[str, str, float]]:
     """Simple function interface for link prediction."""
     predictor = LinkPredictor(graph)
 

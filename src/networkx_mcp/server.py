@@ -9,7 +9,7 @@ import sys
 import time
 import traceback
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import networkx as nx
 import numpy as np
@@ -125,9 +125,9 @@ enterprise_features = EnterpriseFeatures()
 async def create_graph(
     graph_id: str,
     graph_type: str = "undirected",
-    from_data: Optional[Dict[str, Any]] = None,
-    attributes: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    from_data: Optional[dict[str, Any]] = None,
+    attributes: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
     """
     Create a new NetworkX graph with comprehensive initialization options.
 
@@ -239,7 +239,7 @@ async def create_graph(
 
 
 @mcp.tool()
-async def delete_graph(graph_id: str) -> Dict[str, Any]:
+async def delete_graph(graph_id: str) -> dict[str, Any]:
     """
     Delete a graph by ID.
 
@@ -259,7 +259,7 @@ async def delete_graph(graph_id: str) -> Dict[str, Any]:
 
 
 @mcp.tool()
-async def list_graphs() -> Dict[str, Any]:
+async def list_graphs() -> dict[str, Any]:
     """
     List all available graphs.
 
@@ -276,7 +276,7 @@ async def list_graphs() -> Dict[str, Any]:
 
 
 @mcp.tool()
-async def get_graph_info(graph_id: str) -> Dict[str, Any]:
+async def get_graph_info(graph_id: str) -> dict[str, Any]:
     """
     Get comprehensive information about a graph.
 
@@ -304,12 +304,12 @@ async def get_graph_info(graph_id: str) -> Dict[str, Any]:
         if graph.is_directed():
             info["is_weakly_connected"] = nx.is_weakly_connected(graph)
             info["is_strongly_connected"] = nx.is_strongly_connected(graph)
-            info["num_weakly_connected_components"] = (
-                nx.number_weakly_connected_components(graph)
-            )
-            info["num_strongly_connected_components"] = (
-                nx.number_strongly_connected_components(graph)
-            )
+            info[
+                "num_weakly_connected_components"
+            ] = nx.number_weakly_connected_components(graph)
+            info[
+                "num_strongly_connected_components"
+            ] = nx.number_strongly_connected_components(graph)
         else:
             info["is_connected"] = nx.is_connected(graph)
             info["num_connected_components"] = nx.number_connected_components(graph)
@@ -368,9 +368,9 @@ async def get_graph_info(graph_id: str) -> Dict[str, Any]:
 @mcp.tool()
 async def add_nodes(
     graph_id: str,
-    nodes: Union[List[str], List[Dict[str, Any]]],
-    node_attributes: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    nodes: Union[list[str], list[dict[str, Any]]],
+    node_attributes: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
     """
     Add nodes to a graph with support for bulk operations and attributes.
 
@@ -474,9 +474,9 @@ async def add_nodes(
 @mcp.tool()
 async def add_edges(
     graph_id: str,
-    edges: List[Union[Tuple, Dict[str, Any]]],
-    edge_attributes: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    edges: list[Union[tuple, dict[str, Any]]],
+    edge_attributes: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
     """
     Add edges to a graph with support for bulk operations, weights, and attributes.
 
@@ -624,7 +624,7 @@ async def shortest_path(
     weight: Optional[str] = None,
     method: str = "dijkstra",
     k_paths: Optional[int] = None,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Find shortest path(s) in a graph with multiple algorithm support.
 
@@ -791,11 +791,11 @@ async def shortest_path(
 @mcp.tool()
 async def calculate_centrality(
     graph_id: str,
-    centrality_type: Union[str, List[str]] = "degree",
+    centrality_type: Union[str, list[str]] = "degree",
     top_n: Optional[int] = MAX_DISPLAY_ITEMS,
     include_statistics: bool = True,
     weight: Optional[str] = None,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Calculate various centrality measures for nodes in a graph.
 
@@ -982,7 +982,7 @@ async def calculate_centrality(
 
 
 @mcp.tool()
-async def community_detection(graph_id: str, method: str = "louvain") -> Dict[str, Any]:
+async def community_detection(graph_id: str, method: str = "louvain") -> dict[str, Any]:
     """
     Detect communities in a graph.
 
@@ -1009,7 +1009,7 @@ async def community_detection(graph_id: str, method: str = "louvain") -> Dict[st
 
 
 @mcp.tool()
-async def graph_statistics(graph_id: str) -> Dict[str, Any]:
+async def graph_statistics(graph_id: str) -> dict[str, Any]:
     """
     Calculate comprehensive graph statistics.
 
@@ -1035,8 +1035,8 @@ async def export_graph(
     graph_id: str,
     format: str,
     path: Optional[str] = None,
-    options: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    options: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
     """
     Export a graph to various formats.
 
@@ -1072,10 +1072,10 @@ async def export_graph(
 async def import_graph(
     graph_id: str,
     format: str,
-    data: Optional[Dict[str, Any]] = None,
+    data: Optional[dict[str, Any]] = None,
     path: Optional[str] = None,
-    options: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    options: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
     """
     Import a graph from various formats.
 
@@ -1122,8 +1122,8 @@ async def visualize_graph_simple(
     graph_id: str,
     layout: str = "spring",
     output_format: str = "pyvis",
-    options: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    options: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
     """
     Generate visualization data for a graph.
 
@@ -1180,7 +1180,7 @@ async def visualize_graph_simple(
 @mcp.tool()
 async def graph_metrics(
     graph_id: str, include_distributions: bool = True
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Calculate comprehensive graph metrics and statistics.
 
@@ -1436,7 +1436,7 @@ async def graph_metrics(
 
 
 @mcp.tool()
-async def monitoring_stats() -> Dict[str, Any]:
+async def monitoring_stats() -> dict[str, Any]:
     """
     Get server monitoring statistics and performance metrics.
 
@@ -1505,8 +1505,8 @@ async def monitoring_stats() -> Dict[str, Any]:
 async def clustering_analysis(
     graph_id: str,
     include_triangles: bool = True,
-    nodes: Optional[List[Union[str, int]]] = None,
-) -> Dict[str, Any]:
+    nodes: Optional[list[Union[str, int]]] = None,
+) -> dict[str, Any]:
     """
     Analyze clustering coefficients and triangles in a graph.
 
@@ -1636,7 +1636,7 @@ async def connected_components(
     component_type: str = "weakly",
     return_sizes: bool = True,
     largest_only: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Find connected components in a graph.
 
@@ -1786,7 +1786,7 @@ async def find_all_paths(
     target: Union[str, int],
     max_length: Optional[int] = None,
     max_paths: int = MAX_PATHS_DEFAULT,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Find all simple paths between two nodes with constraints.
 
@@ -1843,9 +1843,9 @@ async def find_all_paths(
             for i, path in enumerate(path_generator):
                 if i >= max_paths:
                     result["truncated"] = True
-                    result["truncation_message"] = (
-                        f"Results limited to {max_paths} paths"
-                    )
+                    result[
+                        "truncation_message"
+                    ] = f"Results limited to {max_paths} paths"
                     break
 
                 paths.append(path)
@@ -1913,7 +1913,7 @@ async def find_all_paths(
 @mcp.tool()
 async def path_analysis(
     graph_id: str, sample_size: Optional[int] = 1000
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Analyze path properties of a graph including diameter, radius, and eccentricity.
 
@@ -2070,7 +2070,7 @@ async def path_analysis(
 @mcp.tool()
 async def cycle_detection(
     graph_id: str, max_cycle_length: Optional[int] = None, limit: int = 100
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Detect cycles in a graph with detailed analysis.
 
@@ -2109,9 +2109,9 @@ async def cycle_detection(
                     for i, cycle in enumerate(cycle_gen):
                         if i >= limit:
                             result["truncated"] = True
-                            result["truncation_message"] = (
-                                f"Results limited to {limit} cycles"
-                            )
+                            result[
+                                "truncation_message"
+                            ] = f"Results limited to {limit} cycles"
                             break
 
                         if max_cycle_length and len(cycle) > max_cycle_length:
@@ -2226,7 +2226,7 @@ async def flow_paths(
     target: Union[str, int],
     capacity: str = "capacity",
     flow_type: str = "maximum",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Analyze flow paths in a directed graph including max flow and edge-disjoint paths.
 
@@ -2379,7 +2379,7 @@ async def flow_paths(
 
 
 @mcp.tool()
-async def clear_graph(graph_id: str) -> Dict[str, Any]:
+async def clear_graph(graph_id: str) -> dict[str, Any]:
     """
     Clear all nodes and edges from a graph while preserving the graph instance.
 
@@ -2417,14 +2417,14 @@ async def clear_graph(graph_id: str) -> Dict[str, Any]:
 async def subgraph_extraction(
     graph_id: str,
     method: str = "nodes",
-    nodes: Optional[List[Union[str, int]]] = None,
-    edges: Optional[List[Tuple[Union[str, int], Union[str, int]]]] = None,
+    nodes: Optional[list[Union[str, int]]] = None,
+    edges: Optional[list[tuple[Union[str, int], Union[str, int]]]] = None,
     k_hop: Optional[int] = None,
     center_node: Optional[Union[str, int]] = None,
     condition: Optional[str] = None,
     create_new: bool = True,
     new_graph_id: Optional[str] = None,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Extract subgraphs based on various criteria.
 
@@ -2701,8 +2701,8 @@ async def advanced_community_detection(
     algorithm: str = "auto",
     resolution: float = 1.0,
     seed: Optional[int] = None,
-    params: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    params: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
     """
     Detect communities using advanced algorithms with auto-selection.
 
@@ -2757,7 +2757,7 @@ async def network_flow_analysis(
     capacity: str = "capacity",
     algorithm: str = "auto",
     flow_type: str = "max_flow",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Analyze network flow with multiple algorithms.
 
@@ -2808,8 +2808,8 @@ async def generate_graph(
     graph_type: str,
     n: int,
     graph_id: Optional[str] = None,
-    params: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    params: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
     """
     Generate synthetic graphs using various models.
 
@@ -2877,8 +2877,8 @@ async def bipartite_analysis(
     graph_id: str,
     analysis_type: str = "check",
     weight: Optional[str] = None,
-    params: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    params: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
     """
     Analyze bipartite graphs with specialized algorithms.
 
@@ -2933,8 +2933,8 @@ async def bipartite_analysis(
 async def directed_graph_analysis(
     graph_id: str,
     analysis_type: str = "dag_check",
-    params: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    params: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
     """
     Analyze directed graphs with specialized algorithms.
 
@@ -3001,8 +3001,8 @@ async def directed_graph_analysis(
 
 @mcp.tool()
 async def specialized_algorithms(
-    graph_id: str, algorithm: str, params: Optional[Dict[str, Any]] = None
-) -> Dict[str, Any]:
+    graph_id: str, algorithm: str, params: Optional[dict[str, Any]] = None
+) -> dict[str, Any]:
     """
     Run specialized graph algorithms.
 
@@ -3057,8 +3057,8 @@ async def specialized_algorithms(
 
 @mcp.tool()
 async def ml_graph_analysis(
-    graph_id: str, analysis_type: str, params: Optional[Dict[str, Any]] = None
-) -> Dict[str, Any]:
+    graph_id: str, analysis_type: str, params: Optional[dict[str, Any]] = None
+) -> dict[str, Any]:
     """
     Machine learning-based graph analysis.
 
@@ -3086,9 +3086,9 @@ async def ml_graph_analysis(
                     node: result["embeddings"][node].tolist()[:10]
                     for node in sample_nodes
                 }
-                result["embeddings"] = (
-                    "Full embeddings computed but not returned (too large)"
-                )
+                result[
+                    "embeddings"
+                ] = "Full embeddings computed but not returned (too large)"
 
         elif analysis_type == "features":
             result = MLIntegration.graph_features(graph, **ml_params)
@@ -3125,8 +3125,8 @@ async def ml_graph_analysis(
 async def robustness_analysis(
     graph_id: str,
     analysis_type: str = "attack",
-    params: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    params: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
     """
     Analyze network robustness and resilience.
 
@@ -3189,8 +3189,8 @@ async def visualize_graph(
     visualization_type: str = "static",
     layout: str = "spring",
     format: str = "png",
-    params: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    params: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
     """
     Create graph visualizations with various backends.
 
@@ -3279,8 +3279,8 @@ async def visualize_graph(
 
 @mcp.tool()
 async def visualize_3d(
-    graph_id: str, layout: str = "spring3d", params: Optional[Dict[str, Any]] = None
-) -> Dict[str, Any]:
+    graph_id: str, layout: str = "spring3d", params: Optional[dict[str, Any]] = None
+) -> dict[str, Any]:
     """
     Create 3D graph visualization.
 
@@ -3315,10 +3315,10 @@ async def visualize_3d(
 @mcp.tool()
 async def import_from_source(
     source_type: str,
-    source_config: Dict[str, Any],
+    source_config: dict[str, Any],
     graph_id: Optional[str] = None,
-    params: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    params: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
     """
     Import graph data from various sources with intelligent parsing.
 
@@ -3403,11 +3403,11 @@ async def import_from_source(
 
 @mcp.tool()
 async def batch_graph_analysis(
-    graph_ids: List[str],
-    operations: List[Dict[str, Any]],
+    graph_ids: list[str],
+    operations: list[dict[str, Any]],
     parallel: bool = True,
-    params: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    params: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
     """
     Process multiple graphs with batch operations.
 
@@ -3454,10 +3454,10 @@ async def batch_graph_analysis(
 @mcp.tool()
 async def create_analysis_workflow(
     graph_id: str,
-    workflow_steps: List[Dict[str, Any]],
+    workflow_steps: list[dict[str, Any]],
     cache_results: bool = True,
-    params: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    params: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
     """
     Execute analysis workflow with chained operations.
 
@@ -3498,11 +3498,11 @@ async def create_analysis_workflow(
 
 @mcp.tool()
 async def generate_report(
-    analysis_data: Dict[str, Any],
+    analysis_data: dict[str, Any],
     report_format: str = "pdf",
     template: str = "default",
-    params: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    params: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
     """
     Generate analysis report in various formats.
 
@@ -3560,9 +3560,9 @@ async def generate_report(
 @mcp.tool()
 async def setup_monitoring(
     graph_id: str,
-    alert_rules: List[Dict[str, Any]],
-    params: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    alert_rules: list[dict[str, Any]],
+    params: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
     """
     Setup monitoring and alerts for a graph.
 
@@ -3613,9 +3613,9 @@ async def setup_monitoring(
 @mcp.tool()
 async def create_dashboard(
     graph_id: str,
-    visualizations: Optional[List[str]] = None,
-    params: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    visualizations: Optional[list[str]] = None,
+    params: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
     """
     Create interactive dashboard with multiple visualizations.
 
@@ -3653,7 +3653,7 @@ async def create_dashboard(
 
 
 @mcp.resource("graph://{graph_id}")
-async def get_graph_resource(graph_id: str) -> List[TextContent]:
+async def get_graph_resource(graph_id: str) -> list[TextContent]:
     """
     Provide graph data as an MCP resource.
 
@@ -3675,7 +3675,7 @@ async def get_graph_resource(graph_id: str) -> List[TextContent]:
 
 
 @mcp.resource("graphs://list")
-async def list_graphs_resource() -> List[TextContent]:
+async def list_graphs_resource() -> list[TextContent]:
     """
     List all available graphs as an MCP resource.
 

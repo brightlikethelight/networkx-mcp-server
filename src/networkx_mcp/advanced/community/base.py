@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Optional
 
 import networkx as nx
 
@@ -14,11 +14,11 @@ MIN_NODES_FOR_COMMUNITY_DETECTION = 2
 class CommunityResult:
     """Result from community detection algorithm."""
 
-    communities: List[Set[str]]
+    communities: list[set[str]]
     modularity: float
     algorithm: str
-    parameters: Dict[str, Any]
-    metadata: Optional[Dict[str, Any]] = None
+    parameters: dict[str, Any]
+    metadata: Optional[dict[str, Any]] = None
 
 
 class CommunityDetector(ABC):
@@ -41,7 +41,7 @@ class CommunityDetector(ABC):
         return True
 
 
-def validate_communities(communities: List[Set[str]], graph: nx.Graph) -> bool:
+def validate_communities(communities: list[set[str]], graph: nx.Graph) -> bool:
     """Validate that communities are valid for the graph."""
     all_nodes = set()
     for community in communities:
@@ -54,8 +54,8 @@ def validate_communities(communities: List[Set[str]], graph: nx.Graph) -> bool:
 
 
 def format_community_result(
-    communities: List[Set[str]], algorithm: str, modularity: float
-) -> Dict[str, Any]:
+    communities: list[set[str]], algorithm: str, modularity: float
+) -> dict[str, Any]:
     """Format community detection result for API response."""
     return {
         "algorithm": algorithm,

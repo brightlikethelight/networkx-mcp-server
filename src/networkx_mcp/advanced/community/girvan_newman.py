@@ -1,7 +1,7 @@
 """Girvan-Newman algorithm for community detection."""
 
 import asyncio
-from typing import Dict, List, Optional, Set
+from typing import Optional
 
 import networkx as nx
 
@@ -65,13 +65,13 @@ class GirvanNewmanDetector(CommunityDetector):
             raise RuntimeError(msg) from e
 
 
-def girvan_newman_communities(graph: nx.Graph, k: int = 2) -> List[Set[str]]:
+def girvan_newman_communities(graph: nx.Graph, k: int = 2) -> list[set[str]]:
     """Simple function interface for Girvan-Newman communities."""
     detector = GirvanNewmanDetector(graph)
     result = asyncio.run(detector.detect_communities(k=k))
     return result.communities
 
 
-def edge_betweenness_centrality(graph: nx.Graph) -> Dict[tuple, float]:
+def edge_betweenness_centrality(graph: nx.Graph) -> dict[tuple, float]:
     """Calculate edge betweenness centrality (used in Girvan-Newman)."""
     return nx.edge_betweenness_centrality(graph)

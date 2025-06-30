@@ -11,7 +11,7 @@ import time
 from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Optional, Union
 
 import networkx as nx
 import numpy as np
@@ -91,12 +91,12 @@ class EnterpriseFeatures:
 
     def batch_analysis(
         self,
-        graphs: List[Tuple[str, nx.Graph]],
-        operations: List[Dict[str, Any]],
+        graphs: list[tuple[str, nx.Graph]],
+        operations: list[dict[str, Any]],
         parallel: bool = True,
         batch_size: int = 10,
         progress_callback: Optional[Callable] = None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Process multiple graphs in parallel with batching.
 
@@ -183,9 +183,9 @@ class EnterpriseFeatures:
     def analysis_workflow(
         self,
         graph: nx.Graph,
-        workflow_config: List[Dict[str, Any]],
+        workflow_config: list[dict[str, Any]],
         cache_intermediate: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Chain operations with intermediate caching.
 
@@ -249,7 +249,7 @@ class EnterpriseFeatures:
 
     def report_generation(
         self,
-        graph_analysis: Dict[str, Any],
+        graph_analysis: dict[str, Any],
         template: str = "default",
         output_format: str = "pdf",
         include_visualizations: bool = True,
@@ -290,9 +290,9 @@ class EnterpriseFeatures:
     def alert_system(
         self,
         graph: nx.Graph,
-        alert_rules: List[Dict[str, Any]],
+        alert_rules: list[dict[str, Any]],
         notification_callback: Optional[Callable] = None,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Anomaly detection and alerting system.
 
@@ -412,7 +412,7 @@ class EnterpriseFeatures:
         return triggered_alerts
 
     def schedule_job(
-        self, job_config: Dict[str, Any], start_immediately: bool = True
+        self, job_config: dict[str, Any], start_immediately: bool = True
     ) -> str:
         """
         Schedule a job for execution.
@@ -488,7 +488,7 @@ class EnterpriseFeatures:
         self,
         graph: nx.Graph,
         version_name: str,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: Optional[dict[str, Any]] = None,
     ) -> str:
         """
         Save a versioned snapshot of a graph.
@@ -543,8 +543,8 @@ class EnterpriseFeatures:
         return version_id
 
     def _process_single_graph(
-        self, graph_id: str, graph: nx.Graph, operations: List[Dict[str, Any]]
-    ) -> Dict[str, Any]:
+        self, graph_id: str, graph: nx.Graph, operations: list[dict[str, Any]]
+    ) -> dict[str, Any]:
         """Process a single graph with multiple operations."""
         results = {"graph_id": graph_id, "operations": {}}
 
@@ -571,7 +571,7 @@ class EnterpriseFeatures:
 
         return results
 
-    def _calculate_centrality(self, graph: nx.Graph, **params) -> Dict[str, Any]:
+    def _calculate_centrality(self, graph: nx.Graph, **params) -> dict[str, Any]:
         """Calculate centrality metrics."""
         centrality_type = params.get("type", "degree")
 
@@ -592,7 +592,7 @@ class EnterpriseFeatures:
             "top_10": sorted(centrality.items(), key=lambda x: x[1], reverse=True)[:10],
         }
 
-    def _detect_communities(self, graph: nx.Graph, **params) -> Dict[str, Any]:
+    def _detect_communities(self, graph: nx.Graph, **params) -> dict[str, Any]:
         """Detect communities in graph."""
         # Simplified community detection
         if HAS_LOUVAIN:
@@ -622,7 +622,7 @@ class EnterpriseFeatures:
                 "method": "connected_components",
             }
 
-    def _calculate_metrics(self, graph: nx.Graph, **params) -> Dict[str, Any]:
+    def _calculate_metrics(self, graph: nx.Graph, **params) -> dict[str, Any]:
         """Calculate graph metrics."""
         metrics = {
             "num_nodes": graph.number_of_nodes(),
@@ -648,7 +648,7 @@ class EnterpriseFeatures:
 
         return metrics
 
-    def _get_cache_key(self, graph: nx.Graph, operation: str, params: Dict) -> str:
+    def _get_cache_key(self, graph: nx.Graph, operation: str, params: dict) -> str:
         """Generate cache key for operation."""
         # Using MD5 for non-cryptographic cache key generation (not security sensitive)
         graph_hash = hashlib.md5(
@@ -664,8 +664,8 @@ class EnterpriseFeatures:
         return f"{operation}_{graph_hash}_{params_hash}"
 
     def _execute_operation(
-        self, graph: nx.Graph, operation: str, params: Dict
-    ) -> Dict[str, Any]:
+        self, graph: nx.Graph, operation: str, params: dict
+    ) -> dict[str, Any]:
         """Execute a single operation on graph."""
         # Map operation names to functions
         operations = {
@@ -682,7 +682,7 @@ class EnterpriseFeatures:
             raise ValueError(msg)
 
     def _evaluate_condition(
-        self, result: Dict[str, Any], condition: Dict[str, Any]
+        self, result: dict[str, Any], condition: dict[str, Any]
     ) -> bool:
         """Evaluate workflow condition."""
         field = condition["field"]
@@ -719,7 +719,7 @@ class EnterpriseFeatures:
 
     def _generate_html_report(
         self,
-        analysis: Dict[str, Any],
+        analysis: dict[str, Any],
         template: str,
         timestamp: str,
         include_viz: bool,
@@ -793,7 +793,7 @@ class EnterpriseFeatures:
 
     def _generate_pdf_report(
         self,
-        analysis: Dict[str, Any],
+        analysis: dict[str, Any],
         template: str,
         timestamp: str,
         include_viz: bool,
@@ -870,7 +870,7 @@ class EnterpriseFeatures:
         buffer.seek(0)
         return buffer.read()
 
-    def _format_detailed_results(self, analysis: Dict[str, Any]) -> str:
+    def _format_detailed_results(self, analysis: dict[str, Any]) -> str:
         """Format analysis results for report."""
         # Convert nested dict to readable format
         lines = []
@@ -901,7 +901,7 @@ class EnterpriseFeatures:
 
     def _get_historical_metrics(
         self, graph: nx.Graph, metric: str, periods: int = 30
-    ) -> List[float]:
+    ) -> list[float]:
         """Get historical metric values (simulated for demo)."""
         # In production, this would query a time series database
         current_value = 0
@@ -970,7 +970,7 @@ class EnterpriseFeatures:
             schedule.run_pending()
             time.sleep(1)
 
-    def _update_version_index(self, version_id: str, version_data: Dict[str, Any]):
+    def _update_version_index(self, version_id: str, version_data: dict[str, Any]):
         """Update version control index."""
         index_file = self.cache_dir / "versions" / "index.json"
 
@@ -996,7 +996,7 @@ class EnterpriseFeatures:
             json.dump(index, f, indent=2)
 
     def _send_job_notifications(
-        self, job: Dict[str, Any], alerts: List[Dict[str, Any]]
+        self, job: dict[str, Any], alerts: list[dict[str, Any]]
     ):
         """Send notifications for scheduled job alerts."""
         # In production, integrate with notification services

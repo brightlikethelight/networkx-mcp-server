@@ -3,7 +3,7 @@
 import logging
 import time
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 import networkx as nx
 import numpy as np
@@ -31,7 +31,7 @@ class DirectedAnalysis:
     """Analysis tools for directed graphs."""
 
     @staticmethod
-    def dag_analysis(graph: nx.DiGraph, **_params) -> Dict[str, Any]:
+    def dag_analysis(graph: nx.DiGraph, **_params) -> dict[str, Any]:
         """
         Analyze Directed Acyclic Graph (DAG) properties.
 
@@ -136,9 +136,9 @@ class DirectedAnalysis:
         if graph.number_of_edges() < MAX_EDGES_FOR_TRANSITIVE_REDUCTION:
             try:
                 transitive_reduction = nx.transitive_reduction(graph)
-                results["transitive_reduction_edges"] = (
-                    transitive_reduction.number_of_edges()
-                )
+                results[
+                    "transitive_reduction_edges"
+                ] = transitive_reduction.number_of_edges()
                 results["edge_reduction_ratio"] = (
                     1 - transitive_reduction.number_of_edges() / graph.number_of_edges()
                     if graph.number_of_edges() > 0
@@ -153,7 +153,7 @@ class DirectedAnalysis:
         return results
 
     @staticmethod
-    def _compute_dag_levels(graph: nx.DiGraph, topo_sort: List) -> Dict[Any, int]:
+    def _compute_dag_levels(graph: nx.DiGraph, topo_sort: list) -> dict[Any, int]:
         """Compute level for each node in DAG."""
         levels = {}
 
@@ -168,7 +168,7 @@ class DirectedAnalysis:
         return levels
 
     @staticmethod
-    def _find_all_longest_paths(graph: nx.DiGraph) -> List[List]:
+    def _find_all_longest_paths(graph: nx.DiGraph) -> list[list]:
         """Find all longest paths in DAG."""
         # Get all paths from roots to leaves
         roots = [n for n in graph.nodes() if graph.in_degree(n) == 0]
@@ -198,7 +198,7 @@ class DirectedAnalysis:
         algorithm: str = "tarjan",
         return_condensation: bool = False,
         **_params,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Find strongly connected components using various algorithms.
 
@@ -279,7 +279,7 @@ class DirectedAnalysis:
     @staticmethod
     def condensation_graph(
         graph: nx.DiGraph, **_params
-    ) -> Tuple[nx.DiGraph, Dict[str, Any]]:
+    ) -> tuple[nx.DiGraph, dict[str, Any]]:
         """
         Create and analyze the condensation graph (SCC condensation).
 
@@ -341,7 +341,7 @@ class DirectedAnalysis:
         return C, metadata
 
     @staticmethod
-    def tournament_analysis(graph: nx.DiGraph, **_params) -> Dict[str, Any]:
+    def tournament_analysis(graph: nx.DiGraph, **_params) -> dict[str, Any]:
         """
         Analyze tournament graph properties.
 
@@ -418,7 +418,7 @@ class DirectedAnalysis:
         return results
 
     @staticmethod
-    def _check_landau_theorem(scores: List[int]) -> bool:
+    def _check_landau_theorem(scores: list[int]) -> bool:
         """Check if score sequence satisfies Landau's theorem."""
         n = len(scores)
         for k in range(1, n + 1):
@@ -428,7 +428,7 @@ class DirectedAnalysis:
         return sum(scores) == n * (n - 1) // 2
 
     @staticmethod
-    def _is_transitive_triple(graph: nx.DiGraph, triple: List) -> bool:
+    def _is_transitive_triple(graph: nx.DiGraph, triple: list) -> bool:
         """Check if a triple of nodes forms a transitive relation."""
         for i in range(3):
             for j in range(3):
@@ -443,7 +443,7 @@ class DirectedAnalysis:
         return True
 
     @staticmethod
-    def _find_tournament_kings(graph: nx.DiGraph) -> List:
+    def _find_tournament_kings(graph: nx.DiGraph) -> list:
         """Find kings in a tournament (nodes that dominate all others in ≤2 steps)."""
         kings = []
 
@@ -474,7 +474,7 @@ class DirectedAnalysis:
     @staticmethod
     def feedback_arc_set(
         graph: nx.DiGraph, method: str = "greedy", **_params
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Find minimum feedback arc set.
 
@@ -523,7 +523,7 @@ class DirectedAnalysis:
         }
 
     @staticmethod
-    def _greedy_feedback_arc_set(graph: nx.DiGraph) -> List[Tuple]:
+    def _greedy_feedback_arc_set(graph: nx.DiGraph) -> list[tuple]:
         """Greedy approximation for feedback arc set."""
         # Create a copy to work with
         G = graph.copy()
@@ -565,7 +565,7 @@ class DirectedAnalysis:
         return fas
 
     @staticmethod
-    def _exact_feedback_arc_set(graph: nx.DiGraph) -> List[Tuple]:
+    def _exact_feedback_arc_set(graph: nx.DiGraph) -> list[tuple]:
         """Exact solution using cycle enumeration (exponential time)."""
         # Find all cycles
         cycles = list(nx.simple_cycles(graph))
@@ -613,7 +613,7 @@ class DirectedAnalysis:
         return fas
 
     @staticmethod
-    def _cycle_contains_edge(cycle: List, edge: Tuple) -> bool:
+    def _cycle_contains_edge(cycle: list, edge: tuple) -> bool:
         """Check if cycle contains the given edge."""
         u, v = edge
         for i in range(len(cycle)):
@@ -624,7 +624,7 @@ class DirectedAnalysis:
     @staticmethod
     def bow_tie_structure(
         graph: nx.DiGraph, largest_scc_only: bool = True, **_params
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Analyze bow-tie structure of directed graph (common in web graphs).
 
@@ -741,10 +741,10 @@ class DirectedAnalysis:
 
     @staticmethod
     def temporal_graph_import(
-        edge_list: List[Tuple[Any, Any, float]],
-        time_window: Optional[Tuple[float, float]] = None,
+        edge_list: list[tuple[Any, Any, float]],
+        time_window: Optional[tuple[float, float]] = None,
         **params,
-    ) -> Tuple[nx.DiGraph, Dict[str, Any]]:
+    ) -> tuple[nx.DiGraph, dict[str, Any]]:
         """
         Import temporal graph from time-stamped edge list.
 
@@ -800,11 +800,11 @@ class DirectedAnalysis:
 
     @staticmethod
     def temporal_centrality(
-        temporal_edges: List[Tuple[Any, Any, float]],
+        temporal_edges: list[tuple[Any, Any, float]],
         centrality_type: str = "degree",
         time_slices: int = 10,
         **_params,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Calculate time-dependent centrality measures.
 
@@ -898,11 +898,11 @@ class DirectedAnalysis:
 
     @staticmethod
     def temporal_paths(
-        temporal_edges: List[Tuple[Any, Any, float]],
+        temporal_edges: list[tuple[Any, Any, float]],
         source: Any,
         target: Any,
         **_params,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Find time-respecting paths in temporal graph.
 
@@ -984,11 +984,11 @@ class DirectedAnalysis:
 
     @staticmethod
     def temporal_communities(
-        temporal_edges: List[Tuple[Any, Any, float]],
+        temporal_edges: list[tuple[Any, Any, float]],
         method: str = "snapshots",
         time_slices: int = 10,
         **_params,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Detect dynamic communities in temporal networks.
 

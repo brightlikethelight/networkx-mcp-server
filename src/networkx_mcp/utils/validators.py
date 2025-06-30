@@ -3,7 +3,7 @@
 import logging
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import networkx as nx
 
@@ -40,7 +40,7 @@ class GraphValidator:
         ) and GraphValidator.validate_node_id(edge[1])
 
     @staticmethod
-    def validate_attributes(attributes: Dict[str, Any]) -> bool:
+    def validate_attributes(attributes: dict[str, Any]) -> bool:
         """Validate node/edge attributes."""
         if not isinstance(attributes, dict):
             return False
@@ -84,7 +84,7 @@ class GraphValidator:
     @staticmethod
     def validate_graph_connectivity(
         graph: nx.Graph, require_connected: bool = False
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Validate graph connectivity properties."""
         result = {
             "valid": True,
@@ -115,8 +115,8 @@ class GraphValidator:
 
     @staticmethod
     def validate_algorithm_input(
-        algorithm: str, graph: nx.Graph, params: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        algorithm: str, graph: nx.Graph, params: dict[str, Any]
+    ) -> dict[str, Any]:
         """Validate inputs for specific algorithms."""
         result = {"valid": True, "errors": []}
 
@@ -240,7 +240,7 @@ class GraphValidator:
         return algorithm in valid_algorithms
 
     @staticmethod
-    def sanitize_graph_data(data: Dict[str, Any]) -> Dict[str, Any]:
+    def sanitize_graph_data(data: dict[str, Any]) -> dict[str, Any]:
         """Sanitize graph data for safe processing."""
         sanitized = {}
 
@@ -285,7 +285,7 @@ class GraphValidator:
         return sanitized
 
     @staticmethod
-    def validate_graph_id(graph_id: str) -> Tuple[bool, Optional[str]]:
+    def validate_graph_id(graph_id: str) -> tuple[bool, Optional[str]]:
         """Validate graph ID format and constraints.
 
         Args:
@@ -320,8 +320,8 @@ class GraphValidator:
 
     @staticmethod
     def validate_file_path_format(
-        filepath: Union[str, Path], expected_formats: Optional[List[str]] = None
-    ) -> Tuple[bool, Optional[str]]:
+        filepath: Union[str, Path], expected_formats: Optional[list[str]] = None
+    ) -> tuple[bool, Optional[str]]:
         """Validate file format based on extension and expected formats.
 
         Args:
@@ -396,7 +396,7 @@ class GraphValidator:
             return False, f"Error validating file: {e!s}"
 
     @staticmethod
-    def validate_graph_data(data: Dict[str, Any]) -> Tuple[bool, List[str]]:
+    def validate_graph_data(data: dict[str, Any]) -> tuple[bool, list[str]]:
         """Validate graph data structure for import.
 
         Args:
@@ -470,7 +470,7 @@ class GraphValidator:
     @staticmethod
     def validate_import_data(
         format: str, data: Optional[Any] = None, path: Optional[Union[str, Path]] = None
-    ) -> Tuple[bool, Optional[str]]:
+    ) -> tuple[bool, Optional[str]]:
         """Validate import data based on format.
 
         Args:

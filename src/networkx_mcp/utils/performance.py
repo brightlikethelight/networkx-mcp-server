@@ -2,7 +2,7 @@
 
 import time
 from functools import wraps
-from typing import Any, Callable, Dict
+from typing import Any, Callable
 
 try:
     import psutil
@@ -39,7 +39,7 @@ class PerformanceMonitor:
 
         return decorator
 
-    def get_memory_usage(self) -> Dict[str, Any]:
+    def get_memory_usage(self) -> dict[str, Any]:
         """Get current memory usage."""
         if not HAS_PSUTIL:
             # Return dummy values when psutil is not available
@@ -57,7 +57,7 @@ class PerformanceMonitor:
             "percent": process.memory_percent(),
         }
 
-    def get_performance_summary(self) -> Dict[str, Any]:
+    def get_performance_summary(self) -> dict[str, Any]:
         """Get performance metrics summary."""
         summary = {}
         for operation, times in self.metrics.items():

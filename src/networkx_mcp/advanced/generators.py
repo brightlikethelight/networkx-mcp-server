@@ -2,7 +2,7 @@
 
 import logging
 import random  # Using for non-cryptographic graph generation purposes only
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 import networkx as nx
 import numpy as np
@@ -30,7 +30,7 @@ class GraphGenerators:
         seed: Optional[int] = None,
         directed: bool = False,
         **_params,
-    ) -> Tuple[nx.Graph, Dict[str, Any]]:
+    ) -> tuple[nx.Graph, dict[str, Any]]:
         """
         Generate random graphs using various models.
 
@@ -127,7 +127,7 @@ class GraphGenerators:
         seed: Optional[int] = None,
         model: str = "barabasi_albert",
         **params,
-    ) -> Tuple[nx.Graph, Dict[str, Any]]:
+    ) -> tuple[nx.Graph, dict[str, Any]]:
         """
         Generate scale-free graphs using various models.
 
@@ -247,7 +247,7 @@ class GraphGenerators:
         seed: Optional[int] = None,
         model: str = "watts_strogatz",
         **_params,
-    ) -> Tuple[nx.Graph, Dict[str, Any]]:
+    ) -> tuple[nx.Graph, dict[str, Any]]:
         """
         Generate small-world graphs.
 
@@ -346,7 +346,7 @@ class GraphGenerators:
         seed: Optional[int] = None,
         graph_type: str = "random_regular",
         **params,
-    ) -> Tuple[nx.Graph, Dict[str, Any]]:
+    ) -> tuple[nx.Graph, dict[str, Any]]:
         """
         Generate regular graphs where every node has the same degree.
 
@@ -442,7 +442,7 @@ class GraphGenerators:
         branching: int = 2,
         seed: Optional[int] = None,
         **params,
-    ) -> Tuple[nx.Graph, Dict[str, Any]]:
+    ) -> tuple[nx.Graph, dict[str, Any]]:
         """
         Generate tree graphs.
 
@@ -468,9 +468,7 @@ class GraphGenerators:
             if n <= 0:
                 G = nx.empty_graph(0)
             else:
-                sequence = [
-                    random.randint(0, n - 1) for _ in range(n - 2)
-                ]  # noqa: S311
+                sequence = [random.randint(0, n - 1) for _ in range(n - 2)]  # noqa: S311
                 G = nx.from_prufer_sequence(sequence)
 
             metadata = {
@@ -566,12 +564,12 @@ class GraphGenerators:
         n: int,
         radius: Optional[float] = None,
         dim: int = 2,
-        pos: Optional[Dict] = None,
+        pos: Optional[dict] = None,
         p: float = 2,
         seed: Optional[int] = None,
         graph_type: str = "random_geometric",
         **params,
-    ) -> Tuple[nx.Graph, Dict[str, Any]]:
+    ) -> tuple[nx.Graph, dict[str, Any]]:
         """
         Generate geometric graphs.
 
@@ -617,9 +615,7 @@ class GraphGenerators:
                 "radius": radius,
                 "dimension": dim,
                 "metric": f"L{p}" if p != 2 else "Euclidean",  # noqa: PLR2004
-                "expected_degree": (
-                    n * (np.pi * radius**2) if dim == 2 else "varies"
-                ),  # noqa: PLR2004
+                "expected_degree": (n * (np.pi * radius**2) if dim == 2 else "varies"),  # noqa: PLR2004
             }
 
         elif graph_type == "soft_random_geometric":
@@ -735,7 +731,7 @@ class GraphGenerators:
         mu: float = 0.1,
         seed: Optional[int] = None,
         **params,
-    ) -> Tuple[nx.Graph, Dict[str, Any]]:
+    ) -> tuple[nx.Graph, dict[str, Any]]:
         """
         Generate social network models.
 
@@ -920,12 +916,12 @@ class GraphGenerators:
 
     @staticmethod
     def graph_from_degree_sequence(
-        degree_sequence: List[int],
+        degree_sequence: list[int],
         method: str = "configuration",
         create_using: Optional[nx.Graph] = None,
         seed: Optional[int] = None,
         **_params,
-    ) -> Tuple[nx.Graph, Dict[str, Any]]:
+    ) -> tuple[nx.Graph, dict[str, Any]]:
         """
         Generate graph from a given degree sequence.
 

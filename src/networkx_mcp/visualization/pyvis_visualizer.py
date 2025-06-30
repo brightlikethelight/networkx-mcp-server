@@ -4,7 +4,7 @@ import json
 import logging
 import os
 import tempfile
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 import networkx as nx
 
@@ -62,10 +62,10 @@ class PyvisVisualizer:
         width: str = "100%",
         bgcolor: str = "#ffffff",
         font_color: str = "#000000",
-        physics: Union[bool, str, Dict] = "barnes_hut",
+        physics: Union[bool, str, dict] = "barnes_hut",
         hierarchical: bool = False,
         **kwargs,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Create an interactive network visualization with physics simulation.
 
@@ -167,11 +167,11 @@ class PyvisVisualizer:
     @staticmethod
     def create_community_visualization(
         graph: Union[nx.Graph, nx.DiGraph],
-        communities: Dict[int, List],
+        communities: dict[int, list],
         height: str = "750px",
         width: str = "100%",
         physics: str = "force_atlas",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Visualize graph with community coloring.
 
@@ -280,7 +280,7 @@ class PyvisVisualizer:
         root: Optional[Any] = None,
         height: str = "750px",
         width: str = "100%",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Create hierarchical visualization for tree structures."""
         if not nx.is_tree(tree):
             msg = "Graph must be a tree"
@@ -458,7 +458,7 @@ class PyvisVisualizer:
             net.add_edge(source, target, width=width, color=color, title=title)
 
     @staticmethod
-    def set_custom_options(net: Network, options: Dict[str, Any]) -> Network:
+    def set_custom_options(net: Network, options: dict[str, Any]) -> Network:
         """Set custom vis.js options."""
         options_str = json.dumps(options)
         net.set_options(f"var options = {options_str}")

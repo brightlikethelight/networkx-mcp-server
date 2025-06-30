@@ -2,7 +2,7 @@
 
 import logging
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 import networkx as nx
 import numpy as np
@@ -31,7 +31,7 @@ class GraphAlgorithms:
         target: Optional[Union[str, int]] = None,
         weight: Optional[str] = None,
         method: str = "dijkstra",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Find shortest path(s) in a graph."""
         if source not in graph:
             msg = f"Source node '{source}' not in graph"
@@ -91,7 +91,7 @@ class GraphAlgorithms:
     @staticmethod
     def all_pairs_shortest_path(
         graph: nx.Graph, weight: Optional[str] = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Compute shortest paths between all pairs of nodes."""
         if weight:
             lengths = dict(nx.all_pairs_dijkstra_path_length(graph, weight=weight))
@@ -112,7 +112,7 @@ class GraphAlgorithms:
         return {"lengths": lengths_dict, "paths": paths_dict}
 
     @staticmethod
-    def connected_components(graph: nx.Graph) -> Dict[str, Any]:
+    def connected_components(graph: nx.Graph) -> dict[str, Any]:
         """Find connected components in an undirected graph."""
         if graph.is_directed():
             components = list(nx.weakly_connected_components(graph))
@@ -142,8 +142,8 @@ class GraphAlgorithms:
 
     @staticmethod
     def centrality_measures(
-        graph: nx.Graph, measures: Optional[List[str]] = None
-    ) -> Dict[str, Any]:
+        graph: nx.Graph, measures: Optional[list[str]] = None
+    ) -> dict[str, Any]:
         """Calculate various centrality measures."""
         if measures is None:
             measures = ["degree", "betweenness", "closeness", "eigenvector"]
@@ -177,7 +177,7 @@ class GraphAlgorithms:
         return results
 
     @staticmethod
-    def clustering_coefficients(graph: nx.Graph) -> Dict[str, Any]:
+    def clustering_coefficients(graph: nx.Graph) -> dict[str, Any]:
         """Calculate clustering coefficients."""
         if graph.is_directed():
             clustering = nx.clustering(graph.to_undirected())
@@ -195,7 +195,7 @@ class GraphAlgorithms:
     @staticmethod
     def minimum_spanning_tree(
         graph: nx.Graph, weight: str = "weight", algorithm: str = "kruskal"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Find minimum spanning tree."""
         if graph.is_directed():
             msg = "Minimum spanning tree requires undirected graph"
@@ -224,7 +224,7 @@ class GraphAlgorithms:
         source: Union[str, int],
         sink: Union[str, int],
         capacity: str = "capacity",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Calculate maximum flow."""
         if not graph.is_directed():
             msg = "Maximum flow requires directed graph"
@@ -242,7 +242,7 @@ class GraphAlgorithms:
     @staticmethod
     def graph_coloring(
         graph: nx.Graph, strategy: str = "largest_first"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Color graph vertices."""
         coloring = nx.greedy_color(graph, strategy=strategy)
         num_colors = max(coloring.values()) + 1 if coloring else 0
@@ -259,7 +259,7 @@ class GraphAlgorithms:
         }
 
     @staticmethod
-    def community_detection(graph: nx.Graph, method: str = "louvain") -> Dict[str, Any]:
+    def community_detection(graph: nx.Graph, method: str = "louvain") -> dict[str, Any]:
         """Detect communities in a graph."""
         if not HAS_COMMUNITY:
             msg = (
@@ -292,7 +292,7 @@ class GraphAlgorithms:
         }
 
     @staticmethod
-    def cycles_detection(graph: nx.Graph) -> Dict[str, Any]:
+    def cycles_detection(graph: nx.Graph) -> dict[str, Any]:
         """Detect cycles in a graph."""
         result = {}
 
@@ -325,7 +325,7 @@ class GraphAlgorithms:
         return result
 
     @staticmethod
-    def matching(graph: nx.Graph, max_cardinality: bool = True) -> Dict[str, Any]:
+    def matching(graph: nx.Graph, max_cardinality: bool = True) -> dict[str, Any]:
         """Find matching in a graph."""
         if max_cardinality:
             matching = nx.max_weight_matching(graph, maxcardinality=True)
@@ -341,7 +341,7 @@ class GraphAlgorithms:
         }
 
     @staticmethod
-    def graph_statistics(graph: nx.Graph) -> Dict[str, Any]:
+    def graph_statistics(graph: nx.Graph) -> dict[str, Any]:
         """Calculate various graph statistics."""
         stats = {
             "num_nodes": graph.number_of_nodes(),

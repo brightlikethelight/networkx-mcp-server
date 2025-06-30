@@ -5,7 +5,7 @@ import json
 import os
 import tempfile
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 import networkx as nx
 import yaml
@@ -20,7 +20,7 @@ class FileSecurityError(SecurityError):
 class SecureFileHandler:
     """Secure file operations with strict validation."""
 
-    def __init__(self, allowed_dirs: Optional[List[str]] = None):
+    def __init__(self, allowed_dirs: Optional[list[str]] = None):
         """Initialize with allowed directories."""
         if allowed_dirs is None:
             # Default to temp directory only for safety
@@ -325,7 +325,7 @@ class SecureFileHandler:
         with open(filepath, "w", encoding="utf-8") as f:
             yaml.safe_dump(data, f, default_flow_style=False)
 
-    def _json_node_link_to_graph(self, data: Dict[str, Any]) -> nx.Graph:
+    def _json_node_link_to_graph(self, data: dict[str, Any]) -> nx.Graph:
         """Convert JSON node-link format to graph with validation."""
         # Determine graph type
         directed = data.get("directed", False)

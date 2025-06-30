@@ -6,7 +6,7 @@ import pickle
 import zlib
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import networkx as nx
 
@@ -135,7 +135,7 @@ class RedisBackend(StorageBackend):
         user_id: str,
         graph_id: str,
         graph: nx.Graph,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: Optional[dict[str, Any]] = None,
         tx: Optional[Transaction] = None,
     ) -> bool:
         """Save graph with compression and metadata."""
@@ -309,7 +309,7 @@ class RedisBackend(StorageBackend):
         limit: int = 100,
         offset: int = 0,
         tx: Optional[Transaction] = None,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """List user's graphs with metadata."""
         # Validate inputs
         user_id = SecurityValidator.validate_user_id(user_id)
@@ -351,7 +351,7 @@ class RedisBackend(StorageBackend):
 
     async def get_graph_metadata(
         self, user_id: str, graph_id: str, tx: Optional[Transaction] = None
-    ) -> Optional[Dict[str, Any]]:
+    ) -> Optional[dict[str, Any]]:
         """Get graph metadata without loading the full graph."""
         # Validate inputs
         user_id = SecurityValidator.validate_user_id(user_id)
@@ -369,7 +369,7 @@ class RedisBackend(StorageBackend):
         self,
         user_id: str,
         graph_id: str,
-        metadata: Dict[str, Any],
+        metadata: dict[str, Any],
         tx: Optional[Transaction] = None,
     ) -> bool:
         """Update graph metadata."""
@@ -396,7 +396,7 @@ class RedisBackend(StorageBackend):
         await client.set(meta_key, json.dumps(existing))
         return True
 
-    async def get_storage_stats(self, user_id: str) -> Dict[str, Any]:
+    async def get_storage_stats(self, user_id: str) -> dict[str, Any]:
         """Get storage usage statistics for a user."""
         # Validate input
         user_id = SecurityValidator.validate_user_id(user_id)
@@ -418,7 +418,7 @@ class RedisBackend(StorageBackend):
             ),
         }
 
-    async def check_health(self) -> Dict[str, Any]:
+    async def check_health(self) -> dict[str, Any]:
         """Check Redis backend health."""
         try:
             # Ping Redis

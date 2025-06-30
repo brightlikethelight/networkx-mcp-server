@@ -3,7 +3,7 @@
 import logging
 import random  # Using for non-cryptographic network simulation purposes only
 import time
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import networkx as nx
 import numpy as np
@@ -27,7 +27,7 @@ class RobustnessAnalysis:
         fraction: float = 0.5,
         measure: str = "connectivity",
         **params,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Simulate node/edge removal attacks on the network.
 
@@ -158,7 +158,7 @@ class RobustnessAnalysis:
     @staticmethod
     def _calculate_robustness_metrics(
         graph: Union[nx.Graph, nx.DiGraph], measure: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Calculate robustness metrics for current graph state."""
         metrics = {}
 
@@ -210,9 +210,9 @@ class RobustnessAnalysis:
                 metrics["global_efficiency"] = nx.global_efficiency(graph)
             else:
                 # Approximate for large graphs
-                metrics["global_efficiency"] = (
-                    RobustnessAnalysis._approximate_efficiency(graph)
-                )
+                metrics[
+                    "global_efficiency"
+                ] = RobustnessAnalysis._approximate_efficiency(graph)
 
             # Local efficiency (clustering-based approximation)
             if not graph.is_directed():
@@ -266,7 +266,7 @@ class RobustnessAnalysis:
 
     @staticmethod
     def _calculate_robustness_index(
-        removal_sequence: List[Dict], measure: str
+        removal_sequence: list[dict], measure: str
     ) -> float:
         """Calculate robustness index (area under curve)."""
         if not removal_sequence:
@@ -314,7 +314,7 @@ class RobustnessAnalysis:
 
     @staticmethod
     def _find_critical_fraction(
-        removal_sequence: List[Dict], measure: str
+        removal_sequence: list[dict], measure: str
     ) -> Optional[float]:
         """Find critical fraction where network fails."""
         if not removal_sequence:
@@ -348,11 +348,11 @@ class RobustnessAnalysis:
     def percolation_analysis(
         graph: Union[nx.Graph, nx.DiGraph],
         percolation_type: str = "site",
-        probability_range: Tuple[float, float] = (0.0, 1.0),
+        probability_range: tuple[float, float] = (0.0, 1.0),
         num_steps: int = 20,
         num_trials: int = 10,
         **params,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Analyze percolation threshold of the network.
 
@@ -390,7 +390,9 @@ class RobustnessAnalysis:
                 if percolation_type == "site":
                     # Site percolation: randomly remove nodes
                     nodes_to_keep = [
-                        node for node in G.nodes() if random.random() < p  # noqa: S311
+                        node
+                        for node in G.nodes()
+                        if random.random() < p  # noqa: S311
                     ]
                     nodes_to_remove = set(G.nodes()) - set(nodes_to_keep)
                     G.remove_nodes_from(nodes_to_remove)
@@ -398,7 +400,9 @@ class RobustnessAnalysis:
                 elif percolation_type == "bond":
                     # Bond percolation: randomly remove edges
                     edges_to_remove = [
-                        edge for edge in G.edges() if random.random() > p  # noqa: S311
+                        edge
+                        for edge in G.edges()
+                        if random.random() > p  # noqa: S311
                     ]
                     G.remove_edges_from(edges_to_remove)
 
@@ -487,7 +491,7 @@ class RobustnessAnalysis:
         }
 
     @staticmethod
-    def _find_percolation_threshold(results: List[Dict]) -> Optional[float]:
+    def _find_percolation_threshold(results: list[dict]) -> Optional[float]:
         """Find percolation threshold from results."""
         # Look for sharp transition in giant component size
         max_derivative = 0
@@ -521,10 +525,10 @@ class RobustnessAnalysis:
     @staticmethod
     def cascading_failure(
         graph: Union[nx.Graph, nx.DiGraph],
-        initial_failures: List[Any],
+        initial_failures: list[Any],
         failure_model: str = "threshold",
         **params,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Simulate cascading failures in the network.
 
@@ -721,9 +725,9 @@ class RobustnessAnalysis:
     @staticmethod
     def network_resilience(
         graph: Union[nx.Graph, nx.DiGraph],
-        resilience_metrics: Optional[List[str]] = None,
+        resilience_metrics: Optional[list[str]] = None,
         **params,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Calculate comprehensive network resilience metrics.
 
@@ -860,9 +864,9 @@ class RobustnessAnalysis:
                     efficiency_metrics["local_efficiency"] = nx.local_efficiency(graph)
             else:
                 # Approximate for large graphs
-                efficiency_metrics["global_efficiency"] = (
-                    RobustnessAnalysis._approximate_efficiency(graph)
-                )
+                efficiency_metrics[
+                    "global_efficiency"
+                ] = RobustnessAnalysis._approximate_efficiency(graph)
 
             results["efficiency"] = efficiency_metrics
 
@@ -882,9 +886,9 @@ class RobustnessAnalysis:
                 )
 
                 # Degree assortativity (positive = robust)
-                robustness_metrics["degree_assortativity"] = (
-                    nx.degree_assortativity_coefficient(graph)
-                )
+                robustness_metrics[
+                    "degree_assortativity"
+                ] = nx.degree_assortativity_coefficient(graph)
 
             # Core number distribution
             if not graph.is_directed():
@@ -905,7 +909,7 @@ class RobustnessAnalysis:
         return results
 
     @staticmethod
-    def _calculate_resilience_score(metrics: Dict[str, Any]) -> float:
+    def _calculate_resilience_score(metrics: dict[str, Any]) -> float:
         """Calculate overall resilience score from individual metrics."""
         scores = []
 

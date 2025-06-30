@@ -1,6 +1,6 @@
 """Pydantic schemas for graph data validation."""
 
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, Literal, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -11,7 +11,7 @@ class NodeSchema(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     id: Union[str, int]
-    attributes: Dict[str, Any] = Field(default_factory=dict)
+    attributes: dict[str, Any] = Field(default_factory=dict)
 
 
 class EdgeSchema(BaseModel):
@@ -21,7 +21,7 @@ class EdgeSchema(BaseModel):
 
     source: Union[str, int]
     target: Union[str, int]
-    attributes: Dict[str, Any] = Field(default_factory=dict)
+    attributes: dict[str, Any] = Field(default_factory=dict)
 
 
 class GraphSchema(BaseModel):
@@ -29,9 +29,9 @@ class GraphSchema(BaseModel):
 
     directed: bool = False
     multigraph: bool = False
-    graph_attributes: Dict[str, Any] = Field(default_factory=dict)
-    nodes: List[NodeSchema] = Field(default_factory=list)
-    edges: List[EdgeSchema] = Field(default_factory=list)
+    graph_attributes: dict[str, Any] = Field(default_factory=dict)
+    nodes: list[NodeSchema] = Field(default_factory=list)
+    edges: list[EdgeSchema] = Field(default_factory=list)
 
 
 class CreateGraphRequest(BaseModel):
@@ -39,7 +39,7 @@ class CreateGraphRequest(BaseModel):
 
     graph_id: str
     graph_type: Literal["Graph", "DiGraph", "MultiGraph", "MultiDiGraph"] = "Graph"
-    attributes: Dict[str, Any] = Field(default_factory=dict)
+    attributes: dict[str, Any] = Field(default_factory=dict)
 
 
 class AddNodeRequest(BaseModel):
@@ -47,14 +47,14 @@ class AddNodeRequest(BaseModel):
 
     graph_id: str
     node_id: Union[str, int]
-    attributes: Dict[str, Any] = Field(default_factory=dict)
+    attributes: dict[str, Any] = Field(default_factory=dict)
 
 
 class AddNodesRequest(BaseModel):
     """Request schema for adding multiple nodes."""
 
     graph_id: str
-    nodes: List[Union[str, int, NodeSchema]]
+    nodes: list[Union[str, int, NodeSchema]]
 
 
 class AddEdgeRequest(BaseModel):
@@ -63,14 +63,14 @@ class AddEdgeRequest(BaseModel):
     graph_id: str
     source: Union[str, int]
     target: Union[str, int]
-    attributes: Dict[str, Any] = Field(default_factory=dict)
+    attributes: dict[str, Any] = Field(default_factory=dict)
 
 
 class AddEdgesRequest(BaseModel):
     """Request schema for adding multiple edges."""
 
     graph_id: str
-    edges: List[EdgeSchema]
+    edges: list[EdgeSchema]
 
 
 class ShortestPathRequest(BaseModel):
@@ -87,7 +87,7 @@ class CentralityRequest(BaseModel):
     """Request schema for centrality measures."""
 
     graph_id: str
-    measures: List[
+    measures: list[
         Literal["degree", "betweenness", "closeness", "eigenvector", "pagerank"]
     ] = Field(default=["degree"])
     top_k: Optional[int] = 10
@@ -108,7 +108,7 @@ class ExportGraphRequest(BaseModel):
         "json", "graphml", "gexf", "edgelist", "adjacency", "pickle", "dot", "pajek"
     ]
     path: Optional[str] = None
-    options: Dict[str, Any] = Field(default_factory=dict)
+    options: dict[str, Any] = Field(default_factory=dict)
 
 
 class ImportGraphRequest(BaseModel):
@@ -118,9 +118,9 @@ class ImportGraphRequest(BaseModel):
         "json", "graphml", "gexf", "edgelist", "adjacency", "pickle", "pajek"
     ]
     path: Optional[str] = None
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[dict[str, Any]] = None
     graph_id: Optional[str] = None
-    options: Dict[str, Any] = Field(default_factory=dict)
+    options: dict[str, Any] = Field(default_factory=dict)
 
     @field_validator("data")
     @classmethod
@@ -139,14 +139,14 @@ class LayoutRequest(BaseModel):
     algorithm: Literal[
         "spring", "circular", "random", "shell", "spectral", "kamada_kawai", "planar"
     ] = "spring"
-    options: Dict[str, Any] = Field(default_factory=dict)
+    options: dict[str, Any] = Field(default_factory=dict)
 
 
 class SubgraphRequest(BaseModel):
     """Request schema for creating a subgraph."""
 
     graph_id: str
-    nodes: List[Union[str, int]]
+    nodes: list[Union[str, int]]
     create_copy: bool = True
 
 
@@ -156,7 +156,7 @@ class GraphAttributesRequest(BaseModel):
     graph_id: str
     node_id: Optional[Union[str, int]] = None
     attribute: Optional[str] = None
-    values: Optional[Dict[str, Any]] = None
+    values: Optional[dict[str, Any]] = None
 
 
 class AlgorithmResponse(BaseModel):
@@ -164,7 +164,7 @@ class AlgorithmResponse(BaseModel):
 
     algorithm: str
     success: bool
-    result: Dict[str, Any]
+    result: dict[str, Any]
     execution_time_ms: Optional[float] = None
     error: Optional[str] = None
 
@@ -179,14 +179,14 @@ class GraphInfoResponse(BaseModel):
     density: float
     is_directed: bool
     is_multigraph: bool
-    metadata: Dict[str, Any]
-    degree_stats: Optional[Dict[str, float]] = None
+    metadata: dict[str, Any]
+    degree_stats: Optional[dict[str, float]] = None
 
 
 class VisualizationData(BaseModel):
     """Schema for graph visualization data."""
 
-    nodes: List[Dict[str, Any]]
-    edges: List[Dict[str, Any]]
-    layout: Optional[Dict[str, List[float]]] = None
-    options: Dict[str, Any] = Field(default_factory=dict)
+    nodes: list[dict[str, Any]]
+    edges: list[dict[str, Any]]
+    layout: Optional[dict[str, list[float]]] = None
+    options: dict[str, Any] = Field(default_factory=dict)

@@ -1,7 +1,7 @@
 """Security validation utilities."""
 
 import re
-from typing import Any, Dict
+from typing import Any
 
 
 class SecurityError(Exception):
@@ -45,7 +45,7 @@ class SecurityValidator:
         return graph_id
 
     @staticmethod
-    def sanitize_attributes(attributes: Dict[str, Any]) -> Dict[str, Any]:
+    def sanitize_attributes(attributes: dict[str, Any]) -> dict[str, Any]:
         """Sanitize user-provided attributes."""
         if not isinstance(attributes, dict):
             return {}

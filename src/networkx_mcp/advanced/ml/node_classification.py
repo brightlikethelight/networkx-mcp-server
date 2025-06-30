@@ -1,6 +1,6 @@
 """Node classification algorithms."""
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import networkx as nx
 import numpy as np
@@ -11,7 +11,7 @@ from networkx_mcp.advanced.ml.base import GraphMLModel, MLResult, extract_node_f
 class NodeClassifier(GraphMLModel):
     """Node classification using graph features."""
 
-    async def extract_features(self, nodes: Optional[List[str]] = None) -> np.ndarray:
+    async def extract_features(self, nodes: Optional[list[str]] = None) -> np.ndarray:
         """Extract features for node classification."""
         if nodes is None:
             nodes = list(self.graph.nodes())
@@ -35,7 +35,7 @@ class NodeClassifier(GraphMLModel):
 
         return feature_matrix
 
-    async def train(self, labels: Dict[str, Any], **params) -> bool:
+    async def train(self, labels: dict[str, Any], **params) -> bool:
         """Train node classifier."""
         try:
             # Simple implementation - in real world would use sklearn
@@ -53,7 +53,7 @@ class NodeClassifier(GraphMLModel):
         except Exception:
             return False
 
-    async def predict(self, nodes: List[str]) -> MLResult:
+    async def predict(self, nodes: list[str]) -> MLResult:
         """Predict labels for nodes."""
         if not self.is_trained:
             msg = "Model must be trained before prediction"
@@ -94,8 +94,8 @@ class NodeClassifier(GraphMLModel):
 
 
 async def classify_nodes(
-    graph: nx.Graph, labeled_nodes: Dict[str, str], target_nodes: List[str]
-) -> Dict[str, str]:
+    graph: nx.Graph, labeled_nodes: dict[str, str], target_nodes: list[str]
+) -> dict[str, str]:
     """Simple function interface for node classification."""
     classifier = NodeClassifier(graph)
     await classifier.train(labeled_nodes)

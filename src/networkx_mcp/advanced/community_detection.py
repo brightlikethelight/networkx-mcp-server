@@ -4,7 +4,7 @@ import logging
 import time
 import warnings
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Optional
 
 import networkx as nx
 import numpy as np
@@ -39,7 +39,7 @@ class CommunityDetection:
     @staticmethod
     def detect_communities(
         graph: nx.Graph, algorithm: str = "auto", **params
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Detect communities using various algorithms.
 
@@ -112,7 +112,7 @@ class CommunityDetection:
     @staticmethod
     def _louvain_method(
         graph: nx.Graph, resolution: float = 1.0, **kwargs
-    ) -> List[Set]:
+    ) -> list[set]:
         """Louvain community detection with resolution parameter."""
         if community_louvain is not None:
             # Use python-louvain if available
@@ -139,7 +139,7 @@ class CommunityDetection:
     @staticmethod
     def _girvan_newman(
         graph: nx.Graph, num_communities: Optional[int] = None, **_kwargs
-    ) -> List[Set]:
+    ) -> list[set]:
         """Girvan-Newman edge betweenness community detection."""
         # Create a copy to avoid modifying original
         G = graph.copy()
@@ -173,7 +173,7 @@ class CommunityDetection:
     @staticmethod
     def _label_propagation(
         graph: nx.Graph, _max_iterations: int = 100, **kwargs
-    ) -> List[Set]:
+    ) -> list[set]:
         """Asynchronous label propagation algorithm."""
         communities = nx.algorithms.community.asyn_lpa_communities(
             graph, weight=kwargs.get("weight", None), seed=kwargs.get("seed", None)
@@ -181,7 +181,7 @@ class CommunityDetection:
         return list(communities)
 
     @staticmethod
-    def _modularity_optimization(graph: nx.Graph, **kwargs) -> List[Set]:
+    def _modularity_optimization(graph: nx.Graph, **kwargs) -> list[set]:
         """Modularity-based optimization using greedy approach."""
         return list(
             nx.algorithms.community.greedy_modularity_communities(
@@ -195,7 +195,7 @@ class CommunityDetection:
     @staticmethod
     def _spectral_clustering(
         graph: nx.Graph, num_communities: Optional[int] = None, **kwargs
-    ) -> List[Set]:
+    ) -> list[set]:
         """Spectral clustering for community detection."""
         if SpectralClustering is None:
             logger.warning("scikit-learn not available for spectral clustering")
@@ -240,8 +240,8 @@ class CommunityDetection:
 
     @staticmethod
     def community_quality(
-        graph: nx.Graph, communities: List[List[Any]]
-    ) -> Dict[str, Any]:
+        graph: nx.Graph, communities: list[list[Any]]
+    ) -> dict[str, Any]:
         """
         Calculate various quality metrics for communities.
 
@@ -369,9 +369,9 @@ class CommunityDetection:
         graph: nx.Graph,
         method: str = "louvain",
         max_levels: int = 5,
-        resolution_range: Tuple[float, float] = (0.1, 2.0),
+        resolution_range: tuple[float, float] = (0.1, 2.0),
         **params,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Generate hierarchical community structure.
 
@@ -407,9 +407,9 @@ class CommunityDetection:
     def _louvain_hierarchy(
         graph: nx.Graph,
         max_levels: int,
-        resolution_range: Tuple[float, float],
+        resolution_range: tuple[float, float],
         **params,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Generate hierarchy by varying Louvain resolution."""
         levels = []
         resolutions = np.linspace(resolution_range[0], resolution_range[1], max_levels)
@@ -479,7 +479,7 @@ class CommunityDetection:
     @staticmethod
     def _divisive_hierarchy(
         graph: nx.Graph, max_levels: int, **_params
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Generate hierarchy using divisive approach (Girvan-Newman)."""
         levels = []
         hierarchy = {"id": "root", "children": []}
@@ -533,8 +533,8 @@ class CommunityDetection:
 
     @staticmethod
     def community_comparison(
-        graph: nx.Graph, algorithms: Optional[List[str]] = None, **params
-    ) -> Dict[str, Any]:
+        graph: nx.Graph, algorithms: Optional[list[str]] = None, **params
+    ) -> dict[str, Any]:
         """
         Compare different community detection algorithms.
 
@@ -656,7 +656,7 @@ class CommunityDetection:
 
     @staticmethod
     def _adjusted_rand_index(
-        communities1: List[Set], communities2: List[Set], nodes: List[Any]
+        communities1: list[set], communities2: list[set], nodes: list[Any]
     ) -> float:
         """Calculate Adjusted Rand Index between two partitions."""
         # Create label arrays
@@ -700,7 +700,7 @@ class CommunityDetection:
 
     @staticmethod
     def _normalized_mutual_info(
-        communities1: List[Set], communities2: List[Set], nodes: List[Any]
+        communities1: list[set], communities2: list[set], nodes: list[Any]
     ) -> float:
         """Calculate Normalized Mutual Information between two partitions."""
         # Create label arrays
@@ -756,8 +756,8 @@ class CommunityDetection:
 
     @staticmethod
     def _find_consensus_communities(
-        all_communities: Dict[str, List[Set]],
-    ) -> List[List[Any]]:
+        all_communities: dict[str, list[set]],
+    ) -> list[list[Any]]:
         """Find consensus communities across multiple algorithms."""
         if not all_communities:
             return []
@@ -811,7 +811,7 @@ class CommunityDetection:
 
 
 def _update_hierarchy_recursive(
-    node: Dict, node_to_comm: Dict, level: int, communities: List[Set]
+    node: dict, node_to_comm: dict, level: int, communities: list[set]
 ) -> None:
     """Helper function to update hierarchy tree recursively."""
     if node.get("nodes"):

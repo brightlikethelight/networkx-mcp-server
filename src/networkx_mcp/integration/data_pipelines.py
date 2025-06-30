@@ -5,8 +5,9 @@ import json
 import logging
 import sqlite3
 import time
+from collections.abc import Iterator
 from datetime import datetime, timezone
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import networkx as nx
 import numpy as np
@@ -29,14 +30,14 @@ class DataPipelines:
     @staticmethod
     def csv_pipeline(
         filepath: str,
-        edge_columns: Optional[Tuple[str, str]] = None,
-        node_attributes: Optional[List[str]] = None,
-        edge_attributes: Optional[List[str]] = None,
+        edge_columns: Optional[tuple[str, str]] = None,
+        node_attributes: Optional[list[str]] = None,
+        edge_attributes: Optional[list[str]] = None,
         delimiter: str = ",",
         encoding: str = "utf-8",
         type_inference: bool = True,
         **kwargs,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Intelligent CSV parsing with type inference.
 
@@ -151,7 +152,7 @@ class DataPipelines:
         node_path: Optional[str] = None,
         edge_path: Optional[str] = None,
         **kwargs,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Convert nested JSON to graph.
 
@@ -235,9 +236,9 @@ class DataPipelines:
         connection_string: str,
         query: str,
         db_type: str = "sqlite",
-        edge_columns: Optional[Tuple[str, str]] = None,
+        edge_columns: Optional[tuple[str, str]] = None,
         **kwargs,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         SQL to graph conversion.
 
@@ -296,11 +297,11 @@ class DataPipelines:
     @staticmethod
     async def api_pipeline(
         base_url: str,
-        endpoints: List[Dict[str, Any]],
+        endpoints: list[dict[str, Any]],
         rate_limit: float = 1.0,
         max_retries: int = 3,
         **kwargs,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         REST API pagination and rate limiting.
 
@@ -418,11 +419,11 @@ class DataPipelines:
 
     @staticmethod
     def streaming_pipeline(
-        stream_generator: Iterator[Dict[str, Any]],
+        stream_generator: Iterator[dict[str, Any]],
         window_size: Optional[int] = None,
         update_interval: float = 1.0,
         **kwargs,
-    ) -> Iterator[Dict[str, Any]]:
+    ) -> Iterator[dict[str, Any]]:
         """
         Real-time data ingestion from streaming sources.
 
@@ -484,8 +485,8 @@ class DataPipelines:
 
     @staticmethod
     def excel_pipeline(
-        filepath: str, sheet_mapping: Optional[Dict[str, str]] = None, **kwargs
-    ) -> Dict[str, Any]:
+        filepath: str, sheet_mapping: Optional[dict[str, str]] = None, **kwargs
+    ) -> dict[str, Any]:
         """
         Multi-sheet Excel processing.
 
@@ -575,7 +576,7 @@ class DataPipelines:
 
     @staticmethod
     def _json_tree_to_graph(
-        data: Union[Dict, List],
+        data: Union[dict, list],
         graph: nx.DiGraph,
         parent: Optional[Any] = None,
         parent_key: Optional[str] = None,
@@ -615,8 +616,8 @@ class DataPipelines:
 
     @staticmethod
     def _dataframe_to_graph(
-        df: pd.DataFrame, edge_columns: Optional[Tuple[str, str]] = None, **kwargs
-    ) -> Dict[str, Any]:
+        df: pd.DataFrame, edge_columns: Optional[tuple[str, str]] = None, **kwargs
+    ) -> dict[str, Any]:
         """Convert pandas DataFrame to graph."""
         if edge_columns is None:
             edge_columns = (df.columns[0], df.columns[1])
@@ -674,7 +675,7 @@ class DataPipelines:
         return graph
 
     @staticmethod
-    def _extract_path(data: Any, path: str) -> List[Any]:
+    def _extract_path(data: Any, path: str) -> list[Any]:
         """Simple path extraction (replace with proper JSONPath in production)."""
         parts = path.split(".")
         current = data

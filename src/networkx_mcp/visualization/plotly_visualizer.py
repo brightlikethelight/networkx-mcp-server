@@ -1,7 +1,7 @@
 """Plotly-based interactive graph visualization."""
 
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 import networkx as nx
 import numpy as np
@@ -31,17 +31,17 @@ class PlotlyVisualizer:
     def create_interactive_plot(
         graph: Union[nx.Graph, nx.DiGraph],
         layout: str = "spring",
-        node_size: Union[int, Dict, str] = 10,
-        node_color: Union[str, Dict, str] = "degree",
-        edge_width: Union[float, Dict, str] = 1.0,
-        edge_color: Union[str, Dict, str] = "gray",
-        hover_data: Optional[List[str]] = None,
+        node_size: Union[int, dict, str] = 10,
+        node_color: Union[str, dict, str] = "degree",
+        edge_width: Union[float, dict, str] = 1.0,
+        edge_color: Union[str, dict, str] = "gray",
+        hover_data: Optional[list[str]] = None,
         title: Optional[str] = None,
         height: int = 800,
         width: int = 1200,
         show_edge_labels: bool = False,
         **kwargs,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Create an interactive graph visualization with zoom, pan, and hover.
 
@@ -125,11 +125,11 @@ class PlotlyVisualizer:
     def create_3d_plot(
         graph: Union[nx.Graph, nx.DiGraph],
         layout: str = "spring3d",
-        node_color: Union[str, Dict, str] = "degree",
+        node_color: Union[str, dict, str] = "degree",
         title: Optional[str] = None,
         height: int = 800,
         width: int = 1200,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Create 3D force-directed graph visualization."""
         # Calculate 3D layout
         if layout == "spring3d":
@@ -221,13 +221,13 @@ class PlotlyVisualizer:
 
     @staticmethod
     def create_animated_plot(
-        graphs: List[nx.Graph],
-        timestamps: Optional[List[str]] = None,
+        graphs: list[nx.Graph],
+        timestamps: Optional[list[str]] = None,
         layout: str = "spring",
         title: str = "Temporal Network Animation",
         height: int = 800,
         width: int = 1200,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Create animated visualization for temporal networks."""
         if not timestamps:
             timestamps = [f"T{i}" for i in range(len(graphs))]
@@ -331,11 +331,11 @@ class PlotlyVisualizer:
     @staticmethod
     def _create_edge_traces(
         graph: nx.Graph,
-        pos: Dict,
-        edge_width: Union[float, str, Dict],
-        edge_color: Union[str, Dict],
+        pos: dict,
+        edge_width: Union[float, str, dict],
+        edge_color: Union[str, dict],
         show_labels: bool = False,
-    ) -> List[Any]:
+    ) -> list[Any]:
         """Create edge traces for plotly."""
         if not HAS_PLOTLY:
             return []
@@ -388,10 +388,10 @@ class PlotlyVisualizer:
     @staticmethod
     def _create_node_trace(
         graph: nx.Graph,
-        pos: Dict,
-        node_size: Union[int, str, Dict],
-        node_color: Union[str, Dict],
-        hover_data: Optional[List[str]] = None,
+        pos: dict,
+        node_size: Union[int, str, dict],
+        node_color: Union[str, dict],
+        hover_data: Optional[list[str]] = None,
     ) -> Any:
         """Create node trace for plotly."""
         if not HAS_PLOTLY:
@@ -464,10 +464,10 @@ class PlotlyVisualizer:
 
     @staticmethod
     def export_interactive_html(
-        figure: Dict[str, Any],
+        figure: dict[str, Any],
         filename: str,
         include_plotlyjs: str = "cdn",
-        config: Optional[Dict[str, Any]] = None,
+        config: Optional[dict[str, Any]] = None,
     ) -> str:
         """Export interactive plot as standalone HTML."""
         if config is None:

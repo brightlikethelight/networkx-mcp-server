@@ -1,7 +1,7 @@
 """Core graph operations for NetworkX MCP server."""
 
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import networkx as nx
 
@@ -10,12 +10,12 @@ class GraphManager:
     """Manages NetworkX graph instances and operations."""
 
     def __init__(self):
-        self.graphs: Dict[str, nx.Graph] = {}
-        self.metadata: Dict[str, Dict[str, Any]] = {}
+        self.graphs: dict[str, nx.Graph] = {}
+        self.metadata: dict[str, dict[str, Any]] = {}
 
     def create_graph(
         self, graph_id: str, graph_type: str = "Graph", **kwargs
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Create a new graph instance.
 
         Args:
@@ -62,7 +62,7 @@ class GraphManager:
             raise KeyError(msg)
         return self.graphs[graph_id]
 
-    def delete_graph(self, graph_id: str) -> Dict[str, Any]:
+    def delete_graph(self, graph_id: str) -> dict[str, Any]:
         """Delete a graph by ID."""
         if graph_id not in self.graphs:
             msg = f"Graph '{graph_id}' not found"
@@ -73,7 +73,7 @@ class GraphManager:
 
         return {"graph_id": graph_id, "deleted": True}
 
-    def list_graphs(self) -> List[Dict[str, Any]]:
+    def list_graphs(self) -> list[dict[str, Any]]:
         """List all available graphs."""
         return [
             {
@@ -88,7 +88,7 @@ class GraphManager:
 
     def add_node(
         self, graph_id: str, node_id: Union[str, int], **attributes
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Add a node to a graph."""
         graph = self.get_graph(graph_id)
         graph.add_node(node_id, **attributes)
@@ -101,8 +101,8 @@ class GraphManager:
         }
 
     def add_nodes_from(
-        self, graph_id: str, nodes: List[Union[str, int, Tuple]]
-    ) -> Dict[str, Any]:
+        self, graph_id: str, nodes: list[Union[str, int, tuple]]
+    ) -> dict[str, Any]:
         """Add multiple nodes to a graph."""
         graph = self.get_graph(graph_id)
         graph.add_nodes_from(nodes)
@@ -119,7 +119,7 @@ class GraphManager:
         source: Union[str, int],
         target: Union[str, int],
         **attributes,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Add an edge to a graph."""
         graph = self.get_graph(graph_id)
         graph.add_edge(source, target, **attributes)
@@ -131,7 +131,7 @@ class GraphManager:
             "added": True,
         }
 
-    def add_edges_from(self, graph_id: str, edges: List[Tuple]) -> Dict[str, Any]:
+    def add_edges_from(self, graph_id: str, edges: list[tuple]) -> dict[str, Any]:
         """Add multiple edges to a graph."""
         graph = self.get_graph(graph_id)
         graph.add_edges_from(edges)
@@ -142,7 +142,7 @@ class GraphManager:
             "total_edges": graph.number_of_edges(),
         }
 
-    def remove_node(self, graph_id: str, node_id: Union[str, int]) -> Dict[str, Any]:
+    def remove_node(self, graph_id: str, node_id: Union[str, int]) -> dict[str, Any]:
         """Remove a node from a graph."""
         graph = self.get_graph(graph_id)
         if node_id not in graph:
@@ -155,7 +155,7 @@ class GraphManager:
 
     def remove_edge(
         self, graph_id: str, source: Union[str, int], target: Union[str, int]
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Remove an edge from a graph."""
         graph = self.get_graph(graph_id)
         if not graph.has_edge(source, target):
@@ -166,7 +166,7 @@ class GraphManager:
 
         return {"graph_id": graph_id, "edge": (source, target), "removed": True}
 
-    def get_graph_info(self, graph_id: str) -> Dict[str, Any]:
+    def get_graph_info(self, graph_id: str) -> dict[str, Any]:
         """Get detailed information about a graph."""
         graph = self.get_graph(graph_id)
 
@@ -192,7 +192,7 @@ class GraphManager:
 
     def get_neighbors(
         self, graph_id: str, node_id: Union[str, int]
-    ) -> List[Union[str, int]]:
+    ) -> list[Union[str, int]]:
         """Get neighbors of a node."""
         graph = self.get_graph(graph_id)
         if node_id not in graph:
@@ -206,7 +206,7 @@ class GraphManager:
         graph_id: str,
         node_id: Optional[Union[str, int]] = None,
         attribute: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Get node attributes."""
         graph = self.get_graph(graph_id)
 
@@ -224,9 +224,9 @@ class GraphManager:
     def get_edge_attributes(
         self,
         graph_id: str,
-        edge: Optional[Tuple[Union[str, int], Union[str, int]]] = None,
+        edge: Optional[tuple[Union[str, int], Union[str, int]]] = None,
         attribute: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Get edge attributes."""
         graph = self.get_graph(graph_id)
 
@@ -244,9 +244,9 @@ class GraphManager:
     def set_node_attributes(
         self,
         graph_id: str,
-        values: Dict[Union[str, int], Dict[str, Any]],
+        values: dict[Union[str, int], dict[str, Any]],
         name: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Set node attributes."""
         graph = self.get_graph(graph_id)
 
@@ -260,9 +260,9 @@ class GraphManager:
     def set_edge_attributes(
         self,
         graph_id: str,
-        values: Dict[Tuple[Union[str, int], Union[str, int]], Dict[str, Any]],
+        values: dict[tuple[Union[str, int], Union[str, int]], dict[str, Any]],
         name: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Set edge attributes."""
         graph = self.get_graph(graph_id)
 
@@ -274,8 +274,8 @@ class GraphManager:
         return {"graph_id": graph_id, "edges_updated": len(values), "success": True}
 
     def subgraph(
-        self, graph_id: str, nodes: List[Union[str, int]], create_copy: bool = True
-    ) -> Union[nx.Graph, Dict[str, Any]]:
+        self, graph_id: str, nodes: list[Union[str, int]], create_copy: bool = True
+    ) -> Union[nx.Graph, dict[str, Any]]:
         """Create a subgraph from specified nodes."""
         graph = self.get_graph(graph_id)
 
@@ -290,7 +290,7 @@ class GraphManager:
         else:
             return graph.subgraph(nodes)
 
-    def clear_graph(self, graph_id: str) -> Dict[str, Any]:
+    def clear_graph(self, graph_id: str) -> dict[str, Any]:
         """Clear all nodes and edges from a graph."""
         graph = self.get_graph(graph_id)
         graph.clear()

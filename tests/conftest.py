@@ -3,12 +3,11 @@
 import asyncio
 import shutil
 import tempfile
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator
 
 import networkx as nx
 import pytest
-
 from networkx_mcp.storage.redis_backend import RedisBackend
 
 

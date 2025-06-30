@@ -3,7 +3,7 @@
 import base64
 import logging
 from io import BytesIO
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import networkx as nx
 import numpy as np
@@ -58,19 +58,19 @@ class MatplotlibVisualizer:
     def create_static_plot(
         graph: Union[nx.Graph, nx.DiGraph],
         layout: str = "spring",
-        node_size: Union[int, Dict, str] = 300,
-        node_color: Union[str, Dict, str] = "lightblue",
-        node_shape: Union[str, Dict] = "circle",
-        edge_width: Union[float, Dict, str] = 1.0,
-        edge_color: Union[str, Dict, str] = "gray",
-        edge_style: Union[str, Dict] = "solid",
+        node_size: Union[int, dict, str] = 300,
+        node_color: Union[str, dict, str] = "lightblue",
+        node_shape: Union[str, dict] = "circle",
+        edge_width: Union[float, dict, str] = 1.0,
+        edge_color: Union[str, dict, str] = "gray",
+        edge_style: Union[str, dict] = "solid",
         show_labels: bool = True,
         label_font_size: int = 10,
         title: Optional[str] = None,
-        figsize: Tuple[int, int] = (12, 8),
+        figsize: tuple[int, int] = (12, 8),
         dpi: int = 100,
         **kwargs,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Create a static graph visualization with extensive customization options.
 
@@ -256,7 +256,7 @@ class MatplotlibVisualizer:
         return results
 
     @staticmethod
-    def _hierarchical_layout(graph: nx.Graph) -> Dict[Any, Tuple[float, float]]:
+    def _hierarchical_layout(graph: nx.Graph) -> dict[Any, tuple[float, float]]:
         """Create hierarchical layout for tree-like structures."""
         if nx.is_directed_acyclic_graph(graph):
             # Use topological generations for DAGs
@@ -276,8 +276,8 @@ class MatplotlibVisualizer:
 
     @staticmethod
     def _get_node_attributes(
-        graph: nx.Graph, attr: Union[int, float, str, Dict], default: Any
-    ) -> List[Any]:
+        graph: nx.Graph, attr: Union[int, float, str, dict], default: Any
+    ) -> list[Any]:
         """Get node attributes as a list."""
         if isinstance(attr, dict):
             return [attr.get(node, default) for node in graph.nodes()]
@@ -290,8 +290,8 @@ class MatplotlibVisualizer:
 
     @staticmethod
     def _get_edge_attributes(
-        graph: nx.Graph, attr: Union[int, float, str, Dict], default: Any
-    ) -> List[Any]:
+        graph: nx.Graph, attr: Union[int, float, str, dict], default: Any
+    ) -> list[Any]:
         """Get edge attributes as a list."""
         if isinstance(attr, dict):
             return [attr.get(edge, default) for edge in graph.edges()]
@@ -304,8 +304,8 @@ class MatplotlibVisualizer:
 
     @staticmethod
     def _smart_label_placement(
-        graph: nx.Graph, pos: Dict[Any, Tuple[float, float]], font_size: int
-    ) -> Dict[Any, str]:
+        graph: nx.Graph, pos: dict[Any, tuple[float, float]], font_size: int
+    ) -> dict[Any, str]:
         """Smart label placement to avoid overlap."""
         # For now, show labels only for high-degree nodes
         degrees = dict(graph.degree())
@@ -346,10 +346,10 @@ class MatplotlibVisualizer:
     @staticmethod
     def create_subplot_layout(
         graph: nx.Graph,
-        views: List[Dict[str, Any]],
-        figsize: Tuple[int, int] = (16, 8),
+        views: list[dict[str, Any]],
+        figsize: tuple[int, int] = (16, 8),
         dpi: int = 100,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Create multiple graph views in subplots."""
         num_views = len(views)
         fig, axes = plt.subplots(1, num_views, figsize=figsize, dpi=dpi)

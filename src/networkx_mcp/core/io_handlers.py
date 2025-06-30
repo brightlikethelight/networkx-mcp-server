@@ -5,7 +5,7 @@ import json
 import logging
 import pickle
 from pathlib import Path
-from typing import Any, Dict, List, Optional, TextIO, Tuple, Union
+from typing import Any, Optional, TextIO, Union
 
 import networkx as nx
 import numpy as np
@@ -76,7 +76,7 @@ class GraphIOHandler:
         output_format: str,
         path: Optional[Union[str, Path]] = None,
         **kwargs,
-    ) -> Union[str, bytes, Dict[str, Any]]:
+    ) -> Union[str, bytes, dict[str, Any]]:
         """Export graph to various formats with validation."""
         logger.info(f"Exporting graph to {output_format} format")
 
@@ -131,7 +131,7 @@ class GraphIOHandler:
     @staticmethod
     def import_graph(
         input_format: Optional[str] = None,
-        data: Optional[Union[str, bytes, Dict[str, Any]]] = None,
+        data: Optional[Union[str, bytes, dict[str, Any]]] = None,
         path: Optional[Union[str, Path]] = None,
         auto_detect: bool = True,
         **kwargs,
@@ -203,7 +203,7 @@ class GraphIOHandler:
     @staticmethod
     def _export_json(
         graph: nx.Graph, pretty_print: bool = True, **kwargs
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Export graph to JSON format with metadata preservation."""
         data = nx.node_link_data(graph)
 
@@ -226,7 +226,7 @@ class GraphIOHandler:
 
     @staticmethod
     def _import_json(
-        data: Optional[Dict[str, Any]], path: Optional[Union[str, Path]], **kwargs
+        data: Optional[dict[str, Any]], path: Optional[Union[str, Path]], **kwargs
     ) -> nx.Graph:
         """Import graph from JSON format."""
         if data is None and path:
@@ -365,7 +365,7 @@ class GraphIOHandler:
         weight_col: Optional[str] = None,
         delimiter: str = ",",
         **kwargs,
-    ) -> List[Union[Tuple[Any, Any], Tuple[Any, Any, float]]]:
+    ) -> list[Union[tuple[Any, Any], tuple[Any, Any, float]]]:
         """Convert CSV file to edge list format.
 
         Args:
@@ -421,7 +421,7 @@ class GraphIOHandler:
         df: pd.DataFrame,
         source_col: str,
         target_col: str,
-        edge_attr: Optional[Union[str, List[str]]] = None,
+        edge_attr: Optional[Union[str, list[str]]] = None,
         create_using: Optional[nx.Graph] = None,
         node_attr_df: Optional[pd.DataFrame] = None,
         node_key: Optional[str] = None,
@@ -479,11 +479,11 @@ class GraphIOHandler:
 
     @staticmethod
     def adjacency_to_edge_list(
-        matrix: Union[List[List[float]], np.ndarray],
-        node_labels: Optional[List[Any]] = None,
+        matrix: Union[list[list[float]], np.ndarray],
+        node_labels: Optional[list[Any]] = None,
         threshold: float = 0,
         directed: bool = False,
-    ) -> List[Tuple[Any, Any, float]]:
+    ) -> list[tuple[Any, Any, float]]:
         """Convert adjacency matrix to edge list.
 
         Args:
@@ -679,7 +679,7 @@ class GraphIOHandler:
     @staticmethod
     def _export_edgelist(
         graph: nx.Graph, path: Optional[Union[str, Path]], **kwargs
-    ) -> Union[str, List[Dict]]:
+    ) -> Union[str, list[dict]]:
         """Export graph to edge list format."""
         if path:
             # Handle large graphs with streaming
@@ -717,7 +717,7 @@ class GraphIOHandler:
         return nx.read_edgelist(path, create_using=create_using, **kwargs)
 
     @staticmethod
-    def _export_adjacency(graph: nx.Graph, **kwargs) -> Dict[str, Any]:
+    def _export_adjacency(graph: nx.Graph, **kwargs) -> dict[str, Any]:
         """Export graph as adjacency matrix with metadata."""
         nodes = list(graph.nodes())
 
@@ -766,7 +766,7 @@ class GraphIOHandler:
 
     @staticmethod
     def _import_adjacency(
-        data: Optional[Dict[str, Any]], path: Optional[Union[str, Path]], **kwargs
+        data: Optional[dict[str, Any]], path: Optional[Union[str, Path]], **kwargs
     ) -> nx.Graph:
         """Import graph from adjacency matrix."""
         if data is None and path:
@@ -864,7 +864,7 @@ class GraphIOHandler:
         return nx.read_pajek(path)
 
     @staticmethod
-    def export_to_dataframe(graph: nx.Graph) -> Dict[str, pd.DataFrame]:
+    def export_to_dataframe(graph: nx.Graph) -> dict[str, pd.DataFrame]:
         """Export graph as pandas DataFrames."""
         # Node DataFrame
         node_data = []

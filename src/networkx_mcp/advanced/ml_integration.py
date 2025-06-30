@@ -5,7 +5,7 @@ import random  # Using for non-cryptographic ML training purposes only
 import time
 from collections import defaultdict
 from itertools import combinations
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 import networkx as nx
 import numpy as np
@@ -57,7 +57,7 @@ class MLIntegration:
         method: str = "node2vec",
         dimensions: int = 128,
         **params,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Generate node embeddings for machine learning.
 
@@ -133,7 +133,7 @@ class MLIntegration:
         p: float = 1.0,
         q: float = 1.0,
         **params,
-    ) -> Dict[Any, np.ndarray]:
+    ) -> dict[Any, np.ndarray]:
         """Generate Node2Vec embeddings (simplified version)."""
         # Generate biased random walks
         walks = MLIntegration._generate_node2vec_walks(
@@ -185,7 +185,7 @@ class MLIntegration:
         num_walks: int,
         p: float,
         q: float,
-    ) -> List[List]:
+    ) -> list[list]:
         """Generate biased random walks for Node2Vec."""
         walks = []
 
@@ -240,7 +240,7 @@ class MLIntegration:
         walk_length: int = DEFAULT_NUM_WALKS,
         num_walks: int = DEFAULT_WALK_LENGTH,
         **params,
-    ) -> Dict[Any, np.ndarray]:
+    ) -> dict[Any, np.ndarray]:
         """Generate DeepWalk embeddings (uniform random walks)."""
         # DeepWalk is Node2Vec with p=1, q=1
         return MLIntegration._node2vec_embeddings(
@@ -250,7 +250,7 @@ class MLIntegration:
     @staticmethod
     def _spectral_embeddings(
         graph: Union[nx.Graph, nx.DiGraph], dimensions: int, **_params
-    ) -> Dict[Any, np.ndarray]:
+    ) -> dict[Any, np.ndarray]:
         """Generate spectral embeddings using graph Laplacian."""
         # Get adjacency matrix
         adj_matrix = nx.adjacency_matrix(graph)
@@ -281,7 +281,7 @@ class MLIntegration:
     @staticmethod
     def _structural_embeddings(
         graph: Union[nx.Graph, nx.DiGraph], dimensions: int, **_params
-    ) -> Dict[Any, np.ndarray]:
+    ) -> dict[Any, np.ndarray]:
         """Generate structural feature embeddings."""
         features = []
         nodes = list(graph.nodes())
@@ -374,9 +374,9 @@ class MLIntegration:
     @staticmethod
     def graph_features(
         graph: Union[nx.Graph, nx.DiGraph],
-        feature_types: Optional[List[str]] = None,
+        feature_types: Optional[list[str]] = None,
         **_params,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Extract features for machine learning from graph.
 
@@ -556,7 +556,7 @@ class MLIntegration:
         }
 
     @staticmethod
-    def _gini_coefficient(values: List[float]) -> float:
+    def _gini_coefficient(values: list[float]) -> float:
         """Calculate Gini coefficient for inequality measurement."""
         if not values or len(values) == 0:
             return 0.0
@@ -573,7 +573,7 @@ class MLIntegration:
         return cumsum / (n * sum(sorted_values)) if sum(sorted_values) > 0 else 0
 
     @staticmethod
-    def _graphlet_features(graph: nx.Graph) -> Dict[str, int]:
+    def _graphlet_features(graph: nx.Graph) -> dict[str, int]:
         """Count small subgraph patterns (graphlets)."""
         features = {
             "triangles": 0,
@@ -615,9 +615,9 @@ class MLIntegration:
     def similarity_metrics(
         graph1: nx.Graph,
         graph2: nx.Graph,
-        metrics: Optional[List[str]] = None,
+        metrics: Optional[list[str]] = None,
         **_params,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Calculate similarity between two graphs.
 
@@ -746,7 +746,7 @@ class MLIntegration:
         method: str = "statistical",
         contamination: float = 0.1,
         **_params,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Detect anomalous nodes or edges in the graph.
 
