@@ -9,6 +9,7 @@ from pathlib import Path
 
 try:
     import psutil
+
     HAS_PSUTIL = True
 except ImportError:
     HAS_PSUTIL = False
