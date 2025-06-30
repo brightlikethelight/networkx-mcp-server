@@ -1,4 +1,4 @@
-"""NetworkX MCP Server - A Model Context Protocol server for NetworkX graph operations."""
+"""NetworkX MCP Server - A Model Context Protocol server for NetworkX graphs."""
 
 __version__ = "0.1.0"
 __author__ = "NetworkX MCP Server Contributors"
