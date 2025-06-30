@@ -17,7 +17,6 @@ class GraphReader(ABC):
     @abstractmethod
     async def read(self, filepath: Union[str, Path], **options) -> nx.Graph:
         """Read a graph from file."""
-        pass
 
     def validate_file(self, filepath: Union[str, Path]) -> bool:
         """Validate file can be read by this reader."""
@@ -37,7 +36,6 @@ class GraphWriter(ABC):
         self, graph: nx.Graph, filepath: Union[str, Path], **options
     ) -> bool:
         """Write a graph to file."""
-        pass
 
 
 def validate_file_path(filepath: Union[str, Path], must_exist: bool = True) -> Path:

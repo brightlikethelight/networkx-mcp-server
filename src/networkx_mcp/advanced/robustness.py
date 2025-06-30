@@ -129,7 +129,7 @@ class RobustnessAnalysis:
                 "is_connected", True
             ):
                 if i < len(nodes_to_remove) - 1:
-                    logger.info(f"Network disconnected after removing {i+1} nodes")
+                    logger.info(f"Network disconnected after removing {i + 1} nodes")
 
         # Calculate robustness index (area under curve)
         robustness_index = RobustnessAnalysis._calculate_robustness_index(
@@ -390,7 +390,9 @@ class RobustnessAnalysis:
                 if percolation_type == "site":
                     # Site percolation: randomly remove nodes
                     nodes_to_keep = [
-                        node for node in G.nodes() if random.random() < p  # noqa: S311
+                        node
+                        for node in G.nodes()
+                        if random.random() < p  # noqa: S311
                     ]
                     nodes_to_remove = set(G.nodes()) - set(nodes_to_keep)
                     G.remove_nodes_from(nodes_to_remove)
@@ -398,7 +400,9 @@ class RobustnessAnalysis:
                 elif percolation_type == "bond":
                     # Bond percolation: randomly remove edges
                     edges_to_remove = [
-                        edge for edge in G.edges() if random.random() > p  # noqa: S311
+                        edge
+                        for edge in G.edges()
+                        if random.random() > p  # noqa: S311
                     ]
                     G.remove_edges_from(edges_to_remove)
 

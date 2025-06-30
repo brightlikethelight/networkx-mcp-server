@@ -8,24 +8,28 @@ from pathlib import Path
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
+
 def check_redis_available():
     """Check if Redis is available."""
     try:
         import redis
-        r = redis.Redis(host='localhost', port=6379, decode_responses=True)
+
+        r = redis.Redis(host="localhost", port=6379, decode_responses=True)
         r.ping()
         return True
     except:
         return False
 
+
 def create_redis_backend():
     """Create Redis storage backend."""
     try:
         from simple_redis_backend import RedisGraphStorage
+
         storage = RedisGraphStorage(
             redis_url="redis://localhost:6379/0",
             key_prefix="networkx_mcp",
-            compression=True
+            compression=True,
         )
         # Test connection
         health = storage.check_health()
@@ -38,6 +42,7 @@ def create_redis_backend():
     except Exception as e:
         print(f"⚠️ Failed to create Redis backend: {e}")
         return None
+
 
 def create_in_memory_backend():
     """Create a simple in-memory storage backend."""
@@ -76,44 +81,44 @@ def create_in_memory_backend():
             graphs = []
             for key in self.graphs:
                 if key.startswith(prefix):
-                    graph_id = key[len(prefix):]
+                    graph_id = key[len(prefix) :]
                     graph = self.graphs[key]
                     meta = self.metadata.get(key, {})
-                    graphs.append({
-                        "graph_id": graph_id,
-                        "user_id": user_id,
-                        "num_nodes": graph.number_of_nodes(),
-                        "num_edges": graph.number_of_edges(),
-                        "graph_type": type(graph).__name__,
-                        "metadata": meta
-                    })
+                    graphs.append(
+                        {
+                            "graph_id": graph_id,
+                            "user_id": user_id,
+                            "num_nodes": graph.number_of_nodes(),
+                            "num_edges": graph.number_of_edges(),
+                            "graph_type": type(graph).__name__,
+                            "metadata": meta,
+                        }
+                    )
             return graphs
 
         def get_stats(self, user_id: str):
             """Get storage stats."""
             prefix = f"{user_id}:"
             count = sum(1 for key in self.graphs if key.startswith(prefix))
-            return {
-                "user_id": user_id,
-                "graph_count": count,
-                "backend": "memory"
-            }
+            return {"user_id": user_id, "graph_count": count, "backend": "memory"}
 
         def check_health(self):
             """Health check."""
             return {
                 "status": "healthy",
                 "backend": "memory",
-                "total_graphs": len(self.graphs)
+                "total_graphs": len(self.graphs),
             }
 
     return InMemoryBackend()
+
 
 def patch_graph_manager_with_persistence():
     """Add persistence to the existing GraphManager."""
 
     try:
         from src.networkx_mcp.server import graph_manager
+
         print("📦 Adding persistence layer to GraphManager...")
 
         # Choose storage backend
@@ -133,7 +138,7 @@ def patch_graph_manager_with_persistence():
 
         # Store original methods
         _original_create = graph_manager.create_graph
-        _original_get_graph = graph_manager.get_graph
+        graph_manager.get_graph
         _original_delete_graph = graph_manager.delete_graph
         _original_list_graphs = graph_manager.list_graphs
         _original_add_nodes_from = graph_manager.add_nodes_from
@@ -167,17 +172,23 @@ def patch_graph_manager_with_persistence():
                             graph_id,
                             graph,
                             metadata={
-                                "created_at": result.get("metadata", {}).get("created_at"),
-                                "graph_type": graph_type
-                            }
+                                "created_at": result.get("metadata", {}).get(
+                                    "created_at"
+                                ),
+                                "graph_type": graph_type,
+                            },
                         )
-                        print(f"💾 Saved graph '{graph_id}' to persistent storage: {save_success}")
+                        print(
+                            f"💾 Saved graph '{graph_id}' to persistent storage: {save_success}"
+                        )
                     except Exception as e:
                         print(f"❌ Failed to save graph '{graph_id}': {e}")
                 else:
                     print(f"⚠️ Graph '{graph_id}' not found in manager after creation")
             else:
-                print(f"⚠️ Graph creation condition not met for '{graph_id}': created={result.get('created')}")
+                print(
+                    f"⚠️ Graph creation condition not met for '{graph_id}': created={result.get('created')}"
+                )
 
             return result
 
@@ -189,12 +200,10 @@ def patch_graph_manager_with_persistence():
             # Save updated graph to persistence
             if graph_id in graph_manager.graphs:
                 graph = graph_manager.graphs[graph_id]
-                storage.save_graph(
-                    graph_manager._default_user,
-                    graph_id,
-                    graph
+                storage.save_graph(graph_manager._default_user, graph_id, graph)
+                print(
+                    f"💾 Updated graph '{graph_id}' in persistent storage after adding nodes"
                 )
-                print(f"💾 Updated graph '{graph_id}' in persistent storage after adding nodes")
 
             return result
 
@@ -206,12 +215,10 @@ def patch_graph_manager_with_persistence():
             # Save updated graph to persistence
             if graph_id in graph_manager.graphs:
                 graph = graph_manager.graphs[graph_id]
-                storage.save_graph(
-                    graph_manager._default_user,
-                    graph_id,
-                    graph
+                storage.save_graph(graph_manager._default_user, graph_id, graph)
+                print(
+                    f"💾 Updated graph '{graph_id}' in persistent storage after adding edges"
                 )
-                print(f"💾 Updated graph '{graph_id}' in persistent storage after adding edges")
 
             return result
 
@@ -223,12 +230,10 @@ def patch_graph_manager_with_persistence():
             # Save updated graph to persistence
             if graph_id in graph_manager.graphs:
                 graph = graph_manager.graphs[graph_id]
-                storage.save_graph(
-                    graph_manager._default_user,
-                    graph_id,
-                    graph
+                storage.save_graph(graph_manager._default_user, graph_id, graph)
+                print(
+                    f"💾 Updated graph '{graph_id}' in persistent storage after adding node"
                 )
-                print(f"💾 Updated graph '{graph_id}' in persistent storage after adding node")
 
             return result
 
@@ -240,12 +245,10 @@ def patch_graph_manager_with_persistence():
             # Save updated graph to persistence
             if graph_id in graph_manager.graphs:
                 graph = graph_manager.graphs[graph_id]
-                storage.save_graph(
-                    graph_manager._default_user,
-                    graph_id,
-                    graph
+                storage.save_graph(graph_manager._default_user, graph_id, graph)
+                print(
+                    f"💾 Updated graph '{graph_id}' in persistent storage after adding edge"
                 )
-                print(f"💾 Updated graph '{graph_id}' in persistent storage after adding edge")
 
             return result
 
@@ -257,12 +260,10 @@ def patch_graph_manager_with_persistence():
             # Save updated graph to persistence
             if graph_id in graph_manager.graphs:
                 graph = graph_manager.graphs[graph_id]
-                storage.save_graph(
-                    graph_manager._default_user,
-                    graph_id,
-                    graph
+                storage.save_graph(graph_manager._default_user, graph_id, graph)
+                print(
+                    f"💾 Updated graph '{graph_id}' in persistent storage after removing node"
                 )
-                print(f"💾 Updated graph '{graph_id}' in persistent storage after removing node")
 
             return result
 
@@ -274,12 +275,10 @@ def patch_graph_manager_with_persistence():
             # Save updated graph to persistence
             if graph_id in graph_manager.graphs:
                 graph = graph_manager.graphs[graph_id]
-                storage.save_graph(
-                    graph_manager._default_user,
-                    graph_id,
-                    graph
+                storage.save_graph(graph_manager._default_user, graph_id, graph)
+                print(
+                    f"💾 Updated graph '{graph_id}' in persistent storage after removing edge"
                 )
-                print(f"💾 Updated graph '{graph_id}' in persistent storage after removing edge")
 
             return result
 
@@ -320,7 +319,7 @@ def patch_graph_manager_with_persistence():
                 "status": "success",
                 "graphs": list(all_graphs.values()),
                 "total_graphs": len(all_graphs),
-                "storage_stats": storage.get_stats(graph_manager._default_user)
+                "storage_stats": storage.get_stats(graph_manager._default_user),
             }
 
         def get_storage_stats():
@@ -348,6 +347,7 @@ def patch_graph_manager_with_persistence():
         print(f"❌ Could not add persistence: {e}")
         return None
 
+
 def test_persistence():
     """Test that persistence is working."""
     print("\n🧪 Testing persistence layer...")
@@ -366,10 +366,9 @@ def test_persistence():
 
         # Test 2: Check it's in storage
         print("📝 Test 2: Checking persistent storage...")
-        if hasattr(graph_manager, '_storage'):
+        if hasattr(graph_manager, "_storage"):
             stored_graph = graph_manager._storage.load_graph(
-                graph_manager._default_user,
-                "persistence_test"
+                graph_manager._default_user, "persistence_test"
             )
             if stored_graph is not None:
                 print("✅ Graph found in persistent storage")
@@ -380,7 +379,9 @@ def test_persistence():
         print("📝 Test 3: Listing all graphs...")
         list_result = graph_manager.list_graphs()
         graphs = list_result.get("graphs", [])
-        test_graph = next((g for g in graphs if g["graph_id"] == "persistence_test"), None)
+        test_graph = next(
+            (g for g in graphs if g["graph_id"] == "persistence_test"), None
+        )
 
         if test_graph:
             print(f"✅ Found test graph in list: {test_graph['graph_id']}")
@@ -390,7 +391,7 @@ def test_persistence():
             print("❌ Test graph not found in list")
 
         # Test 4: Storage stats
-        if hasattr(graph_manager, 'get_storage_stats'):
+        if hasattr(graph_manager, "get_storage_stats"):
             stats = graph_manager.get_storage_stats()
             print(f"📊 Storage stats: {stats}")
 
@@ -406,6 +407,7 @@ def test_persistence():
         print(f"❌ Persistence test failed: {e}")
         return False
 
+
 def setup_redis():
     """Setup Redis if available."""
     if check_redis_available():
@@ -415,9 +417,12 @@ def setup_redis():
         print("⚠️ Redis is not available")
         print("\n📝 To install Redis:")
         print("   macOS: brew install redis && brew services start redis")
-        print("   Ubuntu: sudo apt-get install redis-server && sudo systemctl start redis")
+        print(
+            "   Ubuntu: sudo apt-get install redis-server && sudo systemctl start redis"
+        )
         print("   Docker: docker run -d -p 6379:6379 redis:alpine")
         return False
+
 
 if __name__ == "__main__":
     print("🚀 ADDING PERSISTENCE TO NETWORKX MCP SERVER")
@@ -428,6 +433,7 @@ if __name__ == "__main__":
 
     # Apply security patches first
     import security_patches
+
     security_patches.apply_critical_patches()
 
     # Add persistence
@@ -446,14 +452,18 @@ if __name__ == "__main__":
         else:
             print("⚠️ Some persistence tests failed")
 
-        print(f"\n📊 Backend: {'Redis (available)' if redis_available else 'In-Memory'}")
+        print(
+            f"\n📊 Backend: {'Redis (available)' if redis_available else 'In-Memory'}"
+        )
         print("📊 Features added:")
         print("   ✅ Graph persistence across restarts")
         print("   ✅ Storage statistics")
         print("   ✅ Dual storage (memory + persistent)")
 
         print("\n🚀 To run with persistence:")
-        print("   python -c 'import add_persistence; add_persistence.patch_graph_manager_with_persistence(); from src.networkx_mcp.server import main; main()'")
+        print(
+            "   python -c 'import add_persistence; add_persistence.patch_graph_manager_with_persistence(); from src.networkx_mcp.server import main; main()'"
+        )
 
     else:
         print("❌ Failed to add persistence layer")

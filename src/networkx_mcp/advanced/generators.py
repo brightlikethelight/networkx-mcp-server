@@ -336,7 +336,6 @@ class GraphGenerators:
 
             except Exception as e:
                 logger.debug(f"Failed to compute clustering coefficient: {e}")
-                pass
 
         return G, metadata
 
@@ -469,9 +468,7 @@ class GraphGenerators:
             if n <= 0:
                 G = nx.empty_graph(0)
             else:
-                sequence = [
-                    random.randint(0, n - 1) for _ in range(n - 2)
-                ]  # noqa: S311
+                sequence = [random.randint(0, n - 1) for _ in range(n - 2)]  # noqa: S311
                 G = nx.from_prufer_sequence(sequence)
 
             metadata = {
@@ -618,9 +615,7 @@ class GraphGenerators:
                 "radius": radius,
                 "dimension": dim,
                 "metric": f"L{p}" if p != 2 else "Euclidean",  # noqa: PLR2004
-                "expected_degree": (
-                    n * (np.pi * radius**2) if dim == 2 else "varies"
-                ),  # noqa: PLR2004
+                "expected_degree": (n * (np.pi * radius**2) if dim == 2 else "varies"),  # noqa: PLR2004
             }
 
         elif graph_type == "soft_random_geometric":

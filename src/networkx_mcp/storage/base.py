@@ -13,12 +13,10 @@ class Transaction(ABC):
     @abstractmethod
     async def commit(self) -> None:
         """Commit all operations in this transaction."""
-        pass
 
     @abstractmethod
     async def rollback(self) -> None:
         """Rollback all operations in this transaction."""
-        pass
 
 
 class StorageBackend(ABC):
@@ -27,12 +25,10 @@ class StorageBackend(ABC):
     @abstractmethod
     async def initialize(self) -> None:
         """Initialize storage connections."""
-        pass
 
     @abstractmethod
     async def close(self) -> None:
         """Close storage connections."""
-        pass
 
     @abstractmethod
     @asynccontextmanager
@@ -50,21 +46,18 @@ class StorageBackend(ABC):
         tx: Optional[Transaction] = None,
     ) -> bool:
         """Save graph with metadata."""
-        pass
 
     @abstractmethod
     async def load_graph(
         self, user_id: str, graph_id: str, tx: Optional[Transaction] = None
     ) -> Optional[nx.Graph]:
         """Load graph from storage."""
-        pass
 
     @abstractmethod
     async def delete_graph(
         self, user_id: str, graph_id: str, tx: Optional[Transaction] = None
     ) -> bool:
         """Delete graph from storage."""
-        pass
 
     @abstractmethod
     async def list_graphs(
@@ -75,14 +68,12 @@ class StorageBackend(ABC):
         tx: Optional[Transaction] = None,
     ) -> List[Dict[str, Any]]:
         """List user's graphs with metadata."""
-        pass
 
     @abstractmethod
     async def get_graph_metadata(
         self, user_id: str, graph_id: str, tx: Optional[Transaction] = None
     ) -> Optional[Dict[str, Any]]:
         """Get graph metadata without loading the full graph."""
-        pass
 
     @abstractmethod
     async def update_graph_metadata(
@@ -93,38 +84,27 @@ class StorageBackend(ABC):
         tx: Optional[Transaction] = None,
     ) -> bool:
         """Update graph metadata."""
-        pass
 
     @abstractmethod
     async def get_storage_stats(self, user_id: str) -> Dict[str, Any]:
         """Get storage usage statistics for a user."""
-        pass
 
     @abstractmethod
     async def check_health(self) -> Dict[str, Any]:
         """Check storage backend health."""
-        pass
 
 
 class StorageError(Exception):
     """Base exception for storage errors."""
 
-    pass
-
 
 class GraphNotFoundError(StorageError):
     """Raised when requested graph doesn't exist."""
-
-    pass
 
 
 class StorageQuotaExceededError(StorageError):
     """Raised when user exceeds storage quota."""
 
-    pass
-
 
 class TransactionError(StorageError):
     """Raised when transaction operations fail."""
-
-    pass

@@ -4,7 +4,9 @@
 import json
 import pickle
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any
+from typing import Dict
+from typing import Optional
 
 import networkx as nx
 import redis
@@ -13,7 +15,12 @@ import redis
 class RedisGraphStorage:
     """Simple Redis storage backend compatible with current add_persistence.py"""
 
-    def __init__(self, redis_url: str = "redis://localhost:6379/0", key_prefix: str = "networkx", compression: bool = True):
+    def __init__(
+        self,
+        redis_url: str = "redis://localhost:6379/0",
+        key_prefix: str = "networkx",
+        compression: bool = True,
+    ):
         self.redis_url = redis_url
         self.key_prefix = key_prefix
         self.compression = compression
@@ -32,7 +39,13 @@ class RedisGraphStorage:
         """Create a Redis key with namespace."""
         return f"{self.key_prefix}:" + ":".join(str(p) for p in parts)
 
-    def save_graph(self, user_id: str, graph_id: str, graph: nx.Graph, metadata: Optional[Dict[str, Any]] = None):
+    def save_graph(
+        self,
+        user_id: str,
+        graph_id: str,
+        graph: nx.Graph,
+        metadata: Optional[Dict[str, Any]] = None,
+    ):
         """Save graph to Redis."""
         try:
             # Serialize the graph
@@ -46,7 +59,7 @@ class RedisGraphStorage:
                 "num_nodes": graph.number_of_nodes(),
                 "num_edges": graph.number_of_edges(),
                 "graph_type": type(graph).__name__,
-                "size_bytes": len(graph_data)
+                "size_bytes": len(graph_data),
             }
 
             if metadata:
@@ -114,7 +127,11 @@ class RedisGraphStorage:
 
             graphs = []
             for graph_id_bytes in graph_ids:
-                graph_id = graph_id_bytes.decode('utf-8') if isinstance(graph_id_bytes, bytes) else graph_id_bytes
+                graph_id = (
+                    graph_id_bytes.decode("utf-8")
+                    if isinstance(graph_id_bytes, bytes)
+                    else graph_id_bytes
+                )
 
                 # Get metadata
                 meta_key = self._make_key("metadata", user_id, graph_id)
@@ -125,11 +142,13 @@ class RedisGraphStorage:
                     graphs.append(meta_dict)
                 else:
                     # Fallback - just graph ID
-                    graphs.append({
-                        "user_id": user_id,
-                        "graph_id": graph_id,
-                        "created_at": "unknown"
-                    })
+                    graphs.append(
+                        {
+                            "user_id": user_id,
+                            "graph_id": graph_id,
+                            "created_at": "unknown",
+                        }
+                    )
 
             return graphs
 
@@ -143,19 +162,11 @@ class RedisGraphStorage:
             user_graphs_key = self._make_key("user_graphs", user_id)
             graph_count = self.client.scard(user_graphs_key)
 
-            return {
-                "user_id": user_id,
-                "graph_count": graph_count,
-                "backend": "redis"
-            }
+            return {"user_id": user_id, "graph_count": graph_count, "backend": "redis"}
 
         except Exception as e:
             print(f"❌ Failed to get stats for {user_id}: {e}")
-            return {
-                "user_id": user_id,
-                "graph_count": 0,
-                "backend": "redis_error"
-            }
+            return {"user_id": user_id, "graph_count": 0, "backend": "redis_error"}
 
     def check_health(self):
         """Check Redis health."""
@@ -168,14 +179,11 @@ class RedisGraphStorage:
                 "backend": "redis",
                 "redis_version": info.get("redis_version", "unknown"),
                 "connected_clients": info.get("connected_clients", 0),
-                "used_memory_human": info.get("used_memory_human", "unknown")
+                "used_memory_human": info.get("used_memory_human", "unknown"),
             }
         except Exception as e:
-            return {
-                "status": "unhealthy",
-                "backend": "redis",
-                "error": str(e)
-            }
+            return {"status": "unhealthy", "backend": "redis", "error": str(e)}
+
 
 def test_redis_backend():
     """Test the Redis backend directly."""
@@ -198,7 +206,9 @@ def test_redis_backend():
         test_graph.add_edges_from([("A", "B"), ("B", "C")])
 
         # Save graph
-        success = storage.save_graph("test_user", "test_graph", test_graph, {"test": True})
+        success = storage.save_graph(
+            "test_user", "test_graph", test_graph, {"test": True}
+        )
         if not success:
             print("❌ Failed to save test graph")
             return False
@@ -212,9 +222,11 @@ def test_redis_backend():
             return False
 
         # Verify data integrity
-        if (loaded_graph.number_of_nodes() == 3 and
-            loaded_graph.number_of_edges() == 2 and
-            list(loaded_graph.nodes()) == ["A", "B", "C"]):
+        if (
+            loaded_graph.number_of_nodes() == 3
+            and loaded_graph.number_of_edges() == 2
+            and list(loaded_graph.nodes()) == ["A", "B", "C"]
+        ):
             print("✅ Graph data integrity verified")
         else:
             print("❌ Graph data corruption detected")
@@ -241,8 +253,10 @@ def test_redis_backend():
     except Exception as e:
         print(f"❌ Redis backend test failed: {e}")
         import traceback
+
         traceback.print_exc()
         return False
+
 
 if __name__ == "__main__":
     print("🚀 REDIS BACKEND TEST")

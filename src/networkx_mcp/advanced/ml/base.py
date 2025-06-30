@@ -29,17 +29,14 @@ class GraphMLModel(ABC):
     @abstractmethod
     async def extract_features(self, nodes: Optional[List[str]] = None) -> np.ndarray:
         """Extract features from graph nodes."""
-        pass
 
     @abstractmethod
     async def train(self, labels: Dict[str, Any], **params) -> bool:
         """Train the model."""
-        pass
 
     @abstractmethod
     async def predict(self, nodes: List[str]) -> MLResult:
         """Make predictions for given nodes."""
-        pass
 
 
 def extract_node_features(

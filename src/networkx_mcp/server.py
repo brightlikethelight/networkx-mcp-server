@@ -27,6 +27,7 @@ except ImportError:
     HAS_FASTMCP = False
     from mcp import Server
     from mcp.server.models import InitializationOptions
+
 from mcp.types import TextContent
 
 # Phase 2 Advanced Analytics imports
@@ -1351,7 +1352,6 @@ async def graph_metrics(
                     )
                 except Exception as e:
                     logger.debug(f"Failed to compute connectivity metrics: {e}")
-                    pass
 
                 # Articulation points and bridges
                 try:
@@ -1364,14 +1364,13 @@ async def graph_metrics(
                     metrics["connectivity"]["num_bridges"] = len(bridges)
 
                     if len(articulation_points) <= MAX_DISPLAY_ITEMS:
-                        metrics["connectivity"][
-                            "articulation_points"
-                        ] = articulation_points
+                        metrics["connectivity"]["articulation_points"] = (
+                            articulation_points
+                        )
                     if len(bridges) <= MAX_DISPLAY_ITEMS:
                         metrics["connectivity"]["bridges"] = bridges
                 except Exception as e:
                     logger.debug(f"Failed to compute articulation points/bridges: {e}")
-                    pass
 
         # Clustering and triangles
         if not graph.is_directed() or nx.is_directed_acyclic_graph(graph):
@@ -1399,7 +1398,6 @@ async def graph_metrics(
                 metrics["clustering"]["num_triangles"] = triangles
             except Exception as e:
                 logger.debug(f"Failed to compute triangle count: {e}")
-                pass
 
         # Performance metrics
         elapsed_time = time.time() - start_time
@@ -1747,7 +1745,6 @@ async def connected_components(
                     result["num_bridges"] = len(bridges)
                 except Exception as e:
                     logger.debug(f"Failed to compute critical nodes: {e}")
-                    pass
 
         # Performance metrics
         elapsed_time = time.time() - start_time
@@ -2150,7 +2147,6 @@ async def cycle_detection(
                     )
                 except Exception as e:
                     logger.debug(f"Failed to compute cycle metrics: {e}")
-                    pass
 
         else:
             # Undirected graph cycle detection
@@ -2348,7 +2344,6 @@ async def flow_paths(
             }
         except Exception as e:
             logger.debug(f"Failed to compute connectivity metrics: {e}")
-            pass
 
         # Performance metrics
         elapsed_time = time.time() - start_time

@@ -16,8 +16,6 @@ from .validator import SecurityError, SecurityValidator
 class FileSecurityError(SecurityError):
     """File operation security error."""
 
-    pass
-
 
 class SecureFileHandler:
     """Secure file operations with strict validation."""

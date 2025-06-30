@@ -156,8 +156,8 @@ class RedisBackend(StorageBackend):
         # Check size limit
         if len(compressed) > self.max_size_bytes:
             msg = (
-                f"Graph exceeds size limit: {len(compressed)/1024/1024:.1f}MB "
-                f"(max {self.max_size_bytes/1024/1024:.1f}MB)"
+                f"Graph exceeds size limit: {len(compressed) / 1024 / 1024:.1f}MB "
+                f"(max {self.max_size_bytes / 1024 / 1024:.1f}MB)"
             )
             raise StorageQuotaExceededError(msg)
 
@@ -450,4 +450,3 @@ class RedisBackend(StorageBackend):
         """Clean up graphs not accessed for specified days."""
         # This would be called by a scheduled job
         # Implementation depends on requirements
-        pass

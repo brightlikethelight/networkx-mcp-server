@@ -6,7 +6,8 @@ including route optimization, flow analysis, and network resilience.
 
 import asyncio
 import json
-from typing import Any, Dict
+from typing import Any
+from typing import Dict
 
 
 # Simulated MCP client calls
@@ -32,84 +33,316 @@ async def create_transport_network():
         attributes={
             "name": "Metro City Transport Network",
             "type": "multimodal",
-            "last_updated": "2024-01-01"
-        }
+            "last_updated": "2024-01-01",
+        },
     )
 
     # 2. Add stations/intersections (nodes)
     print("\n2. Adding stations and intersections...")
     stations = [
         # Metro stations
-        {"id": "Central", "type": "metro", "capacity": 10000, "lat": 40.7589, "lon": -73.9851},
-        {"id": "North", "type": "metro", "capacity": 7000, "lat": 40.7614, "lon": -73.9776},
-        {"id": "South", "type": "metro", "capacity": 7000, "lat": 40.7489, "lon": -73.9680},
-        {"id": "East", "type": "metro", "capacity": 6000, "lat": 40.7549, "lon": -73.9740},
-        {"id": "West", "type": "metro", "capacity": 6000, "lat": 40.7529, "lon": -73.9910},
-
+        {
+            "id": "Central",
+            "type": "metro",
+            "capacity": 10000,
+            "lat": 40.7589,
+            "lon": -73.9851,
+        },
+        {
+            "id": "North",
+            "type": "metro",
+            "capacity": 7000,
+            "lat": 40.7614,
+            "lon": -73.9776,
+        },
+        {
+            "id": "South",
+            "type": "metro",
+            "capacity": 7000,
+            "lat": 40.7489,
+            "lon": -73.9680,
+        },
+        {
+            "id": "East",
+            "type": "metro",
+            "capacity": 6000,
+            "lat": 40.7549,
+            "lon": -73.9740,
+        },
+        {
+            "id": "West",
+            "type": "metro",
+            "capacity": 6000,
+            "lat": 40.7529,
+            "lon": -73.9910,
+        },
         # Bus hubs
-        {"id": "BusHub1", "type": "bus", "capacity": 3000, "lat": 40.7650, "lon": -73.9800},
-        {"id": "BusHub2", "type": "bus", "capacity": 3000, "lat": 40.7450, "lon": -73.9750},
-
+        {
+            "id": "BusHub1",
+            "type": "bus",
+            "capacity": 3000,
+            "lat": 40.7650,
+            "lon": -73.9800,
+        },
+        {
+            "id": "BusHub2",
+            "type": "bus",
+            "capacity": 3000,
+            "lat": 40.7450,
+            "lon": -73.9750,
+        },
         # Major intersections
-        {"id": "Junction1", "type": "road", "capacity": 5000, "lat": 40.7600, "lon": -73.9850},
-        {"id": "Junction2", "type": "road", "capacity": 5000, "lat": 40.7500, "lon": -73.9800},
-        {"id": "Junction3", "type": "road", "capacity": 4000, "lat": 40.7550, "lon": -73.9900},
-
+        {
+            "id": "Junction1",
+            "type": "road",
+            "capacity": 5000,
+            "lat": 40.7600,
+            "lon": -73.9850,
+        },
+        {
+            "id": "Junction2",
+            "type": "road",
+            "capacity": 5000,
+            "lat": 40.7500,
+            "lon": -73.9800,
+        },
+        {
+            "id": "Junction3",
+            "type": "road",
+            "capacity": 4000,
+            "lat": 40.7550,
+            "lon": -73.9900,
+        },
         # Park & Ride
-        {"id": "ParkRide1", "type": "parking", "capacity": 2000, "lat": 40.7700, "lon": -73.9950},
-        {"id": "ParkRide2", "type": "parking", "capacity": 2000, "lat": 40.7400, "lon": -73.9650}
+        {
+            "id": "ParkRide1",
+            "type": "parking",
+            "capacity": 2000,
+            "lat": 40.7700,
+            "lon": -73.9950,
+        },
+        {
+            "id": "ParkRide2",
+            "type": "parking",
+            "capacity": 2000,
+            "lat": 40.7400,
+            "lon": -73.9650,
+        },
     ]
 
-    await call_tool(
-        "add_nodes",
-        graph_id="city_transport",
-        nodes=stations
-    )
+    await call_tool("add_nodes", graph_id="city_transport", nodes=stations)
 
     # 3. Add routes (edges)
     print("\n3. Adding transportation routes...")
     routes = [
         # Metro lines
-        {"source": "North", "target": "Central", "mode": "metro", "capacity": 5000, "time": 3, "distance": 2.1},
-        {"source": "Central", "target": "South", "mode": "metro", "capacity": 5000, "time": 3, "distance": 2.3},
-        {"source": "West", "target": "Central", "mode": "metro", "capacity": 4000, "time": 4, "distance": 2.5},
-        {"source": "Central", "target": "East", "mode": "metro", "capacity": 4000, "time": 4, "distance": 2.4},
-        {"source": "North", "target": "East", "mode": "metro", "capacity": 3000, "time": 5, "distance": 3.2},
-        {"source": "West", "target": "South", "mode": "metro", "capacity": 3000, "time": 5, "distance": 3.5},
-
+        {
+            "source": "North",
+            "target": "Central",
+            "mode": "metro",
+            "capacity": 5000,
+            "time": 3,
+            "distance": 2.1,
+        },
+        {
+            "source": "Central",
+            "target": "South",
+            "mode": "metro",
+            "capacity": 5000,
+            "time": 3,
+            "distance": 2.3,
+        },
+        {
+            "source": "West",
+            "target": "Central",
+            "mode": "metro",
+            "capacity": 4000,
+            "time": 4,
+            "distance": 2.5,
+        },
+        {
+            "source": "Central",
+            "target": "East",
+            "mode": "metro",
+            "capacity": 4000,
+            "time": 4,
+            "distance": 2.4,
+        },
+        {
+            "source": "North",
+            "target": "East",
+            "mode": "metro",
+            "capacity": 3000,
+            "time": 5,
+            "distance": 3.2,
+        },
+        {
+            "source": "West",
+            "target": "South",
+            "mode": "metro",
+            "capacity": 3000,
+            "time": 5,
+            "distance": 3.5,
+        },
         # Bus routes
-        {"source": "BusHub1", "target": "North", "mode": "bus", "capacity": 1500, "time": 10, "distance": 1.5},
-        {"source": "BusHub1", "target": "Junction1", "mode": "bus", "capacity": 1500, "time": 8, "distance": 1.2},
-        {"source": "Junction1", "target": "Central", "mode": "bus", "capacity": 1500, "time": 6, "distance": 0.8},
-        {"source": "BusHub2", "target": "South", "mode": "bus", "capacity": 1500, "time": 10, "distance": 1.6},
-        {"source": "BusHub2", "target": "Junction2", "mode": "bus", "capacity": 1500, "time": 8, "distance": 1.3},
-        {"source": "Junction2", "target": "Central", "mode": "bus", "capacity": 1500, "time": 7, "distance": 1.0},
-
+        {
+            "source": "BusHub1",
+            "target": "North",
+            "mode": "bus",
+            "capacity": 1500,
+            "time": 10,
+            "distance": 1.5,
+        },
+        {
+            "source": "BusHub1",
+            "target": "Junction1",
+            "mode": "bus",
+            "capacity": 1500,
+            "time": 8,
+            "distance": 1.2,
+        },
+        {
+            "source": "Junction1",
+            "target": "Central",
+            "mode": "bus",
+            "capacity": 1500,
+            "time": 6,
+            "distance": 0.8,
+        },
+        {
+            "source": "BusHub2",
+            "target": "South",
+            "mode": "bus",
+            "capacity": 1500,
+            "time": 10,
+            "distance": 1.6,
+        },
+        {
+            "source": "BusHub2",
+            "target": "Junction2",
+            "mode": "bus",
+            "capacity": 1500,
+            "time": 8,
+            "distance": 1.3,
+        },
+        {
+            "source": "Junction2",
+            "target": "Central",
+            "mode": "bus",
+            "capacity": 1500,
+            "time": 7,
+            "distance": 1.0,
+        },
         # Road connections
-        {"source": "Junction1", "target": "Junction3", "mode": "road", "capacity": 2000, "time": 15, "distance": 3.0},
-        {"source": "Junction3", "target": "Junction2", "mode": "road", "capacity": 2000, "time": 12, "distance": 2.5},
-        {"source": "Junction1", "target": "North", "mode": "walk", "capacity": 500, "time": 20, "distance": 0.5},
-        {"source": "Junction2", "target": "South", "mode": "walk", "capacity": 500, "time": 20, "distance": 0.5},
-        {"source": "Junction3", "target": "West", "mode": "walk", "capacity": 500, "time": 15, "distance": 0.4},
-
+        {
+            "source": "Junction1",
+            "target": "Junction3",
+            "mode": "road",
+            "capacity": 2000,
+            "time": 15,
+            "distance": 3.0,
+        },
+        {
+            "source": "Junction3",
+            "target": "Junction2",
+            "mode": "road",
+            "capacity": 2000,
+            "time": 12,
+            "distance": 2.5,
+        },
+        {
+            "source": "Junction1",
+            "target": "North",
+            "mode": "walk",
+            "capacity": 500,
+            "time": 20,
+            "distance": 0.5,
+        },
+        {
+            "source": "Junction2",
+            "target": "South",
+            "mode": "walk",
+            "capacity": 500,
+            "time": 20,
+            "distance": 0.5,
+        },
+        {
+            "source": "Junction3",
+            "target": "West",
+            "mode": "walk",
+            "capacity": 500,
+            "time": 15,
+            "distance": 0.4,
+        },
         # Park & Ride connections
-        {"source": "ParkRide1", "target": "North", "mode": "shuttle", "capacity": 1000, "time": 5, "distance": 1.0},
-        {"source": "ParkRide1", "target": "BusHub1", "mode": "shuttle", "capacity": 1000, "time": 7, "distance": 1.3},
-        {"source": "ParkRide2", "target": "South", "mode": "shuttle", "capacity": 1000, "time": 5, "distance": 1.0},
-        {"source": "ParkRide2", "target": "BusHub2", "mode": "shuttle", "capacity": 1000, "time": 7, "distance": 1.3},
-
+        {
+            "source": "ParkRide1",
+            "target": "North",
+            "mode": "shuttle",
+            "capacity": 1000,
+            "time": 5,
+            "distance": 1.0,
+        },
+        {
+            "source": "ParkRide1",
+            "target": "BusHub1",
+            "mode": "shuttle",
+            "capacity": 1000,
+            "time": 7,
+            "distance": 1.3,
+        },
+        {
+            "source": "ParkRide2",
+            "target": "South",
+            "mode": "shuttle",
+            "capacity": 1000,
+            "time": 5,
+            "distance": 1.0,
+        },
+        {
+            "source": "ParkRide2",
+            "target": "BusHub2",
+            "mode": "shuttle",
+            "capacity": 1000,
+            "time": 7,
+            "distance": 1.3,
+        },
         # Reverse routes for bidirectional travel
-        {"source": "Central", "target": "North", "mode": "metro", "capacity": 5000, "time": 3, "distance": 2.1},
-        {"source": "South", "target": "Central", "mode": "metro", "capacity": 5000, "time": 3, "distance": 2.3},
-        {"source": "Central", "target": "West", "mode": "metro", "capacity": 4000, "time": 4, "distance": 2.5},
-        {"source": "East", "target": "Central", "mode": "metro", "capacity": 4000, "time": 4, "distance": 2.4}
+        {
+            "source": "Central",
+            "target": "North",
+            "mode": "metro",
+            "capacity": 5000,
+            "time": 3,
+            "distance": 2.1,
+        },
+        {
+            "source": "South",
+            "target": "Central",
+            "mode": "metro",
+            "capacity": 5000,
+            "time": 3,
+            "distance": 2.3,
+        },
+        {
+            "source": "Central",
+            "target": "West",
+            "mode": "metro",
+            "capacity": 4000,
+            "time": 4,
+            "distance": 2.5,
+        },
+        {
+            "source": "East",
+            "target": "Central",
+            "mode": "metro",
+            "capacity": 4000,
+            "time": 4,
+            "distance": 2.4,
+        },
     ]
 
-    await call_tool(
-        "add_edges",
-        graph_id="city_transport",
-        edges=routes
-    )
+    await call_tool("add_edges", graph_id="city_transport", edges=routes)
 
 
 async def analyze_routes():
@@ -125,7 +358,7 @@ async def analyze_routes():
         graph_id="city_transport",
         source="ParkRide1",
         target="East",
-        weight="time"
+        weight="time",
     )
 
     # 2. Find shortest distance route
@@ -135,7 +368,7 @@ async def analyze_routes():
         graph_id="city_transport",
         source="ParkRide1",
         target="East",
-        weight="distance"
+        weight="distance",
     )
 
     # 3. Find alternative routes
@@ -146,7 +379,7 @@ async def analyze_routes():
         source="ParkRide1",
         target="East",
         weight="time",
-        k_paths=5
+        k_paths=5,
     )
 
     # 4. Find all simple paths
@@ -157,7 +390,7 @@ async def analyze_routes():
         source="West",
         target="East",
         max_length=6,
-        max_paths=20
+        max_paths=20,
     )
 
 
@@ -175,7 +408,7 @@ async def analyze_network_flow():
         source="North",
         target="South",
         capacity="capacity",
-        flow_type="maximum"
+        flow_type="maximum",
     )
 
     # 2. Find bottlenecks (minimum cut)
@@ -186,7 +419,7 @@ async def analyze_network_flow():
         source="ParkRide1",
         target="Central",
         capacity="capacity",
-        flow_type="all"
+        flow_type="all",
     )
 
     # 3. Edge-disjoint paths (backup routes)
@@ -196,7 +429,7 @@ async def analyze_network_flow():
         graph_id="city_transport",
         source="West",
         target="East",
-        flow_type="edge_disjoint"
+        flow_type="edge_disjoint",
     )
 
 
@@ -212,15 +445,13 @@ async def analyze_network_resilience():
         "calculate_centrality",
         graph_id="city_transport",
         centrality_type="betweenness",
-        top_n=5
+        top_n=5,
     )
 
     # 2. Analyze connectivity
     print("\n2. Analyzing network connectivity...")
     await call_tool(
-        "connected_components",
-        graph_id="city_transport",
-        component_type="strongly"
+        "connected_components", graph_id="city_transport", component_type="strongly"
     )
 
     # 3. Simulate station closure
@@ -232,14 +463,14 @@ async def analyze_network_resilience():
         method="condition",
         condition="id != Central",
         create_new=True,
-        new_graph_id="transport_no_central"
+        new_graph_id="transport_no_central",
     )
 
     # Analyze impact
     await call_tool(
         "connected_components",
         graph_id="transport_no_central",
-        component_type="strongly"
+        component_type="strongly",
     )
 
 
@@ -257,20 +488,14 @@ async def analyze_by_mode():
         method="condition",
         condition="mode = metro",
         create_new=True,
-        new_graph_id="metro_network"
+        new_graph_id="metro_network",
     )
 
     # 2. Analyze metro network
     print("\n2. Analyzing metro network efficiency...")
-    await call_tool(
-        "graph_metrics",
-        graph_id="metro_network"
-    )
+    await call_tool("graph_metrics", graph_id="metro_network")
 
-    await call_tool(
-        "path_analysis",
-        graph_id="metro_network"
-    )
+    await call_tool("path_analysis", graph_id="metro_network")
 
 
 async def optimize_network():
@@ -285,23 +510,16 @@ async def optimize_network():
         "calculate_centrality",
         graph_id="city_transport",
         centrality_type="betweenness",
-        weight="capacity"
+        weight="capacity",
     )
 
     # 2. Identify potential new connections
     print("\n2. Finding stations that could benefit from direct connections...")
-    await call_tool(
-        "path_analysis",
-        graph_id="city_transport",
-        sample_size=500
-    )
+    await call_tool("path_analysis", graph_id="city_transport", sample_size=500)
 
     # 3. Analyze clustering patterns
     print("\n3. Identifying areas with poor connectivity...")
-    await call_tool(
-        "clustering_analysis",
-        graph_id="city_transport"
-    )
+    await call_tool("clustering_analysis", graph_id="city_transport")
 
 
 async def generate_reports():
@@ -313,9 +531,7 @@ async def generate_reports():
     # 1. Overall network statistics
     print("\n1. Generating network statistics report...")
     await call_tool(
-        "graph_metrics",
-        graph_id="city_transport",
-        include_distributions=True
+        "graph_metrics", graph_id="city_transport", include_distributions=True
     )
 
     # 2. Export for visualization
@@ -324,7 +540,7 @@ async def generate_reports():
         "visualize_graph",
         graph_id="city_transport",
         layout="kamada_kawai",
-        output_format="pyvis"
+        output_format="pyvis",
     )
 
     # 3. Export data
@@ -333,7 +549,7 @@ async def generate_reports():
         "export_graph",
         graph_id="city_transport",
         format="graphml",
-        path="transport_network.graphml"
+        path="transport_network.graphml",
     )
 
 

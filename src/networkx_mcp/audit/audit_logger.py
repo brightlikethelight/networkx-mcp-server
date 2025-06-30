@@ -114,7 +114,6 @@ class SecurityAlert:
 
 
 class AuditLogger:
-
     # Threshold constants
     DELETE_THRESHOLD = 10
     EXPORT_THRESHOLD = 20
@@ -420,7 +419,6 @@ class AuditLogger:
         """Clean up old audit events."""
         # This would be called by a scheduled job
         # Redis handles TTL automatically
-        pass
 
 
 # Decorators for audit logging

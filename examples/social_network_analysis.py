@@ -7,7 +7,8 @@ and path analysis.
 
 import asyncio
 import json
-from typing import Any, Dict
+from typing import Any
+from typing import Dict
 
 
 # Simulated MCP client calls (in practice, use actual MCP client)
@@ -31,7 +32,7 @@ async def create_social_network():
         "create_graph",
         graph_id="social_network",
         graph_type="undirected",
-        attributes={"name": "Friend Network", "created": "2024-01-01"}
+        attributes={"name": "Friend Network", "created": "2024-01-01"},
     )
 
     # 2. Add people (nodes)
@@ -46,14 +47,10 @@ async def create_social_network():
         {"id": "Grace", "age": 29, "city": "Chicago", "profession": "Designer"},
         {"id": "Henry", "age": 31, "city": "NYC", "profession": "Data Scientist"},
         {"id": "Iris", "age": 26, "city": "Boston", "profession": "Engineer"},
-        {"id": "Jack", "age": 33, "city": "Chicago", "profession": "Manager"}
+        {"id": "Jack", "age": 33, "city": "Chicago", "profession": "Manager"},
     ]
 
-    await call_tool(
-        "add_nodes",
-        graph_id="social_network",
-        nodes=people
-    )
+    await call_tool("add_nodes", graph_id="social_network", nodes=people)
 
     # 3. Add friendships (edges)
     print("\n3. Adding friendship connections...")
@@ -62,7 +59,6 @@ async def create_social_network():
         {"source": "Alice", "target": "Bob", "since": 2018, "strength": 0.9},
         {"source": "Alice", "target": "Charlie", "since": 2020, "strength": 0.8},
         {"source": "Bob", "target": "Charlie", "since": 2019, "strength": 0.7},
-
         # Extended network
         {"source": "Alice", "target": "Diana", "since": 2021, "strength": 0.6},
         {"source": "Bob", "target": "Frank", "since": 2017, "strength": 0.95},
@@ -73,30 +69,20 @@ async def create_social_network():
         {"source": "Frank", "target": "Iris", "since": 2016, "strength": 0.9},
         {"source": "Grace", "target": "Jack", "since": 2020, "strength": 0.65},
         {"source": "Henry", "target": "Iris", "since": 2022, "strength": 0.6},
-
         # Bridge connections
         {"source": "Charlie", "target": "Henry", "since": 2021, "strength": 0.7},
         {"source": "Frank", "target": "Jack", "since": 2019, "strength": 0.5},
-        {"source": "Eve", "target": "Iris", "since": 2022, "strength": 0.55}
+        {"source": "Eve", "target": "Iris", "since": 2022, "strength": 0.55},
     ]
 
-    await call_tool(
-        "add_edges",
-        graph_id="social_network",
-        edges=friendships
-    )
+    await call_tool("add_edges", graph_id="social_network", edges=friendships)
 
     # 4. Analyze network structure
     print("\n4. Analyzing network structure...")
-    await call_tool(
-        "get_graph_info",
-        graph_id="social_network"
-    )
+    await call_tool("get_graph_info", graph_id="social_network")
 
     await call_tool(
-        "graph_metrics",
-        graph_id="social_network",
-        include_distributions=True
+        "graph_metrics", graph_id="social_network", include_distributions=True
     )
 
 
@@ -113,7 +99,7 @@ async def analyze_influence():
         graph_id="social_network",
         centrality_type=["degree", "betweenness", "closeness", "eigenvector"],
         top_n=5,
-        include_statistics=True
+        include_statistics=True,
     )
 
     # 2. Find key connectors (high betweenness)
@@ -122,7 +108,7 @@ async def analyze_influence():
         "calculate_centrality",
         graph_id="social_network",
         centrality_type="betweenness",
-        top_n=3
+        top_n=3,
     )
 
 
@@ -134,18 +120,12 @@ async def detect_communities():
 
     # 1. Find communities
     print("\n1. Detecting friend groups...")
-    await call_tool(
-        "community_detection",
-        graph_id="social_network",
-        method="louvain"
-    )
+    await call_tool("community_detection", graph_id="social_network", method="louvain")
 
     # 2. Analyze clustering
     print("\n2. Analyzing how tightly knit the groups are...")
     await call_tool(
-        "clustering_analysis",
-        graph_id="social_network",
-        include_triangles=True
+        "clustering_analysis", graph_id="social_network", include_triangles=True
     )
 
 
@@ -158,10 +138,7 @@ async def analyze_connections():
     # 1. Find shortest path between two people
     print("\n1. Finding how Alice and Jack are connected...")
     await call_tool(
-        "shortest_path",
-        graph_id="social_network",
-        source="Alice",
-        target="Jack"
+        "shortest_path", graph_id="social_network", source="Alice", target="Jack"
     )
 
     # 2. Find all paths between two people
@@ -172,15 +149,12 @@ async def analyze_connections():
         source="Alice",
         target="Jack",
         max_length=5,
-        max_paths=10
+        max_paths=10,
     )
 
     # 3. Analyze overall connectivity
     print("\n3. Analyzing network connectivity...")
-    await call_tool(
-        "path_analysis",
-        graph_id="social_network"
-    )
+    await call_tool("path_analysis", graph_id="social_network")
 
 
 async def analyze_subgroups():
@@ -197,15 +171,12 @@ async def analyze_subgroups():
         method="condition",
         condition="city = NYC",
         create_new=True,
-        new_graph_id="nyc_network"
+        new_graph_id="nyc_network",
     )
 
     # 2. Analyze the NYC subnetwork
     print("\n2. Analyzing NYC subnetwork...")
-    await call_tool(
-        "get_graph_info",
-        graph_id="nyc_network"
-    )
+    await call_tool("get_graph_info", graph_id="nyc_network")
 
     # 3. Extract 2-hop neighborhood around a person
     print("\n3. Extracting Bob's extended friend network (2 hops)...")
@@ -216,7 +187,7 @@ async def analyze_subgroups():
         center_node="Bob",
         k_hop=2,
         create_new=True,
-        new_graph_id="bob_network"
+        new_graph_id="bob_network",
     )
 
 
@@ -231,7 +202,7 @@ async def visualize_network():
         "visualize_graph",
         graph_id="social_network",
         layout="spring",
-        output_format="pyvis"
+        output_format="pyvis",
     )
 
     print("\n2. Generating community-based layout...")
@@ -239,7 +210,7 @@ async def visualize_network():
         "visualize_graph",
         graph_id="social_network",
         layout="kamada_kawai",
-        output_format="plotly"
+        output_format="plotly",
     )
 
 
@@ -254,7 +225,7 @@ async def export_results():
         "export_graph",
         graph_id="social_network",
         format="json",
-        path="social_network.json"
+        path="social_network.json",
     )
 
     print("\n2. Exporting edge list to CSV...")
@@ -262,7 +233,7 @@ async def export_results():
         "export_graph",
         graph_id="social_network",
         format="csv",
-        path="social_network_edges.csv"
+        path="social_network_edges.csv",
     )
 
     print("\n3. Getting server statistics...")

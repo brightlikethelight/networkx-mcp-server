@@ -6,7 +6,8 @@ including identifying influential papers, research trends, and collaboration pat
 
 import asyncio
 import json
-from typing import Any, Dict
+from typing import Any
+from typing import Dict
 
 
 # Simulated MCP client calls
@@ -32,114 +33,196 @@ async def create_citation_network():
         attributes={
             "name": "Machine Learning Research Citations",
             "domain": "Computer Science",
-            "time_period": "2018-2024"
-        }
+            "time_period": "2018-2024",
+        },
     )
 
     # 2. Add papers (nodes)
     print("\n2. Adding research papers...")
     papers = [
         # Foundational papers
-        {"id": "P001", "title": "Attention Is All You Need", "year": 2017, "venue": "NeurIPS",
-         "authors": 8, "field": "NLP", "citations_count": 50000},
-        {"id": "P002", "title": "BERT: Pre-training of Deep Bidirectional Transformers", "year": 2018,
-         "venue": "NAACL", "authors": 12, "field": "NLP", "citations_count": 35000},
-
+        {
+            "id": "P001",
+            "title": "Attention Is All You Need",
+            "year": 2017,
+            "venue": "NeurIPS",
+            "authors": 8,
+            "field": "NLP",
+            "citations_count": 50000,
+        },
+        {
+            "id": "P002",
+            "title": "BERT: Pre-training of Deep Bidirectional Transformers",
+            "year": 2018,
+            "venue": "NAACL",
+            "authors": 12,
+            "field": "NLP",
+            "citations_count": 35000,
+        },
         # Computer Vision papers
-        {"id": "P003", "title": "Vision Transformer", "year": 2020, "venue": "ICLR",
-         "authors": 10, "field": "CV", "citations_count": 15000},
-        {"id": "P004", "title": "DETR: End-to-End Object Detection", "year": 2020,
-         "venue": "ECCV", "authors": 6, "field": "CV", "citations_count": 8000},
-
+        {
+            "id": "P003",
+            "title": "Vision Transformer",
+            "year": 2020,
+            "venue": "ICLR",
+            "authors": 10,
+            "field": "CV",
+            "citations_count": 15000,
+        },
+        {
+            "id": "P004",
+            "title": "DETR: End-to-End Object Detection",
+            "year": 2020,
+            "venue": "ECCV",
+            "authors": 6,
+            "field": "CV",
+            "citations_count": 8000,
+        },
         # Recent influential papers
-        {"id": "P005", "title": "GPT-3: Language Models are Few-Shot Learners", "year": 2020,
-         "venue": "NeurIPS", "authors": 31, "field": "NLP", "citations_count": 20000},
-        {"id": "P006", "title": "Scaling Laws for Neural Language Models", "year": 2020,
-         "venue": "arXiv", "authors": 8, "field": "NLP", "citations_count": 5000},
-
+        {
+            "id": "P005",
+            "title": "GPT-3: Language Models are Few-Shot Learners",
+            "year": 2020,
+            "venue": "NeurIPS",
+            "authors": 31,
+            "field": "NLP",
+            "citations_count": 20000,
+        },
+        {
+            "id": "P006",
+            "title": "Scaling Laws for Neural Language Models",
+            "year": 2020,
+            "venue": "arXiv",
+            "authors": 8,
+            "field": "NLP",
+            "citations_count": 5000,
+        },
         # Reinforcement Learning
-        {"id": "P007", "title": "Proximal Policy Optimization", "year": 2017,
-         "venue": "arXiv", "authors": 4, "field": "RL", "citations_count": 12000},
-        {"id": "P008", "title": "Soft Actor-Critic", "year": 2018,
-         "venue": "ICML", "authors": 5, "field": "RL", "citations_count": 7000},
-
+        {
+            "id": "P007",
+            "title": "Proximal Policy Optimization",
+            "year": 2017,
+            "venue": "arXiv",
+            "authors": 4,
+            "field": "RL",
+            "citations_count": 12000,
+        },
+        {
+            "id": "P008",
+            "title": "Soft Actor-Critic",
+            "year": 2018,
+            "venue": "ICML",
+            "authors": 5,
+            "field": "RL",
+            "citations_count": 7000,
+        },
         # Recent papers building on foundations
-        {"id": "P009", "title": "RoBERTa: A Robustly Optimized BERT", "year": 2019,
-         "venue": "arXiv", "authors": 9, "field": "NLP", "citations_count": 10000},
-        {"id": "P010", "title": "DALL-E: Creating Images from Text", "year": 2021,
-         "venue": "ICML", "authors": 15, "field": "CV", "citations_count": 3000},
-        {"id": "P011", "title": "CLIP: Learning Transferable Visual Models", "year": 2021,
-         "venue": "ICML", "authors": 12, "field": "CV", "citations_count": 5000},
-        {"id": "P012", "title": "Codex: Evaluating Large Language Models", "year": 2021,
-         "venue": "arXiv", "authors": 20, "field": "NLP", "citations_count": 2000},
-
+        {
+            "id": "P009",
+            "title": "RoBERTa: A Robustly Optimized BERT",
+            "year": 2019,
+            "venue": "arXiv",
+            "authors": 9,
+            "field": "NLP",
+            "citations_count": 10000,
+        },
+        {
+            "id": "P010",
+            "title": "DALL-E: Creating Images from Text",
+            "year": 2021,
+            "venue": "ICML",
+            "authors": 15,
+            "field": "CV",
+            "citations_count": 3000,
+        },
+        {
+            "id": "P011",
+            "title": "CLIP: Learning Transferable Visual Models",
+            "year": 2021,
+            "venue": "ICML",
+            "authors": 12,
+            "field": "CV",
+            "citations_count": 5000,
+        },
+        {
+            "id": "P012",
+            "title": "Codex: Evaluating Large Language Models",
+            "year": 2021,
+            "venue": "arXiv",
+            "authors": 20,
+            "field": "NLP",
+            "citations_count": 2000,
+        },
         # Domain-specific applications
-        {"id": "P013", "title": "AlphaFold: Protein Structure Prediction", "year": 2021,
-         "venue": "Nature", "authors": 18, "field": "Bio", "citations_count": 8000},
-        {"id": "P014", "title": "Graph Neural Networks Survey", "year": 2020,
-         "venue": "IEEE", "authors": 4, "field": "ML", "citations_count": 4000},
-        {"id": "P015", "title": "Self-Supervised Learning Survey", "year": 2021,
-         "venue": "IEEE", "authors": 6, "field": "ML", "citations_count": 2500}
+        {
+            "id": "P013",
+            "title": "AlphaFold: Protein Structure Prediction",
+            "year": 2021,
+            "venue": "Nature",
+            "authors": 18,
+            "field": "Bio",
+            "citations_count": 8000,
+        },
+        {
+            "id": "P014",
+            "title": "Graph Neural Networks Survey",
+            "year": 2020,
+            "venue": "IEEE",
+            "authors": 4,
+            "field": "ML",
+            "citations_count": 4000,
+        },
+        {
+            "id": "P015",
+            "title": "Self-Supervised Learning Survey",
+            "year": 2021,
+            "venue": "IEEE",
+            "authors": 6,
+            "field": "ML",
+            "citations_count": 2500,
+        },
     ]
 
-    await call_tool(
-        "add_nodes",
-        graph_id="citations",
-        nodes=papers
-    )
+    await call_tool("add_nodes", graph_id="citations", nodes=papers)
 
     # 3. Add citations (edges)
     print("\n3. Adding citation relationships...")
     citations = [
         # BERT builds on Transformer
         {"source": "P002", "target": "P001", "year": 2018, "context": "architecture"},
-
         # Vision Transformer inspired by text transformers
         {"source": "P003", "target": "P001", "year": 2020, "context": "architecture"},
         {"source": "P003", "target": "P002", "year": 2020, "context": "methodology"},
-
         # DETR uses transformers for detection
         {"source": "P004", "target": "P001", "year": 2020, "context": "architecture"},
         {"source": "P004", "target": "P003", "year": 2020, "context": "application"},
-
         # GPT-3 builds on transformer
         {"source": "P005", "target": "P001", "year": 2020, "context": "architecture"},
         {"source": "P005", "target": "P006", "year": 2020, "context": "scaling"},
-
         # RoBERTa improves BERT
         {"source": "P009", "target": "P002", "year": 2019, "context": "improvement"},
         {"source": "P009", "target": "P001", "year": 2019, "context": "architecture"},
-
         # DALL-E uses multiple innovations
         {"source": "P010", "target": "P003", "year": 2021, "context": "vision"},
         {"source": "P010", "target": "P005", "year": 2021, "context": "generation"},
-
         # CLIP combines vision and language
         {"source": "P011", "target": "P003", "year": 2021, "context": "vision"},
         {"source": "P011", "target": "P002", "year": 2021, "context": "language"},
-
         # Codex builds on GPT-3
         {"source": "P012", "target": "P005", "year": 2021, "context": "extension"},
-
         # AlphaFold uses attention mechanisms
         {"source": "P013", "target": "P001", "year": 2021, "context": "architecture"},
-
         # Surveys cite multiple papers
         {"source": "P014", "target": "P001", "year": 2020, "context": "survey"},
         {"source": "P014", "target": "P003", "year": 2020, "context": "survey"},
         {"source": "P015", "target": "P002", "year": 2021, "context": "survey"},
         {"source": "P015", "target": "P003", "year": 2021, "context": "survey"},
         {"source": "P015", "target": "P009", "year": 2021, "context": "survey"},
-
         # RL papers cite each other
-        {"source": "P008", "target": "P007", "year": 2018, "context": "comparison"}
+        {"source": "P008", "target": "P007", "year": 2018, "context": "comparison"},
     ]
 
-    await call_tool(
-        "add_edges",
-        graph_id="citations",
-        edges=citations
-    )
+    await call_tool("add_edges", graph_id="citations", edges=citations)
 
 
 async def analyze_paper_influence():
@@ -151,10 +234,7 @@ async def analyze_paper_influence():
     # 1. Find most cited papers (high in-degree)
     print("\n1. Finding most cited papers...")
     await call_tool(
-        "calculate_centrality",
-        graph_id="citations",
-        centrality_type="degree",
-        top_n=5
+        "calculate_centrality", graph_id="citations", centrality_type="degree", top_n=5
     )
 
     # 2. Find papers that bridge research areas (high betweenness)
@@ -163,7 +243,7 @@ async def analyze_paper_influence():
         "calculate_centrality",
         graph_id="citations",
         centrality_type="betweenness",
-        top_n=5
+        top_n=5,
     )
 
     # 3. PageRank for overall importance
@@ -172,7 +252,7 @@ async def analyze_paper_influence():
         "calculate_centrality",
         graph_id="citations",
         centrality_type="pagerank",
-        top_n=5
+        top_n=5,
     )
 
 
@@ -189,16 +269,12 @@ async def analyze_research_trends():
         graph_id="citations",
         source="P010",  # DALL-E
         target="P001",  # Transformer
-        max_paths=10
+        max_paths=10,
     )
 
     # 2. Analyze cycles (mutual citations)
     print("\n2. Finding citation cycles (mutual citations/debates)...")
-    await call_tool(
-        "cycle_detection",
-        graph_id="citations",
-        max_cycle_length=4
-    )
+    await call_tool("cycle_detection", graph_id="citations", max_cycle_length=4)
 
     # 3. Find papers with no citations (leaves)
     print("\n3. Finding recent papers (no outgoing citations in our network)...")
@@ -213,11 +289,7 @@ async def analyze_research_communities():
 
     # 1. Detect research communities
     print("\n1. Detecting research communities...")
-    await call_tool(
-        "community_detection",
-        graph_id="citations",
-        method="louvain"
-    )
+    await call_tool("community_detection", graph_id="citations", method="louvain")
 
     # 2. Analyze field-specific subnetworks
     print("\n2. Extracting NLP research subnetwork...")
@@ -227,15 +299,12 @@ async def analyze_research_communities():
         method="condition",
         condition="field = NLP",
         create_new=True,
-        new_graph_id="nlp_citations"
+        new_graph_id="nlp_citations",
     )
 
     # 3. Analyze NLP subnetwork
     print("\n3. Analyzing NLP research network...")
-    await call_tool(
-        "graph_metrics",
-        graph_id="nlp_citations"
-    )
+    await call_tool("graph_metrics", graph_id="nlp_citations")
 
 
 async def find_seminal_papers():
@@ -246,10 +315,7 @@ async def find_seminal_papers():
 
     # 1. Find papers with longest citation chains
     print("\n1. Finding papers with deepest influence (longest paths)...")
-    await call_tool(
-        "path_analysis",
-        graph_id="citations"
-    )
+    await call_tool("path_analysis", graph_id="citations")
 
     # 2. Find papers cited by multiple fields
     print("\n2. Finding interdisciplinary papers...")
@@ -261,13 +327,10 @@ async def find_seminal_papers():
         center_node="P001",  # Transformer paper
         k_hop=2,
         create_new=True,
-        new_graph_id="transformer_impact"
+        new_graph_id="transformer_impact",
     )
 
-    await call_tool(
-        "get_graph_info",
-        graph_id="transformer_impact"
-    )
+    await call_tool("get_graph_info", graph_id="transformer_impact")
 
 
 async def analyze_collaboration_patterns():
@@ -303,7 +366,7 @@ async def predict_future_impact():
         method="condition",
         condition="year > 2020",
         create_new=True,
-        new_graph_id="recent_papers"
+        new_graph_id="recent_papers",
     )
 
     # 2. Analyze recent paper patterns
@@ -312,16 +375,12 @@ async def predict_future_impact():
         "calculate_centrality",
         graph_id="recent_papers",
         centrality_type=["degree", "pagerank"],
-        top_n=5
+        top_n=5,
     )
 
     # 3. Find papers building on multiple innovations
     print("\n3. Finding papers that synthesize multiple research streams...")
-    await call_tool(
-        "clustering_analysis",
-        graph_id="citations",
-        include_triangles=True
-    )
+    await call_tool("clustering_analysis", graph_id="citations", include_triangles=True)
 
 
 async def export_analysis():
@@ -336,7 +395,7 @@ async def export_analysis():
         "visualize_graph",
         graph_id="citations",
         layout="kamada_kawai",
-        output_format="pyvis"
+        output_format="pyvis",
     )
 
     # 2. Export for bibliometric tools
@@ -345,16 +404,13 @@ async def export_analysis():
         "export_graph",
         graph_id="citations",
         format="graphml",
-        path="citation_network.graphml"
+        path="citation_network.graphml",
     )
 
     # 3. Export citation data
     print("\n3. Exporting citation edges to CSV...")
     await call_tool(
-        "export_graph",
-        graph_id="citations",
-        format="csv",
-        path="citations.csv"
+        "export_graph", graph_id="citations", format="csv", path="citations.csv"
     )
 
 

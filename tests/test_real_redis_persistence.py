@@ -186,7 +186,6 @@ def test_real_redis_persistence():
                         and info["num_edges"] == expected_data["edges"]
                         and info["graph_type"] == expected_data["type"]
                     ):
-
                         # Check node attributes if we have a sample node
                         if expected_data["node_sample"]:
                             try:
@@ -235,7 +234,7 @@ def test_real_redis_persistence():
 
         success_rate = recovered_count / len(test_data)
         print(
-            f"📊 Recovery results: {recovered_count}/{len(test_data)} ({success_rate*100:.1f}%)"
+            f"📊 Recovery results: {recovered_count}/{len(test_data)} ({success_rate * 100:.1f}%)"
         )
 
         # Test operations on recovered data
@@ -271,11 +270,13 @@ def test_real_redis_persistence():
             print("🚀 Production persistence is CONFIRMED WORKING!")
             return True
         elif success_rate >= 0.8:
-            print(f"\n⚠️ REDIS PERSISTENCE PARTIALLY WORKING ({success_rate*100:.1f}%)")
+            print(
+                f"\n⚠️ REDIS PERSISTENCE PARTIALLY WORKING ({success_rate * 100:.1f}%)"
+            )
             print("🔧 Some data recovered, but needs investigation")
             return True
         else:
-            print(f"\n❌ REDIS PERSISTENCE FAILED ({success_rate*100:.1f}%)")
+            print(f"\n❌ REDIS PERSISTENCE FAILED ({success_rate * 100:.1f}%)")
             print("💥 Data loss detected - NOT production ready!")
             return False
 

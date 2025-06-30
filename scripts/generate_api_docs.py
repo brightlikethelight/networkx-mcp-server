@@ -4,11 +4,16 @@
 import ast
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
 
 # Add project to path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
+
 
 class MCPToolExtractor:
     """Extract MCP tool information from Python source code."""
@@ -21,7 +26,7 @@ class MCPToolExtractor:
         tools = []
 
         try:
-            with open(file_path, encoding='utf-8') as f:
+            with open(file_path, encoding="utf-8") as f:
                 source = f.read()
 
             tree = ast.parse(source)
@@ -42,16 +47,22 @@ class MCPToolExtractor:
         """Check if function has @mcp.tool() decorator."""
         for decorator in node.decorator_list:
             if isinstance(decorator, ast.Call):
-                if (isinstance(decorator.func, ast.Attribute) and
-                    decorator.func.attr == 'tool'):
+                if (
+                    isinstance(decorator.func, ast.Attribute)
+                    and decorator.func.attr == "tool"
+                ):
                     return True
-            elif (isinstance(decorator, ast.Attribute) and
-                  decorator.func.id == 'mcp' and
-                  decorator.attr == 'tool'):
+            elif (
+                isinstance(decorator, ast.Attribute)
+                and decorator.func.id == "mcp"
+                and decorator.attr == "tool"
+            ):
                 return True
         return False
 
-    def _extract_tool_info(self, node: ast.AsyncFunctionDef, source: str) -> Optional[Dict[str, Any]]:
+    def _extract_tool_info(
+        self, node: ast.AsyncFunctionDef, source: str
+    ) -> Optional[Dict[str, Any]]:
         """Extract comprehensive information about an MCP tool."""
         try:
             # Get function name
@@ -61,7 +72,9 @@ class MCPToolExtractor:
             docstring = ast.get_docstring(node) or ""
 
             # Parse docstring for structured information
-            description, params_doc, returns_doc, examples = self._parse_docstring(docstring)
+            description, params_doc, returns_doc, examples = self._parse_docstring(
+                docstring
+            )
 
             # Extract function signature
             parameters = self._extract_parameters(node)
@@ -76,34 +89,38 @@ class MCPToolExtractor:
             error_codes = self._extract_error_codes(node, source)
 
             return {
-                'name': name,
-                'description': description,
-                'category': category,
-                'parameters': parameters,
-                'params_doc': params_doc,
-                'returns': return_type,
-                'returns_doc': returns_doc,
-                'examples': examples,
-                'error_codes': error_codes,
-                'source_location': f"src/networkx_mcp/server.py:{node.lineno}"
+                "name": name,
+                "description": description,
+                "category": category,
+                "parameters": parameters,
+                "params_doc": params_doc,
+                "returns": return_type,
+                "returns_doc": returns_doc,
+                "examples": examples,
+                "error_codes": error_codes,
+                "source_location": f"src/networkx_mcp/server.py:{node.lineno}",
             }
 
         except Exception as e:
             print(f"Error extracting tool info for {node.name}: {e}")
             return None
 
-    def _parse_docstring(self, docstring: str) -> Tuple[str, Dict[str, str], str, List[str]]:
+    def _parse_docstring(
+        self, docstring: str
+    ) -> Tuple[str, Dict[str, str], str, List[str]]:
         """Parse docstring into structured components."""
-        lines = docstring.strip().split('\n')
+        lines = docstring.strip().split("\n")
 
         # Extract main description (everything before Args:)
         description_lines = []
         i = 0
-        while i < len(lines) and not lines[i].strip().startswith(('Args:', 'Parameters:')):
+        while i < len(lines) and not lines[i].strip().startswith(
+            ("Args:", "Parameters:")
+        ):
             description_lines.append(lines[i].strip())
             i += 1
 
-        description = ' '.join(description_lines).strip()
+        description = " ".join(description_lines).strip()
 
         # Extract parameters documentation
         params_doc = {}
@@ -116,25 +133,25 @@ class MCPToolExtractor:
         while i < len(lines):
             line = lines[i].strip()
 
-            if line.startswith(('Args:', 'Parameters:')):
-                current_section = 'params'
-            elif line.startswith('Returns:'):
-                current_section = 'returns'
-            elif line.startswith(('Examples:', 'Example:')):
-                current_section = 'examples'
-            elif line and current_section == 'params':
+            if line.startswith(("Args:", "Parameters:")):
+                current_section = "params"
+            elif line.startswith("Returns:"):
+                current_section = "returns"
+            elif line.startswith(("Examples:", "Example:")):
+                current_section = "examples"
+            elif line and current_section == "params":
                 # Parse parameter documentation
-                if ':' in line:
-                    param_name = line.split(':')[0].strip()
-                    param_desc = ':'.join(line.split(':')[1:]).strip()
+                if ":" in line:
+                    param_name = line.split(":")[0].strip()
+                    param_desc = ":".join(line.split(":")[1:]).strip()
                     params_doc[param_name] = param_desc
                     current_param = param_name
-                elif current_param and line.startswith((' ', '\t')):
+                elif current_param and line.startswith((" ", "\t")):
                     # Continuation of previous parameter description
-                    params_doc[current_param] += ' ' + line.strip()
-            elif line and current_section == 'returns':
-                returns_doc += line + ' '
-            elif line and current_section == 'examples':
+                    params_doc[current_param] += " " + line.strip()
+            elif line and current_section == "returns":
+                returns_doc += line + " "
+            elif line and current_section == "examples":
                 examples.append(line)
 
             i += 1
@@ -154,17 +171,19 @@ class MCPToolExtractor:
 
         for i, arg in enumerate(args.args):
             param_info = {
-                'name': arg.arg,
-                'type': self._extract_type_annotation(arg.annotation),
-                'required': i < (num_args - num_defaults),
-                'default': None
+                "name": arg.arg,
+                "type": self._extract_type_annotation(arg.annotation),
+                "required": i < (num_args - num_defaults),
+                "default": None,
             }
 
             # Add default value if available
             if i >= (num_args - num_defaults):
                 default_index = i - (num_args - num_defaults)
                 if default_index < len(defaults):
-                    param_info['default'] = self._extract_default_value(defaults[default_index])
+                    param_info["default"] = self._extract_default_value(
+                        defaults[default_index]
+                    )
 
             parameters.append(param_info)
 
@@ -204,55 +223,88 @@ class MCPToolExtractor:
     def _categorize_tool(self, name: str, description: str) -> str:
         """Categorize tool based on name and description."""
         name_lower = name.lower()
-        desc_lower = description.lower()
+        description.lower()
 
         # Core operations
-        if any(word in name_lower for word in ['create', 'add', 'delete', 'clear', 'get', 'list']):
+        if any(
+            word in name_lower
+            for word in ["create", "add", "delete", "clear", "get", "list"]
+        ):
             return "Core Operations"
 
         # Algorithms
-        elif any(word in name_lower for word in ['centrality', 'shortest', 'path', 'cluster', 'component']):
+        elif any(
+            word in name_lower
+            for word in ["centrality", "shortest", "path", "cluster", "component"]
+        ):
             return "Graph Algorithms"
 
         # Advanced analytics
-        elif any(word in name_lower for word in ['community', 'flow', 'bipartite', 'robustness', 'generate']):
+        elif any(
+            word in name_lower
+            for word in ["community", "flow", "bipartite", "robustness", "generate"]
+        ):
             return "Advanced Analytics"
 
         # Visualization
-        elif any(word in name_lower for word in ['visualize', 'plot', 'interactive', 'specialized']):
+        elif any(
+            word in name_lower
+            for word in ["visualize", "plot", "interactive", "specialized"]
+        ):
             return "Visualization"
 
         # Data integration
-        elif any(word in name_lower for word in ['import', 'export', 'batch', 'pipeline']):
+        elif any(
+            word in name_lower for word in ["import", "export", "batch", "pipeline"]
+        ):
             return "Data Integration"
 
         # Enterprise features
-        elif any(word in name_lower for word in ['audit', 'backup', 'permission', 'enterprise']):
+        elif any(
+            word in name_lower
+            for word in ["audit", "backup", "permission", "enterprise"]
+        ):
             return "Enterprise Features"
 
         else:
             return "Utilities"
 
-    def _extract_error_codes(self, node: ast.AsyncFunctionDef, source: str) -> List[Dict[str, str]]:
+    def _extract_error_codes(
+        self, node: ast.AsyncFunctionDef, source: str
+    ) -> List[Dict[str, str]]:
         """Extract error codes and descriptions from function source."""
         error_codes = []
 
         # Common patterns for error handling
         common_errors = [
-            {"code": "GRAPH_NOT_FOUND", "description": "The specified graph does not exist"},
-            {"code": "INVALID_PARAMETER", "description": "One or more parameters are invalid"},
-            {"code": "OPERATION_FAILED", "description": "The operation could not be completed"},
-            {"code": "INSUFFICIENT_DATA", "description": "Not enough data to perform the operation"},
+            {
+                "code": "GRAPH_NOT_FOUND",
+                "description": "The specified graph does not exist",
+            },
+            {
+                "code": "INVALID_PARAMETER",
+                "description": "One or more parameters are invalid",
+            },
+            {
+                "code": "OPERATION_FAILED",
+                "description": "The operation could not be completed",
+            },
+            {
+                "code": "INSUFFICIENT_DATA",
+                "description": "Not enough data to perform the operation",
+            },
             {"code": "MEMORY_LIMIT", "description": "Operation exceeds memory limits"},
         ]
 
         # Extract function source
         try:
             func_start = node.lineno
-            func_end = node.end_lineno if hasattr(node, 'end_lineno') else func_start + 50
+            func_end = (
+                node.end_lineno if hasattr(node, "end_lineno") else func_start + 50
+            )
 
-            source_lines = source.split('\n')
-            func_source = '\n'.join(source_lines[func_start-1:func_end])
+            source_lines = source.split("\n")
+            func_source = "\n".join(source_lines[func_start - 1 : func_end])
 
             # Look for specific error patterns
             for error in common_errors:
@@ -263,6 +315,7 @@ class MCPToolExtractor:
             pass
 
         return error_codes[:3]  # Limit to 3 most relevant errors
+
 
 class DocumentationGenerator:
     """Generate markdown documentation from extracted tool information."""
@@ -283,25 +336,27 @@ class DocumentationGenerator:
         # Description
         md.append("## Description")
         md.append("")
-        md.append(tool['description'])
+        md.append(tool["description"])
         md.append("")
 
         # Parameters
         md.append("## Parameters")
         md.append("")
 
-        if tool['parameters']:
+        if tool["parameters"]:
             md.append("| Name | Type | Required | Default | Description |")
             md.append("|------|------|----------|---------|-------------|")
 
-            for param in tool['parameters']:
-                name = param['name']
-                param_type = param['type']
-                required = "Yes" if param['required'] else "No"
-                default = str(param['default']) if param['default'] is not None else "-"
-                description = tool['params_doc'].get(name, "No description available")
+            for param in tool["parameters"]:
+                name = param["name"]
+                param_type = param["type"]
+                required = "Yes" if param["required"] else "No"
+                default = str(param["default"]) if param["default"] is not None else "-"
+                description = tool["params_doc"].get(name, "No description available")
 
-                md.append(f"| `{name}` | `{param_type}` | {required} | `{default}` | {description} |")
+                md.append(
+                    f"| `{name}` | `{param_type}` | {required} | `{default}` | {description} |"
+                )
         else:
             md.append("No parameters required.")
 
@@ -312,29 +367,29 @@ class DocumentationGenerator:
         md.append("")
         md.append(f"**Type:** `{tool['returns']}`")
         md.append("")
-        if tool['returns_doc']:
-            md.append(tool['returns_doc'])
+        if tool["returns_doc"]:
+            md.append(tool["returns_doc"])
         else:
             md.append("Returns operation result with status and metadata.")
         md.append("")
 
         # Examples
-        if tool['examples']:
+        if tool["examples"]:
             md.append("## Examples")
             md.append("")
-            for example in tool['examples']:
+            for example in tool["examples"]:
                 md.append("```python")
                 md.append(example)
                 md.append("```")
             md.append("")
 
         # Error Codes
-        if tool['error_codes']:
+        if tool["error_codes"]:
             md.append("## Error Codes")
             md.append("")
             md.append("| Code | Description |")
             md.append("|------|-------------|")
-            for error in tool['error_codes']:
+            for error in tool["error_codes"]:
                 md.append(f"| `{error['code']}` | {error['description']} |")
             md.append("")
 
@@ -344,7 +399,7 @@ class DocumentationGenerator:
         md.append(f"Located in: `{tool['source_location']}`")
         md.append("")
 
-        return '\n'.join(md)
+        return "\n".join(md)
 
     def generate_api_index(self, tools: List[Dict[str, Any]]) -> str:
         """Generate API index with all tools organized by category."""
@@ -353,12 +408,14 @@ class DocumentationGenerator:
         # Header
         md.append("# NetworkX MCP Server API Reference")
         md.append("")
-        md.append("Complete documentation for all 39 graph analysis tools available in the NetworkX MCP Server.")
+        md.append(
+            "Complete documentation for all 39 graph analysis tools available in the NetworkX MCP Server."
+        )
         md.append("")
 
         # Quick stats
         total_tools = len(tools)
-        categories = set(tool['category'] for tool in tools)
+        categories = {tool["category"] for tool in tools}
 
         md.append("## Overview")
         md.append("")
@@ -375,7 +432,7 @@ class DocumentationGenerator:
         # Group tools by category
         by_category = {}
         for tool in tools:
-            category = tool['category']
+            category = tool["category"]
             if category not in by_category:
                 by_category[category] = []
             by_category[category].append(tool)
@@ -388,7 +445,7 @@ class DocumentationGenerator:
             "Visualization",
             "Data Integration",
             "Enterprise Features",
-            "Utilities"
+            "Utilities",
         ]
 
         for category in category_order:
@@ -397,11 +454,17 @@ class DocumentationGenerator:
                 md.append("")
 
                 # Sort tools alphabetically within category
-                category_tools = sorted(by_category[category], key=lambda x: x['name'])
+                category_tools = sorted(by_category[category], key=lambda x: x["name"])
 
                 for tool in category_tools:
-                    description = tool['description'][:100] + "..." if len(tool['description']) > 100 else tool['description']
-                    md.append(f"- [`{tool['name']}`](tools/{tool['name']}.md) - {description}")
+                    description = (
+                        tool["description"][:100] + "..."
+                        if len(tool["description"]) > 100
+                        else tool["description"]
+                    )
+                    md.append(
+                        f"- [`{tool['name']}`](tools/{tool['name']}.md) - {description}"
+                    )
 
                 md.append("")
 
@@ -453,10 +516,13 @@ class DocumentationGenerator:
         md.append("- [Getting Started Guide](../getting-started.md)")
         md.append("- [Examples](../examples/)")
         md.append("- [Contributing](../CONTRIBUTING.md)")
-        md.append("- [Issue Tracker](https://github.com/yourusername/networkx-mcp-server/issues)")
+        md.append(
+            "- [Issue Tracker](https://github.com/yourusername/networkx-mcp-server/issues)"
+        )
         md.append("")
 
-        return '\n'.join(md)
+        return "\n".join(md)
+
 
 def main():
     """Generate comprehensive API documentation."""
@@ -494,28 +560,28 @@ def main():
     for tool in tools:
         doc_content = generator.generate_tool_documentation(tool)
         doc_file = tools_dir / f"{tool['name']}.md"
-        doc_file.write_text(doc_content, encoding='utf-8')
+        doc_file.write_text(doc_content, encoding="utf-8")
         print(f"  ✅ {tool['name']}.md")
 
     # Generate API index
     print("📋 Generating API index...")
     index_content = generator.generate_api_index(tools)
     index_file = api_dir / "README.md"
-    index_file.write_text(index_content, encoding='utf-8')
+    index_file.write_text(index_content, encoding="utf-8")
 
     print("\n📊 Documentation Summary:")
     print(f"  Tools documented: {len(tools)}")
-    print(f"  Categories: {len(set(tool['category'] for tool in tools))}")
+    print(f"  Categories: {len({tool['category'] for tool in tools})}")
     print(f"  Files created: {len(tools) + 1}")
     print(f"  Output directory: {api_dir}")
 
     # Create categories summary
     categories = {}
     for tool in tools:
-        cat = tool['category']
+        cat = tool["category"]
         if cat not in categories:
             categories[cat] = []
-        categories[cat].append(tool['name'])
+        categories[cat].append(tool["name"])
 
     print("\n📈 Tools by Category:")
     for cat, tool_names in sorted(categories.items()):
@@ -529,6 +595,7 @@ def main():
     print("📖 View the index at: docs/api/README.md")
 
     return True
+
 
 if __name__ == "__main__":
     success = main()

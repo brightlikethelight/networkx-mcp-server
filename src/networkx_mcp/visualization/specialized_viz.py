@@ -185,7 +185,7 @@ class SpecializedVisualizations:
                         y=path_y,
                         mode="lines",
                         line={
-                            "color": f"rgba(100, 100, 100, {min(weight/adj_matrix.max(), 1)})",
+                            "color": f"rgba(100, 100, 100, {min(weight / adj_matrix.max(), 1)})",
                             "width": weight * 3 / adj_matrix.max(),
                         },
                         hoverinfo="text",

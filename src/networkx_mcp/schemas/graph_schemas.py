@@ -2,28 +2,26 @@
 
 from typing import Any, Dict, List, Literal, Optional, Union
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class NodeSchema(BaseModel):
     """Schema for node data."""
 
+    model_config = ConfigDict(extra="allow")
+
     id: Union[str, int]
     attributes: Dict[str, Any] = Field(default_factory=dict)
-
-    class Config:
-        extra = "allow"
 
 
 class EdgeSchema(BaseModel):
     """Schema for edge data."""
 
+    model_config = ConfigDict(extra="allow")
+
     source: Union[str, int]
     target: Union[str, int]
     attributes: Dict[str, Any] = Field(default_factory=dict)
-
-    class Config:
-        extra = "allow"
 
 
 class GraphSchema(BaseModel):
@@ -124,10 +122,11 @@ class ImportGraphRequest(BaseModel):
     graph_id: Optional[str] = None
     options: Dict[str, Any] = Field(default_factory=dict)
 
-    @validator("data")
-    def validate_data_or_path(self, v, values):
+    @field_validator("data")
+    @classmethod
+    def validate_data_or_path(cls, v, info):
         """Ensure either data or path is provided."""
-        if v is None and values.get("path") is None:
+        if v is None and info.data.get("path") is None:
             msg = "Either 'data' or 'path' must be provided"
             raise ValueError(msg)
         return v

@@ -134,21 +134,21 @@ class NetworkXCLI:
             # Create info panel
             info_text = f"""
 [bold]Graph: {graph_id}[/bold]
-Type: {info['graph_type']}
-Nodes: {info['num_nodes']}
-Edges: {info['num_edges']}
-Density: {info['density']:.4f}
-Directed: {info['is_directed']}
-MultiGraph: {info['is_multigraph']}
+Type: {info["graph_type"]}
+Nodes: {info["num_nodes"]}
+Edges: {info["num_edges"]}
+Density: {info["density"]:.4f}
+Directed: {info["is_directed"]}
+MultiGraph: {info["is_multigraph"]}
             """
 
             if "degree_stats" in info:
                 stats = info["degree_stats"]
                 info_text += f"""
 Degree Stats:
-  Average: {stats['average']:.2f}
-  Min: {stats['min']}
-  Max: {stats['max']}
+  Average: {stats["average"]:.2f}
+  Min: {stats["min"]}
+  Max: {stats["max"]}
             """
 
             console.print(Panel(info_text, title="Graph Information"))
@@ -255,18 +255,18 @@ Degree Stats:
                 stats = GraphAlgorithms.graph_statistics(graph)
 
                 metrics_text = f"""
-Nodes: {stats['num_nodes']}
-Edges: {stats['num_edges']}
-Density: {stats['density']:.4f}
-Avg Degree: {stats['degree_stats']['mean']:.2f}
-Max Degree: {stats['degree_stats']['max']}
-Min Degree: {stats['degree_stats']['min']}
+Nodes: {stats["num_nodes"]}
+Edges: {stats["num_edges"]}
+Density: {stats["density"]:.4f}
+Avg Degree: {stats["degree_stats"]["mean"]:.2f}
+Max Degree: {stats["degree_stats"]["max"]}
+Min Degree: {stats["degree_stats"]["min"]}
                 """
 
                 if "diameter" in stats:
                     metrics_text += f"""
-Diameter: {stats['diameter']}
-Radius: {stats['radius']}
+Diameter: {stats["diameter"]}
+Radius: {stats["radius"]}
                     """
 
                 console.print(Panel(metrics_text, title="Graph Metrics"))
@@ -363,11 +363,11 @@ Radius: {stats['radius']}
         # Show results
         results = f"""
 [bold]Benchmark Results ({size} nodes, {len(edges)} edges):[/bold]
-Node creation: {node_time*1000:.2f} ms
-Edge creation: {edge_time*1000:.2f} ms
-Centrality calculation: {centrality_time*1000:.2f} ms
-Component detection: {component_time*1000:.2f} ms
-Total: {(node_time + edge_time + centrality_time + component_time)*1000:.2f} ms
+Node creation: {node_time * 1000:.2f} ms
+Edge creation: {edge_time * 1000:.2f} ms
+Centrality calculation: {centrality_time * 1000:.2f} ms
+Component detection: {component_time * 1000:.2f} ms
+Total: {(node_time + edge_time + centrality_time + component_time) * 1000:.2f} ms
         """
         console.print(Panel(results, title="Benchmark Complete"))
 

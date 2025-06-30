@@ -154,7 +154,7 @@ class RedisRealityCheck:
                 graph_manager.add_nodes_from(graph_id, nodes)
 
                 # Add edges
-                edges = [(f"node_{j}", f"node_{j+1}") for j in range(19)]
+                edges = [(f"node_{j}", f"node_{j + 1}") for j in range(19)]
                 graph_manager.add_edges_from(graph_id, edges)
 
                 # Store expected data
@@ -209,7 +209,6 @@ class RedisRealityCheck:
             # Try to recover each graph
             recovered_count = 0
             for graph_id, expected_data in expected_graphs.items():
-
                 # Try to load from Redis
                 if hasattr(graph_manager, "_storage"):
                     stored_graph = graph_manager._storage.load_graph(
@@ -309,7 +308,8 @@ class RedisRealityCheck:
             # Test 1: Verify Redis backend is available
             print("📝 Test 1: Checking Redis backend availability...")
             try:
-                from src.networkx_mcp.storage.redis_backend import RedisGraphStorage
+                from src.networkx_mcp.storage.redis_backend import \
+                    RedisGraphStorage
 
                 print("✅ Redis backend module exists")
             except ImportError:

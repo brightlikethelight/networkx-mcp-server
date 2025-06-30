@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Run NetworkX MCP Server without FastMCP/Pydantic v2 dependencies."""
 
-import asyncio
 import sys
 from pathlib import Path
 

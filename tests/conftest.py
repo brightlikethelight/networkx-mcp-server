@@ -67,6 +67,14 @@ async def mcp_server():
 
 
 @pytest.fixture
+def graph_manager():
+    """Create a GraphManager instance for testing."""
+    from networkx_mcp.core.graph_operations import GraphManager
+    
+    return GraphManager()
+
+
+@pytest.fixture
 def mock_redis_backend(mocker):
     """Mock Redis backend for testing."""
     mock = mocker.Mock(spec=RedisBackend)

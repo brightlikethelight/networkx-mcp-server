@@ -31,7 +31,6 @@ class CommunityDetector(ABC):
     @abstractmethod
     async def detect_communities(self, **params) -> CommunityResult:
         """Detect communities in the graph."""
-        pass
 
     def validate_graph(self) -> bool:
         """Validate graph is suitable for community detection."""

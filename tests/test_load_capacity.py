@@ -124,7 +124,6 @@ class TestLoadCapacity:
 
             # Test with increasing numbers of concurrent users
             for num_users in [1, 5, 10, 20, 50]:
-
                 start_time = time.time()
                 start_stats = self.get_system_stats()
 
@@ -231,7 +230,6 @@ class TestLoadCapacity:
 
             # Test 2: Try to create many small graphs
             try:
-
                 start_memory = self.get_system_stats()["memory_mb"]
 
                 for i in range(1000):  # 1000 small graphs
@@ -304,7 +302,7 @@ class TestLoadCapacity:
                 latencies["add_nodes"].append((time.time() - start) * 1000)
 
                 # Test add_edges latency
-                edges = [(f"n{i}", f"n{i+1}") for i in range(99)]
+                edges = [(f"n{i}", f"n{i + 1}") for i in range(99)]
                 start = time.time()
                 graph_manager.add_edges_from(graph_id, edges)
                 latencies["add_edges"].append((time.time() - start) * 1000)

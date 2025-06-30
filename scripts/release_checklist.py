@@ -11,7 +11,8 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
+from typing import List
 
 # ANSI color codes
 GREEN = "\033[92m"
@@ -22,7 +23,9 @@ BOLD = "\033[1m"
 RESET = "\033[0m"
 
 
-def run_command(cmd: List[str], capture_output: bool = True, check: bool = False) -> subprocess.CompletedProcess:
+def run_command(
+    cmd: List[str], capture_output: bool = True, check: bool = False
+) -> subprocess.CompletedProcess:
     """Run a command and return the result."""
     try:
         return subprocess.run(
@@ -30,7 +33,7 @@ def run_command(cmd: List[str], capture_output: bool = True, check: bool = False
             capture_output=capture_output,
             text=True,
             check=check,
-            cwd=Path(__file__).parent.parent
+            cwd=Path(__file__).parent.parent,
         )
     except subprocess.CalledProcessError as e:
         return e
@@ -105,14 +108,28 @@ class ReleaseChecker:
 
         try:
             bandit_data = json.loads(bandit_result.stdout)
-            high_severity = [r for r in bandit_data.get("results", []) if r.get("issue_severity") == "HIGH"]
+            high_severity = [
+                r
+                for r in bandit_data.get("results", [])
+                if r.get("issue_severity") == "HIGH"
+            ]
             return len(high_severity) == 0
         except json.JSONDecodeError:
             return False
 
     def check_test_coverage(self) -> bool:
         """Check if test coverage is above 90%."""
-        result = run_command(["python", "-m", "pytest", "--cov=src/networkx_mcp", "--cov-report=json", "--tb=no", "-q"])
+        result = run_command(
+            [
+                "python",
+                "-m",
+                "pytest",
+                "--cov=src/networkx_mcp",
+                "--cov-report=json",
+                "--tb=no",
+                "-q",
+            ]
+        )
         if result.returncode != 0:
             return False
 
@@ -175,7 +192,7 @@ class ReleaseChecker:
         with open(self.project_root / "CHANGELOG.md") as f:
             changelog_content = f.read()
 
-        changelog_match = re.search(r'\[(\d+\.\d+\.\d+)\]', changelog_content)
+        changelog_match = re.search(r"\[(\d+\.\d+\.\d+)\]", changelog_content)
         if not changelog_match:
             return False
         changelog_version = changelog_match.group(1)
@@ -223,8 +240,13 @@ class ReleaseChecker:
             content = f.read()
 
         required_sections = [
-            "installation", "features", "usage", "examples",
-            "documentation", "contributing", "license"
+            "installation",
+            "features",
+            "usage",
+            "examples",
+            "documentation",
+            "contributing",
+            "license",
         ]
 
         content_lower = content.lower()
@@ -239,30 +261,37 @@ class ReleaseChecker:
             # Critical files
             ("README.md exists", lambda: self.check_file_exists("README.md"), True),
             ("LICENSE exists", lambda: self.check_file_exists("LICENSE"), True),
-            ("CHANGELOG.md exists", lambda: self.check_file_exists("CHANGELOG.md"), True),
-            ("CONTRIBUTING.md exists", lambda: self.check_file_exists("CONTRIBUTING.md"), True),
-            ("pyproject.toml exists", lambda: self.check_file_exists("pyproject.toml"), True),
-
+            (
+                "CHANGELOG.md exists",
+                lambda: self.check_file_exists("CHANGELOG.md"),
+                True,
+            ),
+            (
+                "CONTRIBUTING.md exists",
+                lambda: self.check_file_exists("CONTRIBUTING.md"),
+                True,
+            ),
+            (
+                "pyproject.toml exists",
+                lambda: self.check_file_exists("pyproject.toml"),
+                True,
+            ),
             # Code quality
             ("All tests pass", self.check_tests_pass, True),
             ("Code formatting (Black + Ruff)", self.check_linting, True),
             ("Type checking passes (MyPy)", self.check_type_checking, True),
             ("Security scan clean", self.check_security_scan, True),
             ("Test coverage ≥ 90%", self.check_test_coverage, True),
-
             # Build and packaging
             ("Key imports work", self.check_imports_work, True),
             ("Package builds successfully", self.check_package_builds, True),
             ("Version consistency", self.check_version_consistency, True),
-
             # Documentation
             ("API docs generated (39+ tools)", self.check_api_docs_exist, True),
             ("README quality check", self.check_readme_quality, True),
-
             # Git repository
             ("Git repository clean", self.check_git_clean, True),
             ("Current commit tagged", self.check_git_tagged, False),
-
             # Optional but recommended
             ("Example scripts compile", self.check_examples_work, False),
             ("Docker image builds", self.check_docker_builds, False),
@@ -335,11 +364,18 @@ def main():
     results = checker.run_all_checks()
 
     # Exit with error code if critical checks failed
-    critical_failed = sum(1 for name, passed in results.items()
-                         if not passed and "exists" in name.lower() or
-                         "pass" in name.lower() or "clean" in name.lower() or
-                         "work" in name.lower() or "builds" in name.lower() or
-                         "consistency" in name.lower() or "coverage" in name.lower())
+    critical_failed = sum(
+        1
+        for name, passed in results.items()
+        if not passed
+        and "exists" in name.lower()
+        or "pass" in name.lower()
+        or "clean" in name.lower()
+        or "work" in name.lower()
+        or "builds" in name.lower()
+        or "consistency" in name.lower()
+        or "coverage" in name.lower()
+    )
 
     sys.exit(0 if critical_failed == 0 else 1)
 

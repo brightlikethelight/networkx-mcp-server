@@ -13,6 +13,7 @@ import psutil
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
+
 class ProductionValidator:
     """Comprehensive production readiness validation."""
 
@@ -22,12 +23,14 @@ class ProductionValidator:
 
     def add_result(self, check_name: str, passed: bool, details: str = ""):
         """Add a validation result."""
-        self.results.append({
-            "check": check_name,
-            "passed": passed,
-            "details": details,
-            "timestamp": time.time() - self.start_time
-        })
+        self.results.append(
+            {
+                "check": check_name,
+                "passed": passed,
+                "details": details,
+                "timestamp": time.time() - self.start_time,
+            }
+        )
 
         status = "✅" if passed else "❌"
         print(f"{status} {check_name}")
@@ -39,7 +42,8 @@ class ProductionValidator:
         try:
             result = subprocess.run(
                 ["grep", "-r", "exec(", "src/", "--include=*.py"],
-                capture_output=True, text=True
+                capture_output=True,
+                text=True,
             )
             return result.returncode != 0  # No matches means good
         except:
@@ -50,7 +54,8 @@ class ProductionValidator:
         try:
             result = subprocess.run(
                 ["grep", "-r", "eval(", "src/", "--include=*.py"],
-                capture_output=True, text=True
+                capture_output=True,
+                text=True,
             )
             return result.returncode != 0  # No matches means good
         except:
@@ -90,7 +95,8 @@ class ProductionValidator:
         """Test basic rate limiting functionality."""
         try:
             from collections import defaultdict
-            from datetime import datetime, timedelta
+            from datetime import datetime
+            from datetime import timedelta
 
             class TestRateLimiter:
                 def __init__(self, max_requests=3, window_seconds=1):
@@ -102,7 +108,8 @@ class ProductionValidator:
                     now = datetime.now()
                     # Clean old requests
                     self.requests[key] = [
-                        req_time for req_time in self.requests[key]
+                        req_time
+                        for req_time in self.requests[key]
                         if now - req_time < self.window
                     ]
                     # Check limit
@@ -132,7 +139,8 @@ class ProductionValidator:
         """Check if Redis is available and working."""
         try:
             import redis
-            r = redis.Redis(host='localhost', port=6379, decode_responses=True)
+
+            r = redis.Redis(host="localhost", port=6379, decode_responses=True)
             r.ping()
             return True
         except:
@@ -159,10 +167,9 @@ class ProductionValidator:
                 return False
 
             # Check if it's in persistent storage
-            if hasattr(graph_manager, '_storage'):
+            if hasattr(graph_manager, "_storage"):
                 stored_graph = graph_manager._storage.load_graph(
-                    graph_manager._default_user,
-                    "persistence_check"
+                    graph_manager._default_user, "persistence_check"
                 )
 
                 # Clean up
@@ -193,7 +200,9 @@ class ProductionValidator:
                     graph_id = f"worker_{worker_id}_graph_{i}"
                     try:
                         graph_manager.create_graph(graph_id, "Graph")
-                        graph_manager.add_nodes_from(graph_id, [f"n{j}" for j in range(5)])
+                        graph_manager.add_nodes_from(
+                            graph_id, [f"n{j}" for j in range(5)]
+                        )
                         graph_manager.delete_graph(graph_id)
                     except Exception:
                         return False
@@ -254,7 +263,7 @@ class ProductionValidator:
             add_persistence.patch_graph_manager_with_persistence()
 
             # Monitor CPU during intensive operations
-            start_cpu = psutil.Process().cpu_percent()
+            psutil.Process().cpu_percent()
 
             # Perform CPU-intensive operations
             for i in range(10):
@@ -268,7 +277,7 @@ class ProductionValidator:
                 # Add many edges
                 edges = []
                 for j in range(0, 100, 10):
-                    for k in range(j+1, min(j+10, 100)):
+                    for k in range(j + 1, min(j + 10, 100)):
                         edges.append((f"n{j}", f"n{k}"))
                 graph_manager.add_edges_from(graph_id, edges)
 
@@ -291,7 +300,7 @@ class ProductionValidator:
             sys.path.append(str(Path(__file__).parent / "tests"))
             from test_load_capacity import TestLoadCapacity
 
-            load_tester = TestLoadCapacity()
+            TestLoadCapacity()
 
             # Quick test with just 5 users, 3 operations each
             import security_patches
@@ -368,7 +377,7 @@ class ProductionValidator:
             from src.networkx_mcp.server import graph_manager
 
             # If we can import it, consider it healthy
-            return hasattr(graph_manager, 'list_graphs')
+            return hasattr(graph_manager, "list_graphs")
         except:
             return False
 
@@ -379,7 +388,7 @@ class ProductionValidator:
 
             # Check if we have storage stats (basic metrics)
             storage = add_persistence.patch_graph_manager_with_persistence()
-            if storage and hasattr(storage, 'get_stats'):
+            if storage and hasattr(storage, "get_stats"):
                 return True
             return False
         except:
@@ -391,10 +400,12 @@ class ProductionValidator:
             import logging
 
             # Check if there are any loggers configured
-            loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
+            loggers = [
+                logging.getLogger(name) for name in logging.root.manager.loggerDict
+            ]
 
             # Look for our server loggers
-            server_loggers = [l for l in loggers if 'networkx_mcp' in l.name]
+            server_loggers = [l for l in loggers if "networkx_mcp" in l.name]
 
             return len(server_loggers) > 0
         except:
@@ -444,16 +455,20 @@ class ProductionValidator:
         try:
             result = subprocess.run(
                 ["grep", "-r", "TODO", "src/", "--include=*.py"],
-                capture_output=True, text=True
+                capture_output=True,
+                text=True,
             )
 
             # Count TODO items
-            todo_lines = result.stdout.strip().split('\n') if result.stdout.strip() else []
+            todo_lines = (
+                result.stdout.strip().split("\n") if result.stdout.strip() else []
+            )
 
             # Should have < 5 TODO items for production readiness
             return len(todo_lines) < 5
         except:
             return True  # If grep fails, assume no TODOs
+
 
 async def validate_production():
     """Run complete production validation."""
@@ -470,7 +485,9 @@ async def validate_production():
     validator.add_result("No exec() in codebase", validator.check_no_exec())
     validator.add_result("No eval() in codebase", validator.check_no_eval())
     validator.add_result("Pickle format disabled", validator.check_pickle_disabled())
-    validator.add_result("Input validation active", await validator.check_input_validation())
+    validator.add_result(
+        "Input validation active", await validator.check_input_validation()
+    )
     validator.add_result("Rate limiting working", await validator.check_rate_limiting())
 
     # Persistence checks
@@ -478,14 +495,20 @@ async def validate_production():
     print("-" * 30)
     validator.add_result("Redis connected", validator.check_redis_connection())
     validator.add_result("Data persists restart", await validator.check_persistence())
-    validator.add_result("Concurrent access safe", await validator.check_concurrent_safety())
+    validator.add_result(
+        "Concurrent access safe", await validator.check_concurrent_safety()
+    )
 
     # Performance checks
     print("\n⚡ PERFORMANCE CHECKS")
     print("-" * 30)
-    validator.add_result("Memory limits enforced", await validator.check_memory_limits())
+    validator.add_result(
+        "Memory limits enforced", await validator.check_memory_limits()
+    )
     validator.add_result("CPU limits reasonable", await validator.check_cpu_limits())
-    validator.add_result("Handles 5 concurrent users", await validator.check_concurrent_users())
+    validator.add_result(
+        "Handles 5 concurrent users", await validator.check_concurrent_users()
+    )
     validator.add_result("P95 latency < 500ms", await validator.check_latency())
 
     # Operational checks
@@ -499,8 +522,12 @@ async def validate_production():
     # Architecture checks
     print("\n🏗️ ARCHITECTURE CHECKS")
     print("-" * 30)
-    validator.add_result("No single file > 500 lines (except server.py)", validator.check_file_sizes())
-    validator.add_result("Test coverage > 5 test files", validator.check_test_coverage())
+    validator.add_result(
+        "No single file > 500 lines (except server.py)", validator.check_file_sizes()
+    )
+    validator.add_result(
+        "Test coverage > 5 test files", validator.check_test_coverage()
+    )
     validator.add_result("< 5 TODO items remaining", validator.check_todos())
 
     # Generate final report
@@ -521,16 +548,43 @@ async def validate_production():
     print("\n📈 SCORE BREAKDOWN:")
 
     categories = {
-        "Security": [r for r in validator.results if any(term in r["check"].lower()
-                    for term in ["exec", "eval", "pickle", "validation", "rate"])],
-        "Persistence": [r for r in validator.results if any(term in r["check"].lower()
-                       for term in ["redis", "persist", "concurrent"])],
-        "Performance": [r for r in validator.results if any(term in r["check"].lower()
-                       for term in ["memory", "cpu", "users", "latency"])],
-        "Operations": [r for r in validator.results if any(term in r["check"].lower()
-                      for term in ["health", "metrics", "logging", "error"])],
-        "Architecture": [r for r in validator.results if any(term in r["check"].lower()
-                        for term in ["file", "coverage", "todo"])]
+        "Security": [
+            r
+            for r in validator.results
+            if any(
+                term in r["check"].lower()
+                for term in ["exec", "eval", "pickle", "validation", "rate"]
+            )
+        ],
+        "Persistence": [
+            r
+            for r in validator.results
+            if any(
+                term in r["check"].lower()
+                for term in ["redis", "persist", "concurrent"]
+            )
+        ],
+        "Performance": [
+            r
+            for r in validator.results
+            if any(
+                term in r["check"].lower()
+                for term in ["memory", "cpu", "users", "latency"]
+            )
+        ],
+        "Operations": [
+            r
+            for r in validator.results
+            if any(
+                term in r["check"].lower()
+                for term in ["health", "metrics", "logging", "error"]
+            )
+        ],
+        "Architecture": [
+            r
+            for r in validator.results
+            if any(term in r["check"].lower() for term in ["file", "coverage", "todo"])
+        ],
     }
 
     for category, checks in categories.items():
@@ -578,9 +632,12 @@ async def validate_production():
         print("    python tests/test_load_capacity.py")
         print("    python verify_security.py")
 
-    print(f"\n⏱️ Total validation time: {time.time() - validator.start_time:.2f} seconds")
+    print(
+        f"\n⏱️ Total validation time: {time.time() - validator.start_time:.2f} seconds"
+    )
 
     return score_percent >= 80  # 80% is our threshold for production readiness
+
 
 if __name__ == "__main__":
     success = asyncio.run(validate_production())

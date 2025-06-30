@@ -52,7 +52,7 @@ class TestRedisPersistence:
                 graph_manager.add_nodes_from(graph_id, nodes)
 
                 # Add some edges
-                edges = [(f"N{j}", f"N{j+1}") for j in range(9)]
+                edges = [(f"N{j}", f"N{j + 1}") for j in range(9)]
                 graph_manager.add_edges_from(graph_id, edges)
 
                 # Store expected data
@@ -80,7 +80,6 @@ class TestRedisPersistence:
             # Check if we can load graphs from persistent storage
             recovered_count = 0
             for graph_id, expected_data in graphs_created.items():
-
                 # Try to load from persistent storage
                 if hasattr(graph_manager, "_storage"):
                     stored_graph = graph_manager._storage.load_graph(

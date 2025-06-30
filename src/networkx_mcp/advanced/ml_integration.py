@@ -520,7 +520,6 @@ class MLIntegration:
                     }
                 except Exception as e:
                     logger.debug(f"Failed to compute PageRank: {e}")
-                    pass
 
             features["centrality"] = centrality_stats
 

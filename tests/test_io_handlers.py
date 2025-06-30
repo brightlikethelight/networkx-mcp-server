@@ -266,7 +266,9 @@ class TestFormatConverters:
         nodes = ["W", "X", "Y", "Z"]
 
         edges = GraphIOHandler.adjacency_to_edge_list(
-            matrix, node_labels=nodes, threshold=1.5  # Only edges with weight > 1.5
+            matrix,
+            node_labels=nodes,
+            threshold=1.5,  # Only edges with weight > 1.5
         )
 
         assert len(edges) == 3

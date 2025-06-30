@@ -12,17 +12,12 @@ def check_installation():
 
     try:
         # Test core imports
-        from networkx_mcp.core.algorithms import GraphAlgorithms
-        from networkx_mcp.core.graph_operations import GraphManager
-        from networkx_mcp.server import mcp
         print("   ✅ Core modules imported successfully")
 
         # Test advanced imports
-        from networkx_mcp.advanced import CommunityDetection, GraphGenerators
         print("   ✅ Advanced analytics modules imported")
 
         # Test visualization imports
-        from networkx_mcp.visualization import MatplotlibVisualizer
         print("   ✅ Visualization modules imported")
 
         return True
@@ -55,9 +50,10 @@ def test_basic_functionality():
         print(f"   ✅ Added {result['nodes_added']} nodes")
 
         # Add edges
-        result = manager.add_edges_from("quickstart_test", [
-            ("Alice", "Bob"), ("Bob", "Charlie"), ("Charlie", "Alice")
-        ])
+        result = manager.add_edges_from(
+            "quickstart_test",
+            [("Alice", "Bob"), ("Bob", "Charlie"), ("Charlie", "Alice")],
+        )
         print(f"   ✅ Added {result['edges_added']} edges")
 
         # Get graph info
@@ -85,8 +81,12 @@ def test_algorithms():
         graph = nx.karate_club_graph()
 
         # Test centrality measures
-        centrality = GraphAlgorithms.centrality_measures(graph, measures=["degree", "betweenness"])
-        print(f"   ✅ Centrality calculation: {len(centrality['degree_centrality'])} nodes analyzed")
+        centrality = GraphAlgorithms.centrality_measures(
+            graph, measures=["degree", "betweenness"]
+        )
+        print(
+            f"   ✅ Centrality calculation: {len(centrality['degree_centrality'])} nodes analyzed"
+        )
 
         # Test shortest path
         path_result = GraphAlgorithms.shortest_path(graph, 0, 33)
@@ -94,7 +94,9 @@ def test_algorithms():
 
         # Test connected components
         components = GraphAlgorithms.connected_components(graph)
-        print(f"   ✅ Connected components: {components['num_components']} component(s)")
+        print(
+            f"   ✅ Connected components: {components['num_components']} component(s)"
+        )
 
         return True
 
@@ -114,9 +116,11 @@ def test_mcp_tools():
         import subprocess
 
         from networkx_mcp.server import mcp
+
         result = subprocess.run(
             ["grep", "-c", "@mcp.tool", "src/networkx_mcp/server.py"],
-            capture_output=True, text=True
+            capture_output=True,
+            text=True,
         )
 
         if result.returncode == 0:
@@ -131,7 +135,7 @@ def test_mcp_tools():
             print("   ⚠️ Could not count MCP tools")
 
         # Test server object creation
-        if hasattr(mcp, 'tools'):
+        if hasattr(mcp, "tools"):
             print("   ✅ MCP server object created successfully")
         else:
             print("   ⚠️ MCP server object may not be properly configured")
@@ -165,6 +169,7 @@ def test_visualization():
         try:
             from networkx_mcp.visualization.plotly_visualizer import \
                 PlotlyVisualizer
+
             result = PlotlyVisualizer.create_interactive_plot(graph)
             print("   ✅ Plotly visualization: interactive plot created")
         except ImportError:
@@ -186,10 +191,19 @@ def show_usage_examples():
     examples = [
         ("Create a graph", "await create_graph('social', 'Graph')"),
         ("Add nodes", "await add_nodes('social', ['Alice', 'Bob', 'Charlie'])"),
-        ("Add edges", "await add_edges('social', [('Alice', 'Bob'), ('Bob', 'Charlie')])"),
-        ("Calculate centrality", "await centrality_measures('social', ['degree', 'betweenness'])"),
+        (
+            "Add edges",
+            "await add_edges('social', [('Alice', 'Bob'), ('Bob', 'Charlie')])",
+        ),
+        (
+            "Calculate centrality",
+            "await centrality_measures('social', ['degree', 'betweenness'])",
+        ),
         ("Find shortest path", "await shortest_path('social', 'Alice', 'Charlie')"),
-        ("Detect communities", "await community_detection('social', algorithm='louvain')"),
+        (
+            "Detect communities",
+            "await community_detection('social', algorithm='louvain')",
+        ),
         ("Visualize graph", "await visualize_graph('social', layout='spring')"),
         ("Export graph", "await export_graph('social', format='json')"),
     ]

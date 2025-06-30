@@ -322,7 +322,6 @@ class NetworkFlow:
                     and level[v] == level[u] + 1
                     and residual[u][v].get(capacity, 0) > 0
                 ):
-
                     min_flow = min(flow, residual[u][v].get(capacity, 0))
                     result = dfs_blocking_flow(residual, v, sink, min_flow, level)
 

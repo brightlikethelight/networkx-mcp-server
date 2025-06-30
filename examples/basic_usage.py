@@ -16,7 +16,7 @@ async def demonstrate_basic_operations():
     create_request = {
         "graph_id": "social_network",
         "graph_type": "Graph",
-        "name": "Example Social Network"
+        "name": "Example Social Network",
     }
     print(f"Request: {json.dumps(create_request, indent=2)}")
     print("Expected Response: Graph created successfully\n")
@@ -28,12 +28,9 @@ async def demonstrate_basic_operations():
         {"id": "Bob", "age": 25, "city": "Boston"},
         {"id": "Charlie", "age": 35, "city": "Chicago"},
         {"id": "David", "age": 28, "city": "Denver"},
-        {"id": "Eve", "age": 32, "city": "Seattle"}
+        {"id": "Eve", "age": 32, "city": "Seattle"},
     ]
-    add_nodes_request = {
-        "graph_id": "social_network",
-        "nodes": nodes
-    }
+    add_nodes_request = {"graph_id": "social_network", "nodes": nodes}
     print(f"Request: {json.dumps(add_nodes_request, indent=2)}")
     print("Expected Response: 5 nodes added\n")
 
@@ -45,12 +42,9 @@ async def demonstrate_basic_operations():
         {"source": "Bob", "target": "David", "since": 2021},
         {"source": "Charlie", "target": "David", "since": 2019},
         {"source": "David", "target": "Eve", "since": 2022},
-        {"source": "Charlie", "target": "Eve", "since": 2017}
+        {"source": "Charlie", "target": "Eve", "since": 2017},
     ]
-    add_edges_request = {
-        "graph_id": "social_network",
-        "edges": edges
-    }
+    add_edges_request = {"graph_id": "social_network", "edges": edges}
     print(f"Request: {json.dumps(add_edges_request, indent=2)}")
     print("Expected Response: 6 edges added\n")
 
@@ -64,7 +58,7 @@ async def demonstrate_algorithms():
     shortest_path_request = {
         "graph_id": "social_network",
         "source": "Alice",
-        "target": "Eve"
+        "target": "Eve",
     }
     print(f"Request: {json.dumps(shortest_path_request, indent=2)}")
     print("Expected Response: Path: Alice -> Charlie -> Eve (length: 2)\n")
@@ -74,17 +68,14 @@ async def demonstrate_algorithms():
     centrality_request = {
         "graph_id": "social_network",
         "measures": ["degree", "betweenness", "closeness"],
-        "top_k": 3
+        "top_k": 3,
     }
     print(f"Request: {json.dumps(centrality_request, indent=2)}")
     print("Expected Response: Top 3 nodes by centrality scores\n")
 
     # 3. Community detection
     print("3. Detecting communities:")
-    community_request = {
-        "graph_id": "social_network",
-        "method": "louvain"
-    }
+    community_request = {"graph_id": "social_network", "method": "louvain"}
     print(f"Request: {json.dumps(community_request, indent=2)}")
     print("Expected Response: Communities found with modularity score\n")
 
@@ -98,7 +89,7 @@ async def demonstrate_advanced_features():
     create_digraph_request = {
         "graph_id": "transport_network",
         "graph_type": "DiGraph",
-        "description": "City transportation network"
+        "description": "City transportation network",
     }
     print(f"Request: {json.dumps(create_digraph_request, indent=2)}")
 
@@ -107,10 +98,15 @@ async def demonstrate_advanced_features():
     routes = [
         {"source": "NYC", "target": "Boston", "distance": 215, "time": 4.5},
         {"source": "NYC", "target": "Philadelphia", "distance": 95, "time": 2},
-        {"source": "Philadelphia", "target": "Washington DC", "distance": 140, "time": 3},
+        {
+            "source": "Philadelphia",
+            "target": "Washington DC",
+            "distance": 140,
+            "time": 3,
+        },
         {"source": "Philadelphia", "target": "Baltimore", "distance": 100, "time": 2},
         {"source": "Baltimore", "target": "Washington DC", "distance": 40, "time": 1},
-        {"source": "Boston", "target": "NYC", "distance": 215, "time": 4.5}
+        {"source": "Boston", "target": "NYC", "distance": 215, "time": 4.5},
     ]
     print(f"Cities: {cities}")
     print(f"Routes: {len(routes)} directed edges\n")
@@ -122,17 +118,14 @@ async def demonstrate_advanced_features():
         "source": "NYC",
         "target": "Washington DC",
         "weight": "distance",
-        "method": "dijkstra"
+        "method": "dijkstra",
     }
     print(f"Request: {json.dumps(weighted_path_request, indent=2)}")
     print("Expected: NYC -> Philadelphia -> Washington DC (235 miles)\n")
 
     # 3. Export/Import operations
     print("3. Export and import graph data:")
-    export_request = {
-        "graph_id": "social_network",
-        "format": "json"
-    }
+    export_request = {"graph_id": "social_network", "format": "json"}
     print(f"Export Request: {json.dumps(export_request, indent=2)}")
     print("Expected: JSON representation of the graph\n")
 
@@ -145,7 +138,7 @@ async def demonstrate_visualization():
     viz_request = {
         "graph_id": "social_network",
         "layout": "spring",
-        "output_format": "pyvis"
+        "output_format": "pyvis",
     }
     print(f"Request: {json.dumps(viz_request, indent=2)}")
     print("Expected: Node positions and visualization data\n")
@@ -163,7 +156,7 @@ def get_layout_description(layout: str) -> str:
         "circular": "Nodes arranged in a circle",
         "kamada_kawai": "Optimal distance-based layout",
         "spectral": "Based on graph eigenvalues",
-        "random": "Random node positions"
+        "random": "Random node positions",
     }
     return descriptions.get(layout, "Custom layout algorithm")
 
@@ -185,28 +178,28 @@ async def demonstrate_analysis_workflow():
         {
             "step": "Import graph",
             "tool": "import_graph",
-            "params": {"format": "graphml", "path": "collaboration.graphml"}
+            "params": {"format": "graphml", "path": "collaboration.graphml"},
         },
         {
             "step": "Get statistics",
             "tool": "graph_statistics",
-            "expected": "Nodes: 150, Edges: 742, Density: 0.066"
+            "expected": "Nodes: 150, Edges: 742, Density: 0.066",
         },
         {
             "step": "Find key researchers",
             "tool": "centrality_measures",
-            "params": {"measures": ["degree", "betweenness"]}
+            "params": {"measures": ["degree", "betweenness"]},
         },
         {
             "step": "Detect research groups",
             "tool": "community_detection",
-            "params": {"method": "louvain"}
+            "params": {"method": "louvain"},
         },
         {
             "step": "Export for visualization",
             "tool": "export_graph",
-            "params": {"format": "gexf", "path": "results.gexf"}
-        }
+            "params": {"format": "gexf", "path": "results.gexf"},
+        },
     ]
 
     for i, step in enumerate(workflow, 1):

@@ -6,12 +6,10 @@ from unittest.mock import patch
 import networkx as nx
 import pytest
 
-from networkx_mcp.visualization import (
-    MatplotlibVisualizer,
-    PlotlyVisualizer,
-    PyvisVisualizer,
-    SpecializedVisualizations,
-)
+from networkx_mcp.visualization import MatplotlibVisualizer
+from networkx_mcp.visualization import PlotlyVisualizer
+from networkx_mcp.visualization import PyvisVisualizer
+from networkx_mcp.visualization import SpecializedVisualizations
 
 
 class TestMatplotlibVisualizer:
@@ -133,7 +131,9 @@ class TestMatplotlibVisualizer:
         start_time = time.time()
 
         result = MatplotlibVisualizer.create_static_plot(
-            graph, layout="spring", show_labels=False  # Disable labels for large graphs
+            graph,
+            layout="spring",
+            show_labels=False,  # Disable labels for large graphs
         )
 
         elapsed_time = time.time() - start_time
@@ -181,7 +181,8 @@ class TestMatplotlibVisualizer:
         # Invalid layout
         graph = nx.complete_graph(3)
         result = MatplotlibVisualizer.create_static_plot(
-            graph, layout="invalid_layout"  # Should fall back to spring
+            graph,
+            layout="invalid_layout",  # Should fall back to spring
         )
         assert result["layout_used"] == "spring"
 
@@ -326,7 +327,8 @@ class TestPyvisVisualizer:
         graph = sample_graphs["tree"]
 
         result = PyvisVisualizer.create_hierarchical_network(
-            graph, layout_direction="UD"  # Up-Down
+            graph,
+            layout_direction="UD",  # Up-Down
         )
 
         assert "html" in result
