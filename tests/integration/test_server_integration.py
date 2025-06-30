@@ -1,6 +1,7 @@
 """Integration tests for the MCP server."""
 
 import pytest
+
 from networkx_mcp.server import mcp
 
 

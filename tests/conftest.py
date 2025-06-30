@@ -8,6 +8,7 @@ from pathlib import Path
 
 import networkx as nx
 import pytest
+
 from networkx_mcp.storage.redis_backend import RedisBackend
 
 
