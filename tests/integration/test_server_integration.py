@@ -3,6 +3,7 @@
 import json
 
 import pytest
+
 from networkx_mcp.server import mcp
 
 

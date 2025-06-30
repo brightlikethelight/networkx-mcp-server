@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 import networkx as nx
 import pytest
+
 from networkx_mcp.core.graph_operations import GraphManager
 from networkx_mcp.utils.validators import GraphValidator
 

@@ -6,6 +6,7 @@ import tempfile
 
 import networkx as nx
 import pytest
+
 from networkx_mcp.integration import DataPipelines
 
 

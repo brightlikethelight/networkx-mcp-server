@@ -20,6 +20,7 @@ def test_real_redis_persistence():
 
         import add_persistence
         import security_patches
+
         from networkx_mcp.server import graph_manager
 
         # Apply security patches

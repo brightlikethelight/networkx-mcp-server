@@ -121,6 +121,7 @@ class RedisRealityCheck:
             # Import and setup
             import add_persistence
             import security_patches
+
             from networkx_mcp.server import graph_manager
 
             # Apply security patches
@@ -185,6 +186,7 @@ class RedisRealityCheck:
             # Clear in-memory state and rebuild from Redis
             import add_persistence
             import security_patches
+
             from networkx_mcp.server import graph_manager
 
             # Clear memory

@@ -2,6 +2,7 @@
 
 import networkx as nx
 import pytest
+
 from networkx_mcp.advanced import (
     BipartiteAnalysis,
     CommunityDetection,

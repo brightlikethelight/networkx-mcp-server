@@ -24,6 +24,7 @@ class TestRedisPersistence:
             # Import server components
             import add_persistence
             import security_patches
+
             from networkx_mcp.server import graph_manager
 
             # Apply security and persistence
@@ -150,6 +151,7 @@ class TestRedisPersistence:
         try:
             import add_persistence
             import security_patches
+
             from networkx_mcp.server import graph_manager
 
             # Apply security and persistence
