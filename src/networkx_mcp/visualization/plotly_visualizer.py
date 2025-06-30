@@ -335,8 +335,10 @@ class PlotlyVisualizer:
         edge_width: Union[float, str, Dict],
         edge_color: Union[str, Dict],
         show_labels: bool = False,
-    ) -> List[go.Scatter]:
+    ) -> List[Any]:
         """Create edge traces for plotly."""
+        if not HAS_PLOTLY:
+            return []
         edge_traces = []
 
         for edge in graph.edges():
@@ -390,8 +392,10 @@ class PlotlyVisualizer:
         node_size: Union[int, str, Dict],
         node_color: Union[str, Dict],
         hover_data: Optional[List[str]] = None,
-    ) -> go.Scatter:
+    ) -> Any:
         """Create node trace for plotly."""
+        if not HAS_PLOTLY:
+            return None
         x_nodes = []
         y_nodes = []
 

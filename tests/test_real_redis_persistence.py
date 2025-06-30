@@ -18,10 +18,9 @@ def test_real_redis_persistence():
         # Phase 1: Set up Redis persistence and create test data
         print("📝 Phase 1: Setting up Redis persistence...")
 
-        import security_patches
-
         import add_persistence
-        from src.networkx_mcp.server import graph_manager
+        import security_patches
+        from networkx_mcp.server import graph_manager
 
         # Apply security patches
         security_patches.apply_critical_patches()

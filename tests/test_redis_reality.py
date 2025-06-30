@@ -119,10 +119,9 @@ class RedisRealityCheck:
             print("📝 Creating test data via GraphManager...")
 
             # Import and setup
-            import security_patches
-
             import add_persistence
-            from src.networkx_mcp.server import graph_manager
+            import security_patches
+            from networkx_mcp.server import graph_manager
 
             # Apply security patches
             security_patches.apply_critical_patches()
@@ -184,10 +183,9 @@ class RedisRealityCheck:
             print("🔍 Verifying data recovery from Redis...")
 
             # Clear in-memory state and rebuild from Redis
-            import security_patches
-
             import add_persistence
-            from src.networkx_mcp.server import graph_manager
+            import security_patches
+            from networkx_mcp.server import graph_manager
 
             # Clear memory
             graph_manager.graphs.clear()
@@ -308,7 +306,7 @@ class RedisRealityCheck:
             # Test 1: Verify Redis backend is available
             print("📝 Test 1: Checking Redis backend availability...")
             try:
-                from src.networkx_mcp.storage.redis_backend import RedisGraphStorage
+                from networkx_mcp.storage.redis_backend import RedisGraphStorage
 
                 print("✅ Redis backend module exists")
             except ImportError:

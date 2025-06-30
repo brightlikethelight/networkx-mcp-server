@@ -22,10 +22,9 @@ class TestRedisPersistence:
 
         try:
             # Import server components
-            import security_patches
-
             import add_persistence
-            from src.networkx_mcp.server import graph_manager
+            import security_patches
+            from networkx_mcp.server import graph_manager
 
             # Apply security and persistence
             security_patches.apply_critical_patches()
@@ -149,10 +148,9 @@ class TestRedisPersistence:
         """Test that concurrent access to persistence is safe."""
 
         try:
-            import security_patches
-
             import add_persistence
-            from src.networkx_mcp.server import graph_manager
+            import security_patches
+            from networkx_mcp.server import graph_manager
 
             # Apply security and persistence
             security_patches.apply_critical_patches()
