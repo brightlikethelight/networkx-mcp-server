@@ -5,13 +5,30 @@ import logging
 from io import BytesIO
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
-import plotly.graph_objects as go
-import seaborn as sns
-from plotly.subplots import make_subplots
-from scipy.cluster.hierarchy import dendrogram, linkage
+
+# Optional imports
+try:
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    from scipy.cluster.hierarchy import dendrogram, linkage
+    HAS_MATPLOTLIB = True
+except ImportError:
+    HAS_MATPLOTLIB = False
+    plt = None
+    sns = None
+    dendrogram = None
+    linkage = None
+
+try:
+    import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
+    HAS_PLOTLY = True
+except ImportError:
+    HAS_PLOTLY = False
+    go = None
+    make_subplots = None
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +62,13 @@ class SpecializedVisualizations:
         --------
         Dict containing the heatmap visualization
         """
+        if not HAS_MATPLOTLIB:
+            msg = \"Matplotlib is required for heatmap visualization. Install with: pip install matplotlib seaborn\"
+            raise ImportError(msg)
+        if not HAS_PLOTLY:
+            msg = \"Plotly is required for interactive heatmap visualization. Install with: pip install plotly\"
+            raise ImportError(msg)
+        
         # Get adjacency matrix
         if node_order is None:
             node_order = list(graph.nodes())
@@ -137,6 +161,10 @@ class SpecializedVisualizations:
         --------
         Dict containing chord diagram visualization
         """
+        if not HAS_PLOTLY:
+            msg = "Plotly is required for chord diagram visualization. Install with: pip install plotly"
+            raise ImportError(msg)
+        
         # Filter nodes if needed
         if top_nodes and graph.number_of_nodes() > top_nodes:
             degrees = dict(graph.degree())
@@ -265,6 +293,10 @@ class SpecializedVisualizations:
         --------
         Dict containing Sankey diagram
         """
+        if not HAS_PLOTLY:
+            msg = "Plotly is required for Sankey diagram visualization. Install with: pip install plotly"
+            raise ImportError(msg)
+        
         if not graph.is_directed():
             msg = "Sankey diagram requires a directed graph"
             raise ValueError(msg)
@@ -359,6 +391,10 @@ class SpecializedVisualizations:
         --------
         Dict containing dendrogram visualization
         """
+        if not HAS_MATPLOTLIB:
+            msg = "Matplotlib and scipy are required for dendrogram visualization. Install with: pip install matplotlib scipy"
+            raise ImportError(msg)
+        
         # Create feature matrix from graph structure
         nodes = list(graph.nodes())
         n = len(nodes)
@@ -473,6 +509,10 @@ class SpecializedVisualizations:
         --------
         Dict containing dashboard HTML
         """
+        if not HAS_PLOTLY:
+            msg = "Plotly is required for dashboard visualization. Install with: pip install plotly"
+            raise ImportError(msg)
+        
         if visualizations is None:
             visualizations = ["adjacency", "degree_dist", "centrality", "components"]
 
