@@ -109,7 +109,10 @@ select = [
     "C4", # flake8-comprehensions
     "UP", # pyupgrade
 ]
-ignore = ["E501", "B008", "C901", "W191"]
+ignore = ["E501", "B008", "C901", "W191", "I001"]
+
+[tool.ruff.lint.isort]
+lines-after-imports = 1
 
 [tool.mypy]
 python_version = "3.9"
