@@ -13,7 +13,7 @@ sys.path.insert(0, str(project_root))
 
 class TestRedisPersistence:
     """Test Redis-based persistence functionality."""
-    
+
     def setup_method(self):
         """Set up test method."""
         self.server_process = None

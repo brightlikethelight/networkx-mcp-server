@@ -22,7 +22,7 @@ sys.path.insert(0, str(project_root))
 
 class TestLoadCapacity:
     """Test server capacity under various load conditions."""
-    
+
     def setup_method(self):
         """Set up test method."""
         self.baseline_memory = None
