@@ -55,9 +55,10 @@ class TestCommunityDetection:
         result = CommunityDetection.hierarchical_communities(graph, max_levels=3)
 
         assert len(result["levels"]) <= 3
+        # With increasing resolution, we expect more communities
         assert (
             result["levels"][0]["num_communities"]
-            >= result["levels"][-1]["num_communities"]
+            <= result["levels"][-1]["num_communities"]
         )
 
 
