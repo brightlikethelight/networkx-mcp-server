@@ -52,12 +52,12 @@ class TestCommunityDetection:
     def test_hierarchical_communities(self):
         """Test hierarchical community detection."""
         graph = nx.karate_club_graph()
-        result = CommunityDetection.hierarchical_communities(graph, num_levels=3)
+        result = CommunityDetection.hierarchical_communities(graph, max_levels=3)
 
-        assert len(result["hierarchy"]) <= 3
+        assert len(result["levels"]) <= 3
         assert (
-            result["hierarchy"][0]["num_communities"]
-            >= result["hierarchy"][-1]["num_communities"]
+            result["levels"][0]["num_communities"]
+            >= result["levels"][-1]["num_communities"]
         )
 
 
