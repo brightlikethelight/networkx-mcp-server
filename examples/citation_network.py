@@ -6,8 +6,7 @@ including identifying influential papers, research trends, and collaboration pat
 
 import asyncio
 import json
-from typing import Any
-from typing import Dict
+from typing import Any, Dict
 
 
 # Simulated MCP client calls

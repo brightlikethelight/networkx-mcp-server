@@ -4,9 +4,7 @@
 import json
 import pickle
 from datetime import datetime
-from typing import Any
-from typing import Dict
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import networkx as nx
 import redis

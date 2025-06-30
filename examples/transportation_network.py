@@ -6,8 +6,7 @@ including route optimization, flow analysis, and network resilience.
 
 import asyncio
 import json
-from typing import Any
-from typing import Dict
+from typing import Any, Dict
 
 
 # Simulated MCP client calls

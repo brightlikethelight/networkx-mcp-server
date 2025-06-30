@@ -390,9 +390,7 @@ class RobustnessAnalysis:
                 if percolation_type == "site":
                     # Site percolation: randomly remove nodes
                     nodes_to_keep = [
-                        node
-                        for node in G.nodes()
-                        if random.random() < p  # noqa: S311
+                        node for node in G.nodes() if random.random() < p  # noqa: S311
                     ]
                     nodes_to_remove = set(G.nodes()) - set(nodes_to_keep)
                     G.remove_nodes_from(nodes_to_remove)
@@ -400,9 +398,7 @@ class RobustnessAnalysis:
                 elif percolation_type == "bond":
                     # Bond percolation: randomly remove edges
                     edges_to_remove = [
-                        edge
-                        for edge in G.edges()
-                        if random.random() > p  # noqa: S311
+                        edge for edge in G.edges() if random.random() > p  # noqa: S311
                     ]
                     G.remove_edges_from(edges_to_remove)
 

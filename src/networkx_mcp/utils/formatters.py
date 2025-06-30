@@ -10,28 +10,19 @@ class GraphFormatter:
     @staticmethod
     def format_success(data: Any, message: str = "Success") -> Dict[str, Any]:
         """Format successful response."""
-        return {
-            "success": True,
-            "message": message,
-            "data": data
-        }
+        return {"success": True, "message": message, "data": data}
 
     @staticmethod
     def format_error(error_type: str, message: str) -> Dict[str, Any]:
         """Format error response."""
-        return {
-            "success": False,
-            "error": error_type,
-            "message": message
-        }
+        return {"success": False, "error": error_type, "message": message}
 
     @staticmethod
-    def format_algorithm_result(algorithm: str, result: Any, execution_time: float = None) -> Dict[str, Any]:
+    def format_algorithm_result(
+        algorithm: str, result: Any, execution_time: float = None
+    ) -> Dict[str, Any]:
         """Format algorithm result."""
-        response = {
-            "algorithm": algorithm,
-            "result": result
-        }
+        response = {"algorithm": algorithm, "result": result}
         if execution_time is not None:
             response["execution_time_ms"] = execution_time
         return response
@@ -41,11 +32,15 @@ class GraphFormatter:
         """Format community detection results."""
         return {
             "communities": communities,
-            "num_communities": len(communities) if hasattr(communities, "__len__") else 0
+            "num_communities": (
+                len(communities) if hasattr(communities, "__len__") else 0
+            ),
         }
 
     @staticmethod
-    def format_visualization_data(graph, layout: Dict[str, Any], options: Dict[str, Any] = None) -> Dict[str, Any]:
+    def format_visualization_data(
+        graph, layout: Dict[str, Any], options: Dict[str, Any] = None
+    ) -> Dict[str, Any]:
         """Format visualization data."""
         nodes = []
         for node in graph.nodes():
@@ -65,7 +60,7 @@ class GraphFormatter:
             "nodes": nodes,
             "edges": edges,
             "layout": layout,
-            "options": options or {}
+            "options": options or {},
         }
 
 

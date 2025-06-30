@@ -22,6 +22,7 @@ except ImportError:
 try:
     from fastmcp import FastMCP
     from mcp.types import TextContent
+
     HAS_FASTMCP = True
 except ImportError:
     HAS_FASTMCP = False
@@ -32,6 +33,7 @@ except ImportError:
     except ImportError:
         # Use mock MCP when the package is not available
         from networkx_mcp.mcp_mock import MockMCP
+
         Server = MockMCP.Server
         FastMCP = MockMCP.FastMCP
         InitializationOptions = MockMCP.server.models.InitializationOptions
@@ -1371,9 +1373,9 @@ async def graph_metrics(
                     metrics["connectivity"]["num_bridges"] = len(bridges)
 
                     if len(articulation_points) <= MAX_DISPLAY_ITEMS:
-                        metrics["connectivity"]["articulation_points"] = (
-                            articulation_points
-                        )
+                        metrics["connectivity"][
+                            "articulation_points"
+                        ] = articulation_points
                     if len(bridges) <= MAX_DISPLAY_ITEMS:
                         metrics["connectivity"]["bridges"] = bridges
                 except Exception as e:

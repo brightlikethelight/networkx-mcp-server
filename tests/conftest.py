@@ -70,7 +70,7 @@ async def mcp_server():
 def graph_manager():
     """Create a GraphManager instance for testing."""
     from networkx_mcp.core.graph_operations import GraphManager
-    
+
     return GraphManager()
 
 

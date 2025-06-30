@@ -37,9 +37,14 @@ pip install -e ".[dev]"
 
 ### Docker Deployment
 ```bash
-docker pull Bright-L01/networkx-mcp-server:latest
-docker run -p 8765:8765 Bright-L01/networkx-mcp-server
+docker build -t networkx-mcp-server .
+docker run -p 8765:8765 networkx-mcp-server
 ```
+
+### Requirements
+- Python 3.8 or higher
+- Redis (optional, for persistence)
+- GraphViz (optional, for DOT format visualization)
 
 ## 🎯 Quick Start
 

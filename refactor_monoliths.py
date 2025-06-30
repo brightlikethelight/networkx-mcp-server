@@ -4,8 +4,7 @@
 import ast
 import sys
 from pathlib import Path
-from typing import Any
-from typing import Dict
+from typing import Any, Dict
 
 # Add project to path
 project_root = Path(__file__).parent

@@ -95,8 +95,7 @@ class ProductionValidator:
         """Test basic rate limiting functionality."""
         try:
             from collections import defaultdict
-            from datetime import datetime
-            from datetime import timedelta
+            from datetime import datetime, timedelta
 
             class TestRateLimiter:
                 def __init__(self, max_requests=3, window_seconds=1):

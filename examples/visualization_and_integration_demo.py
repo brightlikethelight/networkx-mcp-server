@@ -18,8 +18,7 @@ Requirements:
 import asyncio
 import json
 from pathlib import Path
-from typing import Any
-from typing import Dict
+from typing import Any, Dict
 
 
 # In a real implementation, you would use an MCP client library

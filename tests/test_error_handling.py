@@ -255,10 +255,7 @@ class TestAlgorithmErrors:
     @pytest.mark.asyncio
     async def test_flow_algorithm_errors(self):
         """Test network flow algorithm errors."""
-        from networkx_mcp.server import add_edges
-        from networkx_mcp.server import add_nodes
-        from networkx_mcp.server import create_graph
-        from networkx_mcp.server import network_flow
+        from networkx_mcp.server import add_edges, add_nodes, create_graph, network_flow
 
         # Create directed graph for flow
         await create_graph(graph_id="flow_test", graph_type="DiGraph")
@@ -369,8 +366,7 @@ class TestVisualizationErrors:
     @pytest.mark.asyncio
     async def test_visualization_with_empty_graph(self):
         """Test visualization of empty graphs."""
-        from networkx_mcp.server import create_graph
-        from networkx_mcp.server import visualize_graph
+        from networkx_mcp.server import create_graph, visualize_graph
 
         await create_graph(graph_id="empty_viz", graph_type="Graph")
 
@@ -383,9 +379,7 @@ class TestVisualizationErrors:
     @pytest.mark.asyncio
     async def test_invalid_layout_algorithms(self):
         """Test handling of invalid layout algorithms."""
-        from networkx_mcp.server import add_nodes
-        from networkx_mcp.server import create_graph
-        from networkx_mcp.server import layout_calculation
+        from networkx_mcp.server import add_nodes, create_graph, layout_calculation
 
         await create_graph(graph_id="layout_test", graph_type="Graph")
         await add_nodes(graph_id="layout_test", nodes=["A", "B", "C"])
@@ -401,8 +395,9 @@ class TestVisualizationErrors:
     @patch("matplotlib.pyplot.savefig")
     def test_matplotlib_save_error(self, mock_savefig):
         """Test handling of matplotlib save errors."""
-        from networkx_mcp.visualization.matplotlib_visualizer import \
-            MatplotlibVisualizer
+        from networkx_mcp.visualization.matplotlib_visualizer import (
+            MatplotlibVisualizer,
+        )
 
         # Mock savefig to raise an error
         mock_savefig.side_effect = OSError("Cannot save figure")

@@ -155,8 +155,9 @@ def test_visualization():
     try:
         import networkx as nx
 
-        from networkx_mcp.visualization.matplotlib_visualizer import \
-            MatplotlibVisualizer
+        from networkx_mcp.visualization.matplotlib_visualizer import (
+            MatplotlibVisualizer,
+        )
 
         # Create test graph
         graph = nx.complete_graph(5)
@@ -167,8 +168,7 @@ def test_visualization():
 
         # Test if we can import Plotly
         try:
-            from networkx_mcp.visualization.plotly_visualizer import \
-                PlotlyVisualizer
+            from networkx_mcp.visualization.plotly_visualizer import PlotlyVisualizer
 
             result = PlotlyVisualizer.create_interactive_plot(graph)
             print("   ✅ Plotly visualization: interactive plot created")

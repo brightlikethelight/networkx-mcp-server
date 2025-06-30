@@ -11,8 +11,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict
-from typing import List
+from typing import Dict, List
 
 # ANSI color codes
 GREEN = "\033[92m"

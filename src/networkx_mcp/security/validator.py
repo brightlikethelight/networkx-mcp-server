@@ -6,6 +6,7 @@ from typing import Any, Dict
 
 class SecurityError(Exception):
     """Base security exception."""
+
     pass
 
 
@@ -13,7 +14,7 @@ class SecurityValidator:
     """Security validation for user inputs."""
 
     # Patterns for validation
-    ID_PATTERN = re.compile(r'^[a-zA-Z0-9_-]{1,100}$')
+    ID_PATTERN = re.compile(r"^[a-zA-Z0-9_-]{1,100}$")
 
     @staticmethod
     def validate_user_id(user_id: str) -> str:
@@ -50,7 +51,7 @@ class SecurityValidator:
             return {}
 
         # Remove any potentially dangerous keys
-        dangerous_keys = ['__', 'eval', 'exec', 'compile', 'globals', 'locals']
+        dangerous_keys = ["__", "eval", "exec", "compile", "globals", "locals"]
 
         sanitized = {}
         for key, value in attributes.items():
@@ -71,7 +72,10 @@ class SecurityValidator:
                 sanitized[key] = value
             elif isinstance(value, (list, tuple)):
                 # Only allow simple lists
-                if all(isinstance(item, (str, int, float, bool, type(None))) for item in value[:100]):
+                if all(
+                    isinstance(item, (str, int, float, bool, type(None)))
+                    for item in value[:100]
+                ):
                     sanitized[key] = list(value[:100])  # Limit list size
             elif isinstance(value, dict):
                 # Recursively sanitize nested dicts (with depth limit)
