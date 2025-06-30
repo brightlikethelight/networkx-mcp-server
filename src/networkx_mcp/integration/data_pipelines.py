@@ -9,10 +9,16 @@ from collections.abc import Iterator
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import aiohttp
 import networkx as nx
 import numpy as np
 import pandas as pd
+
+try:
+    import aiohttp
+    HAS_AIOHTTP = True
+except ImportError:
+    HAS_AIOHTTP = False
+    aiohttp = None
 
 logger = logging.getLogger(__name__)
 
@@ -313,6 +319,8 @@ class DataPipelines:
         --------
         Dict containing graph and metadata
         """
+        if not HAS_AIOHTTP:
+            raise ImportError("aiohttp is required for API pipeline. Install with: pip install aiohttp")
         start_time = time.time()
         graph = nx.DiGraph() if kwargs.get("directed", True) else nx.Graph()
 

@@ -4,7 +4,12 @@ import time
 from functools import wraps
 from typing import Any, Callable, Dict
 
-import psutil
+try:
+    import psutil
+    HAS_PSUTIL = True
+except ImportError:
+    HAS_PSUTIL = False
+    psutil = None
 
 
 class PerformanceMonitor:
@@ -35,6 +40,14 @@ class PerformanceMonitor:
 
     def get_memory_usage(self) -> Dict[str, float]:
         """Get current memory usage."""
+        if not HAS_PSUTIL:
+            # Return dummy values when psutil is not available
+            return {
+                "rss_mb": 0.0,
+                "vms_mb": 0.0,
+                "percent": 0.0,
+                "error": "psutil not available"
+            }
         process = psutil.Process()
         memory_info = process.memory_info()
         return {
