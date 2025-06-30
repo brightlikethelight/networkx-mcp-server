@@ -21,14 +21,21 @@ except ImportError:
 
 try:
     from fastmcp import FastMCP
-
+    from mcp.types import TextContent
     HAS_FASTMCP = True
 except ImportError:
     HAS_FASTMCP = False
-    from mcp import Server
-    from mcp.server.models import InitializationOptions
-
-from mcp.types import TextContent
+    try:
+        from mcp import Server
+        from mcp.server.models import InitializationOptions
+        from mcp.types import TextContent
+    except ImportError:
+        # Use mock MCP when the package is not available
+        from networkx_mcp.mcp_mock import MockMCP
+        Server = MockMCP.Server
+        FastMCP = MockMCP.FastMCP
+        InitializationOptions = MockMCP.server.models.InitializationOptions
+        TextContent = MockMCP.types.TextContent
 
 # Phase 2 Advanced Analytics imports
 from networkx_mcp.advanced import (
