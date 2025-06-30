@@ -15,19 +15,45 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import networkx as nx
 import numpy as np
-import schedule
-from jinja2 import Template
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
-from reportlab.lib.units import inch
-from reportlab.platypus import (
-    Image,
-    PageBreak,
-    Paragraph,
-    SimpleDocTemplate,
-    Spacer,
-    Table,
-)
+try:
+    import schedule
+    HAS_SCHEDULE = True
+except ImportError:
+    HAS_SCHEDULE = False
+    schedule = None
+
+try:
+    from jinja2 import Template
+    HAS_JINJA2 = True
+except ImportError:
+    HAS_JINJA2 = False
+    Template = None
+
+try:
+    from reportlab.lib.pagesizes import letter
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+    from reportlab.lib.units import inch
+    from reportlab.platypus import (
+        Image,
+        PageBreak,
+        Paragraph,
+        SimpleDocTemplate,
+        Spacer,
+        Table,
+    )
+    HAS_REPORTLAB = True
+except ImportError:
+    HAS_REPORTLAB = False
+    letter = None
+    ParagraphStyle = None
+    getSampleStyleSheet = None
+    inch = None
+    Image = None
+    PageBreak = None
+    Paragraph = None
+    SimpleDocTemplate = None
+    Spacer = None
+    Table = None
 
 # Performance thresholds
 MAX_NODES_FOR_EXPENSIVE_METRICS = 1000
@@ -399,6 +425,8 @@ class EnterpriseFeatures:
         str
             Job ID
         """
+        if not HAS_SCHEDULE:
+            raise ImportError("schedule is required for job scheduling. Install with: pip install schedule")
         # Using MD5 for non-cryptographic job ID generation (not security sensitive)
         job_id = hashlib.md5(
             json.dumps(job_config, sort_keys=True).encode()
@@ -690,6 +718,8 @@ class EnterpriseFeatures:
         **kwargs,
     ) -> str:
         """Generate HTML report."""
+        if not HAS_JINJA2:
+            raise ImportError("jinja2 is required for HTML report generation. Install with: pip install jinja2")
         # Simple HTML template
         html_template = """
         <!DOCTYPE html>
@@ -760,6 +790,8 @@ class EnterpriseFeatures:
         **kwargs,
     ) -> bytes:
         """Generate PDF report."""
+        if not HAS_REPORTLAB:
+            raise ImportError("reportlab is required for PDF generation. Install with: pip install reportlab")
         buffer = io.BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=letter)
         story = []
