@@ -4,7 +4,7 @@
 
 **Type of Change**
 - [ ] 🐛 Bug fix (non-breaking change that fixes an issue)
-- [ ] 🚀 New feature (non-breaking change that adds functionality)  
+- [ ] 🚀 New feature (non-breaking change that adds functionality)
 - [ ] 💥 Breaking change (fix or feature that would cause existing functionality to change)
 - [ ] 📚 Documentation update
 - [ ] 🔧 Refactoring (no functional changes)
@@ -29,7 +29,7 @@ Related to #<!-- issue number -->
 **Testing Done**
 <!-- Describe the testing you've performed -->
 - [ ] Unit tests
-- [ ] Integration tests  
+- [ ] Integration tests
 - [ ] Manual testing
 - [ ] Performance testing
 

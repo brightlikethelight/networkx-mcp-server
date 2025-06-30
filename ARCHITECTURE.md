@@ -4,7 +4,7 @@
 
 ### ✅ Well-Structured Modules (< 500 lines each)
 - `src/networkx_mcp/core/node_ops.py` - Focused node operations (64 lines)
-- `src/networkx_mcp/core/edge_ops.py` - Focused edge operations (56 lines)  
+- `src/networkx_mcp/core/edge_ops.py` - Focused edge operations (56 lines)
 - `src/networkx_mcp/utils/validation.py` - Input validation (52 lines)
 - `src/networkx_mcp/utils/performance.py` - Performance monitoring (68 lines)
 

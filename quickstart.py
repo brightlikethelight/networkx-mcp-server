@@ -74,7 +74,6 @@ def test_algorithms():
 
     try:
         import networkx as nx
-
         from networkx_mcp.core.algorithms import GraphAlgorithms
 
         # Create test graph
@@ -154,7 +153,6 @@ def test_visualization():
 
     try:
         import networkx as nx
-
         from networkx_mcp.visualization.matplotlib_visualizer import (
             MatplotlibVisualizer,
         )

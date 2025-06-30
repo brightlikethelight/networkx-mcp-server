@@ -202,15 +202,15 @@ def calculate_modularity(
     weight: Optional[str] = None
 ) -> float:
     """Calculate modularity of community partition.
-    
+
     Args:
         graph: Input graph
         communities: List of node communities
         weight: Edge weight attribute name
-        
+
     Returns:
         Modularity score between -1 and 1
-        
+
     Raises:
         ValueError: If communities overlap
     """
@@ -244,27 +244,27 @@ from networkx_mcp.algorithms import find_shortest_path
 
 class TestShortestPath:
     """Test shortest path algorithms."""
-    
+
     def test_simple_path(self):
         """Test shortest path in simple graph."""
         # Arrange
         graph = nx.Graph()
         graph.add_edges_from([("A", "B"), ("B", "C")])
-        
+
         # Act
         path = find_shortest_path(graph, "A", "C")
-        
+
         # Assert
         assert path == ["A", "B", "C"]
-    
+
     def test_no_path_exists(self):
         """Test when no path exists between nodes."""
         graph = nx.Graph()
         graph.add_nodes_from(["A", "B"])
-        
+
         with pytest.raises(nx.NetworkXNoPath):
             find_shortest_path(graph, "A", "B")
-    
+
     @pytest.mark.parametrize("weight,expected", [
         ("weight", ["A", "C"]),
         (None, ["A", "B", "C"]),
@@ -348,16 +348,16 @@ git commit -m "add feature"
    ```bash
    # Format code
    black src/ tests/
-   
+
    # Lint
    ruff check src/ tests/
-   
+
    # Type check
    mypy src/
-   
+
    # Run all tests
    pytest
-   
+
    # Check coverage
    pytest --cov=src/networkx_mcp --cov-report=term-missing
    ```
@@ -459,33 +459,33 @@ def complex_function(
     cutoff: Optional[int] = None
 ) -> List[str]:
     """Find shortest path between source and target.
-    
+
     This function implements Dijkstra's algorithm with optimizations
     for sparse graphs. It handles both weighted and unweighted graphs.
-    
+
     Args:
         graph: NetworkX graph instance
         source: Starting node for path
-        target: Ending node for path  
+        target: Ending node for path
         weight: Name of edge attribute to use as weight.
             If None, all edges have weight 1.
         cutoff: Depth to stop the search. Only paths of
             length <= cutoff are returned.
-    
+
     Returns:
         List of nodes representing the shortest path.
         Empty list if no path exists.
-    
+
     Raises:
         NodeNotFound: If source or target not in graph
         ValueError: If weight attribute doesn't exist
-        
+
     Examples:
         >>> G = nx.Graph()
         >>> G.add_edges_from([('A', 'B'), ('B', 'C')])
         >>> complex_function(G, 'A', 'C')
         ['A', 'B', 'C']
-        
+
     Note:
         For graphs with negative weights, use Bellman-Ford
         algorithm instead.
@@ -510,7 +510,7 @@ def complex_function(
 ### Communication Channels
 
 - **Discussions**: General questions and ideas
-- **Issues**: Bug reports and feature requests  
+- **Issues**: Bug reports and feature requests
 - **Pull Requests**: Code contributions
 - **Security**: security@networkx-mcp.org for vulnerabilities
 

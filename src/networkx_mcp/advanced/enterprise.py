@@ -435,7 +435,7 @@ class EnterpriseFeatures:
             )
         # Using MD5 for non-cryptographic job ID generation (not security sensitive)
         job_id = hashlib.md5(
-            json.dumps(job_config, sort_keys=True).encode()
+            json.dumps(job_config, sort_keys=True).encode(), usedforsecurity=False
         ).hexdigest()[:8]
 
         job_config["job_id"] = job_id
@@ -508,7 +508,8 @@ class EnterpriseFeatures:
         """
         # Using MD5 for non-cryptographic version ID generation (not security sensitive)
         version_id = hashlib.md5(
-            f"{version_name}_{datetime.now(tz=timezone.utc).isoformat()}".encode()
+            f"{version_name}_{datetime.now(tz=timezone.utc).isoformat()}".encode(),
+            usedforsecurity=False,
         ).hexdigest()[:12]
 
         version_data = {
@@ -651,12 +652,13 @@ class EnterpriseFeatures:
         """Generate cache key for operation."""
         # Using MD5 for non-cryptographic cache key generation (not security sensitive)
         graph_hash = hashlib.md5(
-            f"{graph.number_of_nodes()}_{graph.number_of_edges()}".encode()
+            f"{graph.number_of_nodes()}_{graph.number_of_edges()}".encode(),
+            usedforsecurity=False,
         ).hexdigest()[:8]
 
         # Using MD5 for non-cryptographic params hash (not security sensitive)
         params_hash = hashlib.md5(
-            json.dumps(params, sort_keys=True).encode()
+            json.dumps(params, sort_keys=True).encode(), usedforsecurity=False
         ).hexdigest()[:8]
 
         return f"{operation}_{graph_hash}_{params_hash}"

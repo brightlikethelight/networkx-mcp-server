@@ -114,13 +114,13 @@ from your_mcp_client import MCPClient  # Use your MCP client library
 
 async def create_social_network():
     client = MCPClient("http://localhost:8000")
-    
+
     # Create graph
     await client.call_tool("create_graph", {
         "graph_id": "friends",
         "graph_type": "undirected"
     })
-    
+
     # Add people with attributes
     await client.call_tool("add_nodes", {
         "graph_id": "friends",
@@ -132,7 +132,7 @@ async def create_social_network():
             {"id": "Eve", "age": 27, "city": "NYC"}
         ]
     })
-    
+
     # Add friendships with relationship strength
     await client.call_tool("add_edges", {
         "graph_id": "friends",
@@ -144,7 +144,7 @@ async def create_social_network():
             {"source": "Alice", "target": "Diana", "strength": 0.5}
         ]
     })
-    
+
     # Find most influential person
     result = await client.call_tool("calculate_centrality", {
         "graph_id": "friends",
@@ -152,7 +152,7 @@ async def create_social_network():
         "top_n": 3
     })
     print("Most influential people:", result)
-    
+
     # Find communities
     result = await client.call_tool("clustering_analysis", {
         "graph_id": "friends",

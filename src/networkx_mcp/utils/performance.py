@@ -39,7 +39,7 @@ class PerformanceMonitor:
 
         return decorator
 
-    def get_memory_usage(self) -> Dict[str, float]:
+    def get_memory_usage(self) -> Dict[str, Any]:
         """Get current memory usage."""
         if not HAS_PSUTIL:
             # Return dummy values when psutil is not available

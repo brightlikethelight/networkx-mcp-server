@@ -14,7 +14,7 @@
 ## 🚀 Key Features
 
 - **39 Graph Analysis Tools**: Complete suite for graph operations, algorithms, and visualization
-- **Enterprise Ready**: Security hardening, Redis persistence, monitoring, and audit logging  
+- **Enterprise Ready**: Security hardening, Redis persistence, monitoring, and audit logging
 - **Multiple Graph Types**: Directed, undirected, multi-graphs, and multi-digraphs
 - **Advanced Algorithms**: Community detection, ML integration, network flow analysis
 - **Rich Visualizations**: matplotlib, Plotly, and pyvis backends with interactive features
@@ -53,7 +53,7 @@ docker run -p 8765:8765 networkx-mcp-server
 # Using the installed command
 networkx-mcp-server
 
-# Or using Python module  
+# Or using Python module
 python -m networkx_mcp.server
 
 # With Redis persistence (recommended for production)
@@ -69,51 +69,51 @@ async def analyze_social_network():
     # Connect to server
     client = Client()
     await client.connect("localhost:8765")
-    
+
     # Create a social network
     await client.call_tool("create_graph", {
         "graph_id": "friends",
         "graph_type": "undirected"
     })
-    
+
     # Add people and relationships
     await client.call_tool("add_nodes", {
-        "graph_id": "friends", 
+        "graph_id": "friends",
         "nodes": ["Alice", "Bob", "Charlie", "David", "Eve"]
     })
-    
+
     await client.call_tool("add_edges", {
         "graph_id": "friends",
         "edges": [
             ["Alice", "Bob"], ["Bob", "Charlie"],
-            ["Charlie", "David"], ["David", "Eve"], 
+            ["Charlie", "David"], ["David", "Eve"],
             ["Alice", "Charlie"], ["Bob", "David"]
         ]
     })
-    
+
     # Find the most influential person
     centrality = await client.call_tool("calculate_centrality", {
         "graph_id": "friends",
         "centrality_type": "betweenness",
         "top_k": 3
     })
-    
+
     print(f"Most influential: {centrality['top_nodes'][0]['node']}")
-    
+
     # Detect communities
     communities = await client.call_tool("community_detection", {
         "graph_id": "friends",
         "algorithm": "louvain"
     })
-    
+
     print(f"Found {len(communities['communities'])} friend groups")
-    
+
     # Create visualization
     viz = await client.call_tool("visualize_graph_simple", {
         "graph_id": "friends",
         "layout": "spring"
     })
-    
+
     # Save visualization to file
     with open("social_network.html", "w") as f:
         f.write(viz["html"])
@@ -133,7 +133,7 @@ await client.call_tool("generate_graph", {
 
 # Advanced community detection
 communities = await client.call_tool("advanced_community_detection", {
-    "graph_id": "scale_free_network", 
+    "graph_id": "scale_free_network",
     "algorithm": "louvain",
     "resolution": 1.2
 })
@@ -141,7 +141,7 @@ communities = await client.call_tool("advanced_community_detection", {
 # Network flow analysis
 flow = await client.call_tool("network_flow_analysis", {
     "graph_id": "transport_network",
-    "source": "A", 
+    "source": "A",
     "sink": "Z",
     "algorithm": "edmonds_karp"
 })
@@ -149,7 +149,7 @@ flow = await client.call_tool("network_flow_analysis", {
 # ML-based node embeddings
 embeddings = await client.call_tool("ml_graph_analysis", {
     "graph_id": "scale_free_network",
-    "analysis_type": "embeddings", 
+    "analysis_type": "embeddings",
     "method": "node2vec",
     "dimensions": 128
 })
@@ -167,7 +167,7 @@ embeddings = await client.call_tool("ml_graph_analysis", {
 
 ### Core Operations (9 tools)
 - **Graph Management**: `create_graph`, `delete_graph`, `list_graphs`, `get_graph_info`
-- **Node/Edge Operations**: `add_nodes`, `add_edges`, `clear_graph` 
+- **Node/Edge Operations**: `add_nodes`, `add_edges`, `clear_graph`
 - **Data Operations**: `import_graph`, `export_graph`
 
 ### Graph Algorithms (12 tools)
@@ -205,7 +205,7 @@ src/networkx_mcp/
 ├── advanced/                    # Advanced analytics modules
 │   ├── community/              # Community detection algorithms
 │   │   ├── louvain.py         # Louvain algorithm implementation
-│   │   ├── girvan_newman.py   # Girvan-Newman algorithm  
+│   │   ├── girvan_newman.py   # Girvan-Newman algorithm
 │   │   └── base.py            # Shared interfaces
 │   └── ml/                    # Machine learning integration
 │       ├── node_classification.py
@@ -231,22 +231,22 @@ src/networkx_mcp/
 
 ### Design Principles
 
-✅ **Single Responsibility**: Each module has one clear purpose  
-✅ **Plugin Architecture**: Easy to extend with custom components  
-✅ **Clean Interfaces**: Protocol-based abstractions  
-✅ **Factory Patterns**: Easy component selection  
-✅ **Backwards Compatible**: Existing code continues to work  
-✅ **Professional Standards**: Following open-source best practices  
+✅ **Single Responsibility**: Each module has one clear purpose
+✅ **Plugin Architecture**: Easy to extend with custom components
+✅ **Clean Interfaces**: Protocol-based abstractions
+✅ **Factory Patterns**: Easy component selection
+✅ **Backwards Compatible**: Existing code continues to work
+✅ **Professional Standards**: Following open-source best practices
 
 ## 🧪 Production Readiness: 94.7%
 
 ### ✅ **Security: 100%**
 - Input validation prevents injection attacks
-- File operations sandboxed to safe directories  
+- File operations sandboxed to safe directories
 - Memory limits prevent DoS attacks
 - Rate limiting per client
 
-### ✅ **Persistence: 100%** 
+### ✅ **Persistence: 100%**
 - Redis backend for reliable data storage
 - 100% data recovery across server restarts
 - Concurrent access protection
@@ -300,16 +300,16 @@ src/networkx_mcp/
 
 ## 🏆 Awards & Recognition
 
-🎖️ **Production-Grade Architecture** - Clean modular design  
-🚀 **Performance Validated** - Load tested and optimized  
-🔒 **Security Hardened** - Comprehensive protection measures  
-📈 **Community Ready** - Professional open-source standards  
+🎖️ **Production-Grade Architecture** - Clean modular design
+🚀 **Performance Validated** - Load tested and optimized
+🔒 **Security Hardened** - Comprehensive protection measures
+📈 **Community Ready** - Professional open-source standards
 
 ## 💡 Examples & Use Cases
 
 ### Real-World Applications
 - **Social Network Analysis**: Influence mapping, community detection
-- **Transportation Networks**: Route optimization, capacity analysis  
+- **Transportation Networks**: Route optimization, capacity analysis
 - **Citation Networks**: Research impact analysis, trend identification
 - **Infrastructure Networks**: Robustness testing, failure analysis
 - **Molecular Networks**: Drug discovery, protein interaction analysis
@@ -318,13 +318,13 @@ src/networkx_mcp/
 ```bash
 # Run comprehensive examples
 python examples/social_network_analysis.py
-python examples/transportation_network.py  
+python examples/transportation_network.py
 python examples/citation_network.py
 
 # Interactive CLI
 python -m networkx_mcp.cli
 
-# Performance benchmarking  
+# Performance benchmarking
 python -m networkx_mcp.cli --benchmark 1000
 ```
 
@@ -337,7 +337,7 @@ pytest --cov=src/networkx_mcp --cov-report=html
 
 # Specific test categories
 pytest tests/test_algorithms.py      # Algorithm tests
-pytest tests/test_security.py       # Security tests  
+pytest tests/test_security.py       # Security tests
 pytest tests/test_performance.py    # Load tests
 ```
 
@@ -358,7 +358,7 @@ pre-commit run --all-files
 2. Create feature branch: `git checkout -b feature/amazing-feature`
 3. Make changes with tests
 4. Run quality checks: `pre-commit run --all-files`
-5. Commit: `git commit -m 'feat: add amazing feature'`  
+5. Commit: `git commit -m 'feat: add amazing feature'`
 6. Push: `git push origin feature/amazing-feature`
 7. Create Pull Request
 

@@ -35,7 +35,7 @@ python -m networkx_mcp.server streamable-http 8765
 ### Transport Methods Explained
 
 - **stdio**: Communicates via standard input/output (best for CLI tools and scripts)
-- **sse**: Server-Sent Events over HTTP (best for web applications)  
+- **sse**: Server-Sent Events over HTTP (best for web applications)
 - **streamable-http**: HTTP with streaming support
 
 ### If Port is Already in Use (SSE/HTTP only)

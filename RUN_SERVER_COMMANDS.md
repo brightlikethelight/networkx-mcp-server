@@ -7,7 +7,7 @@
 # Quick health check - verifies installation
 python quickstart.py
 
-# Full validation - tests all components  
+# Full validation - tests all components
 python validate_server.py
 
 # Test stdio server can start

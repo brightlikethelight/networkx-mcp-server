@@ -78,31 +78,31 @@ async def example():
     # Connect to server
     client = Client()
     await client.connect('localhost:8765')
-    
+
     # Create a graph
     result = await client.call_tool('create_graph', {
         'graph_id': 'my_graph',
         'graph_type': 'undirected'
     })
-    
+
     # Add some nodes
     await client.call_tool('add_nodes', {
         'graph_id': 'my_graph',
         'nodes': ['A', 'B', 'C', 'D']
     })
-    
+
     # Add edges
     await client.call_tool('add_edges', {
         'graph_id': 'my_graph',
         'edges': [['A', 'B'], ['B', 'C'], ['C', 'D']]
     })
-    
+
     # Analyze
     centrality = await client.call_tool('centrality_measures', {
         'graph_id': 'my_graph',
         'centrality_type': 'betweenness'
     })
-    
+
     print(centrality)
 
 asyncio.run(example())

@@ -134,4 +134,6 @@ skips = [
     "B404",  # subprocess - we need subprocess for some operations
     "B603",  # subprocess_without_shell_equals_true - false positives
     "B607",  # start_process_with_partial_path - false positives
+    "B324",  # hashlib - we use MD5 for non-crypto purposes
+    "B104",  # hardcoded_bind_all_interfaces - false positive
 ]

@@ -15,7 +15,7 @@ NetworkX MCP Server includes several built-in security features:
 
 ### Input Validation
 - All graph IDs validated against safe patterns
-- File paths restricted to safe directories  
+- File paths restricted to safe directories
 - Format whitelisting for imports
 - Parameter validation for all MCP tools
 
@@ -66,7 +66,7 @@ Please include the following information in your report:
 ### ⏱️ Response Timeline
 
 - **Initial Response**: Within 48 hours
-- **Investigation**: Within 7 days  
+- **Investigation**: Within 7 days
 - **Fix Development**: Depends on severity
 - **Public Disclosure**: After fix is available
 
@@ -147,7 +147,7 @@ While we don't currently offer monetary rewards, we're considering a bug bounty 
 
 We appreciate the security research community's efforts to responsibly disclose vulnerabilities. Your work helps keep NetworkX MCP Server secure for everyone.
 
-**Contact**: security@networkx-mcp.org  
+**Contact**: security@networkx-mcp.org
 **PGP Key**: [TO BE ADDED]
 
 ---

@@ -41,7 +41,7 @@ redis = ">=5.0.0"  # or aioredis for older Python
 
 # OLD (server.py - UNSAFE):
 @mcp.tool()
-async def create_graph(graph_id: str, graph_type: str = "Graph", 
+async def create_graph(graph_id: str, graph_type: str = "Graph",
                       params: Optional[Dict[str, Any]] = None):
     # No validation!
     result = graph_manager.create_graph(graph_id, graph_type, params)
@@ -55,27 +55,27 @@ from ..audit.audit_logger import audit_log
 class GraphHandlers:
     @audit_log("create_graph")
     @ResourceManager.resource_limited("create_graph")
-    async def create_graph(self, user_id: str, graph_id: str, 
+    async def create_graph(self, user_id: str, graph_id: str,
                           graph_type: str = "Graph",
                           params: Optional[Dict[str, Any]] = None):
         # 1. Validate ALL inputs
         user_id = SecurityValidator.validate_user_id(user_id)
         graph_id = SecurityValidator.validate_graph_id(graph_id)
         graph_type = SecurityValidator.validate_graph_type(graph_type)
-        
+
         # 2. Check resource limits
         user_stats = await self.storage.get_storage_stats(user_id)
         if user_stats['graph_count'] >= self.limits.max_graphs_per_user:
             raise LimitExceeded(f"User graph limit reached")
-        
+
         # 3. Sanitize parameters
         safe_params = SecurityValidator.sanitize_attributes(params or {})
-        
+
         # 4. Create with transaction
         async with self.storage.transaction() as tx:
             graph = self._create_graph_instance(graph_type, **safe_params)
             await self.storage.save_graph(user_id, graph_id, graph, tx)
-            
+
         return {"status": "success", "graph_id": graph_id}
 ```
 
@@ -120,14 +120,14 @@ from src.networkx_mcp.core.graph_operations import GraphManager
 async def migrate_graphs():
     """Migrate from in-memory to Redis."""
     print("🔄 Starting migration...")
-    
+
     # Old system
     old_manager = GraphManager()
-    
+
     # New system
     new_storage = RedisBackend()
     await new_storage.initialize()
-    
+
     # Migrate each graph
     migrated = 0
     for graph_id, graph in old_manager.graphs.items():
@@ -143,9 +143,9 @@ async def migrate_graphs():
             print(f"✅ Migrated: {graph_id}")
         except Exception as e:
             print(f"❌ Failed to migrate {graph_id}: {e}")
-    
+
     print(f"\n✅ Migration complete: {migrated} graphs")
-    
+
     # Verify
     graphs = await new_storage.list_graphs("migrated_user")
     print(f"📊 Verified: {len(graphs)} graphs in new storage")
@@ -165,13 +165,13 @@ class SecureServer:
         self.legacy = legacy_server
         self.validator = SecurityValidator()
         self.rate_limiter = RateLimiter()
-    
+
     async def create_graph(self, user_id: str, graph_id: str, **kwargs):
         # Add security layer
         user_id = self.validator.validate_user_id(user_id)
         graph_id = self.validator.validate_graph_id(graph_id)
         self.rate_limiter.check_rate_limit(user_id)
-        
+
         # Call legacy
         return await self.legacy.create_graph(graph_id, **kwargs)
 
@@ -187,15 +187,15 @@ class PersistentGraphManager(GraphManager):
     def __init__(self, storage: StorageBackend):
         super().__init__()
         self.storage = storage
-    
+
     async def create_graph(self, user_id: str, graph_id: str, graph_type: str):
         # Create in memory (legacy)
         result = super().create_graph(graph_id, graph_type)
-        
+
         # Also persist
         graph = self.graphs[graph_id]
         await self.storage.save_graph(user_id, graph_id, graph)
-        
+
         return result
 ```
 
@@ -211,7 +211,7 @@ async def shortest_path(graph_id: str, source: str, target: str):
 # NEW:
 # In handlers/algorithm_handlers.py
 class AlgorithmHandlers:
-    async def shortest_path(self, user_id: str, graph_id: str, 
+    async def shortest_path(self, user_id: str, graph_id: str,
                           source: str, target: str):
         # Moved and improved code...
 
@@ -236,10 +236,10 @@ async def shortest_path(graph_id: str, source: str, target: str):
 async def test_parallel():
     # Old system
     old_result = await old_server.create_graph("test1", "Graph")
-    
+
     # New system
     new_result = await new_server.create_graph("user1", "test1", "Graph")
-    
+
     # Compare
     assert old_result['status'] == new_result['status']
     print("✅ Results match!")
@@ -271,11 +271,11 @@ curl -X POST http://localhost:8765/create_graph \
 async def migration_status():
     old_graphs = len(old_manager.graphs)
     new_graphs = await new_storage.get_storage_stats("all")
-    
+
     print(f"""
     Migration Status:
     - Old system: {old_graphs} graphs
-    - New system: {new_graphs['graph_count']} graphs  
+    - New system: {new_graphs['graph_count']} graphs
     - Progress: {new_graphs['graph_count']/old_graphs*100:.1f}%
     """)
 ```
