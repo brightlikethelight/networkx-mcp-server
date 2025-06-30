@@ -9,7 +9,13 @@ from typing import Any, Dict, List, Optional, Union
 
 import networkx as nx
 import numpy as np
-from sklearn.preprocessing import StandardScaler
+
+try:
+    from sklearn.preprocessing import StandardScaler
+    HAS_SKLEARN = True
+except ImportError:
+    HAS_SKLEARN = False
+    StandardScaler = None
 
 # Performance thresholds and constants
 MAX_NODES_FOR_EXPENSIVE_COMPUTATION = 1000
@@ -338,8 +344,15 @@ class MLIntegration:
         features = np.array(features)
 
         # Normalize features
-        scaler = StandardScaler()
-        features = scaler.fit_transform(features)
+        if HAS_SKLEARN:
+            scaler = StandardScaler()
+            features = scaler.fit_transform(features)
+        else:
+            # Simple normalization without sklearn
+            mean = np.mean(features, axis=0)
+            std = np.std(features, axis=0)
+            std[std == 0] = 1  # Avoid division by zero
+            features = (features - mean) / std
 
         # Reduce dimensions if needed
         if features.shape[1] > dimensions:
@@ -789,8 +802,15 @@ class MLIntegration:
 
             # Normalize
             if feature_matrix.shape[0] > 1:
-                scaler = StandardScaler()
-                feature_matrix = scaler.fit_transform(feature_matrix)
+                if HAS_SKLEARN:
+                    scaler = StandardScaler()
+                    feature_matrix = scaler.fit_transform(feature_matrix)
+                else:
+                    # Simple normalization without sklearn
+                    mean = np.mean(feature_matrix, axis=0)
+                    std = np.std(feature_matrix, axis=0)
+                    std[std == 0] = 1  # Avoid division by zero
+                    feature_matrix = (feature_matrix - mean) / std
 
             # Calculate anomaly scores using Mahalanobis distance
             mean = np.mean(feature_matrix, axis=0)
