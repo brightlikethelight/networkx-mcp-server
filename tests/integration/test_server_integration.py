@@ -51,8 +51,8 @@ class TestMCPServerIntegration:
 
         # Calculate centrality
         centrality = algorithms.centrality_measures(graph, ["degree"])
-        assert "degree" in centrality
-        assert len(centrality["degree"]) == 5
+        assert "degree_centrality" in centrality
+        assert len(centrality["degree_centrality"]) == 5
 
     def test_graph_persistence(self, graph_manager):
         """Test graph persistence operations."""
