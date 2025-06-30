@@ -27,6 +27,8 @@ class Server:
         self.request_context = None
         self._tools = {}
         self._resources = {}
+        # Expose tools as a public attribute for compatibility
+        self.tools = self._tools
 
     def tool(self, name: Optional[str] = None):
         """Mock tool decorator."""
