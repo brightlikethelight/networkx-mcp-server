@@ -144,14 +144,16 @@ class TestBipartiteAnalysis:
         B = nx.Graph()
         B.add_edges_from([(0, "a"), (0, "b"), (1, "a"), (1, "c"), (2, "b")])
 
-        result = BipartiteAnalysis.is_bipartite(B)
-        assert result["is_bipartite"]
-        assert len(result["node_sets"]) == 2
+        is_bipartite, node_sets = BipartiteAnalysis.is_bipartite(B)
+        assert is_bipartite
+        assert node_sets is not None
+        assert len(node_sets) == 2
 
         # Non-bipartite graph
         G = nx.cycle_graph(5)
-        result = BipartiteAnalysis.is_bipartite(G)
-        assert not result["is_bipartite"]
+        is_bipartite, node_sets = BipartiteAnalysis.is_bipartite(G)
+        assert not is_bipartite
+        assert node_sets is None
 
     def test_maximum_matching(self):
         """Test maximum matching in bipartite graph."""
