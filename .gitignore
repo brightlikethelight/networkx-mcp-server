@@ -87,3 +87,4 @@ tmp/
 # Temporary files
 UNUSED_FUNCTIONS.md
 code_cleanup_analysis.md
+fix-env/
