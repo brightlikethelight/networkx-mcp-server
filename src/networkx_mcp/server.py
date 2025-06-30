@@ -228,9 +228,7 @@ async def create_graph(
         operation_counter.increment("create_graph")
 
         logger.info(f"Graph '{graph_id}' created successfully in {elapsed_time:.3f}s")
-        return GraphFormatter.format_success(
-            "create_graph", "Graph created successfully", result
-        )
+        return GraphFormatter.format_success(result, "Graph created successfully")
 
     except Exception as e:
         logger.error(f"Error creating graph '{graph_id}': {e!s}")
@@ -251,9 +249,7 @@ async def delete_graph(graph_id: str) -> dict[str, Any]:
     """
     try:
         result = graph_manager.delete_graph(graph_id)
-        return GraphFormatter.format_success(
-            "delete_graph", "Graph deleted successfully", result
-        )
+        return GraphFormatter.format_success(result, "Graph deleted successfully")
     except Exception as e:
         return GraphFormatter.format_error("GraphDeletionError", str(e))
 
@@ -269,7 +265,7 @@ async def list_graphs() -> dict[str, Any]:
     try:
         graphs = graph_manager.list_graphs()
         return GraphFormatter.format_success(
-            "list_graphs", f"Found {len(graphs)} graphs", {"graphs": graphs}
+            {"graphs": graphs}, f"Found {len(graphs)} graphs"
         )
     except Exception as e:
         return GraphFormatter.format_error("ListGraphsError", str(e))
@@ -351,9 +347,7 @@ async def get_graph_info(graph_id: str) -> dict[str, Any]:
         operation_counter.increment("get_graph_info")
 
         logger.info(f"Retrieved info for graph '{graph_id}' in {elapsed_time:.3f}s")
-        return GraphFormatter.format_success(
-            "get_graph_info", "Graph info retrieved", info
-        )
+        return GraphFormatter.format_success(info, "Graph info retrieved")
 
     except KeyError:
         error_msg = f"Graph '{graph_id}' not found"
@@ -457,9 +451,7 @@ async def add_nodes(
         logger.info(
             f"Added {result['nodes_added']} nodes to graph '{graph_id}' in {elapsed_time:.3f}s"
         )
-        return GraphFormatter.format_success(
-            "add_nodes", "Nodes added successfully", result
-        )
+        return GraphFormatter.format_success(result, "Nodes added successfully")
 
     except KeyError:
         error_msg = f"Graph '{graph_id}' not found"
@@ -602,9 +594,7 @@ async def add_edges(
         logger.info(
             f"Added {result['edges_added']} edges to graph '{graph_id}' in {elapsed_time:.3f}s"
         )
-        return GraphFormatter.format_success(
-            "add_edges", "Edges added successfully", result
-        )
+        return GraphFormatter.format_success(result, "Edges added successfully")
 
     except KeyError:
         error_msg = f"Graph '{graph_id}' not found"
@@ -772,9 +762,7 @@ async def shortest_path(
         operation_counter.increment("shortest_path")
 
         logger.info(f"Shortest path computation completed in {elapsed_time:.3f}s")
-        return GraphFormatter.format_success(
-            "shortest_path", "Path computation successful", result
-        )
+        return GraphFormatter.format_success(result, "Path computation successful")
 
     except nx.NetworkXNoPath:
         return GraphFormatter.format_error(
@@ -968,7 +956,7 @@ async def calculate_centrality(
 
         logger.info(f"Centrality calculation completed in {elapsed_time:.3f}s")
         return GraphFormatter.format_success(
-            "calculate_centrality", "Centrality calculated successfully", final_result
+            final_result, "Centrality calculated successfully"
         )
 
     except KeyError:
@@ -1060,9 +1048,7 @@ async def export_graph(
         result = GraphIOHandler.export_graph(graph, format, path, **export_options)
 
         return GraphFormatter.format_success(
-            "export_graph",
-            f"Graph exported to {format} format",
-            {"format": format, "result": result},
+            {"format": format, "result": result}, f"Graph exported to {format} format"
         )
     except Exception as e:
         return GraphFormatter.format_error("ExportError", str(e))
@@ -1111,7 +1097,7 @@ async def import_graph(
         info = graph_manager.get_graph_info(graph_id)
 
         return GraphFormatter.format_success(
-            "import_graph", f"Graph imported from {format} format", info
+            info, f"Graph imported from {format} format"
         )
     except Exception as e:
         return GraphFormatter.format_error("ImportError", str(e))
@@ -1170,9 +1156,7 @@ async def visualize_graph_simple(
             output_format=output_format,
         )
 
-        return GraphFormatter.format_success(
-            "visualize_graph", "Visualization data generated", result
-        )
+        return GraphFormatter.format_success(result, "Visualization data generated")
     except Exception as e:
         return GraphFormatter.format_error("VisualizationError", str(e))
 
@@ -1373,9 +1357,9 @@ async def graph_metrics(
                     metrics["connectivity"]["num_bridges"] = len(bridges)
 
                     if len(articulation_points) <= MAX_DISPLAY_ITEMS:
-                        metrics["connectivity"][
-                            "articulation_points"
-                        ] = articulation_points
+                        metrics["connectivity"]["articulation_points"] = (
+                            articulation_points
+                        )
                     if len(bridges) <= MAX_DISPLAY_ITEMS:
                         metrics["connectivity"]["bridges"] = bridges
                 except Exception as e:
@@ -1421,9 +1405,7 @@ async def graph_metrics(
         operation_counter.increment("graph_metrics")
 
         logger.info(f"Calculated metrics for graph '{graph_id}' in {elapsed_time:.3f}s")
-        return GraphFormatter.format_success(
-            "graph_metrics", "Metrics calculated successfully", metrics
-        )
+        return GraphFormatter.format_success(metrics, "Metrics calculated successfully")
 
     except KeyError:
         error_msg = f"Graph '{graph_id}' not found"
@@ -1492,9 +1474,7 @@ async def monitoring_stats() -> dict[str, Any]:
         }
 
         logger.info("Retrieved monitoring statistics")
-        return GraphFormatter.format_success(
-            "monitoring_stats", "Statistics retrieved", stats
-        )
+        return GraphFormatter.format_success(stats, "Statistics retrieved")
 
     except Exception as e:
         logger.error(f"Error getting monitoring stats: {e!s}")
@@ -1616,9 +1596,7 @@ async def clustering_analysis(
         operation_counter.increment("clustering_analysis")
 
         logger.info(f"Clustering analysis completed in {elapsed_time:.3f}s")
-        return GraphFormatter.format_success(
-            "clustering_analysis", "Analysis completed successfully", result
-        )
+        return GraphFormatter.format_success(result, "Analysis completed successfully")
 
     except KeyError:
         error_msg = f"Graph '{graph_id}' not found"
@@ -1765,9 +1743,7 @@ async def connected_components(
         operation_counter.increment("connected_components")
 
         logger.info(f"Component analysis completed in {elapsed_time:.3f}s")
-        return GraphFormatter.format_success(
-            "connected_components", "Component analysis successful", result
-        )
+        return GraphFormatter.format_success(result, "Component analysis successful")
 
     except KeyError:
         error_msg = f"Graph '{graph_id}' not found"
@@ -1896,9 +1872,7 @@ async def find_all_paths(
         operation_counter.increment("find_all_paths")
 
         logger.info(f"Found {len(paths)} paths in {elapsed_time:.3f}s")
-        return GraphFormatter.format_success(
-            "find_all_paths", "Paths found successfully", result
-        )
+        return GraphFormatter.format_success(result, "Paths found successfully")
 
     except KeyError:
         error_msg = f"Graph '{graph_id}' not found"
