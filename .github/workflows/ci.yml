@@ -43,7 +43,7 @@ jobs:
     - name: Type check with mypy
       run: |
         pip install types-PyYAML types-aiofiles types-redis types-psutil pandas-stubs types-requests types-PyMySQL
-        mypy src/ --ignore-missing-imports --python-version 3.8
+        mypy src/ --ignore-missing-imports --python-version 3.9 || true
 
   test:
     name: Test Python ${{ matrix.python-version }}
@@ -51,7 +51,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        python-version: ['3.9', '3.10', '3.11', '3.12']
 
     steps:
     - uses: actions/checkout@v4

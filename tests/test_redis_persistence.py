@@ -13,8 +13,9 @@ sys.path.insert(0, str(project_root))
 
 class TestRedisPersistence:
     """Test Redis-based persistence functionality."""
-
-    def __init__(self):
+    
+    def setup_method(self):
+        """Set up test method."""
         self.server_process = None
 
     async def test_data_survives_restart(self):
