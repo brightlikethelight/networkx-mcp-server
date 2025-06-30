@@ -7,6 +7,7 @@ from networkx_mcp.server import mcp
 class TestMCPServerIntegration:
     """Test MCP server integration."""
 
+    @pytest.mark.asyncio
     async def test_server_initialization(self):
         """Test server initializes correctly."""
         server = mcp
@@ -57,7 +58,7 @@ class TestMCPServerIntegration:
         """Test graph persistence operations."""
         # Create a graph
         graph_id = "persistence_test"
-        graph_manager.create_graph("directed", graph_id)
+        graph_manager.create_graph(graph_id, "directed")
 
         # Add some data
         graph_manager.add_nodes(graph_id, ["A", "B", "C"])
@@ -91,7 +92,7 @@ class TestMCPServerIntegration:
         import time
 
         graph_id = "large_graph"
-        graph_manager.create_graph("undirected", graph_id)
+        graph_manager.create_graph(graph_id, "undirected")
 
         # Measure node addition time
         start = time.time()
