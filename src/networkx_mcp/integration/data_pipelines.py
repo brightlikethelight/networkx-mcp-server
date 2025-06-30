@@ -15,6 +15,7 @@ import pandas as pd
 
 try:
     import aiohttp
+
     HAS_AIOHTTP = True
 except ImportError:
     HAS_AIOHTTP = False
@@ -320,7 +321,9 @@ class DataPipelines:
         Dict containing graph and metadata
         """
         if not HAS_AIOHTTP:
-            raise ImportError("aiohttp is required for API pipeline. Install with: pip install aiohttp")
+            raise ImportError(
+                "aiohttp is required for API pipeline. Install with: pip install aiohttp"
+            )
         start_time = time.time()
         graph = nx.DiGraph() if kwargs.get("directed", True) else nx.Graph()
 

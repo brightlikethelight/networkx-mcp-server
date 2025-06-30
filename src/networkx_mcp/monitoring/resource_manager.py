@@ -5,6 +5,7 @@ from typing import Any, Dict
 
 try:
     import psutil
+
     HAS_PSUTIL = True
 except ImportError:
     HAS_PSUTIL = False
@@ -20,7 +21,7 @@ def get_system_metrics() -> Dict[str, Any]:
             "cpu_percent": 0.0,
             "memory_percent": 0.0,
             "memory_available_mb": 0.0,
-            "error": "psutil not available"
+            "error": "psutil not available",
         }
     return {
         "cpu_percent": psutil.cpu_percent(interval=0.1),

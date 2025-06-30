@@ -6,6 +6,7 @@ from typing import Any, Callable, Dict
 
 try:
     import psutil
+
     HAS_PSUTIL = True
 except ImportError:
     HAS_PSUTIL = False
@@ -46,7 +47,7 @@ class PerformanceMonitor:
                 "rss_mb": 0.0,
                 "vms_mb": 0.0,
                 "percent": 0.0,
-                "error": "psutil not available"
+                "error": "psutil not available",
             }
         process = psutil.Process()
         memory_info = process.memory_info()

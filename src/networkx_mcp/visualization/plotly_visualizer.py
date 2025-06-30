@@ -8,6 +8,7 @@ import numpy as np
 
 try:
     import plotly.graph_objects as go
+
     HAS_PLOTLY = True
 except ImportError:
     HAS_PLOTLY = False
@@ -18,11 +19,13 @@ logger = logging.getLogger(__name__)
 
 class PlotlyVisualizer:
     """Create interactive graph visualizations using Plotly."""
-    
+
     def __init__(self):
         """Initialize PlotlyVisualizer."""
         if not HAS_PLOTLY:
-            raise ImportError("plotly is required for PlotlyVisualizer. Install with: pip install plotly")
+            raise ImportError(
+                "plotly is required for PlotlyVisualizer. Install with: pip install plotly"
+            )
 
     @staticmethod
     def create_interactive_plot(

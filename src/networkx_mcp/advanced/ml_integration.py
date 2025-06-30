@@ -12,6 +12,7 @@ import numpy as np
 
 try:
     from sklearn.preprocessing import StandardScaler
+
     HAS_SKLEARN = True
 except ImportError:
     HAS_SKLEARN = False

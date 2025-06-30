@@ -3,8 +3,7 @@
 import json
 
 import pytest
-
-from networkx_mcp.server import NetworkXMCPServer
+from networkx_mcp.server import mcp
 
 
 @pytest.mark.asyncio
@@ -13,7 +12,7 @@ class TestMCPServerIntegration:
 
     async def test_server_initialization(self):
         """Test server initializes correctly."""
-        server = NetworkXMCPServer()
+        server = mcp
 
         # Server should have tools registered
         assert hasattr(server, "tools")

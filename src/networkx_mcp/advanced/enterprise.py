@@ -15,8 +15,10 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import networkx as nx
 import numpy as np
+
 try:
     import schedule
+
     HAS_SCHEDULE = True
 except ImportError:
     HAS_SCHEDULE = False
@@ -24,6 +26,7 @@ except ImportError:
 
 try:
     from jinja2 import Template
+
     HAS_JINJA2 = True
 except ImportError:
     HAS_JINJA2 = False
@@ -41,6 +44,7 @@ try:
         Spacer,
         Table,
     )
+
     HAS_REPORTLAB = True
 except ImportError:
     HAS_REPORTLAB = False
@@ -426,7 +430,9 @@ class EnterpriseFeatures:
             Job ID
         """
         if not HAS_SCHEDULE:
-            raise ImportError("schedule is required for job scheduling. Install with: pip install schedule")
+            raise ImportError(
+                "schedule is required for job scheduling. Install with: pip install schedule"
+            )
         # Using MD5 for non-cryptographic job ID generation (not security sensitive)
         job_id = hashlib.md5(
             json.dumps(job_config, sort_keys=True).encode()
@@ -719,7 +725,9 @@ class EnterpriseFeatures:
     ) -> str:
         """Generate HTML report."""
         if not HAS_JINJA2:
-            raise ImportError("jinja2 is required for HTML report generation. Install with: pip install jinja2")
+            raise ImportError(
+                "jinja2 is required for HTML report generation. Install with: pip install jinja2"
+            )
         # Simple HTML template
         html_template = """
         <!DOCTYPE html>
@@ -791,7 +799,9 @@ class EnterpriseFeatures:
     ) -> bytes:
         """Generate PDF report."""
         if not HAS_REPORTLAB:
-            raise ImportError("reportlab is required for PDF generation. Install with: pip install reportlab")
+            raise ImportError(
+                "reportlab is required for PDF generation. Install with: pip install reportlab"
+            )
         buffer = io.BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=letter)
         story = []

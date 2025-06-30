@@ -55,7 +55,7 @@ if PyvisVisualizer is not None:
 def get_visualizer(backend: str = "matplotlib"):
     """Get visualizer by backend name."""
     visualizers = {}
-    
+
     if MatplotlibVisualizer is not None:
         visualizers["matplotlib"] = MatplotlibVisualizer
     if PlotlyVisualizer is not None:
