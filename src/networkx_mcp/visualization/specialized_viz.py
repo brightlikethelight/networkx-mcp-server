@@ -63,10 +63,12 @@ class SpecializedVisualizations:
         Dict containing the heatmap visualization
         """
         if not HAS_MATPLOTLIB:
-            msg = \"Matplotlib is required for heatmap visualization. Install with: pip install matplotlib seaborn\"
+            msg = ("Matplotlib is required for heatmap visualization. "
+                   "Install with: pip install matplotlib seaborn")
             raise ImportError(msg)
         if not HAS_PLOTLY:
-            msg = \"Plotly is required for interactive heatmap visualization. Install with: pip install plotly\"
+            msg = ("Plotly is required for interactive heatmap visualization. "
+                   "Install with: pip install plotly")
             raise ImportError(msg)
         
         # Get adjacency matrix

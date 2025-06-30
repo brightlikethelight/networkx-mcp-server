@@ -76,10 +76,14 @@ class SecurityValidator:
                     isinstance(item, (str, int, float, bool, type(None)))
                     for item in value[:100]
                 ):
-                    sanitized[key] = list(value[:100])  # Limit list size
+                    # Create a list from the first 100 items
+                    limited_list = list(value[:100])
+                    sanitized[key] = limited_list
             elif isinstance(value, dict):
                 # Recursively sanitize nested dicts (with depth limit)
                 if len(str(value)) < 10000:  # Limit total size
-                    sanitized[key] = SecurityValidator.sanitize_attributes(value)
+                    # Recursively sanitize nested dict
+                    nested_sanitized = SecurityValidator.sanitize_attributes(value)
+                    sanitized[key] = nested_sanitized
 
         return sanitized

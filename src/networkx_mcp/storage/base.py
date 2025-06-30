@@ -34,7 +34,9 @@ class StorageBackend(ABC):
     @asynccontextmanager
     async def transaction(self) -> AsyncGenerator[Transaction, None]:
         """Context manager for atomic operations."""
-        yield
+        # This is an abstract method, implementations should yield a Transaction
+        raise NotImplementedError("Subclasses must implement transaction()")
+        yield  # type: ignore[unreachable]
 
     @abstractmethod
     async def save_graph(

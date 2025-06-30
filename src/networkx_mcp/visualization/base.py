@@ -6,8 +6,8 @@ import networkx as nx
 
 
 def calculate_layout(
-    graph: nx.Graph, layout: str, **params
-) -> Dict[str, Tuple[float, float]]:
+    graph: nx.Graph, layout: str, **params: Any
+) -> Dict[Any, Tuple[float, float]]:
     """Calculate node positions for given layout algorithm."""
     layout_funcs = {
         "spring": lambda g, **p: nx.spring_layout(g, **p),
@@ -24,14 +24,16 @@ def calculate_layout(
         layout = "spring"  # fallback
 
     try:
-        return layout_funcs[layout](graph, **params)
+        result: Dict[Any, Tuple[float, float]] = layout_funcs[layout](graph, **params)
+        return result
     except Exception:
         # Fallback to spring layout if specific layout fails
-        return nx.spring_layout(graph)
+        fallback_result: Dict[Any, Tuple[float, float]] = nx.spring_layout(graph)
+        return fallback_result
 
 
 def prepare_graph_data(
-    graph: nx.Graph, pos: Dict[str, Tuple[float, float]]
+    graph: nx.Graph, pos: Dict[Any, Tuple[float, float]]
 ) -> Dict[str, Any]:
     """Prepare graph data for visualization."""
     nodes = []
