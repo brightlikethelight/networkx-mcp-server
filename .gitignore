@@ -44,6 +44,7 @@ env/
 .coverage.*
 .cache
 .pytest_cache/
+.mypy_cache/
 cover/
 *.cover
 *.py,cover

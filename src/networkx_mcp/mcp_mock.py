@@ -27,6 +27,7 @@ class Server:
         self.request_context = None
         self._tools = {}
         self._resources = {}
+        self._prompts = {}
         # Expose tools as a public attribute for compatibility
         self.tools = self._tools
 
@@ -47,6 +48,16 @@ class Server:
             self._resources[pattern] = func
             return func
 
+        return decorator
+    
+    def prompt(self, name: Optional[str] = None):
+        """Mock prompt decorator."""
+        
+        def decorator(func: Callable) -> Callable:
+            prompt_name = name or func.__name__
+            self._prompts[prompt_name] = func
+            return func
+        
         return decorator
 
     async def run(self, **kwargs):
@@ -75,10 +86,56 @@ class ServerModels:
     InitializationOptions = InitializationOptions
 
 
+class Resource:
+    """Mock Resource class."""
+    
+    def __init__(self, uri: str, name: str, description: str = ""):
+        self.uri = uri
+        self.name = name
+        self.description = description
+
+
+class ResourceContent:
+    """Mock ResourceContent class."""
+    
+    def __init__(self, uri: str, mimeType: str, text: str):
+        self.uri = uri
+        self.mimeType = mimeType
+        self.text = text
+
+
+class TextResourceContent(ResourceContent):
+    """Mock TextResourceContent class."""
+    pass
+
+
+class Prompt:
+    """Mock Prompt class."""
+    
+    def __init__(self, name: str, description: str, arguments: list = None):
+        self.name = name
+        self.description = description
+        self.arguments = arguments or []
+
+
+class PromptArgument:
+    """Mock PromptArgument class."""
+    
+    def __init__(self, name: str, description: str, required: bool = False):
+        self.name = name
+        self.description = description
+        self.required = required
+
+
 class Types:
     """Mock types module."""
 
     TextContent = TextContent
+    Resource = Resource
+    ResourceContent = ResourceContent
+    TextResourceContent = TextResourceContent
+    Prompt = Prompt
+    PromptArgument = PromptArgument
 
 
 class MockMCP:
