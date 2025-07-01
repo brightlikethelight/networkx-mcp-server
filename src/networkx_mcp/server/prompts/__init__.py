@@ -4,7 +4,6 @@ Prompts provide pre-defined templates for common graph analysis workflows,
 helping users leverage tools and resources effectively.
 """
 
-from typing import List, Dict, Any
 
 try:
     from fastmcp import FastMCP
@@ -12,7 +11,7 @@ try:
 except ImportError:
     # Mock imports for when MCP is not available
     from networkx_mcp.mcp_mock import MockMCP
-    
+
     Prompt = MockMCP.types.Prompt
     PromptArgument = MockMCP.types.PromptArgument
     TextContent = MockMCP.types.TextContent
@@ -20,18 +19,20 @@ except ImportError:
 
 class GraphPrompts:
     """MCP Prompts for graph analysis workflows."""
-    
+
     def __init__(self, mcp: FastMCP):
         """Initialize prompts with MCP server."""
         self.mcp = mcp
         self._register_prompts()
-    
+
     def _register_prompts(self):
         """Register all available prompts."""
-        
+
         # Social Network Analysis Prompt
         @self.mcp.prompt()
-        async def analyze_social_network(graph_id: str = "social_network") -> List[TextContent]:
+        async def analyze_social_network(
+            graph_id: str = "social_network",
+        ) -> list[TextContent]:
             """Complete workflow for analyzing a social network."""
             return [
                 TextContent(
@@ -59,17 +60,15 @@ Step 5: Visualize the network:
 - Use visualize_graph with community coloring
 - Highlight influential nodes
 
-Would you like me to execute this analysis workflow?"""
+Would you like me to execute this analysis workflow?""",
                 )
             ]
-        
+
         # Path Finding Prompt
         @self.mcp.prompt()
         async def find_optimal_path(
-            graph_id: str = "network",
-            source: str = "A",
-            target: str = "Z"
-        ) -> List[TextContent]:
+            graph_id: str = "network", source: str = "A", target: str = "Z"
+        ) -> list[TextContent]:
             """Find optimal paths in a network."""
             return [
                 TextContent(
@@ -90,16 +89,15 @@ Commands to execute:
 - find_all_paths(graph_id="{graph_id}", source="{source}", target="{target}", max_length=10)
 - visualize_paths(graph_id="{graph_id}", paths=<results>)
 
-Shall I proceed with the path analysis?"""
+Shall I proceed with the path analysis?""",
                 )
             ]
-        
+
         # Graph Generation Prompt
         @self.mcp.prompt()
         async def generate_test_graph(
-            graph_type: str = "scale_free",
-            num_nodes: int = 100
-        ) -> List[TextContent]:
+            graph_type: str = "scale_free", num_nodes: int = 100
+        ) -> list[TextContent]:
             """Generate test graphs for analysis."""
             return [
                 TextContent(
@@ -109,16 +107,16 @@ Shall I proceed with the path analysis?"""
 Available graph types:
 1. **scale_free**: Power-law degree distribution (social networks)
    - Parameters: n={num_nodes}, m=3 (edges per new node)
-   
+
 2. **small_world**: High clustering, short paths (brain networks)
    - Parameters: n={num_nodes}, k=6, p=0.3
-   
+
 3. **random**: Erdős-Rényi random graph
    - Parameters: n={num_nodes}, p=0.1 (edge probability)
-   
+
 4. **complete**: All nodes connected
    - Parameters: n={num_nodes}
-   
+
 5. **bipartite**: Two-mode network
    - Parameters: n1={num_nodes//2}, n2={num_nodes//2}
 
@@ -130,13 +128,15 @@ generate_graph(
     <additional_params>
 )
 
-Would you like to generate this graph and analyze its properties?"""
+Would you like to generate this graph and analyze its properties?""",
                 )
             ]
-        
+
         # Performance Analysis Prompt
         @self.mcp.prompt()
-        async def benchmark_algorithms(graph_id: str = "test_graph") -> List[TextContent]:
+        async def benchmark_algorithms(
+            graph_id: str = "test_graph",
+        ) -> list[TextContent]:
             """Benchmark algorithm performance on a graph."""
             return [
                 TextContent(
@@ -147,15 +147,15 @@ Performance Tests:
 1. **Shortest Path Algorithms**:
    - Dijkstra vs Bellman-Ford vs A*
    - Single-source vs all-pairs
-   
+
 2. **Centrality Measures**:
    - Degree vs Betweenness vs Eigenvector
    - Exact vs approximate algorithms
-   
+
 3. **Community Detection**:
    - Louvain vs Label Propagation vs Spectral
    - Quality vs speed trade-offs
-   
+
 4. **Graph Traversal**:
    - BFS vs DFS performance
    - Memory usage analysis
@@ -166,16 +166,15 @@ Metrics to collect:
 - Result quality
 - Scalability
 
-Would you like to run the performance benchmarks?"""
+Would you like to run the performance benchmarks?""",
                 )
             ]
-        
+
         # Machine Learning Prompt
         @self.mcp.prompt()
         async def ml_graph_analysis(
-            graph_id: str = "ml_graph",
-            task: str = "node_classification"
-        ) -> List[TextContent]:
+            graph_id: str = "ml_graph", task: str = "node_classification"
+        ) -> list[TextContent]:
             """Apply machine learning to graph analysis."""
             return [
                 TextContent(
@@ -186,15 +185,15 @@ Available ML Tasks:
 1. **Node Classification**:
    - Predict node labels/categories
    - Use: node features + graph structure
-   
+
 2. **Link Prediction**:
    - Predict future/missing edges
    - Use: node similarity + graph patterns
-   
+
 3. **Graph Embedding**:
    - Learn vector representations
    - Methods: Node2Vec, DeepWalk, GraphSAGE
-   
+
 4. **Anomaly Detection**:
    - Find unusual nodes/edges
    - Use: statistical + structural features
@@ -214,16 +213,15 @@ ml_graph_analysis(
     test_size=0.2
 )
 
-Ready to start the ML analysis?"""
+Ready to start the ML analysis?""",
                 )
             ]
-        
+
         # Visualization Workflow Prompt
         @self.mcp.prompt()
         async def create_visualization(
-            graph_id: str = "my_graph",
-            viz_type: str = "interactive"
-        ) -> List[TextContent]:
+            graph_id: str = "my_graph", viz_type: str = "interactive"
+        ) -> list[TextContent]:
             """Create beautiful graph visualizations."""
             return [
                 TextContent(
@@ -236,17 +234,17 @@ Visualization Options:
    - Quick overview plots
    - Good for small graphs (<100 nodes)
    - Export as PNG/PDF
-   
+
 2. **Interactive** (plotly):
    - Zoom, pan, hover details
    - Good for medium graphs (<1000 nodes)
    - Export as HTML
-   
+
 3. **3D Interactive** (plotly 3D):
    - Three-dimensional layout
    - Rotation and exploration
    - Best for spatial networks
-   
+
 4. **Web-based** (pyvis):
    - Physics simulation
    - Drag nodes, adjust layout
@@ -267,7 +265,7 @@ visualize_graph(
     layout="spring"
 )
 
-Would you like to create this visualization?"""
+Would you like to create this visualization?""",
                 )
             ]
 

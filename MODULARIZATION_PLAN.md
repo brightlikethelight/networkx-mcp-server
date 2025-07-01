@@ -67,7 +67,7 @@ async def create_graph(graph_id: str, graph_type: str = "Graph"):
 class GraphOperationHandler:
     def __init__(self, graph_manager):
         self.graph_manager = graph_manager
-    
+
     async def create_graph(self, graph_id: str, graph_type: str = "Graph"):
         # Same implementation
         ...
@@ -91,15 +91,15 @@ async def create_graph(graph_id: str, graph_type: str = "Graph"):
 ```python
 class ToolPlugin:
     """Base class for tool plugins."""
-    
+
     def get_tools(self) -> Dict[str, Callable]:
         """Return tool name -> handler mapping."""
         raise NotImplementedError
-    
+
     def get_resources(self) -> Dict[str, Callable]:
         """Return resource pattern -> handler mapping."""
         return {}
-    
+
     def get_prompts(self) -> Dict[str, Callable]:
         """Return prompt name -> handler mapping."""
         return {}
@@ -128,26 +128,26 @@ from typing import Optional
 @dataclass
 class ServerConfig:
     """Centralized server configuration."""
-    
+
     # Server settings
     host: str = "127.0.0.1"
     port: int = 8765
-    
+
     # Graph limits
     max_nodes: int = 1_000_000
     max_edges: int = 10_000_000
     max_graph_memory_mb: int = 1024
-    
+
     # Performance
     enable_caching: bool = True
     cache_ttl_seconds: int = 300
     max_concurrent_operations: int = 100
-    
+
     # Features
     enable_ml: bool = True
     enable_visualization: bool = True
     enable_enterprise: bool = False
-    
+
     @classmethod
     def from_env(cls) -> "ServerConfig":
         """Load configuration from environment variables."""
@@ -164,18 +164,18 @@ from typing import Dict, Callable
 
 class BaseHandler(ABC):
     """Base class for all tool handlers."""
-    
+
     def __init__(self, graph_manager, config: ServerConfig):
         self.graph_manager = graph_manager
         self.config = config
         self._tools: Dict[str, Callable] = {}
         self._register_tools()
-    
+
     @abstractmethod
     def _register_tools(self):
         """Register tools provided by this handler."""
         pass
-    
+
     def get_tools(self) -> Dict[str, Callable]:
         """Get all tools provided by this handler."""
         return self._tools
@@ -187,23 +187,23 @@ class BaseHandler(ABC):
 # main.py
 class NetworkXMCPServer:
     """Main server orchestrator."""
-    
+
     def __init__(self, config: Optional[ServerConfig] = None):
         self.config = config or ServerConfig.from_env()
         self.mcp = FastMCP("NetworkX MCP Server")
-        
+
         # Core dependencies
         self.graph_manager = GraphManager()
         self.validator = GraphValidator()
         self.monitor = PerformanceMonitor()
-        
+
         # Initialize handlers
         self._init_handlers()
-        
+
         # Initialize resources and prompts
         self.resources = GraphResources(self.mcp, self.graph_manager)
         self.prompts = GraphPrompts(self.mcp)
-    
+
     def _init_handlers(self):
         """Initialize and register all handlers."""
         # Create handler instances
@@ -213,14 +213,14 @@ class NetworkXMCPServer:
             AnalysisHandler(self.graph_manager, self.config),
             VisualizationHandler(self.graph_manager, self.config),
         ]
-        
+
         # Register optional handlers
         if self.config.enable_ml:
             handlers.append(MLHandler(self.graph_manager, self.config))
-        
+
         if self.config.enable_enterprise:
             handlers.append(EnterpriseHandler(self.graph_manager, self.config))
-        
+
         # Register all tools
         for handler in handlers:
             for tool_name, tool_func in handler.get_tools().items():
@@ -238,12 +238,12 @@ class TestGraphOperationHandler:
     @pytest.fixture
     def handler(self, mock_graph_manager, test_config):
         return GraphOperationHandler(mock_graph_manager, test_config)
-    
+
     async def test_create_graph(self, handler):
         result = await handler.create_graph("test_id", "DiGraph")
         assert result["success"] is True
         assert result["graph_type"] == "DiGraph"
-    
+
     async def test_add_nodes(self, handler):
         # Test implementation
         ...

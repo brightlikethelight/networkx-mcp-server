@@ -29,8 +29,8 @@ Resources provide read-only access to graph data, similar to GET endpoints in RE
 ### Available Resources:
 
 #### 1. Graph Catalog
-**URI**: `graph://catalog`  
-**Description**: Lists all available graphs with their metadata  
+**URI**: `graph://catalog`
+**Description**: Lists all available graphs with their metadata
 **Returns**: JSON array of graph information
 
 ```json
@@ -47,8 +47,8 @@ Resources provide read-only access to graph data, similar to GET endpoints in RE
 ```
 
 #### 2. Graph Data
-**URI**: `graph://data/{graph_id}`  
-**Description**: Complete graph data in node-link format  
+**URI**: `graph://data/{graph_id}`
+**Description**: Complete graph data in node-link format
 **Returns**: JSON graph representation
 
 ```json
@@ -68,8 +68,8 @@ Resources provide read-only access to graph data, similar to GET endpoints in RE
 ```
 
 #### 3. Graph Statistics
-**URI**: `graph://stats/{graph_id}`  
-**Description**: Detailed statistics about a graph  
+**URI**: `graph://stats/{graph_id}`
+**Description**: Detailed statistics about a graph
 **Returns**: JSON with comprehensive metrics
 
 ```json
@@ -98,13 +98,13 @@ Resources provide read-only access to graph data, similar to GET endpoints in RE
 ```
 
 #### 4. Algorithm Results Cache
-**URI**: `graph://results/{graph_id}/{algorithm}`  
-**Description**: Cached results from previous algorithm runs  
+**URI**: `graph://results/{graph_id}/{algorithm}`
+**Description**: Cached results from previous algorithm runs
 **Returns**: JSON with algorithm-specific results
 
 #### 5. Visualization Data
-**URI**: `graph://viz/{graph_id}`  
-**Description**: Graph data optimized for visualization with node positions  
+**URI**: `graph://viz/{graph_id}`
+**Description**: Graph data optimized for visualization with node positions
 **Returns**: JSON with nodes and edges including layout positions
 
 ```json
@@ -126,9 +126,9 @@ Prompts are pre-defined templates that help users leverage tools and resources e
 ### Available Prompts:
 
 #### 1. Social Network Analysis
-**Name**: `analyze_social_network`  
-**Description**: Complete workflow for analyzing social networks  
-**Parameters**: 
+**Name**: `analyze_social_network`
+**Description**: Complete workflow for analyzing social networks
+**Parameters**:
 - `graph_id`: The social network to analyze
 
 **Workflow**:
@@ -139,8 +139,8 @@ Prompts are pre-defined templates that help users leverage tools and resources e
 5. Create visualizations
 
 #### 2. Path Finding
-**Name**: `find_optimal_path`  
-**Description**: Find and analyze paths between nodes  
+**Name**: `find_optimal_path`
+**Description**: Find and analyze paths between nodes
 **Parameters**:
 - `graph_id`: The graph to search
 - `source`: Starting node
@@ -154,8 +154,8 @@ Prompts are pre-defined templates that help users leverage tools and resources e
 - Path visualization
 
 #### 3. Graph Generation
-**Name**: `generate_test_graph`  
-**Description**: Generate various types of test graphs  
+**Name**: `generate_test_graph`
+**Description**: Generate various types of test graphs
 **Parameters**:
 - `graph_type`: Type of graph (scale_free, small_world, random, etc.)
 - `num_nodes`: Number of nodes
@@ -168,8 +168,8 @@ Prompts are pre-defined templates that help users leverage tools and resources e
 - Bipartite graphs
 
 #### 4. Performance Benchmarking
-**Name**: `benchmark_algorithms`  
-**Description**: Benchmark algorithm performance  
+**Name**: `benchmark_algorithms`
+**Description**: Benchmark algorithm performance
 **Parameters**:
 - `graph_id`: Graph to test on
 
@@ -180,8 +180,8 @@ Prompts are pre-defined templates that help users leverage tools and resources e
 - Memory usage analysis
 
 #### 5. Machine Learning
-**Name**: `ml_graph_analysis`  
-**Description**: Apply ML techniques to graphs  
+**Name**: `ml_graph_analysis`
+**Description**: Apply ML techniques to graphs
 **Parameters**:
 - `graph_id`: Graph to analyze
 - `task`: ML task (node_classification, link_prediction, etc.)
@@ -193,8 +193,8 @@ Prompts are pre-defined templates that help users leverage tools and resources e
 - Anomaly detection
 
 #### 6. Visualization Workflow
-**Name**: `create_visualization`  
-**Description**: Create customized graph visualizations  
+**Name**: `create_visualization`
+**Description**: Create customized graph visualizations
 **Parameters**:
 - `graph_id`: Graph to visualize
 - `viz_type`: Visualization type
@@ -230,13 +230,13 @@ resource("graph://viz/social_network")
 prompt("analyze_social_network", graph_id="my_network")
 
 # Find optimal paths
-prompt("find_optimal_path", 
+prompt("find_optimal_path",
        graph_id="transport_network",
-       source="Station_A", 
+       source="Station_A",
        target="Station_Z")
 
 # Generate test graph
-prompt("generate_test_graph", 
+prompt("generate_test_graph",
        graph_type="scale_free",
        num_nodes=1000)
 ```
