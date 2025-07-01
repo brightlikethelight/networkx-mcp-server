@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "networkx-mcp-server"
-version = "1.0.0"
-description = "Production-ready MCP server for NetworkX graph analysis"
+version = "2.0.0"
+description = "Production-ready MCP server for NetworkX graph analysis with Tools, Resources, and Prompts"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [{name = "Bright Liu", email = "brightliu@example.com"}]

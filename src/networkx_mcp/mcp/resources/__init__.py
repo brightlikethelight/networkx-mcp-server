@@ -12,6 +12,7 @@ except ImportError:
     # Mock imports for when MCP is not available
     from networkx_mcp.mcp_mock import MockMCP
 
+    FastMCP = MockMCP.FastMCP
     Resource = MockMCP.types.Resource
     ResourceContent = MockMCP.types.ResourceContent
     TextResourceContent = MockMCP.types.TextResourceContent
