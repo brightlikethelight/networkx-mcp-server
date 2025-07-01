@@ -4,7 +4,7 @@ This module handles basic graph operations including creation, deletion,
 modification, and querying of graphs.
 """
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 import networkx as nx
 from networkx.readwrite import json_graph
 
@@ -25,13 +25,13 @@ class GraphOpsHandler:
 
     def _register_tools(self):
         """Register all graph operation tools."""
-        
+
         @self.mcp.tool()
         async def create_graph(
             graph_id: str,
             graph_type: str = "undirected",
-            from_data: Optional[Dict[str, Any]] = None,
-        ) -> Dict[str, Any]:
+            from_data: Optional[dict[str, Any]] = None,
+        ) -> dict[str, Any]:
             """Create a new graph.
 
             Args:
@@ -61,7 +61,10 @@ class GraphOpsHandler:
 
                 if from_data:
                     # Create from provided data
-                    G = json_graph.node_link_graph(from_data, directed=(graph_type in ["directed", "multi_directed"]))
+                    G = json_graph.node_link_graph(
+                        from_data,
+                        directed=(graph_type in ["directed", "multi_directed"]),
+                    )
                     if not isinstance(G, GraphClass):
                         # Convert to requested type
                         G = GraphClass(G)
@@ -83,7 +86,7 @@ class GraphOpsHandler:
                 return {"error": f"Failed to create graph: {str(e)}"}
 
         @self.mcp.tool()
-        async def delete_graph(graph_id: str) -> Dict[str, Any]:
+        async def delete_graph(graph_id: str) -> dict[str, Any]:
             """Delete a graph from memory.
 
             Args:
@@ -99,7 +102,7 @@ class GraphOpsHandler:
             return {"status": "deleted", "graph_id": graph_id}
 
         @self.mcp.tool()
-        async def list_graphs() -> Dict[str, Any]:
+        async def list_graphs() -> dict[str, Any]:
             """List all available graphs.
 
             Returns:
@@ -121,7 +124,7 @@ class GraphOpsHandler:
             return {"graphs": graphs_info, "count": len(graphs_info)}
 
         @self.mcp.tool()
-        async def get_graph_info(graph_id: str) -> Dict[str, Any]:
+        async def get_graph_info(graph_id: str) -> dict[str, Any]:
             """Get detailed information about a graph.
 
             Args:
@@ -149,11 +152,17 @@ class GraphOpsHandler:
                 if G.is_directed():
                     info["is_weakly_connected"] = nx.is_weakly_connected(G)
                     info["is_strongly_connected"] = nx.is_strongly_connected(G)
-                    info["number_weakly_connected_components"] = nx.number_weakly_connected_components(G)
-                    info["number_strongly_connected_components"] = nx.number_strongly_connected_components(G)
+                    info[
+                        "number_weakly_connected_components"
+                    ] = nx.number_weakly_connected_components(G)
+                    info[
+                        "number_strongly_connected_components"
+                    ] = nx.number_strongly_connected_components(G)
                 else:
                     info["is_connected"] = nx.is_connected(G)
-                    info["number_connected_components"] = nx.number_connected_components(G)
+                    info[
+                        "number_connected_components"
+                    ] = nx.number_connected_components(G)
 
             # Sample nodes and edges
             info["sample_nodes"] = list(G.nodes())[:10]
@@ -164,9 +173,9 @@ class GraphOpsHandler:
         @self.mcp.tool()
         async def add_nodes(
             graph_id: str,
-            nodes: List[Union[str, int]],
-            attributes: Optional[Dict[str, Dict[str, Any]]] = None,
-        ) -> Dict[str, Any]:
+            nodes: list[Union[str, int]],
+            attributes: Optional[dict[str, dict[str, Any]]] = None,
+        ) -> dict[str, Any]:
             """Add nodes to a graph.
 
             Args:
@@ -203,9 +212,9 @@ class GraphOpsHandler:
         @self.mcp.tool()
         async def add_edges(
             graph_id: str,
-            edges: List[Union[List[Any], tuple[Any, Any]]],
-            attributes: Optional[Dict[str, Dict[str, Any]]] = None,
-        ) -> Dict[str, Any]:
+            edges: list[Union[list[Any], tuple[Any, Any]]],
+            attributes: Optional[dict[str, dict[str, Any]]] = None,
+        ) -> dict[str, Any]:
             """Add edges to a graph.
 
             Args:
@@ -243,8 +252,8 @@ class GraphOpsHandler:
 
         @self.mcp.tool()
         async def remove_nodes(
-            graph_id: str, nodes: List[Union[str, int]]
-        ) -> Dict[str, Any]:
+            graph_id: str, nodes: list[Union[str, int]]
+        ) -> dict[str, Any]:
             """Remove nodes from a graph.
 
             Args:
@@ -274,8 +283,8 @@ class GraphOpsHandler:
 
         @self.mcp.tool()
         async def remove_edges(
-            graph_id: str, edges: List[Union[List[Any], tuple[Any, Any]]]
-        ) -> Dict[str, Any]:
+            graph_id: str, edges: list[Union[list[Any], tuple[Any, Any]]]
+        ) -> dict[str, Any]:
             """Remove edges from a graph.
 
             Args:
@@ -304,7 +313,7 @@ class GraphOpsHandler:
                 return {"error": f"Failed to remove edges: {str(e)}"}
 
         @self.mcp.tool()
-        async def clear_graph(graph_id: str) -> Dict[str, Any]:
+        async def clear_graph(graph_id: str) -> dict[str, Any]:
             """Clear all nodes and edges from a graph.
 
             Args:
@@ -332,11 +341,11 @@ class GraphOpsHandler:
         @self.mcp.tool()
         async def subgraph_extraction(
             graph_id: str,
-            nodes: Optional[List[Union[str, int]]] = None,
+            nodes: Optional[list[Union[str, int]]] = None,
             k_hop: Optional[int] = None,
             center_node: Optional[Union[str, int]] = None,
             new_graph_id: Optional[str] = None,
-        ) -> Dict[str, Any]:
+        ) -> dict[str, Any]:
             """Extract a subgraph from an existing graph.
 
             Args:
@@ -377,7 +386,9 @@ class GraphOpsHandler:
                     subgraph = G.subgraph(valid_nodes).copy()
 
                 else:
-                    return {"error": "Must specify either nodes or k_hop with center_node"}
+                    return {
+                        "error": "Must specify either nodes or k_hop with center_node"
+                    }
 
                 # Save subgraph if ID provided
                 if new_graph_id:

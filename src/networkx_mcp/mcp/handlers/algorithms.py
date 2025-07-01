@@ -4,7 +4,7 @@ This module handles graph algorithm tools including pathfinding,
 centrality, connectivity, and other core algorithms.
 """
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 import networkx as nx
 
 
@@ -33,7 +33,7 @@ class AlgorithmHandler:
             target: Union[str, int],
             weight: Optional[str] = None,
             method: str = "dijkstra",
-        ) -> Dict[str, Any]:
+        ) -> dict[str, Any]:
             """Find shortest path between two nodes.
 
             Args:
@@ -58,7 +58,9 @@ class AlgorithmHandler:
                     # For negative weights
                     if weight:
                         path = nx.bellman_ford_path(G, source, target, weight=weight)
-                        length = nx.bellman_ford_path_length(G, source, target, weight=weight)
+                        length = nx.bellman_ford_path_length(
+                            G, source, target, weight=weight
+                        )
                     else:
                         path = nx.shortest_path(G, source, target)
                         length = nx.shortest_path_length(G, source, target)
@@ -91,7 +93,7 @@ class AlgorithmHandler:
             source: Union[str, int],
             target: Union[str, int],
             weight: Optional[str] = None,
-        ) -> Dict[str, Any]:
+        ) -> dict[str, Any]:
             """Find all shortest paths between two nodes.
 
             Args:
@@ -128,7 +130,7 @@ class AlgorithmHandler:
         @self.mcp.tool()
         async def connected_components(
             graph_id: str, component_type: str = "weak"
-        ) -> Dict[str, Any]:
+        ) -> dict[str, Any]:
             """Find connected components in a graph.
 
             Args:
@@ -175,7 +177,7 @@ class AlgorithmHandler:
             centrality_type: str = "degree",
             top_k: int = 10,
             normalized: bool = True,
-        ) -> Dict[str, Any]:
+        ) -> dict[str, Any]:
             """Calculate node centrality measures.
 
             Args:
@@ -193,8 +195,12 @@ class AlgorithmHandler:
 
             try:
                 centrality_funcs = {
-                    "degree": lambda: nx.degree_centrality(G) if normalized else dict(G.degree()),
-                    "betweenness": lambda: nx.betweenness_centrality(G, normalized=normalized),
+                    "degree": lambda: nx.degree_centrality(G)
+                    if normalized
+                    else dict(G.degree()),
+                    "betweenness": lambda: nx.betweenness_centrality(
+                        G, normalized=normalized
+                    ),
                     "closeness": lambda: nx.closeness_centrality(G),
                     "eigenvector": lambda: nx.eigenvector_centrality(G, max_iter=1000),
                     "pagerank": lambda: nx.pagerank(G),
@@ -207,7 +213,9 @@ class AlgorithmHandler:
                 centrality = centrality_funcs[centrality_type]()
 
                 # Sort nodes by centrality
-                sorted_nodes = sorted(centrality.items(), key=lambda x: x[1], reverse=True)
+                sorted_nodes = sorted(
+                    centrality.items(), key=lambda x: x[1], reverse=True
+                )
 
                 # Get statistics
                 values = list(centrality.values())
@@ -220,7 +228,9 @@ class AlgorithmHandler:
                 return {
                     "centrality_type": centrality_type,
                     "top_nodes": sorted_nodes[:top_k],
-                    "all_centrality": dict(sorted_nodes) if len(sorted_nodes) <= 100 else None,
+                    "all_centrality": dict(sorted_nodes)
+                    if len(sorted_nodes) <= 100
+                    else None,
                     "statistics": stats,
                     "normalized": normalized,
                 }
@@ -232,8 +242,8 @@ class AlgorithmHandler:
 
         @self.mcp.tool()
         async def clustering_coefficient(
-            graph_id: str, nodes: Optional[List[Union[str, int]]] = None
-        ) -> Dict[str, Any]:
+            graph_id: str, nodes: Optional[list[Union[str, int]]] = None
+        ) -> dict[str, Any]:
             """Calculate clustering coefficient.
 
             Args:
@@ -273,7 +283,7 @@ class AlgorithmHandler:
         @self.mcp.tool()
         async def minimum_spanning_tree(
             graph_id: str, weight: str = "weight", algorithm: str = "kruskal"
-        ) -> Dict[str, Any]:
+        ) -> dict[str, Any]:
             """Find minimum spanning tree.
 
             Args:
@@ -293,11 +303,15 @@ class AlgorithmHandler:
 
             try:
                 if algorithm == "kruskal":
-                    mst = nx.minimum_spanning_tree(G, weight=weight, algorithm="kruskal")
+                    mst = nx.minimum_spanning_tree(
+                        G, weight=weight, algorithm="kruskal"
+                    )
                 elif algorithm == "prim":
                     mst = nx.minimum_spanning_tree(G, weight=weight, algorithm="prim")
                 elif algorithm == "boruvka":
-                    mst = nx.minimum_spanning_tree(G, weight=weight, algorithm="boruvka")
+                    mst = nx.minimum_spanning_tree(
+                        G, weight=weight, algorithm="boruvka"
+                    )
                 else:
                     return {"error": f"Unknown algorithm: {algorithm}"}
 
@@ -317,7 +331,7 @@ class AlgorithmHandler:
         @self.mcp.tool()
         async def find_cycles(
             graph_id: str, cycle_type: str = "simple"
-        ) -> Dict[str, Any]:
+        ) -> dict[str, Any]:
             """Find cycles in a graph.
 
             Args:
@@ -359,7 +373,7 @@ class AlgorithmHandler:
                 return {"error": f"Cycle detection failed: {str(e)}"}
 
         @self.mcp.tool()
-        async def topological_sort(graph_id: str) -> Dict[str, Any]:
+        async def topological_sort(graph_id: str) -> dict[str, Any]:
             """Perform topological sort on a DAG.
 
             Args:
@@ -377,7 +391,9 @@ class AlgorithmHandler:
 
             try:
                 if not nx.is_directed_acyclic_graph(G):
-                    return {"error": "Graph contains cycles - topological sort not possible"}
+                    return {
+                        "error": "Graph contains cycles - topological sort not possible"
+                    }
 
                 ordering = list(nx.topological_sort(G))
 

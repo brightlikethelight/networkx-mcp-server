@@ -166,19 +166,19 @@ from networkx_mcp.server_v2 import NetworkXMCPServer
 
 async def main():
     server = NetworkXMCPServer()
-    
+
     # Create a graph
     result = await server.invoke_tool(
         "create_graph",
         {"graph_id": "my_graph", "graph_type": "directed"}
     )
-    
+
     # Add nodes and edges
     await server.invoke_tool(
         "add_nodes",
         {"graph_id": "my_graph", "nodes": ["A", "B", "C"]}
     )
-    
+
     # Use resources
     catalog = await server.get_resource("graph://catalog")
     print(catalog)

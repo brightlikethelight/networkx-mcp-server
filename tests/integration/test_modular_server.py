@@ -11,7 +11,7 @@ sys.path.insert(0, "src")
 def test_handler_imports():
     """Test that all handlers can be imported."""
     print("Testing handler imports...")
-    
+
     try:
         from networkx_mcp.server.handlers import (
             GraphOpsHandler,
@@ -19,11 +19,12 @@ def test_handler_imports():
             AnalysisHandler,
             VisualizationHandler,
         )
+
         print("✓ GraphOpsHandler imported")
         print("✓ AlgorithmHandler imported")
         print("✓ AnalysisHandler imported")
         print("✓ VisualizationHandler imported")
-        
+
         # Test that handlers have expected methods
         handlers = [
             GraphOpsHandler,
@@ -31,14 +32,16 @@ def test_handler_imports():
             AnalysisHandler,
             VisualizationHandler,
         ]
-        
+
         for handler in handlers:
             assert hasattr(handler, "__init__"), f"{handler.__name__} missing __init__"
-            assert hasattr(handler, "_register_tools"), f"{handler.__name__} missing _register_tools"
+            assert hasattr(
+                handler, "_register_tools"
+            ), f"{handler.__name__} missing _register_tools"
             print(f"✓ {handler.__name__} has required methods")
-            
+
         return True
-        
+
     except ImportError as e:
         print(f"✗ Import error: {e}")
         return False
@@ -48,11 +51,12 @@ def test_handler_imports():
 def test_server_v2_structure():
     """Test server_v2 structure and initialization."""
     print("\nTesting server_v2 structure...")
-    
+
     try:
         from networkx_mcp.server_v2 import NetworkXMCPServer
+
         print("✓ NetworkXMCPServer imported")
-        
+
         # Check class structure
         expected_attrs = [
             "mcp",
@@ -64,19 +68,20 @@ def test_server_v2_structure():
             "analysis_handler",
             "visualization_handler",
         ]
-        
+
         # Check __init__ method has expected attributes
         import inspect
+
         init_code = inspect.getsource(NetworkXMCPServer.__init__)
-        
+
         for attr in expected_attrs:
             if f"self.{attr}" in init_code:
                 print(f"✓ NetworkXMCPServer initializes {attr}")
             else:
                 print(f"✗ NetworkXMCPServer missing {attr}")
-                
+
         return True
-        
+
     except Exception as e:
         print(f"✗ Error: {e}")
         return False
@@ -85,7 +90,7 @@ def test_server_v2_structure():
 def test_tool_counts():
     """Count tools in each handler."""
     print("\nCounting tools in handlers...")
-    
+
     handlers = {
         "graph_ops.py": [
             "create_graph",
@@ -125,7 +130,7 @@ def test_tool_counts():
             "export_visualization_data",
         ],
     }
-    
+
     total_tools = 0
     for handler, tools in handlers.items():
         print(f"\n{handler}:")
@@ -133,7 +138,7 @@ def test_tool_counts():
             print(f"  - {tool}")
         print(f"  Total: {len(tools)} tools")
         total_tools += len(tools)
-    
+
     print(f"\nTotal tools across all handlers: {total_tools}")
     return True
 
@@ -141,7 +146,7 @@ def test_tool_counts():
 def test_file_structure():
     """Test that all required files exist."""
     print("\nTesting file structure...")
-    
+
     files = [
         "src/networkx_mcp/server/__init__.py",
         "src/networkx_mcp/server/handlers/__init__.py",
@@ -153,21 +158,21 @@ def test_file_structure():
         "src/networkx_mcp/server/prompts/__init__.py",
         "src/networkx_mcp/server_v2.py",
     ]
-    
+
     all_exist = True
     for file in files:
         exists = os.path.exists(file)
         print(f"  {'✓' if exists else '✗'} {file}")
         if not exists:
             all_exist = False
-            
+
     return all_exist
 
 
 def analyze_migration_progress():
     """Analyze what has been migrated from server.py."""
     print("\nAnalyzing migration progress...")
-    
+
     # Count lines in server.py vs new modular files
     files_to_check = {
         "Original server.py": "src/networkx_mcp/server.py",
@@ -177,22 +182,22 @@ def analyze_migration_progress():
         "AnalysisHandler": "src/networkx_mcp/server/handlers/analysis.py",
         "VisualizationHandler": "src/networkx_mcp/server/handlers/visualization.py",
     }
-    
+
     for name, path in files_to_check.items():
         if os.path.exists(path):
-            with open(path, "r") as f:
+            with open(path) as f:
                 lines = len(f.readlines())
             print(f"  {name}: {lines} lines")
         else:
             print(f"  {name}: File not found")
-    
+
     print("\nModularization Benefits:")
     print("  ✓ Separated concerns into focused handlers")
     print("  ✓ Each handler is < 500 lines (maintainable)")
     print("  ✓ Clear interfaces and dependencies")
     print("  ✓ Easier to test individual components")
     print("  ✓ Plugin architecture ready")
-    
+
     return True
 
 
@@ -201,7 +206,7 @@ def main():
     print("=" * 60)
     print("Modular Server Test Suite")
     print("=" * 60)
-    
+
     tests = [
         test_file_structure,
         test_handler_imports,
@@ -209,7 +214,7 @@ def main():
         test_tool_counts,
         analyze_migration_progress,
     ]
-    
+
     passed = 0
     for test in tests:
         try:
@@ -217,10 +222,10 @@ def main():
                 passed += 1
         except Exception as e:
             print(f"✗ Test {test.__name__} failed: {e}")
-    
+
     print("\n" + "=" * 60)
     print(f"Test Results: {passed}/{len(tests)} passed")
-    
+
     if passed == len(tests):
         print("✓ All tests passed! Modular migration successful.")
         print("\nNext Steps:")
@@ -230,7 +235,7 @@ def main():
         print("4. Package and deploy")
     else:
         print("✗ Some tests failed. Please review the output above.")
-    
+
     print("=" * 60)
 
 

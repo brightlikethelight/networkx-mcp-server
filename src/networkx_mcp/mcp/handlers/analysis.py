@@ -4,7 +4,7 @@ This module handles graph analysis tools including statistics,
 community detection, bipartite analysis, and other analytical operations.
 """
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional
 import networkx as nx
 from networkx.algorithms import bipartite
 
@@ -28,7 +28,7 @@ class AnalysisHandler:
         """Register all analysis tools."""
 
         @self.mcp.tool()
-        async def graph_statistics(graph_id: str) -> Dict[str, Any]:
+        async def graph_statistics(graph_id: str) -> dict[str, Any]:
             """Calculate comprehensive graph statistics.
 
             Args:
@@ -67,8 +67,12 @@ class AnalysisHandler:
                     stats["connectivity"] = {
                         "is_weakly_connected": nx.is_weakly_connected(G),
                         "is_strongly_connected": nx.is_strongly_connected(G),
-                        "num_weakly_connected_components": nx.number_weakly_connected_components(G),
-                        "num_strongly_connected_components": nx.number_strongly_connected_components(G),
+                        "num_weakly_connected_components": nx.number_weakly_connected_components(
+                            G
+                        ),
+                        "num_strongly_connected_components": nx.number_strongly_connected_components(
+                            G
+                        ),
                     }
                 else:
                     stats["connectivity"] = {
@@ -87,7 +91,9 @@ class AnalysisHandler:
                         stats["distance"] = {
                             "diameter": nx.diameter(G),
                             "radius": nx.radius(G),
-                            "average_shortest_path_length": nx.average_shortest_path_length(G),
+                            "average_shortest_path_length": nx.average_shortest_path_length(
+                                G
+                            ),
                         }
 
                 return stats
@@ -101,7 +107,7 @@ class AnalysisHandler:
             method: str = "louvain",
             resolution: float = 1.0,
             k: Optional[int] = None,
-        ) -> Dict[str, Any]:
+        ) -> dict[str, Any]:
             """Detect communities in a graph.
 
             Args:
@@ -138,14 +144,18 @@ class AnalysisHandler:
 
                     except ImportError:
                         # Fallback to greedy modularity
-                        from networkx.algorithms.community import greedy_modularity_communities
+                        from networkx.algorithms.community import (
+                            greedy_modularity_communities,
+                        )
 
                         communities = list(greedy_modularity_communities(G))
                         communities = [list(c) for c in communities]
                         modularity = nx.community.modularity(G, communities)
 
                 elif method == "label_propagation":
-                    from networkx.algorithms.community import label_propagation_communities
+                    from networkx.algorithms.community import (
+                        label_propagation_communities,
+                    )
 
                     communities = list(label_propagation_communities(G))
                     communities = [list(c) for c in communities]
@@ -209,7 +219,7 @@ class AnalysisHandler:
         @self.mcp.tool()
         async def bipartite_analysis(
             graph_id: str,
-        ) -> Dict[str, Any]:
+        ) -> dict[str, Any]:
             """Analyze bipartite properties of a graph.
 
             Args:
@@ -225,7 +235,7 @@ class AnalysisHandler:
             try:
                 # Check if bipartite
                 is_bipartite_result = bipartite.is_bipartite(G)
-                
+
                 if not is_bipartite_result:
                     return {
                         "is_bipartite": False,
@@ -238,7 +248,7 @@ class AnalysisHandler:
 
                 # Calculate bipartite-specific metrics
                 density = bipartite.density(G, set1)
-                
+
                 # Degree statistics
                 degrees_set1 = bipartite.degrees(G, set1)[0]
                 degrees_set2 = bipartite.degrees(G, set2)[1]
@@ -250,15 +260,19 @@ class AnalysisHandler:
                     "set1_nodes": set1[:20],  # First 20 nodes
                     "set2_nodes": set2[:20],
                     "density": density,
-                    "set1_avg_degree": sum(degrees_set1.values()) / len(set1) if set1 else 0,
-                    "set2_avg_degree": sum(degrees_set2.values()) / len(set2) if set2 else 0,
+                    "set1_avg_degree": sum(degrees_set1.values()) / len(set1)
+                    if set1
+                    else 0,
+                    "set2_avg_degree": sum(degrees_set2.values()) / len(set2)
+                    if set2
+                    else 0,
                 }
 
                 # Projection analysis
                 if len(set1) <= 1000 and len(set2) <= 1000:  # Limit for performance
                     proj1 = bipartite.projected_graph(G, set1)
                     proj2 = bipartite.projected_graph(G, set2)
-                    
+
                     result["projections"] = {
                         "set1_projection": {
                             "nodes": proj1.number_of_nodes(),
@@ -280,7 +294,7 @@ class AnalysisHandler:
         @self.mcp.tool()
         async def degree_distribution(
             graph_id: str, log_scale: bool = False
-        ) -> Dict[str, Any]:
+        ) -> dict[str, Any]:
             """Analyze degree distribution of a graph.
 
             Args:
@@ -308,10 +322,10 @@ class AnalysisHandler:
 
                 # Calculate distribution
                 degree_hist = nx.degree_histogram(G)
-                
+
                 # Statistics
                 import numpy as np
-                
+
                 stats = {
                     "mean": np.mean(degrees),
                     "std": np.std(degrees),
@@ -328,15 +342,19 @@ class AnalysisHandler:
                         # Rough estimate of power law exponent
                         try:
                             from scipy import stats as scipy_stats
-                            
+
                             x = np.array(unique_degrees[1:])  # Exclude 0
                             y = np.array([degrees.count(d) for d in unique_degrees[1:]])
                             if len(x) > 2 and np.all(y > 0):
-                                slope, intercept, r_value, p_value, std_err = scipy_stats.linregress(
-                                    np.log(x), np.log(y)
-                                )
+                                (
+                                    slope,
+                                    intercept,
+                                    r_value,
+                                    p_value,
+                                    std_err,
+                                ) = scipy_stats.linregress(np.log(x), np.log(y))
                                 power_law_exponent = -slope
-                                r_squared = r_value ** 2
+                                r_squared = r_value**2
                             else:
                                 power_law_exponent = None
                                 r_squared = None
@@ -378,8 +396,8 @@ class AnalysisHandler:
 
         @self.mcp.tool()
         async def node_classification_features(
-            graph_id: str, feature_types: Optional[List[str]] = None
-        ) -> Dict[str, Any]:
+            graph_id: str, feature_types: Optional[list[str]] = None
+        ) -> dict[str, Any]:
             """Extract features for node classification tasks.
 
             Args:
@@ -408,7 +426,9 @@ class AnalysisHandler:
                 # Clustering coefficient
                 if "clustering" in feature_types and not G.is_directed():
                     clustering = nx.clustering(G)
-                    features["clustering"] = {str(n): clustering[n] for n in nodes[:100]}
+                    features["clustering"] = {
+                        str(n): clustering[n] for n in nodes[:100]
+                    }
 
                 # Centrality features
                 if "centrality" in feature_types:
@@ -442,7 +462,7 @@ class AnalysisHandler:
         @self.mcp.tool()
         async def assortativity_analysis(
             graph_id: str, attribute: Optional[str] = None
-        ) -> Dict[str, Any]:
+        ) -> dict[str, Any]:
             """Analyze assortativity patterns in the graph.
 
             Args:
@@ -470,23 +490,33 @@ class AnalysisHandler:
                         if attribute in G.nodes[sample_node]:
                             # Check if numeric or categorical
                             attr_values = [G.nodes[n].get(attribute) for n in G.nodes()]
-                            if all(isinstance(v, (int, float)) for v in attr_values if v is not None):
-                                result["numeric_assortativity"] = nx.numeric_assortativity_coefficient(
-                                    G, attribute
-                                )
+                            if all(
+                                isinstance(v, (int, float))
+                                for v in attr_values
+                                if v is not None
+                            ):
+                                result[
+                                    "numeric_assortativity"
+                                ] = nx.numeric_assortativity_coefficient(G, attribute)
                             else:
-                                result["attribute_assortativity"] = nx.attribute_assortativity_coefficient(
-                                    G, attribute
-                                )
+                                result[
+                                    "attribute_assortativity"
+                                ] = nx.attribute_assortativity_coefficient(G, attribute)
 
                 # Interpretation
                 deg_assort = result.get("degree_assortativity", 0)
                 if deg_assort > 0.3:
-                    result["interpretation"] = "Assortative: High-degree nodes tend to connect to high-degree nodes"
+                    result[
+                        "interpretation"
+                    ] = "Assortative: High-degree nodes tend to connect to high-degree nodes"
                 elif deg_assort < -0.3:
-                    result["interpretation"] = "Disassortative: High-degree nodes tend to connect to low-degree nodes"
+                    result[
+                        "interpretation"
+                    ] = "Disassortative: High-degree nodes tend to connect to low-degree nodes"
                 else:
-                    result["interpretation"] = "Neutral: No strong degree correlation pattern"
+                    result[
+                        "interpretation"
+                    ] = "Neutral: No strong degree correlation pattern"
 
                 return result
 

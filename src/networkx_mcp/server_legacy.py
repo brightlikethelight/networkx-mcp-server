@@ -300,12 +300,12 @@ async def get_graph_info(graph_id: str) -> dict[str, Any]:
         if graph.is_directed():
             info["is_weakly_connected"] = nx.is_weakly_connected(graph)
             info["is_strongly_connected"] = nx.is_strongly_connected(graph)
-            info["num_weakly_connected_components"] = (
-                nx.number_weakly_connected_components(graph)
-            )
-            info["num_strongly_connected_components"] = (
-                nx.number_strongly_connected_components(graph)
-            )
+            info[
+                "num_weakly_connected_components"
+            ] = nx.number_weakly_connected_components(graph)
+            info[
+                "num_strongly_connected_components"
+            ] = nx.number_strongly_connected_components(graph)
         else:
             info["is_connected"] = nx.is_connected(graph)
             info["num_connected_components"] = nx.number_connected_components(graph)
@@ -1357,9 +1357,9 @@ async def graph_metrics(
                     metrics["connectivity"]["num_bridges"] = len(bridges)
 
                     if len(articulation_points) <= MAX_DISPLAY_ITEMS:
-                        metrics["connectivity"]["articulation_points"] = (
-                            articulation_points
-                        )
+                        metrics["connectivity"][
+                            "articulation_points"
+                        ] = articulation_points
                     if len(bridges) <= MAX_DISPLAY_ITEMS:
                         metrics["connectivity"]["bridges"] = bridges
                 except Exception as e:
@@ -1819,9 +1819,9 @@ async def find_all_paths(
             for i, path in enumerate(path_generator):
                 if i >= max_paths:
                     result["truncated"] = True
-                    result["truncation_message"] = (
-                        f"Results limited to {max_paths} paths"
-                    )
+                    result[
+                        "truncation_message"
+                    ] = f"Results limited to {max_paths} paths"
                     break
 
                 paths.append(path)
@@ -2083,9 +2083,9 @@ async def cycle_detection(
                     for i, cycle in enumerate(cycle_gen):
                         if i >= limit:
                             result["truncated"] = True
-                            result["truncation_message"] = (
-                                f"Results limited to {limit} cycles"
-                            )
+                            result[
+                                "truncation_message"
+                            ] = f"Results limited to {limit} cycles"
                             break
 
                         if max_cycle_length and len(cycle) > max_cycle_length:
@@ -3060,9 +3060,9 @@ async def ml_graph_analysis(
                     node: result["embeddings"][node].tolist()[:10]
                     for node in sample_nodes
                 }
-                result["embeddings"] = (
-                    "Full embeddings computed but not returned (too large)"
-                )
+                result[
+                    "embeddings"
+                ] = "Full embeddings computed but not returned (too large)"
 
         elif analysis_type == "features":
             result = MLIntegration.graph_features(graph, **ml_params)

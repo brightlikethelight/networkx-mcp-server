@@ -4,7 +4,7 @@ This module handles graph visualization tools using various backends
 including matplotlib, plotly, and pyvis.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 import os
 
 
@@ -37,8 +37,8 @@ class VisualizationHandler:
             with_labels: bool = True,
             title: Optional[str] = None,
             output_path: Optional[str] = None,
-            **kwargs
-        ) -> Dict[str, Any]:
+            **kwargs,
+        ) -> dict[str, Any]:
             """Visualize a graph using various backends.
 
             Args:
@@ -119,8 +119,8 @@ class VisualizationHandler:
             max_nodes: int = 50,
             backend: str = "matplotlib",
             layout: str = "spring",
-            **kwargs
-        ) -> Dict[str, Any]:
+            **kwargs,
+        ) -> dict[str, Any]:
             """Visualize a subgraph around specific nodes.
 
             Args:
@@ -179,7 +179,7 @@ class VisualizationHandler:
                     backend=backend,
                     layout=layout,
                     title=f"Subgraph of {graph_id}",
-                    **kwargs
+                    **kwargs,
                 )
 
                 # Clean up temporary graph
@@ -203,8 +203,8 @@ class VisualizationHandler:
             method: str = "louvain",
             backend: str = "matplotlib",
             layout: str = "spring",
-            **kwargs
-        ) -> Dict[str, Any]:
+            **kwargs,
+        ) -> dict[str, Any]:
             """Visualize graph with communities highlighted.
 
             Args:
@@ -259,7 +259,6 @@ class VisualizationHandler:
                         node_colors[node] = color
 
                 # Add community colors as node attributes
-                import networkx as nx
 
                 for node in G.nodes():
                     G.nodes[node]["community_color"] = node_colors.get(node, "gray")
@@ -271,7 +270,7 @@ class VisualizationHandler:
                     layout=layout,
                     node_color="community_color",  # Use attribute for coloring
                     title=f"Communities in {graph_id} ({method})",
-                    **kwargs
+                    **kwargs,
                 )
 
                 result["community_info"] = {
@@ -294,8 +293,8 @@ class VisualizationHandler:
             backend: str = "matplotlib",
             layout: str = "spring",
             highlight_color: str = "red",
-            **kwargs
-        ) -> Dict[str, Any]:
+            **kwargs,
+        ) -> dict[str, Any]:
             """Visualize a path in the graph.
 
             Args:
@@ -367,7 +366,7 @@ class VisualizationHandler:
                     node_color="highlight",
                     edge_color="highlight",
                     title=f"Path from {source} to {target}",
-                    **kwargs
+                    **kwargs,
                 )
 
                 result["path_info"] = {
@@ -386,7 +385,7 @@ class VisualizationHandler:
         @self.mcp.tool()
         async def export_visualization_data(
             graph_id: str, format: str = "json", include_positions: bool = True
-        ) -> Dict[str, Any]:
+        ) -> dict[str, Any]:
             """Export graph data formatted for visualization tools.
 
             Args:

@@ -41,6 +41,13 @@ dev = [
     "pytest>=7.0.0",
     "pytest-asyncio>=0.20.0",
     "pytest-cov>=4.0.0",
+    "pytest-xdist>=3.0.0",
+    "pytest-benchmark>=4.0.0",
+    "pytest-mock>=3.10.0",
+    "hypothesis>=6.70.0",
+    "freezegun>=1.2.0",
+    "factory-boy>=3.2.0",
+    "coverage[toml]>=7.0.0",
     "black>=22.0.0",
     "ruff>=0.1.0",
     "mypy>=1.0.0",
@@ -140,3 +147,78 @@ skips = [
     "B324",  # hashlib - we use MD5 for non-crypto purposes
     "B104",  # hardcoded_bind_all_interfaces - false positive
 ]
+
+# Testing Configuration
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = [
+    "--cov=src/networkx_mcp",
+    "--cov-report=term-missing",
+    "--cov-report=html:htmlcov",
+    "--cov-report=xml",
+    "--cov-fail-under=95",
+    "--strict-markers",
+    "--strict-config",
+    "--disable-warnings",
+    "-v",
+]
+testpaths = ["tests"]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "performance: Performance tests",
+    "security: Security tests",
+    "property: Property-based tests",
+    "slow: Slow running tests",
+    "redis: Tests requiring Redis",
+    "network: Tests requiring network access",
+]
+asyncio_mode = "auto"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
+
+[tool.coverage.run]
+source = ["src/networkx_mcp"]
+branch = true
+parallel = true
+omit = [
+    "src/networkx_mcp/__init__.py",
+    "src/networkx_mcp/cli.py",
+    "tests/*",
+    "*/migrations/*",
+    "*/venv/*",
+    "*/__pycache__/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+precision = 2
+show_missing = true
+skip_covered = false
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+[tool.coverage.xml]
+output = "coverage.xml"
+
+# Property-based testing configuration
+[tool.hypothesis]
+max_examples = 100
+deadline = 10000  # 10 seconds
+derandomize = true
+database_file = ".hypothesis/examples"
+suppress_health_check = ["too_slow"]

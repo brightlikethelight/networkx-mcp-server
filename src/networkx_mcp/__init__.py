@@ -10,7 +10,7 @@ from networkx_mcp.server import NetworkXMCPServer
 
 __all__ = [
     "GraphAlgorithms",
-    "GraphIOHandler", 
+    "GraphIOHandler",
     "GraphManager",
     "NetworkXMCPServer",
 ]

@@ -9,4 +9,9 @@ from networkx_mcp.mcp.handlers.algorithms import AlgorithmHandler
 from networkx_mcp.mcp.handlers.analysis import AnalysisHandler
 from networkx_mcp.mcp.handlers.visualization import VisualizationHandler
 
-__all__ = ["GraphOpsHandler", "AlgorithmHandler", "AnalysisHandler", "VisualizationHandler"]
+__all__ = [
+    "GraphOpsHandler",
+    "AlgorithmHandler",
+    "AnalysisHandler",
+    "VisualizationHandler",
+]
