@@ -162,7 +162,8 @@ class TestBipartiteAnalysis:
 
         result = BipartiteAnalysis.maximum_matching(B)
         assert result["matching_size"] == 3
-        assert len(result["matching"]) == 3
+        # Matching dict contains both directions (u->v and v->u), so 6 entries for 3 matches
+        assert len(result["matching"]) == 6
 
 
 class TestDirectedAnalysis:
