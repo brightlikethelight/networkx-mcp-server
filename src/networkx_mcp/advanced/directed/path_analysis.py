@@ -1,0 +1,15 @@
+"""
+Path analysis for directed graphs.
+
+Split from directed_analysis.py for better organization.
+"""
+
+
+MAX_CYCLES_LIMIT = 100
+MAX_NODES_FOR_ALL_PATHS = 100
+MAX_EDGES_FOR_TRANSITIVE_REDUCTION = 1000
+MAX_LONGEST_PATHS_DISPLAY = 10
+MAX_CONDENSATION_NODES = 1000
+MAX_EDGES_FOR_EXACT_FAS = 50
+COMMUNITY_OVERLAP_THRESHOLD = 0.3
+

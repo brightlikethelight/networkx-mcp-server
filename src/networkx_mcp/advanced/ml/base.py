@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Optional, Union
+from typing import Any
 
 import networkx as nx
 import numpy as np
@@ -12,10 +12,10 @@ import numpy as np
 class MLResult:
     """Result from ML algorithm on graphs."""
 
-    predictions: Union[dict[str, Any], list[Any]]
-    confidence: Optional[dict[str, float]] = None
-    model_info: Optional[dict[str, Any]] = None
-    features_used: Optional[list[str]] = None
+    predictions: dict[str, Any] | list[Any]
+    confidence: dict[str, float] | None = None
+    model_info: dict[str, Any] | None = None
+    features_used: list[str] | None = None
 
 
 class GraphMLModel(ABC):
@@ -27,7 +27,7 @@ class GraphMLModel(ABC):
         self.is_trained = False
 
     @abstractmethod
-    async def extract_features(self, nodes: Optional[list[str]] = None) -> np.ndarray:
+    async def extract_features(self, nodes: list[str] | None = None) -> np.ndarray:
         """Extract features from graph nodes."""
 
     @abstractmethod
@@ -40,7 +40,7 @@ class GraphMLModel(ABC):
 
 
 def extract_node_features(
-    graph: nx.Graph, feature_types: Optional[list[str]] = None
+    graph: nx.Graph, feature_types: list[str] | None = None
 ) -> dict[str, np.ndarray]:
     """Extract standard node features from graph."""
     if feature_types is None:

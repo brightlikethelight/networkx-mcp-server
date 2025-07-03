@@ -1,26 +1,20 @@
-"""Machine learning algorithms for graphs."""
+"""
+Machine Learning integration modules.
 
-from networkx_mcp.advanced.ml.base import GraphMLModel, MLResult, extract_node_features
-from networkx_mcp.advanced.ml.link_prediction import LinkPredictor, predict_links
-from networkx_mcp.advanced.ml.node_classification import NodeClassifier, classify_nodes
+Provides compatibility exports for the old ml_integration module.
+"""
+
+# For backward compatibility
+try:
+    from ..ml_integration import MLIntegration, HAS_SKLEARN
+except ImportError:
+    class MLIntegration:
+        """Placeholder MLIntegration for compatibility."""
+    
+    HAS_SKLEARN = False
+
 
 __all__ = [
-    "GraphMLModel",
-    "LinkPredictor",
-    "MLResult",
-    "NodeClassifier",
-    "classify_nodes",
-    "extract_node_features",
-    "predict_links",
+    'MLIntegration',
+    'HAS_SKLEARN'
 ]
-
-
-def get_ml_model(model_type: str, graph):
-    """Get ML model by type."""
-    models = {"node_classifier": NodeClassifier, "link_predictor": LinkPredictor}
-
-    if model_type not in models:
-        msg = f"Unknown model type: {model_type}"
-        raise ValueError(msg)
-
-    return models[model_type](graph)
