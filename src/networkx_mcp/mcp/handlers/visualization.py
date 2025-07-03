@@ -8,10 +8,7 @@ from typing import Any, Optional
 import os
 
 
-try:
-    from fastmcp import FastMCP
-except ImportError:
-    from networkx_mcp.mcp_mock import MockMCP as FastMCP
+from fastmcp import FastMCP
 
 
 class VisualizationHandler:

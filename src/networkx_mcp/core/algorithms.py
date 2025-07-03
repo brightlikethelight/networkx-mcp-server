@@ -2,7 +2,7 @@
 
 import logging
 from collections import defaultdict
-from typing import Any, Optional, Union
+from typing import Any
 
 import networkx as nx
 import numpy as np
@@ -27,9 +27,9 @@ class GraphAlgorithms:
     @staticmethod
     def shortest_path(
         graph: nx.Graph,
-        source: Union[str, int],
-        target: Optional[Union[str, int]] = None,
-        weight: Optional[str] = None,
+        source: str | int,
+        target: str | int | None = None,
+        weight: str | None = None,
         method: str = "dijkstra",
     ) -> dict[str, Any]:
         """Find shortest path(s) in a graph."""
@@ -90,7 +90,7 @@ class GraphAlgorithms:
 
     @staticmethod
     def all_pairs_shortest_path(
-        graph: nx.Graph, weight: Optional[str] = None
+        graph: nx.Graph, weight: str | None = None
     ) -> dict[str, Any]:
         """Compute shortest paths between all pairs of nodes."""
         if weight:
@@ -114,6 +114,21 @@ class GraphAlgorithms:
     @staticmethod
     def connected_components(graph: nx.Graph) -> dict[str, Any]:
         """Find connected components in an undirected graph."""
+        # Handle empty graphs to avoid NetworkXPointlessConcept exception
+        if graph.number_of_nodes() == 0:
+            return {
+                "connected_components": [],
+                "num_components": 0,
+                "is_connected": False,
+                "largest_component_size": 0,
+                "weakly_connected_components": [],
+                "strongly_connected_components": [],
+                "num_weakly_connected": 0,
+                "num_strongly_connected": 0,
+                "is_weakly_connected": False,
+                "is_strongly_connected": False,
+            }
+
         if graph.is_directed():
             components = list(nx.weakly_connected_components(graph))
             strong_components = list(nx.strongly_connected_components(graph))
@@ -125,8 +140,16 @@ class GraphAlgorithms:
                 ],
                 "num_weakly_connected": len(components),
                 "num_strongly_connected": len(strong_components),
-                "is_weakly_connected": nx.is_weakly_connected(graph),
-                "is_strongly_connected": nx.is_strongly_connected(graph),
+                "is_weakly_connected": (
+                    nx.is_weakly_connected(graph)
+                    if graph.number_of_nodes() > 0
+                    else False
+                ),
+                "is_strongly_connected": (
+                    nx.is_strongly_connected(graph)
+                    if graph.number_of_nodes() > 0
+                    else False
+                ),
             }
         else:
             components = list(nx.connected_components(graph))
@@ -134,7 +157,9 @@ class GraphAlgorithms:
             return {
                 "connected_components": [list(comp) for comp in components],
                 "num_components": len(components),
-                "is_connected": nx.is_connected(graph),
+                "is_connected": (
+                    nx.is_connected(graph) if graph.number_of_nodes() > 0 else False
+                ),
                 "largest_component_size": (
                     max(len(comp) for comp in components) if components else 0
                 ),
@@ -142,7 +167,7 @@ class GraphAlgorithms:
 
     @staticmethod
     def centrality_measures(
-        graph: nx.Graph, measures: Optional[list[str]] = None
+        graph: nx.Graph, measures: list[str] | None = None
     ) -> dict[str, Any]:
         """Calculate various centrality measures."""
         if measures is None:
@@ -179,6 +204,14 @@ class GraphAlgorithms:
     @staticmethod
     def clustering_coefficients(graph: nx.Graph) -> dict[str, Any]:
         """Calculate clustering coefficients."""
+        # Handle empty graphs to avoid division by zero
+        if graph.number_of_nodes() == 0:
+            return {
+                "node_clustering": {},
+                "average_clustering": 0.0,
+                "transitivity": 0.0,
+            }
+
         if graph.is_directed():
             clustering = nx.clustering(graph.to_undirected())
             avg_clustering = nx.average_clustering(graph.to_undirected())
@@ -221,8 +254,8 @@ class GraphAlgorithms:
     @staticmethod
     def maximum_flow(
         graph: nx.Graph,
-        source: Union[str, int],
-        sink: Union[str, int],
+        source: str | int,
+        sink: str | int,
         capacity: str = "capacity",
     ) -> dict[str, Any]:
         """Calculate maximum flow."""

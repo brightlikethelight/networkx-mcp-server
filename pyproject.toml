@@ -15,70 +15,85 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Information Analysis",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 dependencies = [
-    "networkx>=3.0",
-    "numpy>=1.20.0",
-    "scipy>=1.7.0",
-    "pandas>=1.3.0",
-    "redis>=4.0.0",
-    "aiofiles>=0.8.0",
-    "pyyaml>=6.0",
-    "python-dotenv>=0.19.0",
-    "pydantic>=2.0.0",
-    "rich>=10.0.0",
+    "networkx>=3.4.0",
+    "numpy>=2.0.0",
+    "scipy>=1.14.0",
+    "pandas>=2.2.0",
+    "redis>=5.2.0",
+    "aiofiles>=24.1.0",
+    "pyyaml>=6.0.2",
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.10.0",
+    "rich>=13.9.0",
+    "fastmcp>=0.5.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.0.0",
-    "pytest-asyncio>=0.20.0",
-    "pytest-cov>=4.0.0",
-    "pytest-xdist>=3.0.0",
-    "pytest-benchmark>=4.0.0",
-    "pytest-mock>=3.10.0",
-    "hypothesis>=6.70.0",
-    "freezegun>=1.2.0",
-    "factory-boy>=3.2.0",
-    "coverage[toml]>=7.0.0",
-    "black>=22.0.0",
-    "ruff>=0.1.0",
-    "mypy>=1.0.0",
-    "types-PyYAML>=6.0.0",
-    "types-aiofiles>=0.8.0",
-    "types-redis>=4.0.0",
-    "types-psutil>=5.8.0",
-    "pandas-stubs>=1.5.0",
-    "types-requests>=2.28.0",
-    "types-PyMySQL>=1.0.0",
-    "sphinx>=5.0.0",
-    "sphinx-rtd-theme>=1.0.0",
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov>=6.0.0",
+    "pytest-xdist>=3.7.0",
+    "pytest-benchmark>=5.1.0",
+    "pytest-mock>=3.14.0",
+    "pytest-randomly>=3.15.0",
+    "mutmut>=2.5.0",
+    "hypothesis>=6.135.0",
+    "freezegun>=1.5.2",
+    "factory-boy>=3.3.3",
+    "coverage[toml]>=7.6.0",
+    "black>=24.0.0",
+    "ruff>=0.8.0",
+    "mypy>=1.13.0",
+    "bandit[toml]>=1.8.0",
+    "safety>=3.2.0",
+    "pre-commit>=4.0.0",
+    "types-PyYAML>=6.0.12",
+    "types-aiofiles>=24.1.0",
+    "types-redis>=4.6.0",
+    "types-psutil>=6.1.0",
+    "pandas-stubs>=2.2.2",
+    "types-requests>=2.32.0",
+    "sphinx>=8.1.0",
+    "sphinx-rtd-theme>=3.0.0",
+    "mkdocs>=1.6.0",
+    "mkdocs-material>=9.5.0",
 ]
 ml = [
-    "scikit-learn>=1.0.0",
-    "torch>=2.0.0",
-    "sentence-transformers>=2.0.0",
+    "scikit-learn>=1.6.0",
+    "torch>=2.5.0",
+    "sentence-transformers>=3.3.0",
+    "transformers>=4.47.0",
+    "numpy-ml>=0.1.2",
 ]
 visualization = [
-    "matplotlib>=3.3.0",
-    "plotly>=5.0.0",
-    "pyvis>=0.3.0",
-    "seaborn>=0.12.0",
-    "pygraphviz>=1.9",
+    "matplotlib>=3.9.0",
+    "plotly>=5.24.0",
+    "pyvis>=0.3.4",
+    "seaborn>=0.13.2",
+    "pygraphviz>=1.14",
+    "bokeh>=3.6.0",
+    "ipython>=8.29.0",
+    "jupyter>=1.1.1",
 ]
 enterprise = [
-    "psutil>=5.8.0",
-    "aiohttp>=3.8.0",
-    "jinja2>=3.0.0",
-    "reportlab>=3.6.0",
-    "schedule>=1.1.0",
+    "psutil>=6.1.0",
+    "aiohttp>=3.11.0",
+    "jinja2>=3.1.4",
+    "reportlab>=4.2.0",
+    "schedule>=1.2.2",
+    "prometheus-client>=0.21.0",
+    "opentelemetry-api>=1.28.0",
+    "opentelemetry-sdk>=1.28.0",
+    "structlog>=24.4.0",
 ]
 all = [
     "networkx-mcp-server[dev,ml,visualization,enterprise]",
@@ -97,14 +112,10 @@ networkx-mcp-server = "networkx_mcp.cli:main"
 where = ["src"]
 include = ["networkx_mcp*"]
 
-[tool.black]
-line-length = 88
-target-version = ['py39']
-include = '\.pyi?$'
 
 [tool.ruff]
 line-length = 88
-target-version = "py39"
+target-version = "py311"
 
 [tool.ruff.lint]
 select = [
@@ -122,7 +133,7 @@ ignore = ["E501", "B008", "C901", "W191", "I001"]
 lines-after-imports = 1
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false
@@ -135,6 +146,8 @@ warn_unused_ignores = true
 warn_no_return = true
 follow_imports = "normal"
 ignore_missing_imports = true
+strict_optional = false
+show_error_codes = true
 
 [tool.bandit]
 exclude_dirs = ["tests", "scripts", "docs", "build", "dist"]
@@ -150,17 +163,21 @@ skips = [
 
 # Testing Configuration
 [tool.pytest.ini_options]
-minversion = "7.0"
+minversion = "8.0"
 addopts = [
     "--cov=src/networkx_mcp",
     "--cov-report=term-missing",
     "--cov-report=html:htmlcov",
     "--cov-report=xml",
     "--cov-fail-under=95",
+    "--cov-branch",
     "--strict-markers",
     "--strict-config",
+    "--tb=short",
     "--disable-warnings",
-    "-v",
+    "-ra",
+    "-q",
+    "--durations=10",
 ]
 testpaths = ["tests"]
 markers = [
@@ -222,3 +239,85 @@ deadline = 10000  # 10 seconds
 derandomize = true
 database_file = ".hypothesis/examples"
 suppress_health_check = ["too_slow"]
+
+# Enhanced ruff configuration for 2024 standards
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401", "F403"]  # Allow unused imports in __init__.py
+"tests/*" = ["S101", "PLR2004", "S311"]  # Allow asserts and magic values in tests
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.flake8-quotes]
+docstring-quotes = "double"
+
+[tool.ruff.lint.flake8-type-checking]
+strict = true
+
+# Enhanced mypy configuration (applied above)
+
+# Mutation testing configuration
+[tool.mutmut]
+backup = false
+runner = "pytest"
+tests_dir = "tests/"
+paths_to_mutate = "src/networkx_mcp/"
+exclude_patterns = [
+    "*__init__.py",
+    "*__version__.py",
+    "*/tests/*",
+]
+
+# Safety configuration for dependency scanning
+[tool.safety]
+# Ignore known false positives
+ignore = []
+full-report = true
+
+# Pre-commit configuration (referenced by .pre-commit-config.yaml)
+[tool.pre-commit]
+default_stages = ["commit", "push"]
+
+# Enhanced bandit configuration
+[tool.bandit.assert_used]
+skips = ["*_test.py", "*/test_*.py", "*/tests/*"]
+
+# Black configuration for consistent formatting
+[tool.black]
+line-length = 88
+target-version = ['py311', 'py312', 'py313']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+# Enhanced performance testing
+[tool.pytest.benchmark]
+min_rounds = 5
+max_time = 2.0
+sort = "mean"
+histogram = true
+save_data = true
+json_output = "benchmark.json"
+
+# Documentation configuration
+[tool.sphinx]
+source_dir = "docs"
+build_dir = "docs/_build"
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.intersphinx",
+    "sphinx_rtd_theme",
+]

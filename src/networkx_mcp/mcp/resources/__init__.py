@@ -5,17 +5,8 @@ They are similar to GET endpoints in REST APIs - no side effects.
 """
 
 
-try:
-    from fastmcp import FastMCP
-    from mcp.types import Resource, ResourceContent, TextResourceContent
-except ImportError:
-    # Mock imports for when MCP is not available
-    from networkx_mcp.mcp_mock import MockMCP
-
-    FastMCP = MockMCP.FastMCP
-    Resource = MockMCP.types.Resource
-    ResourceContent = MockMCP.types.ResourceContent
-    TextResourceContent = MockMCP.types.TextResourceContent
+from fastmcp import FastMCP
+from mcp.types import Resource, ResourceContent, TextResourceContent
 
 
 class GraphResources:

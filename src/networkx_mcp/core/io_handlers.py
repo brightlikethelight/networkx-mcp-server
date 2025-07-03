@@ -5,7 +5,7 @@ import json
 import logging
 import pickle
 from pathlib import Path
-from typing import Any, Optional, TextIO, Union
+from typing import Any, TextIO
 
 import networkx as nx
 import numpy as np
@@ -51,7 +51,7 @@ class GraphIOHandler:
     }
 
     @staticmethod
-    def detect_format(filepath: Union[str, Path]) -> str:
+    def detect_format(filepath: str | Path) -> str:
         """Auto-detect file format from extension."""
         path = Path(filepath)
         ext = path.suffix.lower()
@@ -74,9 +74,9 @@ class GraphIOHandler:
     def export_graph(
         graph: nx.Graph,
         output_format: str,
-        path: Optional[Union[str, Path]] = None,
+        path: str | Path | None = None,
         **kwargs,
-    ) -> Union[str, bytes, dict[str, Any]]:
+    ) -> str | bytes | dict[str, Any]:
         """Export graph to various formats with validation."""
         logger.info(f"Exporting graph to {output_format} format")
 
@@ -130,9 +130,9 @@ class GraphIOHandler:
 
     @staticmethod
     def import_graph(
-        input_format: Optional[str] = None,
-        data: Optional[Union[str, bytes, dict[str, Any]]] = None,
-        path: Optional[Union[str, Path]] = None,
+        input_format: str | None = None,
+        data: str | bytes | dict[str, Any] | None = None,
+        path: str | Path | None = None,
         auto_detect: bool = True,
         **kwargs,
     ) -> nx.Graph:
@@ -226,7 +226,7 @@ class GraphIOHandler:
 
     @staticmethod
     def _import_json(
-        data: Optional[dict[str, Any]], path: Optional[Union[str, Path]], **kwargs
+        data: dict[str, Any] | None, path: str | Path | None, **kwargs
     ) -> nx.Graph:
         """Import graph from JSON format."""
         if data is None and path:
@@ -242,7 +242,7 @@ class GraphIOHandler:
         return nx.node_link_graph(data)
 
     @staticmethod
-    def _export_yaml(graph: nx.Graph, path: Union[str, Path], **kwargs) -> str:
+    def _export_yaml(graph: nx.Graph, path: str | Path, **kwargs) -> str:
         """Export graph to YAML format."""
         data = GraphIOHandler._export_json(graph, pretty_print=False)
 
@@ -254,9 +254,7 @@ class GraphIOHandler:
             return yaml.dump(data, default_flow_style=False, sort_keys=True)
 
     @staticmethod
-    def _import_yaml(
-        data: Optional[str], path: Optional[Union[str, Path]], **kwargs
-    ) -> nx.Graph:
+    def _import_yaml(data: str | None, path: str | Path | None, **kwargs) -> nx.Graph:
         """Import graph from YAML format."""
         if data is None and path:
             with open(path) as f:
@@ -267,7 +265,7 @@ class GraphIOHandler:
         return nx.node_link_graph(data)
 
     @staticmethod
-    def _export_csv(graph: nx.Graph, path: Union[str, Path], **kwargs) -> str:
+    def _export_csv(graph: nx.Graph, path: str | Path, **kwargs) -> str:
         """Export graph to CSV edge list format."""
         if path is None:
             msg = "Path required for CSV export"
@@ -315,7 +313,7 @@ class GraphIOHandler:
         return f"Graph exported to CSV: {path} ({len(rows)} edges)"
 
     @staticmethod
-    def _import_csv(path: Union[str, Path], **kwargs) -> nx.Graph:
+    def _import_csv(path: str | Path, **kwargs) -> nx.Graph:
         """Import graph from CSV edge list."""
         source_col = kwargs.get("source_col", "source")
         target_col = kwargs.get("target_col", "target")
@@ -359,13 +357,13 @@ class GraphIOHandler:
 
     @staticmethod
     def csv_to_edge_list(
-        filepath: Union[str, Path],
+        filepath: str | Path,
         source_col: str,
         target_col: str,
-        weight_col: Optional[str] = None,
+        weight_col: str | None = None,
         delimiter: str = ",",
         **kwargs,
-    ) -> list[Union[tuple[Any, Any], tuple[Any, Any, float]]]:
+    ) -> list[tuple[Any, Any] | tuple[Any, Any, float]]:
         """Convert CSV file to edge list format.
 
         Args:
@@ -421,10 +419,10 @@ class GraphIOHandler:
         df: pd.DataFrame,
         source_col: str,
         target_col: str,
-        edge_attr: Optional[Union[str, list[str]]] = None,
-        create_using: Optional[nx.Graph] = None,
-        node_attr_df: Optional[pd.DataFrame] = None,
-        node_key: Optional[str] = None,
+        edge_attr: str | list[str] | None = None,
+        create_using: nx.Graph | None = None,
+        node_attr_df: pd.DataFrame | None = None,
+        node_key: str | None = None,
     ) -> nx.Graph:
         """Convert pandas DataFrame to NetworkX graph.
 
@@ -479,8 +477,8 @@ class GraphIOHandler:
 
     @staticmethod
     def adjacency_to_edge_list(
-        matrix: Union[list[list[float]], np.ndarray],
-        node_labels: Optional[list[Any]] = None,
+        matrix: list[list[float]] | np.ndarray,
+        node_labels: list[Any] | None = None,
         threshold: float = 0,
         directed: bool = False,
     ) -> list[tuple[Any, Any, float]]:
@@ -639,7 +637,7 @@ class GraphIOHandler:
             raise ValueError(msg)
 
     @staticmethod
-    def _export_graphml(graph: nx.Graph, path: Union[str, Path], **kwargs) -> str:
+    def _export_graphml(graph: nx.Graph, path: str | Path, **kwargs) -> str:
         """Export graph to GraphML format."""
         if path is None:
             msg = "Path required for GraphML export"
@@ -649,7 +647,7 @@ class GraphIOHandler:
         return f"Graph exported to {path}"
 
     @staticmethod
-    def _import_graphml(path: Union[str, Path]) -> nx.Graph:
+    def _import_graphml(path: str | Path) -> nx.Graph:
         """Import graph from GraphML format."""
         if path is None:
             msg = "Path required for GraphML import"
@@ -658,7 +656,7 @@ class GraphIOHandler:
         return nx.read_graphml(path)
 
     @staticmethod
-    def _export_gexf(graph: nx.Graph, path: Union[str, Path], **kwargs) -> str:
+    def _export_gexf(graph: nx.Graph, path: str | Path, **kwargs) -> str:
         """Export graph to GEXF format."""
         if path is None:
             msg = "Path required for GEXF export"
@@ -668,7 +666,7 @@ class GraphIOHandler:
         return f"Graph exported to {path}"
 
     @staticmethod
-    def _import_gexf(path: Union[str, Path]) -> nx.Graph:
+    def _import_gexf(path: str | Path) -> nx.Graph:
         """Import graph from GEXF format."""
         if path is None:
             msg = "Path required for GEXF import"
@@ -678,8 +676,8 @@ class GraphIOHandler:
 
     @staticmethod
     def _export_edgelist(
-        graph: nx.Graph, path: Optional[Union[str, Path]], **kwargs
-    ) -> Union[str, list[dict]]:
+        graph: nx.Graph, path: str | Path | None, **kwargs
+    ) -> str | list[dict]:
         """Export graph to edge list format."""
         if path:
             # Handle large graphs with streaming
@@ -705,7 +703,7 @@ class GraphIOHandler:
             return edges
 
     @staticmethod
-    def _import_edgelist(path: Union[str, Path], **kwargs) -> nx.Graph:
+    def _import_edgelist(path: str | Path, **kwargs) -> nx.Graph:
         """Import graph from edge list format."""
         if path is None:
             msg = "Path required for edge list import"
@@ -766,7 +764,7 @@ class GraphIOHandler:
 
     @staticmethod
     def _import_adjacency(
-        data: Optional[dict[str, Any]], path: Optional[Union[str, Path]], **kwargs
+        data: dict[str, Any] | None, path: str | Path | None, **kwargs
     ) -> nx.Graph:
         """Import graph from adjacency matrix."""
         if data is None and path:
@@ -813,7 +811,7 @@ class GraphIOHandler:
         return graph
 
     @staticmethod
-    def _export_pickle(graph: nx.Graph, path: Union[str, Path]) -> str:
+    def _export_pickle(graph: nx.Graph, path: str | Path) -> str:
         """Export graph to pickle format."""
         if path is None:
             msg = "Path required for pickle export"
@@ -825,7 +823,7 @@ class GraphIOHandler:
         return f"Graph exported to {path}"
 
     @staticmethod
-    def _import_pickle(path: Union[str, Path]) -> nx.Graph:
+    def _import_pickle(path: str | Path) -> nx.Graph:
         """Import graph from pickle format."""
         if path is None:
             msg = "Path required for pickle import"
@@ -845,7 +843,7 @@ class GraphIOHandler:
         return A.to_string()
 
     @staticmethod
-    def _export_pajek(graph: nx.Graph, path: Union[str, Path]) -> str:
+    def _export_pajek(graph: nx.Graph, path: str | Path) -> str:
         """Export graph to Pajek format."""
         if path is None:
             msg = "Path required for Pajek export"
@@ -855,7 +853,7 @@ class GraphIOHandler:
         return f"Graph exported to {path}"
 
     @staticmethod
-    def _import_pajek(path: Union[str, Path]) -> nx.Graph:
+    def _import_pajek(path: str | Path) -> nx.Graph:
         """Import graph from Pajek format."""
         if path is None:
             msg = "Path required for Pajek import"
@@ -893,12 +891,12 @@ class GraphIOHandler:
 
     @staticmethod
     def import_from_dataframe(
-        nodes_df: Optional[pd.DataFrame] = None,
-        edges_df: Optional[pd.DataFrame] = None,
+        nodes_df: pd.DataFrame | None = None,
+        edges_df: pd.DataFrame | None = None,
         source_col: str = "source",
         target_col: str = "target",
         node_id_col: str = "node_id",
-        create_using: Optional[nx.Graph] = None,
+        create_using: nx.Graph | None = None,
     ) -> nx.Graph:
         """Import graph from pandas DataFrames."""
         if create_using is None:

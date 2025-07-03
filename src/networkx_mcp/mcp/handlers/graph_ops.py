@@ -8,10 +8,7 @@ from typing import Any, Optional, Union
 import networkx as nx
 from networkx.readwrite import json_graph
 
-try:
-    from fastmcp import FastMCP
-except ImportError:
-    from networkx_mcp.mcp_mock import MockMCP as FastMCP
+from fastmcp import FastMCP
 
 
 class GraphOpsHandler:

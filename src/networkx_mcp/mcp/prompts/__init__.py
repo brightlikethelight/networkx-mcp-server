@@ -5,17 +5,8 @@ helping users leverage tools and resources effectively.
 """
 
 
-try:
-    from fastmcp import FastMCP
-    from mcp.types import Prompt, PromptArgument, TextContent
-except ImportError:
-    # Mock imports for when MCP is not available
-    from networkx_mcp.mcp_mock import MockMCP
-
-    FastMCP = MockMCP.FastMCP
-    Prompt = MockMCP.types.Prompt
-    PromptArgument = MockMCP.types.PromptArgument
-    TextContent = MockMCP.types.TextContent
+from fastmcp import FastMCP
+from mcp.types import Prompt, PromptArgument, TextContent
 
 
 class GraphPrompts:

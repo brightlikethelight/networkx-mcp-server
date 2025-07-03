@@ -1,6 +1,6 @@
 """Focused node operations module."""
 
-from typing import Any, Union
+from typing import Any
 
 import networkx as nx
 
@@ -11,20 +11,20 @@ class NodeOperations:
     def __init__(self, graph: nx.Graph):
         self.graph = graph
 
-    def add_node_with_validation(self, node_id: Union[str, int], **attrs) -> bool:
+    def add_node_with_validation(self, node_id: str | int, **attrs) -> bool:
         """Add node with validation."""
         if node_id in self.graph:
             return False
         self.graph.add_node(node_id, **attrs)
         return True
 
-    def bulk_add_nodes(self, nodes: list[Union[str, int, tuple]]) -> int:
+    def bulk_add_nodes(self, nodes: list[str | int | tuple]) -> int:
         """Efficiently add multiple nodes."""
         initial_count = self.graph.number_of_nodes()
         self.graph.add_nodes_from(nodes)
         return self.graph.number_of_nodes() - initial_count
 
-    def get_node_summary(self, node_id: Union[str, int]) -> dict[str, Any]:
+    def get_node_summary(self, node_id: str | int) -> dict[str, Any]:
         """Get comprehensive node information."""
         if node_id not in self.graph:
             msg = f"Node {node_id} not found"

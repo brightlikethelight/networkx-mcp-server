@@ -4,15 +4,12 @@ This module handles graph analysis tools including statistics,
 community detection, bipartite analysis, and other analytical operations.
 """
 
-from typing import Any, Optional
+from typing import Any
 import networkx as nx
 from networkx.algorithms import bipartite
 
 
-try:
-    from fastmcp import FastMCP
-except ImportError:
-    from networkx_mcp.mcp_mock import MockMCP as FastMCP
+from fastmcp import FastMCP
 
 
 class AnalysisHandler:
@@ -106,7 +103,7 @@ class AnalysisHandler:
             graph_id: str,
             method: str = "louvain",
             resolution: float = 1.0,
-            k: Optional[int] = None,
+            k: int | None = None,
         ) -> dict[str, Any]:
             """Detect communities in a graph.
 
@@ -174,7 +171,6 @@ class AnalysisHandler:
                 elif method == "spectral":
                     try:
                         from sklearn.cluster import SpectralClustering
-                        import numpy as np
 
                         # Create adjacency matrix
                         adj_matrix = nx.adjacency_matrix(G)
@@ -260,12 +256,12 @@ class AnalysisHandler:
                     "set1_nodes": set1[:20],  # First 20 nodes
                     "set2_nodes": set2[:20],
                     "density": density,
-                    "set1_avg_degree": sum(degrees_set1.values()) / len(set1)
-                    if set1
-                    else 0,
-                    "set2_avg_degree": sum(degrees_set2.values()) / len(set2)
-                    if set2
-                    else 0,
+                    "set1_avg_degree": (
+                        sum(degrees_set1.values()) / len(set1) if set1 else 0
+                    ),
+                    "set2_avg_degree": (
+                        sum(degrees_set2.values()) / len(set2) if set2 else 0
+                    ),
                 }
 
                 # Projection analysis
@@ -358,7 +354,7 @@ class AnalysisHandler:
                             else:
                                 power_law_exponent = None
                                 r_squared = None
-                        except:
+                        except Exception:
                             power_law_exponent = None
                             r_squared = None
                     else:
@@ -396,7 +392,7 @@ class AnalysisHandler:
 
         @self.mcp.tool()
         async def node_classification_features(
-            graph_id: str, feature_types: Optional[list[str]] = None
+            graph_id: str, feature_types: list[str] | None = None
         ) -> dict[str, Any]:
             """Extract features for node classification tasks.
 
@@ -461,7 +457,7 @@ class AnalysisHandler:
 
         @self.mcp.tool()
         async def assortativity_analysis(
-            graph_id: str, attribute: Optional[str] = None
+            graph_id: str, attribute: str | None = None
         ) -> dict[str, Any]:
             """Analyze assortativity patterns in the graph.
 
@@ -491,32 +487,32 @@ class AnalysisHandler:
                             # Check if numeric or categorical
                             attr_values = [G.nodes[n].get(attribute) for n in G.nodes()]
                             if all(
-                                isinstance(v, (int, float))
+                                isinstance(v, int | float)
                                 for v in attr_values
                                 if v is not None
                             ):
-                                result[
-                                    "numeric_assortativity"
-                                ] = nx.numeric_assortativity_coefficient(G, attribute)
+                                result["numeric_assortativity"] = (
+                                    nx.numeric_assortativity_coefficient(G, attribute)
+                                )
                             else:
-                                result[
-                                    "attribute_assortativity"
-                                ] = nx.attribute_assortativity_coefficient(G, attribute)
+                                result["attribute_assortativity"] = (
+                                    nx.attribute_assortativity_coefficient(G, attribute)
+                                )
 
                 # Interpretation
                 deg_assort = result.get("degree_assortativity", 0)
                 if deg_assort > 0.3:
-                    result[
-                        "interpretation"
-                    ] = "Assortative: High-degree nodes tend to connect to high-degree nodes"
+                    result["interpretation"] = (
+                        "Assortative: High-degree nodes tend to connect to high-degree nodes"
+                    )
                 elif deg_assort < -0.3:
-                    result[
-                        "interpretation"
-                    ] = "Disassortative: High-degree nodes tend to connect to low-degree nodes"
+                    result["interpretation"] = (
+                        "Disassortative: High-degree nodes tend to connect to low-degree nodes"
+                    )
                 else:
-                    result[
-                        "interpretation"
-                    ] = "Neutral: No strong degree correlation pattern"
+                    result["interpretation"] = (
+                        "Neutral: No strong degree correlation pattern"
+                    )
 
                 return result
 

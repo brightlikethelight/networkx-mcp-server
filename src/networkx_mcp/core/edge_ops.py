@@ -1,6 +1,6 @@
 """Focused edge operations module."""
 
-from typing import Any, Union
+from typing import Any
 
 import networkx as nx
 
@@ -12,7 +12,7 @@ class EdgeOperations:
         self.graph = graph
 
     def add_edge_with_validation(
-        self, source: Union[str, int], target: Union[str, int], **attrs
+        self, source: str | int, target: str | int, **attrs
     ) -> bool:
         """Add edge with validation."""
         if self.graph.has_edge(source, target):
@@ -26,9 +26,7 @@ class EdgeOperations:
         self.graph.add_edges_from(edges)
         return self.graph.number_of_edges() - initial_count
 
-    def get_edge_summary(
-        self, source: Union[str, int], target: Union[str, int]
-    ) -> dict[str, Any]:
+    def get_edge_summary(self, source: str | int, target: str | int) -> dict[str, Any]:
         """Get comprehensive edge information."""
         if not self.graph.has_edge(source, target):
             msg = f"Edge ({source}, {target}) not found"
