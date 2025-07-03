@@ -1,0 +1,12 @@
+# Minimal requirements for NetworkX MCP Server
+# These are the absolute minimum dependencies needed to run the server
+
+# Core dependencies
+networkx>=3.0
+mcp>=1.0.0
+
+# Standard library extensions
+typing-extensions>=4.0.0
+
+# Optional but recommended
+numpy>=1.20.0  # For better performance with large graphs

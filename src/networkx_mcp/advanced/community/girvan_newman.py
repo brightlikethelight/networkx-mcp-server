@@ -1,18 +1,18 @@
 """Girvan-Newman algorithm for community detection."""
 
 import asyncio
-from typing import Optional
 
 import networkx as nx
 
-from networkx_mcp.advanced.community.base import CommunityDetector, CommunityResult
+from networkx_mcp.advanced.community.base import (CommunityDetector,
+                                                  CommunityResult)
 
 
 class GirvanNewmanDetector(CommunityDetector):
     """Girvan-Newman algorithm implementation."""
 
     async def detect_communities(
-        self, k: Optional[int] = None, max_communities: int = 10
+        self, k: int | None = None, max_communities: int = 10
     ) -> CommunityResult:
         """Detect communities using Girvan-Newman algorithm."""
         if not self.validate_graph():

@@ -18,7 +18,7 @@ Requirements:
 import asyncio
 import json
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 
 # In a real implementation, you would use an MCP client library
@@ -30,7 +30,7 @@ class MCPClient:
         self.server_url = server_url
         print(f"Connected to NetworkX MCP Server at {server_url}")
 
-    async def call_tool(self, tool_name: str, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def call_tool(self, tool_name: str, params: dict[str, Any]) -> dict[str, Any]:
         """Simulate calling an MCP tool."""
         print(f"\n🔧 Calling tool: {tool_name}")
         print(f"   Parameters: {json.dumps(params, indent=2)}")

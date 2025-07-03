@@ -4,9 +4,15 @@ Prompts provide pre-defined templates for common graph analysis workflows,
 helping users leverage tools and resources effectively.
 """
 
+from ...compat.fastmcp_compat import FastMCPCompat as FastMCP
 
-from fastmcp import FastMCP
-from mcp.types import Prompt, PromptArgument, TextContent
+try:
+    from mcp.types import Prompt, PromptArgument, TextContent
+except ImportError:
+    # Fallback for compatibility
+    Prompt = dict
+    PromptArgument = dict
+    TextContent = dict
 
 
 class GraphPrompts:

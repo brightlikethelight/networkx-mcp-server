@@ -68,16 +68,16 @@ def test_optional_imports():
     """Test that optional imports are handled gracefully."""
     # These imports should not fail even if packages are missing
     try:
-        from networkx_mcp.advanced.enterprise import (
-            HAS_JINJA2,
-            HAS_REPORTLAB,
-            HAS_SCHEDULE,
-        )
-        from networkx_mcp.advanced.ml_integration import HAS_SKLEARN
+        from networkx_mcp.advanced.enterprise import (HAS_JINJA2,
+                                                      HAS_REPORTLAB,
+                                                      HAS_SCHEDULE)
+        from networkx_mcp.advanced.ml import HAS_SKLEARN
         from networkx_mcp.integration.data_pipelines import HAS_AIOHTTP
         from networkx_mcp.monitoring.resource_manager import HAS_PSUTIL
-        from networkx_mcp.utils.performance import HAS_PSUTIL as PERF_HAS_PSUTIL
-        from networkx_mcp.visualization.matplotlib_visualizer import HAS_MATPLOTLIB
+        from networkx_mcp.utils.performance import \
+            HAS_PSUTIL as PERF_HAS_PSUTIL
+        from networkx_mcp.visualization.matplotlib_visualizer import \
+            HAS_MATPLOTLIB
         from networkx_mcp.visualization.plotly_visualizer import HAS_PLOTLY
         from networkx_mcp.visualization.pyvis_visualizer import HAS_PYVIS
 

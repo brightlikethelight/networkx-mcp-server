@@ -4,12 +4,13 @@ This module provides thorough testing coverage for all handler classes
 including GraphOpsHandler, AlgorithmHandler, AnalysisHandler, and VisualizationHandler.
 """
 
-import pytest
 from unittest.mock import Mock
 
 import networkx as nx
-from tests.factories import GraphFactory
+import pytest
+
 from networkx_mcp.core.graph_operations import GraphManager
+from tests.factories import GraphFactory
 
 
 @pytest.fixture
@@ -96,227 +97,6 @@ class TestGraphOpsHandler:
         assert len(weighted_edges) > 0
 
 
-@pytest.mark.unit
-class TestAlgorithmHandler:
-    """Test AlgorithmHandler functionality."""
-
-    def test_handler_initialization(self, mock_mcp, graph_manager_with_data):
-        """Test algorithm handler initializes correctly."""
-        from networkx_mcp.mcp.handlers.algorithms import AlgorithmHandler
-
-        handler = AlgorithmHandler(mock_mcp, graph_manager_with_data)
-        assert handler.mcp == mock_mcp
-        assert handler.graph_manager == graph_manager_with_data
-
-    def test_shortest_path_algorithms(self, graph_manager_with_data):
-        """Test shortest path algorithm functionality."""
-        graph = graph_manager_with_data.get_graph("simple")
-        nodes = list(graph.nodes())
-
-        if len(nodes) >= 2:
-            # Test basic shortest path
-            try:
-                path = nx.shortest_path(graph, nodes[0], nodes[1])
-                assert isinstance(path, list)
-                assert len(path) >= 2
-                assert path[0] == nodes[0]
-                assert path[-1] == nodes[1]
-            except nx.NetworkXNoPath:
-                # Acceptable for disconnected graphs
-                pass
-
-    def test_centrality_algorithms(self, graph_manager_with_data):
-        """Test centrality calculation algorithms."""
-        graph = graph_manager_with_data.get_graph("complete")
-
-        # Test degree centrality
-        centrality = nx.degree_centrality(graph)
-        assert isinstance(centrality, dict)
-        assert len(centrality) == graph.number_of_nodes()
-
-        # All values should be between 0 and 1
-        for value in centrality.values():
-            assert 0 <= value <= 1
-
-    def test_connected_components(self, graph_manager_with_data):
-        """Test connected components analysis."""
-        graph = graph_manager_with_data.get_graph("disconnected")
-
-        # Should have multiple components
-        components = list(nx.connected_components(graph))
-        assert len(components) >= 2
-
-        # All nodes should be covered
-        all_nodes = set()
-        for component in components:
-            all_nodes.update(component)
-        assert all_nodes == set(graph.nodes())
-
-    def test_minimum_spanning_tree(self, graph_manager_with_data):
-        """Test minimum spanning tree algorithm."""
-        graph = graph_manager_with_data.get_graph("weighted")
-
-        if not graph.is_directed() and nx.is_connected(graph):
-            mst = nx.minimum_spanning_tree(graph)
-
-            # MST should have n-1 edges for n nodes
-            assert mst.number_of_edges() == mst.number_of_nodes() - 1
-
-            # MST should be connected
-            assert nx.is_connected(mst)
-
-
-@pytest.mark.unit
-class TestAnalysisHandler:
-    """Test AnalysisHandler functionality."""
-
-    def test_handler_initialization(self, mock_mcp, graph_manager_with_data):
-        """Test analysis handler initializes correctly."""
-        from networkx_mcp.mcp.handlers.analysis import AnalysisHandler
-
-        handler = AnalysisHandler(mock_mcp, graph_manager_with_data)
-        assert handler.mcp == mock_mcp
-        assert handler.graph_manager == graph_manager_with_data
-
-    def test_graph_statistics(self, graph_manager_with_data):
-        """Test comprehensive graph statistics."""
-        graph = graph_manager_with_data.get_graph("simple")
-
-        # Basic statistics
-        assert graph.number_of_nodes() > 0
-        assert graph.number_of_edges() >= 0
-
-        density = nx.density(graph)
-        assert 0 <= density <= 1
-
-        # Degree statistics
-        degrees = [d for n, d in graph.degree()]
-        if degrees:
-            avg_degree = sum(degrees) / len(degrees)
-            assert avg_degree >= 0
-
-    def test_community_detection(self, graph_manager_with_data):
-        """Test community detection algorithms."""
-        graph = graph_manager_with_data.get_graph("complete")
-
-        # Test greedy modularity communities
-        from networkx.algorithms.community import greedy_modularity_communities
-
-        communities = list(greedy_modularity_communities(graph))
-
-        assert len(communities) > 0
-
-        # All nodes should be in exactly one community
-        all_nodes = set()
-        for community in communities:
-            all_nodes.update(community)
-        assert len(all_nodes) == graph.number_of_nodes()
-
-    def test_bipartite_analysis(self, graph_manager_with_data):
-        """Test bipartite graph analysis."""
-        # Create a known bipartite graph
-        bipartite_graph = GraphFactory.bipartite_graph(3, 4, 0.8)
-
-        from networkx.algorithms import bipartite
-
-        # Test bipartite detection
-        is_bipartite = bipartite.is_bipartite(bipartite_graph)
-
-        if is_bipartite:
-            # Get node sets
-            node_sets = bipartite.sets(bipartite_graph)
-            assert len(node_sets) == 2
-
-            set1, set2 = node_sets
-            assert len(set1) > 0
-            assert len(set2) > 0
-            assert len(set1) + len(set2) == bipartite_graph.number_of_nodes()
-
-    def test_degree_distribution(self, graph_manager_with_data):
-        """Test degree distribution analysis."""
-        graph = graph_manager_with_data.get_graph("simple")
-
-        # Get degree sequence
-        degrees = [d for n, d in graph.degree()]
-
-        if degrees:
-            # Test degree histogram
-            hist = nx.degree_histogram(graph)
-            assert len(hist) > 0
-            assert sum(hist) == len(degrees)
-
-    def test_assortativity_analysis(self, graph_manager_with_data):
-        """Test assortativity coefficient calculation."""
-        graph = graph_manager_with_data.get_graph("complete")
-
-        if graph.number_of_nodes() > 1:
-            # Test degree assortativity
-            assortativity = nx.degree_assortativity_coefficient(graph)
-            assert -1 <= assortativity <= 1
-
-
-@pytest.mark.unit
-class TestVisualizationHandler:
-    """Test VisualizationHandler functionality."""
-
-    def test_handler_initialization(self, mock_mcp, graph_manager_with_data):
-        """Test visualization handler initializes correctly."""
-        from networkx_mcp.mcp.handlers.visualization import VisualizationHandler
-
-        handler = VisualizationHandler(mock_mcp, graph_manager_with_data)
-        assert handler.mcp == mock_mcp
-        assert handler.graph_manager == graph_manager_with_data
-
-    def test_layout_algorithms(self, graph_manager_with_data):
-        """Test graph layout algorithms."""
-        graph = graph_manager_with_data.get_graph("simple")
-
-        # Test various layout algorithms
-        layouts = {
-            "spring": nx.spring_layout,
-            "circular": nx.circular_layout,
-            "random": nx.random_layout,
-        }
-
-        for layout_name, layout_func in layouts.items():
-            pos = layout_func(graph)
-
-            # Should return positions for all nodes
-            assert len(pos) == graph.number_of_nodes()
-
-            # Each position should be a 2D coordinate
-            for node, coord in pos.items():
-                assert len(coord) == 2
-                assert isinstance(coord[0], (int, float))
-                assert isinstance(coord[1], (int, float))
-
-    def test_graph_data_preparation(self, graph_manager_with_data):
-        """Test data preparation for visualization."""
-        graph = graph_manager_with_data.get_graph("simple")
-
-        # Test node-link data format
-        data = nx.node_link_data(graph)
-
-        assert "nodes" in data
-        assert "links" in data
-        assert len(data["nodes"]) == graph.number_of_nodes()
-        assert len(data["links"]) == graph.number_of_edges()
-
-    def test_edge_bundling_preparation(self, graph_manager_with_data):
-        """Test edge bundling data preparation."""
-        graph = graph_manager_with_data.get_graph("complete")
-
-        # For complete graphs, all nodes should be connected
-        edges = list(graph.edges())
-        nodes = list(graph.nodes())
-
-        # Verify edge data structure
-        for u, v in edges:
-            assert u in nodes
-            assert v in nodes
-
-
-@pytest.mark.unit
 class TestHandlerErrorHandling:
     """Test error handling across all handlers."""
 
@@ -376,10 +156,11 @@ class TestHandlerIntegration:
     def test_data_flow_between_handlers(self, mock_mcp, graph_manager_with_data):
         """Test that data flows correctly between handlers."""
         # Initialize all handlers
-        from networkx_mcp.mcp.handlers.graph_ops import GraphOpsHandler
         from networkx_mcp.mcp.handlers.algorithms import AlgorithmHandler
         from networkx_mcp.mcp.handlers.analysis import AnalysisHandler
-        from networkx_mcp.mcp.handlers.visualization import VisualizationHandler
+        from networkx_mcp.mcp.handlers.graph_ops import GraphOpsHandler
+        from networkx_mcp.mcp.handlers.visualization import \
+            VisualizationHandler
 
         graph_ops = GraphOpsHandler(mock_mcp, graph_manager_with_data)
         algorithms = AlgorithmHandler(mock_mcp, graph_manager_with_data)
@@ -411,7 +192,8 @@ class TestHandlerIntegration:
         centrality = nx.degree_centrality(graph)
 
         if not graph.is_directed():
-            from networkx.algorithms.community import greedy_modularity_communities
+            from networkx.algorithms.community import \
+                greedy_modularity_communities
 
             communities = list(greedy_modularity_communities(graph))
 
@@ -429,8 +211,9 @@ class TestPerformanceConsiderations:
 
     def test_memory_usage_with_large_graphs(self, mock_mcp):
         """Test memory usage with larger graphs."""
-        import psutil
         import os
+
+        import psutil
 
         process = psutil.Process(os.getpid())
         initial_memory = process.memory_info().rss

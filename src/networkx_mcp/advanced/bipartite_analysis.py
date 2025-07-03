@@ -3,7 +3,7 @@
 import logging
 import time
 from collections import defaultdict
-from typing import Any, Optional, Union
+from typing import Any
 
 import networkx as nx
 import numpy as np
@@ -19,7 +19,7 @@ class BipartiteAnalysis:
     @staticmethod
     def is_bipartite(
         graph: nx.Graph, return_sets: bool = True
-    ) -> Union[bool, tuple[bool, Optional[tuple[set, set]]]]:
+    ) -> bool | tuple[bool, tuple[set, set] | None]:
         """
         Check if graph is bipartite and optionally return the bipartition.
 
@@ -58,7 +58,7 @@ class BipartiteAnalysis:
     def bipartite_projection(
         graph: nx.Graph,
         nodes: set[Any],
-        weight_function: Optional[str] = "overlap",
+        weight_function: str | None = "overlap",
         **_params,
     ) -> tuple[nx.Graph, dict[str, Any]]:
         """
@@ -174,7 +174,7 @@ class BipartiteAnalysis:
 
     @staticmethod
     def bipartite_clustering(
-        graph: nx.Graph, nodes: Optional[set[Any]] = None, mode: str = "dot", **_params
+        graph: nx.Graph, nodes: set[Any] | None = None, mode: str = "dot", **_params
     ) -> dict[str, Any]:
         """
         Calculate bipartite clustering coefficients.
@@ -376,8 +376,8 @@ class BipartiteAnalysis:
     @staticmethod
     def maximum_matching(
         graph: nx.Graph,
-        weight: Optional[str] = None,
-        top_nodes: Optional[set[Any]] = None,
+        weight: str | None = None,
+        top_nodes: set[Any] | None = None,
         **_params,
     ) -> dict[str, Any]:
         """

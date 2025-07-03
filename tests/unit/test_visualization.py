@@ -6,12 +6,9 @@ from unittest.mock import patch
 import networkx as nx
 import pytest
 
-from networkx_mcp.visualization import (
-    MatplotlibVisualizer,
-    PlotlyVisualizer,
-    PyvisVisualizer,
-    SpecializedVisualizations,
-)
+from networkx_mcp.visualization import (MatplotlibVisualizer, PlotlyVisualizer,
+                                        PyvisVisualizer,
+                                        SpecializedVisualizations)
 
 
 class TestMatplotlibVisualizer:

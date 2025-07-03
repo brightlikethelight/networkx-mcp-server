@@ -5,11 +5,11 @@ community detection, bipartite analysis, and other analytical operations.
 """
 
 from typing import Any
+
 import networkx as nx
 from networkx.algorithms import bipartite
 
-
-from fastmcp import FastMCP
+from ...compat.fastmcp_compat import FastMCPCompat as FastMCP
 
 
 class AnalysisHandler:
@@ -141,18 +141,16 @@ class AnalysisHandler:
 
                     except ImportError:
                         # Fallback to greedy modularity
-                        from networkx.algorithms.community import (
-                            greedy_modularity_communities,
-                        )
+                        from networkx.algorithms.community import \
+                            greedy_modularity_communities
 
                         communities = list(greedy_modularity_communities(G))
                         communities = [list(c) for c in communities]
                         modularity = nx.community.modularity(G, communities)
 
                 elif method == "label_propagation":
-                    from networkx.algorithms.community import (
-                        label_propagation_communities,
-                    )
+                    from networkx.algorithms.community import \
+                        label_propagation_communities
 
                     communities = list(label_propagation_communities(G))
                     communities = [list(c) for c in communities]
@@ -289,7 +287,7 @@ class AnalysisHandler:
 
         @self.mcp.tool()
         async def degree_distribution(
-            graph_id: str, log_scale: bool = False
+            graph_id: str, _log_scale: bool = False
         ) -> dict[str, Any]:
             """Analyze degree distribution of a graph.
 

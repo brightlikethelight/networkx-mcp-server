@@ -2,7 +2,7 @@
 
 import logging
 import random  # Using for non-cryptographic graph generation purposes only
-from typing import Any, Optional
+from typing import Any
 
 import networkx as nx
 import numpy as np
@@ -25,9 +25,9 @@ class GraphGenerators:
     def random_graph(
         n: int,
         graph_type: str = "gnp",
-        p: Optional[float] = None,
-        m: Optional[int] = None,
-        seed: Optional[int] = None,
+        p: float | None = None,
+        m: int | None = None,
+        seed: int | None = None,
         directed: bool = False,
         **_params,
     ) -> tuple[nx.Graph, dict[str, Any]]:
@@ -118,13 +118,13 @@ class GraphGenerators:
     def scale_free_graph(
         n: int,
         m: int = MIN_EDGES_FACTOR,
-        m0: Optional[int] = None,
+        m0: int | None = None,
         alpha: float = 0.41,
         beta: float = 0.54,
         gamma: float = 0.05,
         delta_in: float = 0.2,
         delta_out: float = 0.2,
-        seed: Optional[int] = None,
+        seed: int | None = None,
         model: str = "barabasi_albert",
         **params,
     ) -> tuple[nx.Graph, dict[str, Any]]:
@@ -244,7 +244,7 @@ class GraphGenerators:
         k: int = DEFAULT_NEIGHBORS,
         p: float = DEFAULT_REWIRING_PROBABILITY,
         tries: int = 100,
-        seed: Optional[int] = None,
+        seed: int | None = None,
         model: str = "watts_strogatz",
         **_params,
     ) -> tuple[nx.Graph, dict[str, Any]]:
@@ -343,7 +343,7 @@ class GraphGenerators:
     def regular_graph(
         n: int,
         d: int,
-        seed: Optional[int] = None,
+        seed: int | None = None,
         graph_type: str = "random_regular",
         **params,
     ) -> tuple[nx.Graph, dict[str, Any]]:
@@ -440,7 +440,7 @@ class GraphGenerators:
         n: int,
         tree_type: str = "random",
         branching: int = 2,
-        seed: Optional[int] = None,
+        seed: int | None = None,
         **params,
     ) -> tuple[nx.Graph, dict[str, Any]]:
         """
@@ -564,11 +564,11 @@ class GraphGenerators:
     @staticmethod
     def geometric_graph(
         n: int,
-        radius: Optional[float] = None,
+        radius: float | None = None,
         dim: int = 2,
-        pos: Optional[dict] = None,
+        pos: dict | None = None,
         p: float = 2,
-        seed: Optional[int] = None,
+        seed: int | None = None,
         graph_type: str = "random_geometric",
         **params,
     ) -> tuple[nx.Graph, dict[str, Any]]:
@@ -727,13 +727,13 @@ class GraphGenerators:
     def social_network_graph(
         n: int,
         model: str = "stochastic_block",
-        communities: Optional[int] = None,
+        communities: int | None = None,
         p_in: float = 0.3,
         p_out: float = 0.01,
         tau1: float = 3.0,
         tau2: float = 1.5,
         mu: float = 0.1,
-        seed: Optional[int] = None,
+        seed: int | None = None,
         **params,
     ) -> tuple[nx.Graph, dict[str, Any]]:
         """
@@ -922,8 +922,8 @@ class GraphGenerators:
     def graph_from_degree_sequence(
         degree_sequence: list[int],
         method: str = "configuration",
-        create_using: Optional[nx.Graph] = None,
-        seed: Optional[int] = None,
+        create_using: nx.Graph | None = None,
+        seed: int | None = None,
         **_params,
     ) -> tuple[nx.Graph, dict[str, Any]]:
         """

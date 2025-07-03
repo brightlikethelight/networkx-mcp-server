@@ -1,83 +1,112 @@
-name: 🚀 Feature Request
-description: Suggest a new feature or enhancement
-title: "🚀 [Feature]: "
-labels: ["enhancement", "needs-discussion"]
+name: ✨ Feature Request
+description: Suggest a new feature or improvement for NetworkX MCP Server
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
 assignees: []
+
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for suggesting a feature! Please provide as much detail as possible to help us understand your request.
+        Thanks for suggesting a new feature! ✨
+        
+        Help us understand your idea and its potential impact on the NetworkX MCP Server.
 
   - type: checkboxes
-    id: preliminary-checks
+    id: checklist
     attributes:
-      label: Preliminary Checks
-      description: Please confirm you've done these checks before submitting
+      label: Pre-submission Checklist
+      description: Please verify that you have completed the following
       options:
-        - label: I searched existing issues and discussions
+        - label: I have searched existing issues and discussions for similar feature requests
           required: true
-        - label: This feature would benefit the broader community
+        - label: I have reviewed the [roadmap](https://github.com/brightliu/networkx-mcp-server/projects) to see if this is already planned
           required: true
-        - label: I've considered if this could be implemented as a plugin
+        - label: I have considered if this could be implemented as a plugin or extension
           required: true
 
-  - type: textarea
-    id: feature-summary
+  - type: dropdown
+    id: category
     attributes:
-      label: Feature Summary
-      description: A brief, clear description of the feature you'd like to see
-      placeholder: In one or two sentences, what would you like to add or change?
+      label: Feature Category
+      description: What type of feature is this?
+      options:
+        - "New MCP Tool"
+        - "New Algorithm"
+        - "Visualization Enhancement"
+        - "Performance Improvement"
+        - "Developer Experience"
+        - "Documentation"
+        - "Security Feature"
+        - "Enterprise Feature"
+        - "Machine Learning"
+        - "Import/Export Format"
+        - "Other"
     validations:
       required: true
 
   - type: textarea
-    id: motivation
+    id: problem
     attributes:
-      label: Motivation and Use Case
-      description: Why is this feature needed? What problem does it solve?
+      label: Problem Statement
+      description: What problem does this feature solve? Why is it needed?
       placeholder: |
-        Describe your use case and why existing functionality doesn't meet your needs.
-        Include real-world scenarios where this would be helpful.
+        Describe the problem or limitation you're experiencing:
+        - What can't you do today?
+        - What's the impact of not having this feature?
+        - Who would benefit from this feature?
     validations:
       required: true
 
   - type: textarea
-    id: proposed-solution
+    id: solution
     attributes:
       label: Proposed Solution
-      description: How should this feature work? Be as specific as possible.
+      description: What would you like to see implemented?
       placeholder: |
         Describe your ideal solution:
-        - New MCP tools to add
-        - API changes needed
-        - User interface considerations
-        - Configuration options
+        - How should it work?
+        - What should the API look like?
+        - Any specific requirements or constraints?
+    validations:
+      required: true
 
   - type: textarea
     id: alternatives
     attributes:
-      label: Alternatives Considered
-      description: What other solutions or workarounds have you considered?
+      label: Alternative Solutions
+      description: Have you considered any alternative approaches?
       placeholder: |
-        - Alternative approach 1: ...
-        - Alternative approach 2: ...
-        - Why these alternatives aren't sufficient: ...
+        Describe alternative solutions you've considered:
+        - Other ways to solve the same problem
+        - Existing tools or workarounds
+        - Why your proposed solution is better
+
+  - type: textarea
+    id: example
+    attributes:
+      label: Usage Example
+      description: Show how the feature would be used
+      render: python
+      placeholder: |
+        # Example of how the feature would be used
+        
+        # Current approach (if any):
+        # current_method()
+        
+        # Proposed approach:
+        # new_feature_method()
 
   - type: dropdown
-    id: feature-type
+    id: priority
     attributes:
-      label: Feature Type
-      description: What type of feature is this?
+      label: Priority Level
+      description: How important is this feature to you?
       options:
-        - New MCP tool/algorithm
-        - Visualization enhancement
-        - Performance improvement
-        - API enhancement
-        - Documentation improvement
-        - Developer experience
-        - Integration with external service
-        - Other
+        - "Low - Nice to have"
+        - "Medium - Would improve my workflow"
+        - "High - Blocking my current project"
+        - "Critical - Essential for production use"
     validations:
       required: true
 
@@ -87,55 +116,93 @@ body:
       label: Estimated Complexity
       description: How complex do you think this feature would be to implement?
       options:
-        - Simple (few lines of code)
-        - Moderate (new function/class)
-        - Complex (significant changes)
-        - Major (architectural changes)
-        - Not sure
+        - "Low - Small change or addition"
+        - "Medium - Moderate development effort"
+        - "High - Significant implementation required"
+        - "Very High - Major architectural changes"
+        - "I'm not sure"
 
   - type: textarea
-    id: implementation-ideas
+    id: benefits
+    attributes:
+      label: Expected Benefits
+      description: What benefits would this feature provide?
+      placeholder: |
+        List the expected benefits:
+        - Performance improvements
+        - Easier workflow
+        - New capabilities enabled
+        - Better user experience
+        - etc.
+
+  - type: textarea
+    id: implementation
     attributes:
       label: Implementation Ideas
       description: Do you have ideas about how this could be implemented?
       placeholder: |
-        If you have technical ideas or suggestions:
-        - Which files might need changes
-        - Dependencies that might be needed
+        If you have technical ideas about implementation:
+        - Relevant libraries or algorithms
+        - Similar features in other tools
         - Potential challenges or considerations
+        - Performance implications
 
   - type: textarea
-    id: examples
+    id: compatibility
     attributes:
-      label: Code Examples
-      description: Provide examples of how this feature would be used
+      label: Compatibility Considerations
+      description: Are there any compatibility concerns?
       placeholder: |
-        ```python
-        # Example of how the new feature would be used
-        result = await client.call_tool("new_feature", {
-            "parameter": "value"
-        })
-        ```
-      render: python
+        Consider compatibility with:
+        - Current API (breaking changes?)
+        - Different Python versions
+        - MCP specification
+        - NetworkX versions
+        - Performance impact on existing features
+
+  - type: input
+    id: related-tools
+    attributes:
+      label: Related Tools/Libraries
+      description: Are there similar features in other tools?
+      placeholder: "NetworkX, igraph, SNAP, Gephi, etc."
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Anything else you'd like to add?
+      placeholder: |
+        - Links to relevant research papers
+        - Screenshots or mockups
+        - Real-world use cases
+        - Performance requirements
+        - etc.
 
   - type: checkboxes
     id: contribution
     attributes:
       label: Contribution
-      description: Are you willing to help implement this feature?
+      description: Are you interested in contributing to this feature?
       options:
-        - label: I'm willing to submit a PR for this feature
-        - label: I'm willing to help with testing
-        - label: I'm willing to help with documentation
-        - label: I'm willing to help with research/design
+        - label: I would like to implement this feature myself
+          required: false
+        - label: I can help with testing and validation
+          required: false
+        - label: I can provide domain expertise
+          required: false
+        - label: I can help with documentation
+          required: false
 
-  - type: textarea
-    id: additional-context
+  - type: checkboxes
+    id: funding
     attributes:
-      label: Additional Context
-      description: Any other information, mockups, or references
-      placeholder: |
-        - Links to similar features in other projects
-        - Academic papers or algorithms
-        - Mockups or diagrams
-        - Performance requirements
+      label: Funding/Sponsorship
+      description: Is there organizational support for this feature?
+      options:
+        - label: My organization would be interested in sponsoring this feature
+          required: false
+        - label: This feature is needed for a commercial project
+          required: false
+        - label: This is for academic research
+          required: false

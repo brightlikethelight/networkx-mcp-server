@@ -4,11 +4,11 @@ This module handles graph algorithm tools including pathfinding,
 centrality, connectivity, and other core algorithms.
 """
 
-from typing import Any, Optional, Union
+from typing import Any
+
 import networkx as nx
 
-
-from fastmcp import FastMCP
+from ...compat.fastmcp_compat import FastMCPCompat as FastMCP
 
 
 class AlgorithmHandler:
@@ -26,9 +26,9 @@ class AlgorithmHandler:
         @self.mcp.tool()
         async def shortest_path(
             graph_id: str,
-            source: Union[str, int],
-            target: Union[str, int],
-            weight: Optional[str] = None,
+            source: str | int,
+            target: str | int,
+            weight: str | None = None,
             method: str = "dijkstra",
         ) -> dict[str, Any]:
             """Find shortest path between two nodes.
@@ -87,9 +87,9 @@ class AlgorithmHandler:
         @self.mcp.tool()
         async def all_shortest_paths(
             graph_id: str,
-            source: Union[str, int],
-            target: Union[str, int],
-            weight: Optional[str] = None,
+            source: str | int,
+            target: str | int,
+            weight: str | None = None,
         ) -> dict[str, Any]:
             """Find all shortest paths between two nodes.
 
@@ -192,9 +192,9 @@ class AlgorithmHandler:
 
             try:
                 centrality_funcs = {
-                    "degree": lambda: nx.degree_centrality(G)
-                    if normalized
-                    else dict(G.degree()),
+                    "degree": lambda: (
+                        nx.degree_centrality(G) if normalized else dict(G.degree())
+                    ),
                     "betweenness": lambda: nx.betweenness_centrality(
                         G, normalized=normalized
                     ),
@@ -225,9 +225,9 @@ class AlgorithmHandler:
                 return {
                     "centrality_type": centrality_type,
                     "top_nodes": sorted_nodes[:top_k],
-                    "all_centrality": dict(sorted_nodes)
-                    if len(sorted_nodes) <= 100
-                    else None,
+                    "all_centrality": (
+                        dict(sorted_nodes) if len(sorted_nodes) <= 100 else None
+                    ),
                     "statistics": stats,
                     "normalized": normalized,
                 }
@@ -239,7 +239,7 @@ class AlgorithmHandler:
 
         @self.mcp.tool()
         async def clustering_coefficient(
-            graph_id: str, nodes: Optional[list[Union[str, int]]] = None
+            graph_id: str, nodes: list[str | int] | None = None
         ) -> dict[str, Any]:
             """Calculate clustering coefficient.
 

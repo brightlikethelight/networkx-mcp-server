@@ -5,7 +5,7 @@ MCP server testing, and property-based testing scenarios.
 """
 
 import random
-from typing import Any, Optional
+from typing import Any
 
 import networkx as nx
 from hypothesis import strategies as st
@@ -138,7 +138,7 @@ def graph_strategy(
     min_nodes: int = 1,
     max_nodes: int = 20,
     min_edges: int = 0,
-    max_edges: Optional[int] = None,
+    max_edges: int | None = None,
     directed: bool = False,
 ) -> nx.Graph:
     """Generate random graphs using Hypothesis."""
@@ -168,7 +168,7 @@ def node_strategy(draw, graph: nx.Graph) -> Any:
 
 
 @composite
-def edge_strategy(draw, graph: nx.Graph) -> Optional[tuple[Any, Any]]:
+def edge_strategy(draw, graph: nx.Graph) -> tuple[Any, Any] | None:
     """Generate a valid edge from a graph."""
     if graph.number_of_edges() == 0:
         return None

@@ -3,8 +3,8 @@
 import json
 import time
 from collections import defaultdict, deque
-from datetime import datetime, timezone
-from typing import Any, Optional
+from datetime import UTC, datetime
+from typing import Any
 
 
 class PerformanceMonitor:
@@ -23,7 +23,7 @@ class PerformanceMonitor:
         self.start_time = time.time()
 
     def record_operation(
-        self, operation: str, duration: float, metadata: Optional[dict] = None
+        self, operation: str, duration: float, metadata: dict | None = None
     ):
         """Record an operation's performance metrics.
 
@@ -33,13 +33,13 @@ class PerformanceMonitor:
             metadata: Optional additional metadata
         """
         record = {
-            "timestamp": datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),
+            "timestamp": datetime.now(UTC).replace(tzinfo=None).isoformat(),
             "duration_ms": round(duration * 1000, 2),
             "metadata": metadata or {},
         }
         self.operations[operation].append(record)
 
-    def get_statistics(self, operation: Optional[str] = None) -> dict[str, Any]:
+    def get_statistics(self, operation: str | None = None) -> dict[str, Any]:
         """Get performance statistics.
 
         Args:
@@ -107,7 +107,7 @@ class PerformanceMonitor:
 
         return sorted(slow_ops, key=lambda x: x["duration_ms"], reverse=True)
 
-    def clear_history(self, operation: Optional[str] = None):
+    def clear_history(self, operation: str | None = None):
         """Clear performance history.
 
         Args:
@@ -129,7 +129,7 @@ class OperationCounter:
         self.hourly_counts: dict[str, dict[int, int]] = defaultdict(
             lambda: defaultdict(int)
         )
-        self.start_time = datetime.now(timezone.utc).replace(tzinfo=None)
+        self.start_time = datetime.now(UTC).replace(tzinfo=None)
         self.errors: dict[str, int] = defaultdict(int)
 
     def increment(self, operation: str, count: int = 1):
@@ -140,7 +140,7 @@ class OperationCounter:
             count: Number to increment by
         """
         self.counts[operation] += count
-        current_hour = datetime.now(timezone.utc).replace(tzinfo=None).hour
+        current_hour = datetime.now(UTC).replace(tzinfo=None).hour
         self.hourly_counts[operation][current_hour] += count
 
     def increment_error(self, operation: str, error_type: str):
@@ -201,9 +201,7 @@ class OperationCounter:
                 if total_operations > 0
                 else 0
             ),
-            "uptime": str(
-                datetime.now(timezone.utc).replace(tzinfo=None) - self.start_time
-            ),
+            "uptime": str(datetime.now(UTC).replace(tzinfo=None) - self.start_time),
             "operation_counts": dict(self.counts),
             "operation_distribution": operation_distribution,
             "hourly_patterns": hourly_patterns,
@@ -220,7 +218,7 @@ class OperationCounter:
         self.counts.clear()
         self.hourly_counts.clear()
         self.errors.clear()
-        self.start_time = datetime.now(timezone.utc).replace(tzinfo=None)
+        self.start_time = datetime.now(UTC).replace(tzinfo=None)
 
     def export_stats(self, filepath: str):
         """Export statistics to a JSON file.
@@ -229,9 +227,7 @@ class OperationCounter:
             filepath: Path to save the statistics
         """
         stats = self.get_counts()
-        stats["exported_at"] = (
-            datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
-        )
+        stats["exported_at"] = datetime.now(UTC).replace(tzinfo=None).isoformat()
 
         with open(filepath, "w") as f:
             json.dump(stats, f, indent=2)

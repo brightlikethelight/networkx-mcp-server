@@ -1,7 +1,6 @@
 """GraphML format I/O operations."""
 
 from pathlib import Path
-from typing import Union
 
 import networkx as nx
 
@@ -14,7 +13,7 @@ class GraphMLReader(GraphReader):
     def __init__(self):
         super().__init__("graphml", [".graphml", ".xml"])
 
-    async def read(self, filepath: Union[str, Path], **options) -> nx.Graph:
+    async def read(self, filepath: str | Path, **options) -> nx.Graph:
         """Read GraphML file."""
         path = validate_file_path(filepath, must_exist=True)
 
@@ -39,9 +38,7 @@ class GraphMLWriter(GraphWriter):
     def __init__(self):
         super().__init__("graphml", ".graphml")
 
-    async def write(
-        self, graph: nx.Graph, filepath: Union[str, Path], **options
-    ) -> bool:
+    async def write(self, graph: nx.Graph, filepath: str | Path, **options) -> bool:
         """Write graph to GraphML file."""
         path = validate_file_path(filepath, must_exist=False)
 
@@ -59,13 +56,13 @@ class GraphMLWriter(GraphWriter):
             raise RuntimeError(msg) from e
 
 
-async def read_graphml(filepath: Union[str, Path]) -> nx.Graph:
+async def read_graphml(filepath: str | Path) -> nx.Graph:
     """Simple function interface for reading GraphML."""
     reader = GraphMLReader()
     return await reader.read(filepath)
 
 
-async def write_graphml(graph: nx.Graph, filepath: Union[str, Path]) -> bool:
+async def write_graphml(graph: nx.Graph, filepath: str | Path) -> bool:
     """Simple function interface for writing GraphML."""
     writer = GraphMLWriter()
     return await writer.write(graph, filepath)

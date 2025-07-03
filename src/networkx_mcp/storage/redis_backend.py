@@ -5,8 +5,8 @@ import json
 import pickle
 import zlib
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone
-from typing import Any, Optional
+from datetime import UTC, datetime
+from typing import Any
 
 import networkx as nx
 
@@ -16,14 +16,8 @@ except ImportError:
     import aioredis as redis  # Fallback for older versions
 
 from ..security.validator import SecurityValidator
-from .base import (
-    GraphNotFoundError,
-    StorageBackend,
-    StorageError,
-    StorageQuotaExceededError,
-    Transaction,
-    TransactionError,
-)
+from .base import (GraphNotFoundError, StorageBackend, StorageError,
+                   StorageQuotaExceededError, Transaction, TransactionError)
 
 
 class RedisTransaction(Transaction):
@@ -135,8 +129,8 @@ class RedisBackend(StorageBackend):
         user_id: str,
         graph_id: str,
         graph: nx.Graph,
-        metadata: Optional[dict[str, Any]] = None,
-        tx: Optional[Transaction] = None,
+        metadata: dict[str, Any] | None = None,
+        tx: Transaction | None = None,
     ) -> bool:
         """Save graph with compression and metadata."""
         # Validate inputs
@@ -162,7 +156,7 @@ class RedisBackend(StorageBackend):
             raise StorageQuotaExceededError(msg)
 
         # Prepare metadata
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         graph_metadata = {
             "user_id": user_id,
             "graph_id": graph_id,
@@ -221,8 +215,8 @@ class RedisBackend(StorageBackend):
         return True
 
     async def load_graph(
-        self, user_id: str, graph_id: str, tx: Optional[Transaction] = None
-    ) -> Optional[nx.Graph]:
+        self, user_id: str, graph_id: str, tx: Transaction | None = None
+    ) -> nx.Graph | None:
         """Load graph from storage."""
         # Validate inputs
         user_id = SecurityValidator.validate_user_id(user_id)
@@ -255,13 +249,13 @@ class RedisBackend(StorageBackend):
         if not tx:
             meta_key = self._make_key("graph_meta", user_id, graph_id)
             await self._client.hset(
-                meta_key, "last_accessed_at", datetime.now(timezone.utc).isoformat()
+                meta_key, "last_accessed_at", datetime.now(UTC).isoformat()
             )
 
         return graph
 
     async def delete_graph(
-        self, user_id: str, graph_id: str, tx: Optional[Transaction] = None
+        self, user_id: str, graph_id: str, tx: Transaction | None = None
     ) -> bool:
         """Delete graph from storage."""
         # Validate inputs
@@ -308,7 +302,7 @@ class RedisBackend(StorageBackend):
         user_id: str,
         limit: int = 100,
         offset: int = 0,
-        tx: Optional[Transaction] = None,
+        tx: Transaction | None = None,
     ) -> list[dict[str, Any]]:
         """List user's graphs with metadata."""
         # Validate inputs
@@ -350,8 +344,8 @@ class RedisBackend(StorageBackend):
         return graphs
 
     async def get_graph_metadata(
-        self, user_id: str, graph_id: str, tx: Optional[Transaction] = None
-    ) -> Optional[dict[str, Any]]:
+        self, user_id: str, graph_id: str, tx: Transaction | None = None
+    ) -> dict[str, Any] | None:
         """Get graph metadata without loading the full graph."""
         # Validate inputs
         user_id = SecurityValidator.validate_user_id(user_id)
@@ -370,7 +364,7 @@ class RedisBackend(StorageBackend):
         user_id: str,
         graph_id: str,
         metadata: dict[str, Any],
-        tx: Optional[Transaction] = None,
+        tx: Transaction | None = None,
     ) -> bool:
         """Update graph metadata."""
         # Validate inputs
@@ -384,7 +378,7 @@ class RedisBackend(StorageBackend):
             raise GraphNotFoundError(msg)
 
         # Update metadata
-        existing["updated_at"] = datetime.now(timezone.utc).isoformat()
+        existing["updated_at"] = datetime.now(UTC).isoformat()
         existing["custom"] = SecurityValidator.sanitize_attributes(
             metadata.get("custom", {})
         )

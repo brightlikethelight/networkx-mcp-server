@@ -3,7 +3,7 @@
 import logging
 import re
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any
 
 import networkx as nx
 
@@ -73,7 +73,7 @@ class GraphValidator:
 
     @staticmethod
     def validate_path_exists(
-        graph: nx.Graph, source: Union[str, int], target: Union[str, int]
+        graph: nx.Graph, source: str | int, target: str | int
     ) -> bool:
         """Validate if path exists between two nodes."""
         if source not in graph or target not in graph:
@@ -285,7 +285,7 @@ class GraphValidator:
         return sanitized
 
     @staticmethod
-    def validate_graph_id(graph_id: str) -> tuple[bool, Optional[str]]:
+    def validate_graph_id(graph_id: str) -> tuple[bool, str | None]:
         """Validate graph ID format and constraints.
 
         Args:
@@ -320,8 +320,8 @@ class GraphValidator:
 
     @staticmethod
     def validate_file_path_format(
-        filepath: Union[str, Path], expected_formats: Optional[list[str]] = None
-    ) -> tuple[bool, Optional[str]]:
+        filepath: str | Path, expected_formats: list[str] | None = None
+    ) -> tuple[bool, str | None]:
         """Validate file format based on extension and expected formats.
 
         Args:
@@ -469,8 +469,8 @@ class GraphValidator:
 
     @staticmethod
     def validate_import_data(
-        format: str, data: Optional[Any] = None, path: Optional[Union[str, Path]] = None
-    ) -> tuple[bool, Optional[str]]:
+        format: str, data: Any | None = None, path: str | Path | None = None
+    ) -> tuple[bool, str | None]:
         """Validate import data based on format.
 
         Args:

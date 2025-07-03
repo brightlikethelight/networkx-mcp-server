@@ -1,0 +1,358 @@
+# Default values for NetworkX MCP Server
+# This is a YAML-formatted file.
+
+# Global configuration
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+  storageClass: ""
+  
+# Application configuration
+app:
+  name: networkx-mcp
+  version: "2.0.0"
+  environment: production
+  
+# Image configuration
+image:
+  registry: docker.io
+  repository: networkx-mcp
+  tag: "2.0.0"
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+# Deployment configuration
+replicaCount: 3
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 8000
+  targetPort: 8000
+  annotations: {}
+  labels: {}
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hosts:
+    - host: networkx-mcp.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: networkx-mcp-tls
+      hosts:
+        - networkx-mcp.example.com
+
+# Resource configuration
+resources:
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+  requests:
+    cpu: 200m
+    memory: 512Mi
+
+# Autoscaling configuration
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 50
+          periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 60
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+
+# Security configuration
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+
+# Pod security context
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+# Service account
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Node selection
+nodeSelector: {}
+tolerations: []
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - networkx-mcp
+          topologyKey: kubernetes.io/hostname
+
+# Health checks
+healthChecks:
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8000
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readinessProbe:
+    httpGet:
+      path: /ready
+      port: 8000
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+# Environment variables
+env:
+  APP_ENV: production
+  LOG_LEVEL: INFO
+  MONITORING_ENABLED: "true"
+  TRACING_ENABLED: "true"
+
+# Configuration
+config:
+  server:
+    host: "0.0.0.0"
+    port: 8000
+    workers: 4
+  features:
+    rate_limiting: true
+    caching: true
+    tracing: true
+    monitoring: true
+  security:
+    cors_enabled: true
+    rate_limit_requests: 100
+    rate_limit_window: 60
+  cache:
+    default_ttl: 3600
+    max_size_mb: 512
+
+# Secrets (base64 encoded values)
+secrets:
+  jwtSecret: ""  # Override in production
+  postgresPassword: ""  # Override in production
+  redisPassword: ""  # Override if Redis auth enabled
+
+# Storage configuration
+persistence:
+  enabled: true
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  size: 10Gi
+  annotations: {}
+
+# Redis configuration
+redis:
+  enabled: true
+  auth:
+    enabled: false
+    password: ""
+  master:
+    persistence:
+      enabled: true
+      size: 8Gi
+    resources:
+      limits:
+        memory: 512Mi
+        cpu: 500m
+      requests:
+        memory: 256Mi
+        cpu: 100m
+  metrics:
+    enabled: true
+
+# PostgreSQL configuration
+postgresql:
+  enabled: true
+  auth:
+    postgresPassword: "password"  # Change in production
+    username: "networkx"
+    password: "password"  # Change in production
+    database: "networkx_mcp"
+  primary:
+    persistence:
+      enabled: true
+      size: 10Gi
+    resources:
+      limits:
+        memory: 1Gi
+        cpu: 500m
+      requests:
+        memory: 512Mi
+        cpu: 100m
+    initdb:
+      scripts:
+        init.sql: |
+          -- Include the init.sql content here
+  metrics:
+    enabled: true
+
+# Monitoring configuration
+monitoring:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+    scrapeTimeout: 10s
+    labels: {}
+    annotations: {}
+  
+  prometheus:
+    enabled: true
+    server:
+      retention: "15d"
+      persistentVolume:
+        enabled: true
+        size: 50Gi
+    alertmanager:
+      enabled: true
+      persistentVolume:
+        enabled: true
+        size: 2Gi
+  
+  grafana:
+    enabled: true
+    admin:
+      user: admin
+      password: admin  # Change in production
+    persistence:
+      enabled: true
+      size: 10Gi
+    dashboards:
+      default:
+        networkx-mcp:
+          gnetId: 12345  # Custom dashboard
+          revision: 1
+          datasource: Prometheus
+
+# Logging configuration
+logging:
+  enabled: true
+  level: INFO
+  format: json
+  outputs:
+    - console
+    - file
+  
+# Network policies
+networkPolicy:
+  enabled: true
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: redis
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: postgresql
+
+# Circuit breaker configuration
+circuitBreaker:
+  enabled: true
+  failureThreshold: 5
+  recoveryTimeout: 60
+  successThreshold: 3
+  timeout: 30
+
+# Feature flags
+featureFlags:
+  enabled: true
+  configFile: /app/config/feature_flags.json
+  
+# Backup configuration
+backup:
+  enabled: false
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  retention: "30d"
+  storage:
+    type: s3
+    bucket: ""
+    region: ""
+    accessKey: ""
+    secretKey: ""
+
+# Migration configuration
+migration:
+  enabled: true
+  runOnStartup: true
+  
+# Testing configuration (for CI/CD)
+testing:
+  enabled: false
+  smokeTests:
+    enabled: true
+    timeout: 300
+  integrationTests:
+    enabled: false
+    timeout: 600
+
+# Development overrides (not for production)
+development:
+  enabled: false
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  autoscaling:
+    enabled: false
+  persistence:
+    enabled: false

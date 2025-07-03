@@ -1,0 +1,259 @@
+site_name: NetworkX MCP Server
+site_description: Production-ready MCP server for advanced graph analysis powered by NetworkX
+site_author: Bright Liu
+site_url: https://networkx-mcp-server.readthedocs.io/
+
+repo_name: brightliu/networkx-mcp-server
+repo_url: https://github.com/brightliu/networkx-mcp-server
+edit_uri: edit/main/docs/
+
+copyright: Copyright &copy; 2024 Bright Liu
+
+theme:
+  name: material
+  custom_dir: docs/overrides
+  features:
+    - announce.dismiss
+    - content.action.edit
+    - content.action.view
+    - content.code.annotate
+    - content.code.copy
+    - content.code.select
+    - content.tabs.link
+    - content.tooltips
+    - header.autohide
+    - navigation.expand
+    - navigation.footer
+    - navigation.indexes
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.progress
+    - navigation.prune
+    - navigation.sections
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+    - toc.follow
+    - toc.integrate
+  palette:
+    - scheme: default
+      primary: blue
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: blue
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font:
+    text: Roboto
+    code: Roboto Mono
+  favicon: assets/favicon.png
+  logo: assets/logo.svg
+  icon:
+    logo: material/graph
+    repo: fontawesome/brands/github
+
+extra:
+  analytics:
+    provider: google
+    property: G-XXXXXXX
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/brightliu/networkx-mcp-server
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/networkx-mcp-server/
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/r/networkx-mcp-server/networkx-mcp-server
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/NetworkXMCP
+  version:
+    provider: mike
+    default: stable
+  status:
+    new: Recently added
+    deprecated: Deprecated
+
+extra_css:
+  - stylesheets/extra.css
+  - stylesheets/termynal.css
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - javascripts/termynal.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+      title: On this page
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      normalize_issue_symbols: true
+      repo_url_shorthand: true
+      user: brightliu
+      repo: networkx-mcp-server
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.snippets:
+      auto_append:
+        - includes/mkdocs.md
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+      combine_header_slug: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+plugins:
+  - search:
+      separator: '[\s\u200b\-_,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+  - minify:
+      minify_html: true
+  - mike:
+      canonical_version: latest
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: timeago
+  - git-committers:
+      repository: brightliu/networkx-mcp-server
+      branch: main
+  - macros:
+      include_yaml:
+        - docs/data/versions.yml
+  - autorefs
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            docstring_options:
+              ignore_init_summary: true
+            docstring_section_style: table
+            filters: ["!^_"]
+            heading_level: 1
+            inherited_members: true
+            merge_init_into_class: true
+            separate_signature: true
+            show_root_heading: true
+            show_root_full_path: false
+            show_signature_annotations: true
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            signature_crossrefs: true
+            summary: true
+  - awesome-pages:
+      filename: .pages
+      collapse_single_pages: true
+      strict: false
+  - redirects:
+      redirect_maps:
+        'index.md': 'quickstart.md'
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Quick Start: quickstart.md
+    - Installation: installation.md
+    - First Graph: first-graph.md
+    - Configuration: configuration.md
+  - User Guide:
+    - Core Concepts: user-guide/concepts.md
+    - Graph Operations: user-guide/graph-operations.md
+    - Algorithms: user-guide/algorithms.md
+    - Visualization: user-guide/visualization.md
+    - Machine Learning: user-guide/machine-learning.md
+    - Import/Export: user-guide/import-export.md
+  - Examples:
+    - Social Networks: examples/social-networks.md
+    - Transportation: examples/transportation.md
+    - Biological Networks: examples/biological.md
+    - Supply Chain: examples/supply-chain.md
+    - Financial Networks: examples/financial.md
+    - Knowledge Graphs: examples/knowledge-graphs.md
+  - API Reference:
+    - Overview: api/index.md
+    - Tools:
+      - Graph Operations: api/tools/graph-operations.md
+      - Algorithms: api/tools/algorithms.md
+      - Analysis: api/tools/analysis.md
+      - Visualization: api/tools/visualization.md
+      - Import/Export: api/tools/import-export.md
+      - Machine Learning: api/tools/ml.md
+    - Resources:
+      - Graph Catalog: api/resources/catalog.md
+      - Graph Data: api/resources/data.md
+      - Statistics: api/resources/statistics.md
+      - Visualizations: api/resources/visualizations.md
+    - Prompts:
+      - Social Analysis: api/prompts/social-analysis.md
+      - Path Finding: api/prompts/path-finding.md
+      - ML Workflows: api/prompts/ml-workflows.md
+    - Python API: api/python/
+  - Enterprise:
+    - Overview: enterprise/index.md
+    - Security: enterprise/security.md
+    - Performance: enterprise/performance.md
+    - Monitoring: enterprise/monitoring.md
+    - Deployment: enterprise/deployment.md
+    - Compliance: enterprise/compliance.md
+  - Development:
+    - Contributing: development/contributing.md
+    - Development Setup: development/setup.md
+    - Architecture: development/architecture.md
+    - Testing: development/testing.md
+    - Release Process: development/releases.md
+    - Code Style: development/code-style.md
+  - Reference:
+    - CLI: reference/cli.md
+    - Environment Variables: reference/environment.md
+    - Configuration Files: reference/configuration-files.md
+    - Error Codes: reference/error-codes.md
+    - Changelog: reference/changelog.md
+    - Migration Guide: reference/migration.md
+  - Community:
+    - Support: community/support.md
+    - FAQ: community/faq.md
+    - Discussions: community/discussions.md
+    - Roadmap: community/roadmap.md

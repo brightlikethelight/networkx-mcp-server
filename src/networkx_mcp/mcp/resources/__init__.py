@@ -4,9 +4,15 @@ Resources provide read-only access to graph data and analysis results.
 They are similar to GET endpoints in REST APIs - no side effects.
 """
 
+from ...compat.fastmcp_compat import FastMCPCompat as FastMCP
 
-from fastmcp import FastMCP
-from mcp.types import Resource, ResourceContent, TextResourceContent
+try:
+    from mcp.types import Resource, ResourceContents, TextResourceContents
+except ImportError:
+    # Fallback for compatibility
+    Resource = dict
+    ResourceContents = dict
+    TextResourceContents = dict
 
 
 class GraphResources:
@@ -23,7 +29,7 @@ class GraphResources:
 
         # Graph catalog resource
         @self.mcp.resource("graph://catalog")
-        async def graph_catalog() -> ResourceContent:
+        async def graph_catalog() -> ResourceContents:
             """List all available graphs with their metadata."""
             graphs = self.graph_manager.list_graphs()
             catalog = []
@@ -42,17 +48,17 @@ class GraphResources:
                         }
                     )
 
-            return TextResourceContent(
+            return TextResourceContents(
                 uri="graph://catalog", mimeType="application/json", text=str(catalog)
             )
 
         # Individual graph data resource
         @self.mcp.resource("graph://data/{graph_id}")
-        async def graph_data(graph_id: str) -> ResourceContent:
+        async def graph_data(graph_id: str) -> ResourceContents:
             """Get complete graph data in JSON format."""
             graph = self.graph_manager.get_graph(graph_id)
             if not graph:
-                return TextResourceContent(
+                return TextResourceContents(
                     uri=f"graph://data/{graph_id}",
                     mimeType="application/json",
                     text='{"error": "Graph not found"}',
@@ -62,7 +68,7 @@ class GraphResources:
 
             data = json_graph.node_link_data(graph)
 
-            return TextResourceContent(
+            return TextResourceContents(
                 uri=f"graph://data/{graph_id}",
                 mimeType="application/json",
                 text=str(data),
@@ -70,11 +76,11 @@ class GraphResources:
 
         # Graph statistics resource
         @self.mcp.resource("graph://stats/{graph_id}")
-        async def graph_stats(graph_id: str) -> ResourceContent:
+        async def graph_stats(graph_id: str) -> ResourceContents:
             """Get detailed statistics for a graph."""
             graph = self.graph_manager.get_graph(graph_id)
             if not graph:
-                return TextResourceContent(
+                return TextResourceContents(
                     uri=f"graph://stats/{graph_id}",
                     mimeType="application/json",
                     text='{"error": "Graph not found"}',
@@ -91,24 +97,33 @@ class GraphResources:
                     "is_multigraph": graph.is_multigraph(),
                 },
                 "connectivity": {
-                    "is_connected": nx.is_connected(graph)
-                    if not graph.is_directed()
-                    else nx.is_weakly_connected(graph),
-                    "number_connected_components": nx.number_connected_components(graph)
-                    if not graph.is_directed()
-                    else nx.number_weakly_connected_components(graph),
+                    "is_connected": (
+                        nx.is_connected(graph)
+                        if not graph.is_directed()
+                        else nx.is_weakly_connected(graph)
+                    ),
+                    "number_connected_components": (
+                        nx.number_connected_components(graph)
+                        if not graph.is_directed()
+                        else nx.number_weakly_connected_components(graph)
+                    ),
                 },
                 "degree": {
-                    "average_degree": sum(d for n, d in graph.degree())
-                    / graph.number_of_nodes()
-                    if graph.number_of_nodes() > 0
-                    else 0,
-                    "max_degree": max(d for n, d in graph.degree())
-                    if graph.number_of_nodes() > 0
-                    else 0,
-                    "min_degree": min(d for n, d in graph.degree())
-                    if graph.number_of_nodes() > 0
-                    else 0,
+                    "average_degree": (
+                        sum(d for n, d in graph.degree()) / graph.number_of_nodes()
+                        if graph.number_of_nodes() > 0
+                        else 0
+                    ),
+                    "max_degree": (
+                        max(d for n, d in graph.degree())
+                        if graph.number_of_nodes() > 0
+                        else 0
+                    ),
+                    "min_degree": (
+                        min(d for n, d in graph.degree())
+                        if graph.number_of_nodes() > 0
+                        else 0
+                    ),
                 },
             }
 
@@ -119,7 +134,7 @@ class GraphResources:
                     "transitivity": nx.transitivity(graph),
                 }
 
-            return TextResourceContent(
+            return TextResourceContents(
                 uri=f"graph://stats/{graph_id}",
                 mimeType="application/json",
                 text=str(stats),
@@ -127,11 +142,11 @@ class GraphResources:
 
         # Algorithm results cache resource
         @self.mcp.resource("graph://results/{graph_id}/{algorithm}")
-        async def algorithm_results(graph_id: str, algorithm: str) -> ResourceContent:
+        async def algorithm_results(graph_id: str, algorithm: str) -> ResourceContents:
             """Get cached results from previous algorithm runs."""
             # This would integrate with a results cache in production
             # For now, return a placeholder
-            return TextResourceContent(
+            return TextResourceContents(
                 uri=f"graph://results/{graph_id}/{algorithm}",
                 mimeType="application/json",
                 text='{"status": "No cached results available"}',
@@ -139,11 +154,11 @@ class GraphResources:
 
         # Visualization data resource
         @self.mcp.resource("graph://viz/{graph_id}")
-        async def visualization_data(graph_id: str) -> ResourceContent:
+        async def visualization_data(graph_id: str) -> ResourceContents:
             """Get graph data optimized for visualization."""
             graph = self.graph_manager.get_graph(graph_id)
             if not graph:
-                return TextResourceContent(
+                return TextResourceContents(
                     uri=f"graph://viz/{graph_id}",
                     mimeType="application/json",
                     text='{"error": "Graph not found"}',
@@ -176,7 +191,7 @@ class GraphResources:
                 ],
             }
 
-            return TextResourceContent(
+            return TextResourceContents(
                 uri=f"graph://viz/{graph_id}",
                 mimeType="application/json",
                 text=str(viz_data),

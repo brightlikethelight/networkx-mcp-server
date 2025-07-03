@@ -1,6 +1,6 @@
 """Pydantic schemas for graph data validation."""
 
-from typing import Any, Literal, Optional, Union
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -10,7 +10,7 @@ class NodeSchema(BaseModel):
 
     model_config = ConfigDict(extra="allow")
 
-    id: Union[str, int]
+    id: str | int
     attributes: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -19,8 +19,8 @@ class EdgeSchema(BaseModel):
 
     model_config = ConfigDict(extra="allow")
 
-    source: Union[str, int]
-    target: Union[str, int]
+    source: str | int
+    target: str | int
     attributes: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -46,7 +46,7 @@ class AddNodeRequest(BaseModel):
     """Request schema for adding a node."""
 
     graph_id: str
-    node_id: Union[str, int]
+    node_id: str | int
     attributes: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -54,15 +54,15 @@ class AddNodesRequest(BaseModel):
     """Request schema for adding multiple nodes."""
 
     graph_id: str
-    nodes: list[Union[str, int, NodeSchema]]
+    nodes: list[str | int | NodeSchema]
 
 
 class AddEdgeRequest(BaseModel):
     """Request schema for adding an edge."""
 
     graph_id: str
-    source: Union[str, int]
-    target: Union[str, int]
+    source: str | int
+    target: str | int
     attributes: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -77,9 +77,9 @@ class ShortestPathRequest(BaseModel):
     """Request schema for shortest path algorithms."""
 
     graph_id: str
-    source: Union[str, int]
-    target: Optional[Union[str, int]] = None
-    weight: Optional[str] = None
+    source: str | int
+    target: str | int | None = None
+    weight: str | None = None
     method: Literal["dijkstra", "bellman-ford"] = "dijkstra"
 
 
@@ -90,7 +90,7 @@ class CentralityRequest(BaseModel):
     measures: list[
         Literal["degree", "betweenness", "closeness", "eigenvector", "pagerank"]
     ] = Field(default=["degree"])
-    top_k: Optional[int] = 10
+    top_k: int | None = 10
 
 
 class CommunityDetectionRequest(BaseModel):
@@ -107,7 +107,7 @@ class ExportGraphRequest(BaseModel):
     format: Literal[
         "json", "graphml", "gexf", "edgelist", "adjacency", "pickle", "dot", "pajek"
     ]
-    path: Optional[str] = None
+    path: str | None = None
     options: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -117,9 +117,9 @@ class ImportGraphRequest(BaseModel):
     format: Literal[
         "json", "graphml", "gexf", "edgelist", "adjacency", "pickle", "pajek"
     ]
-    path: Optional[str] = None
-    data: Optional[dict[str, Any]] = None
-    graph_id: Optional[str] = None
+    path: str | None = None
+    data: dict[str, Any] | None = None
+    graph_id: str | None = None
     options: dict[str, Any] = Field(default_factory=dict)
 
     @field_validator("data")
@@ -146,7 +146,7 @@ class SubgraphRequest(BaseModel):
     """Request schema for creating a subgraph."""
 
     graph_id: str
-    nodes: list[Union[str, int]]
+    nodes: list[str | int]
     create_copy: bool = True
 
 
@@ -154,9 +154,9 @@ class GraphAttributesRequest(BaseModel):
     """Request schema for getting/setting graph attributes."""
 
     graph_id: str
-    node_id: Optional[Union[str, int]] = None
-    attribute: Optional[str] = None
-    values: Optional[dict[str, Any]] = None
+    node_id: str | int | None = None
+    attribute: str | None = None
+    values: dict[str, Any] | None = None
 
 
 class AlgorithmResponse(BaseModel):
@@ -165,8 +165,8 @@ class AlgorithmResponse(BaseModel):
     algorithm: str
     success: bool
     result: dict[str, Any]
-    execution_time_ms: Optional[float] = None
-    error: Optional[str] = None
+    execution_time_ms: float | None = None
+    error: str | None = None
 
 
 class GraphInfoResponse(BaseModel):
@@ -180,7 +180,7 @@ class GraphInfoResponse(BaseModel):
     is_directed: bool
     is_multigraph: bool
     metadata: dict[str, Any]
-    degree_stats: Optional[dict[str, float]] = None
+    degree_stats: dict[str, float] | None = None
 
 
 class VisualizationData(BaseModel):
@@ -188,5 +188,5 @@ class VisualizationData(BaseModel):
 
     nodes: list[dict[str, Any]]
     edges: list[dict[str, Any]]
-    layout: Optional[dict[str, list[float]]] = None
+    layout: dict[str, list[float]] | None = None
     options: dict[str, Any] = Field(default_factory=dict)

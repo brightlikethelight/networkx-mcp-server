@@ -13,12 +13,10 @@ def test_handler_imports():
     print("Testing handler imports...")
 
     try:
-        from networkx_mcp.server.handlers import (
-            GraphOpsHandler,
-            AlgorithmHandler,
-            AnalysisHandler,
-            VisualizationHandler,
-        )
+        from networkx_mcp.server.handlers import (AlgorithmHandler,
+                                                  AnalysisHandler,
+                                                  GraphOpsHandler,
+                                                  VisualizationHandler)
 
         print("✓ GraphOpsHandler imported")
         print("✓ AlgorithmHandler imported")

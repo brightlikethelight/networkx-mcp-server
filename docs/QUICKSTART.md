@@ -1,412 +1,397 @@
-# NetworkX MCP Server Quick Start Guide
+# Quick Start Guide
 
-This guide will help you get up and running with the NetworkX MCP Server in minutes.
+Get NetworkX MCP Server running in just 5 minutes! This guide will walk you through installation, basic configuration, and your first graph analysis.
+
+## Prerequisites
+
+Before you start, make sure you have:
+
+- **Python 3.11+** (recommended: 3.12)
+- **pip** or **uv** for package management
+- An **MCP-compatible client** (Claude Desktop, MCP CLI, etc.)
+
+!!! tip "Recommended Setup"
+    
+    For the best experience, we recommend using **Python 3.12** with **uv** for faster dependency resolution:
+    
+    ```bash
+    # Install uv (fast Python package manager)
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    ```
 
 ## Installation
 
-1. **Clone the repository:**
-```bash
-git clone https://github.com/yourusername/networkx-mcp-server.git
-cd networkx-mcp-server
-```
+Choose your installation method based on your needs:
 
-2. **Install dependencies:**
-```bash
-pip install -r requirements.txt
-pip install -e .
-```
+=== "Basic Installation"
+
+    ```bash
+    pip install networkx-mcp-server
+    ```
+
+=== "With Visualization"
+
+    ```bash
+    pip install networkx-mcp-server[visualization]
+    ```
+
+=== "With Machine Learning"
+
+    ```bash
+    pip install networkx-mcp-server[ml]
+    ```
+
+=== "Full Installation"
+
+    ```bash
+    pip install networkx-mcp-server[all]
+    ```
+
+=== "Using uv (Recommended)"
+
+    ```bash
+    uv pip install networkx-mcp-server[all]
+    ```
 
 ## Starting the Server
 
-You have three options to interact with the NetworkX MCP Server:
+### Method 1: Command Line
 
-### Option 1: MCP Server Mode (Production)
+```bash
+# Start with default settings
+networkx-mcp-server
+
+# Custom configuration
+networkx-mcp-server --host 0.0.0.0 --port 8765
+```
+
+### Method 2: Python Module
+
 ```bash
 python -m networkx_mcp.server
 ```
-This starts the MCP server on `http://localhost:8000` for use with MCP clients.
 
-### Option 2: Interactive CLI (Development/Testing)
+### Method 3: Docker
+
 ```bash
-python -m networkx_mcp.cli
+docker run -p 8765:8765 networkx-mcp-server:latest
 ```
-This provides an interactive command-line interface for testing and debugging.
 
-### Option 3: Python Script (Direct Usage)
-```python
-# example_script.py
-from networkx_mcp.server import app
-import asyncio
+You should see output like:
 
-async def main():
-    # Your code here
-    pass
-
-if __name__ == "__main__":
-    asyncio.run(main())
+```
+🕸️  NetworkX MCP Server v2.0.0
+🚀 Starting server on localhost:8765
+✅ Server ready! Connect your MCP client to stdio.
 ```
 
 ## Your First Graph
 
-Let's create a simple social network and perform some basic analysis.
+Let's create and analyze a simple social network:
 
-### Using the CLI
-
-1. **Start the CLI:**
-```bash
-python -m networkx_mcp.cli
-```
-
-2. **Create a graph:**
-```
-> create friends Graph
-✓ Created graph 'friends' (type: Graph)
-```
-
-3. **Add some people:**
-```
-> add nodes Alice Bob Charlie Diana Eve
-✓ Added 5 nodes
-```
-
-4. **Add friendships:**
-```
-> add edge Alice Bob
-✓ Added edge Alice -> Bob
-> add edge Bob Charlie
-✓ Added edge Bob -> Charlie
-> add edge Charlie Diana
-✓ Added edge Charlie -> Diana
-> add edge Diana Eve
-✓ Added edge Diana -> Eve
-> add edge Alice Diana
-✓ Added edge Alice -> Diana
-```
-
-5. **Analyze the network:**
-```
-> analyze centrality betweenness
-Betweenness Centrality
-┏━━━━━━━━━┳━━━━━━━━┓
-┃ Node    ┃ Score  ┃
-┡━━━━━━━━━╇━━━━━━━━┩
-│ Diana   │ 0.5000 │
-│ Bob     │ 0.1667 │
-│ Charlie │ 0.1667 │
-│ Alice   │ 0.0000 │
-│ Eve     │ 0.0000 │
-└─────────┴────────┘
-```
-
-6. **Find shortest path:**
-```
-> analyze path Alice Eve
-Shortest path: Alice → Diana → Eve
-Length: 2
-```
-
-### Using MCP Client
+### Step 1: Create a Graph
 
 ```python
-# example_client.py
+# Create a new graph
+create_graph(graph_id="friends", graph_type="Graph")
+```
+
+**Expected output:**
+```json
+{
+  "success": true,
+  "graph_id": "friends",
+  "message": "Graph 'friends' created successfully"
+}
+```
+
+### Step 2: Add Some Data
+
+```python
+# Add people as nodes
+add_nodes("friends", nodes=["Alice", "Bob", "Charlie", "David", "Eve"])
+
+# Add friendships as edges
+add_edges("friends", edges=[
+    ("Alice", "Bob"),
+    ("Bob", "Charlie"), 
+    ("Alice", "David"),
+    ("Charlie", "David"),
+    ("David", "Eve")
+])
+```
+
+### Step 3: Analyze the Network
+
+```python
+# Get basic information
+info = graph_statistics("friends")
+print(info)
+```
+
+**Output:**
+```json
+{
+  "basic": {
+    "num_nodes": 5,
+    "num_edges": 5,
+    "density": 0.5,
+    "is_connected": true
+  },
+  "degree": {
+    "average": 2.0,
+    "max": 3,
+    "min": 1
+  },
+  "clustering": {
+    "average_clustering": 0.33,
+    "transitivity": 0.4
+  }
+}
+```
+
+### Step 4: Find Important People
+
+```python
+# Calculate centrality measures
+centrality = centrality_measures("friends", measures=["degree", "betweenness"])
+print(centrality)
+```
+
+**Output:**
+```json
+{
+  "Alice": {"degree": 0.5, "betweenness": 0.25},
+  "Bob": {"degree": 0.5, "betweenness": 0.25}, 
+  "Charlie": {"degree": 0.5, "betweenness": 0.25},
+  "David": {"degree": 0.75, "betweenness": 0.5},
+  "Eve": {"degree": 0.25, "betweenness": 0.0}
+}
+```
+
+!!! success "Analysis Results"
+    
+    **David** has the highest centrality scores, making him the most influential person in this network!
+
+### Step 5: Visualize the Network
+
+```python
+# Create an interactive visualization
+visualize_graph("friends", 
+               layout="spring",
+               save_path="friends_network.html",
+               node_size_by="degree",
+               node_color_by="betweenness")
+```
+
+This creates an interactive HTML file you can open in your browser.
+
+## Common Patterns
+
+Here are some common analysis patterns you'll use frequently:
+
+### Pattern 1: Network Analysis Workflow
+
+```python
+# 1. Create and populate graph
+create_graph("network", graph_type="Graph")
+import_graph("network", file_path="data.csv", format="edgelist")
+
+# 2. Basic analysis
+stats = graph_statistics("network")
+components = connected_components("network")
+
+# 3. Find important nodes
+centrality = centrality_measures("network", ["pagerank", "betweenness"])
+
+# 4. Detect communities
+communities = community_detection("network", algorithm="louvain")
+
+# 5. Visualize results
+visualize_communities("network", communities, save_path="communities.html")
+```
+
+### Pattern 2: Path Analysis
+
+```python
+# Find shortest paths
+path = shortest_path("network", source="A", target="Z")
+print(f"Shortest path: {path['path']}")
+print(f"Distance: {path['length']}")
+
+# Find all paths between nodes
+all_paths = all_shortest_paths("network", source="A", target="Z")
+print(f"Found {len(all_paths)} shortest paths")
+```
+
+### Pattern 3: Structural Analysis
+
+```python
+# Analyze graph structure
+clustering = clustering_coefficient("network")
+diameter = graph_diameter("network") 
+efficiency = global_efficiency("network")
+
+# Check connectivity
+is_connected = graph_statistics("network")["connectivity"]["is_connected"]
+components = connected_components("network")
+```
+
+## Configuration
+
+### Environment Variables
+
+Create a `.env` file for configuration:
+
+```bash
+# Server settings
+MCP_SERVER_HOST=0.0.0.0
+MCP_SERVER_PORT=8765
+
+# Performance
+MAX_GRAPH_SIZE=1000000
+ENABLE_CACHING=true
+
+# Optional: Redis for persistence
+REDIS_URL=redis://localhost:6379
+```
+
+### Configuration File
+
+Create `config.yaml` for advanced settings:
+
+```yaml
+server:
+  host: "0.0.0.0"
+  port: 8765
+  
+performance:
+  max_nodes: 1000000
+  cache_ttl: 3600
+  
+logging:
+  level: "INFO"
+  format: "json"
+```
+
+## Connecting MCP Clients
+
+### Claude Desktop
+
+Add to your Claude Desktop configuration:
+
+```json
+{
+  "mcpServers": {
+    "networkx": {
+      "command": "networkx-mcp-server",
+      "args": []
+    }
+  }
+}
+```
+
+### MCP CLI
+
+```bash
+# Install MCP CLI
+pip install mcp-cli
+
+# Connect to server
+mcp-cli connect stdio networkx-mcp-server
+```
+
+### Custom Integration
+
+```python
+from mcp import Client
 import asyncio
-from your_mcp_client import MCPClient  # Use your MCP client library
 
-async def create_social_network():
-    client = MCPClient("http://localhost:8000")
+async def main():
+    async with Client("networkx-mcp-server") as client:
+        # Use the client
+        result = await client.call_tool("create_graph", {
+            "graph_id": "test",
+            "graph_type": "Graph"
+        })
+        print(result)
 
-    # Create graph
-    await client.call_tool("create_graph", {
-        "graph_id": "friends",
-        "graph_type": "undirected"
-    })
-
-    # Add people with attributes
-    await client.call_tool("add_nodes", {
-        "graph_id": "friends",
-        "nodes": [
-            {"id": "Alice", "age": 28, "city": "NYC"},
-            {"id": "Bob", "age": 32, "city": "Boston"},
-            {"id": "Charlie", "age": 25, "city": "NYC"},
-            {"id": "Diana", "age": 30, "city": "Chicago"},
-            {"id": "Eve", "age": 27, "city": "NYC"}
-        ]
-    })
-
-    # Add friendships with relationship strength
-    await client.call_tool("add_edges", {
-        "graph_id": "friends",
-        "edges": [
-            {"source": "Alice", "target": "Bob", "strength": 0.9},
-            {"source": "Bob", "target": "Charlie", "strength": 0.7},
-            {"source": "Charlie", "target": "Diana", "strength": 0.6},
-            {"source": "Diana", "target": "Eve", "strength": 0.8},
-            {"source": "Alice", "target": "Diana", "strength": 0.5}
-        ]
-    })
-
-    # Find most influential person
-    result = await client.call_tool("calculate_centrality", {
-        "graph_id": "friends",
-        "centrality_type": ["degree", "betweenness", "closeness"],
-        "top_n": 3
-    })
-    print("Most influential people:", result)
-
-    # Find communities
-    result = await client.call_tool("clustering_analysis", {
-        "graph_id": "friends",
-        "include_triangles": True
-    })
-    print("Network clustering:", result)
-
-if __name__ == "__main__":
-    asyncio.run(create_social_network())
+asyncio.run(main())
 ```
 
-## Common Use Cases
+## Next Steps
 
-### 1. Transportation Route Optimization
+Now that you have the basics working, explore more advanced features:
 
-```python
-# Create transport network
-await client.call_tool("create_graph", {
-    "graph_id": "city_transport",
-    "graph_type": "directed"
-})
+<div class="grid cards" markdown>
 
-# Add stations
-await client.call_tool("add_nodes", {
-    "graph_id": "city_transport",
-    "nodes": ["Central", "North", "South", "East", "West"]
-})
+-   [:material-book-open-page-variant: **User Guide**](user-guide/concepts.md)
+    
+    Learn core concepts and best practices
 
-# Add routes with travel times
-await client.call_tool("add_edges", {
-    "graph_id": "city_transport",
-    "edges": [
-        {"source": "Central", "target": "North", "time": 5, "distance": 3.2},
-        {"source": "Central", "target": "South", "time": 7, "distance": 4.1},
-        {"source": "North", "target": "East", "time": 10, "distance": 6.5},
-        {"source": "South", "target": "West", "time": 8, "distance": 5.0}
-    ]
-})
+-   [:material-lightbulb-outline: **Examples**](examples/social-networks.md)
+    
+    Explore real-world use cases
 
-# Find fastest route
-result = await client.call_tool("shortest_path", {
-    "graph_id": "city_transport",
-    "source": "Central",
-    "target": "East",
-    "weight": "time",
-    "k_paths": 3  # Get top 3 fastest routes
-})
-```
+-   [:material-api: **API Reference**](api/index.md)
+    
+    Complete tool documentation
 
-### 2. Citation Network Analysis
+-   [:material-cog: **Configuration**](configuration.md)
+    
+    Advanced server configuration
 
-```python
-# Create citation network
-await client.call_tool("create_graph", {
-    "graph_id": "papers",
-    "graph_type": "directed",
-    "from_data": {
-        "edge_list": [
-            ["Paper_A", "Paper_B"],  # Paper_A cites Paper_B
-            ["Paper_A", "Paper_C"],
-            ["Paper_B", "Paper_D"],
-            ["Paper_C", "Paper_D"],
-            ["Paper_E", "Paper_D"]
-        ]
-    }
-})
-
-# Find most cited papers
-result = await client.call_tool("calculate_centrality", {
-    "graph_id": "papers",
-    "centrality_type": "pagerank",
-    "top_n": 5
-})
-```
-
-### 3. Network Resilience Analysis
-
-```python
-# Analyze network resilience
-result = await client.call_tool("connected_components", {
-    "graph_id": "infrastructure",
-    "component_type": "strong"
-})
-
-# Extract critical nodes subgraph
-result = await client.call_tool("subgraph_extraction", {
-    "graph_id": "infrastructure",
-    "method": "condition",
-    "condition": "criticality > 0.8",
-    "create_new": True,
-    "new_graph_id": "critical_infrastructure"
-})
-```
-
-## Working with Large Graphs
-
-### 1. Initialize from File
-
-```python
-# For large graphs, initialize from file
-await client.call_tool("create_graph", {
-    "graph_id": "large_network",
-    "graph_type": "undirected",
-    "from_data": {
-        "file_path": "network_data.csv",
-        "format": "csv",
-        "source_col": "from",
-        "target_col": "to",
-        "weight_col": "weight"
-    }
-})
-```
-
-### 2. Use Sampling for Analysis
-
-```python
-# Sample-based analysis for large graphs
-result = await client.call_tool("path_analysis", {
-    "graph_id": "large_network",
-    "sample_size": 1000  # Analyze 1000 random node pairs
-})
-```
-
-### 3. Extract Subgraphs for Detailed Analysis
-
-```python
-# Extract 2-hop neighborhood
-result = await client.call_tool("subgraph_extraction", {
-    "graph_id": "large_network",
-    "method": "k_hop",
-    "center_node": "important_node",
-    "k_hop": 2,
-    "create_new": True,
-    "new_graph_id": "local_network"
-})
-```
-
-## Performance Tips
-
-1. **Monitor Performance:**
-```python
-stats = await client.call_tool("monitoring_stats", {})
-print(f"Average operation time: {stats['performance']['mean_ms']}ms")
-```
-
-2. **Use Bulk Operations:**
-```python
-# Good - single bulk operation
-await client.call_tool("add_edges", {
-    "graph_id": "network",
-    "edges": [edge1, edge2, edge3, ...]  # Add all at once
-})
-
-# Avoid - multiple individual operations
-for edge in edges:
-    await client.call_tool("add_edge", {...})  # Slower
-```
-
-3. **Specify Weights When Needed:**
-```python
-# Unweighted (faster)
-result = await client.call_tool("shortest_path", {
-    "graph_id": "network",
-    "source": "A",
-    "target": "B"
-})
-
-# Weighted (more accurate but slower)
-result = await client.call_tool("shortest_path", {
-    "graph_id": "network",
-    "source": "A",
-    "target": "B",
-    "weight": "distance"
-})
-```
-
-## Running Examples
-
-The repository includes three comprehensive examples:
-
-```bash
-# Social network analysis
-python examples/social_network_analysis.py
-
-# Transportation optimization
-python examples/transportation_network.py
-
-# Citation network analysis
-python examples/citation_network.py
-```
-
-## CLI Quick Reference
-
-```bash
-# Create and manage graphs
-create <id> [type]     # Create new graph
-list                   # List all graphs
-info [id]             # Show graph details
-select <id>           # Select active graph
-delete <id>           # Delete graph
-
-# Build graphs
-add nodes <n1> <n2>... # Add nodes
-add edge <src> <tgt>   # Add edge
-import <fmt> <file>    # Import from file
-export <fmt> <file>    # Export to file
-
-# Analyze
-analyze centrality     # Centrality measures
-analyze path <s> <t>   # Find paths
-analyze components     # Connected components
-analyze metrics        # Graph statistics
-
-# Utilities
-monitor               # Performance stats
-benchmark <size>      # Run benchmark
-demo <type>          # Run demo
-help                 # Show help
-exit                 # Exit CLI
-```
+</div>
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **"Graph not found" error:**
-   - Ensure the graph_id exists using the `list` command
-   - Graph IDs are case-sensitive
+!!! question "Server won't start?"
+    
+    **Check Python version:**
+    ```bash
+    python --version  # Should be 3.11+
+    ```
+    
+    **Verify installation:**
+    ```bash
+    pip show networkx-mcp-server
+    ```
 
-2. **"Node not found" error:**
-   - Check node exists in the graph
-   - Node IDs must match exactly (including type)
+!!! question "Client can't connect?"
+    
+    **Check server is running:**
+    ```bash
+    # Server should show "Server ready!" message
+    ```
+    
+    **Verify client configuration:**
+    ```bash
+    # Make sure client points to correct server command
+    ```
 
-3. **Performance issues:**
-   - Use `monitoring_stats` to identify slow operations
-   - Consider using subgraph extraction for large graphs
-   - Enable sampling for statistical operations
-
-4. **Memory issues:**
-   - Use streaming I/O for large files
-   - Process graphs in chunks
-   - Clear unused graphs with `delete` command
+!!! question "Performance issues?"
+    
+    **Enable Redis caching:**
+    ```bash
+    export REDIS_URL=redis://localhost:6379
+    ```
+    
+    **Increase memory limits:**
+    ```bash
+    export MAX_MEMORY_MB=4096
+    ```
 
 ### Getting Help
 
-- Check the [API Documentation](API.md) for detailed parameter information
-- Run `help` in the CLI for command reference
-- Check the examples folder for working code samples
+- **📖 Documentation**: Check the [User Guide](user-guide/concepts.md)
+- **💬 Community**: Join [GitHub Discussions](https://github.com/brightliu/networkx-mcp-server/discussions)
+- **🐛 Issues**: Report bugs on [GitHub Issues](https://github.com/brightliu/networkx-mcp-server/issues)
+- **📧 Support**: Email [support@networkx-mcp-server.com](mailto:support@networkx-mcp-server.com)
 
-## Next Steps
-
-1. Explore the [example scripts](../examples/) for real-world use cases
-2. Read the [API documentation](API.md) for detailed tool descriptions
-3. Try the interactive CLI with your own data
-4. Build custom analysis workflows using the MCP client
-
-Happy graphing!
+!!! success "You're Ready!"
+    
+    Congratulations! You now have NetworkX MCP Server running and know the basics. 
+    
+    Ready for more advanced features? Check out our [Examples](examples/social-networks.md) or dive into the [API Reference](api/index.md).

@@ -1,0 +1,319 @@
+{
+  "version": "1.0.0",
+  "description": "NetworkX MCP Server Quality Configuration",
+  
+  "thresholds": {
+    "coverage": 95.0,
+    "complexity": 10,
+    "duplication": 5.0,
+    "maintainability": 7.0,
+    "security_score": 9.0,
+    "type_coverage": 90.0,
+    "test_quality": 85.0,
+    "documentation_coverage": 80.0
+  },
+  
+  "rules": {
+    "ruff": {
+      "enabled": true,
+      "config_file": "pyproject.toml",
+      "exclude": [
+        "__pycache__",
+        ".git",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        "build",
+        "dist",
+        "venv",
+        ".venv"
+      ],
+      "per_file_ignores": {
+        "__init__.py": ["F401", "F403"],
+        "tests/*": ["S101", "PLR2004", "S311"]
+      }
+    },
+    
+    "mypy": {
+      "enabled": true,
+      "config_file": "pyproject.toml",
+      "strict_mode": false,
+      "check_untyped_defs": true,
+      "ignore_missing_imports": true,
+      "show_error_codes": true,
+      "exclude": [
+        "tests/",
+        "scripts/",
+        "build/",
+        "dist/"
+      ]
+    },
+    
+    "bandit": {
+      "enabled": true,
+      "config_file": "pyproject.toml",
+      "exclude_dirs": [
+        "tests",
+        "scripts", 
+        "docs",
+        "build",
+        "dist"
+      ],
+      "skips": [
+        "B101",
+        "B311",
+        "B404",
+        "B603",
+        "B607",
+        "B324",
+        "B104"
+      ],
+      "severity_levels": {
+        "high": 0,
+        "medium": 5,
+        "low": 10
+      }
+    },
+    
+    "complexity": {
+      "enabled": true,
+      "tool": "radon",
+      "max_complexity": 10,
+      "average_threshold": 5.0,
+      "exclude": [
+        "tests/",
+        "scripts/",
+        "__init__.py"
+      ]
+    },
+    
+    "duplication": {
+      "enabled": true,
+      "tool": "jscpd",
+      "threshold": 5.0,
+      "min_lines": 5,
+      "min_tokens": 50,
+      "exclude": [
+        "tests/",
+        "docs/",
+        "__pycache__/",
+        "*.pyc"
+      ]
+    },
+    
+    "coverage": {
+      "enabled": true,
+      "tool": "pytest-cov",
+      "threshold": 95.0,
+      "branch_coverage": true,
+      "exclude_lines": [
+        "pragma: no cover",
+        "def __repr__",
+        "if self.debug:",
+        "if settings.DEBUG",
+        "raise AssertionError",
+        "raise NotImplementedError",
+        "if 0:",
+        "if __name__ == .__main__.:",
+        "class .*\\bProtocol\\):",
+        "@(abc\\.)?abstractmethod"
+      ],
+      "omit": [
+        "src/networkx_mcp/__init__.py",
+        "src/networkx_mcp/cli.py",
+        "tests/*",
+        "*/migrations/*",
+        "*/venv/*",
+        "*/__pycache__/*"
+      ]
+    },
+    
+    "security": {
+      "enabled": true,
+      "tools": ["bandit", "safety"],
+      "dependency_check": true,
+      "ignore_vulnerabilities": [
+        "70612"
+      ]
+    },
+    
+    "documentation": {
+      "enabled": true,
+      "docstring_coverage": 80.0,
+      "api_documentation": true,
+      "readme_quality": true
+    }
+  },
+  
+  "quality_gates": {
+    "development": {
+      "description": "Quality gate for development branches",
+      "required_checks": [
+        "ruff",
+        "mypy", 
+        "coverage"
+      ],
+      "thresholds": {
+        "coverage": 90.0,
+        "complexity": 12
+      }
+    },
+    
+    "staging": {
+      "description": "Quality gate for staging/pre-production",
+      "required_checks": [
+        "ruff",
+        "mypy",
+        "bandit", 
+        "coverage",
+        "complexity"
+      ],
+      "thresholds": {
+        "coverage": 93.0,
+        "complexity": 10,
+        "security_score": 8.0
+      }
+    },
+    
+    "production": {
+      "description": "Quality gate for production releases",
+      "required_checks": [
+        "ruff",
+        "mypy",
+        "bandit",
+        "coverage",
+        "complexity",
+        "duplication",
+        "safety"
+      ],
+      "thresholds": {
+        "coverage": 95.0,
+        "complexity": 10,
+        "duplication": 5.0,
+        "security_score": 9.0,
+        "type_coverage": 90.0
+      }
+    }
+  },
+  
+  "reporting": {
+    "formats": ["json", "html", "junit"],
+    "output_dir": ".quality-reports",
+    "include_trends": true,
+    "include_details": true,
+    "archive_reports": true,
+    "max_archived_reports": 50
+  },
+  
+  "integrations": {
+    "github": {
+      "status_checks": true,
+      "pr_comments": true,
+      "commit_status": true
+    },
+    
+    "sonarqube": {
+      "enabled": false,
+      "server_url": "",
+      "project_key": "networkx-mcp-server"
+    },
+    
+    "codecov": {
+      "enabled": false,
+      "token": ""
+    }
+  },
+  
+  "notifications": {
+    "slack": {
+      "enabled": false,
+      "webhook_url": "",
+      "channels": ["#quality-alerts"]
+    },
+    
+    "email": {
+      "enabled": false,
+      "recipients": [],
+      "smtp_server": ""
+    }
+  },
+  
+  "exclusions": {
+    "files": [
+      "*.pyc",
+      "__pycache__/",
+      ".git/",
+      ".mypy_cache/",
+      ".pytest_cache/",
+      ".ruff_cache/",
+      "build/",
+      "dist/",
+      "*.egg-info/",
+      ".venv/",
+      "venv/"
+    ],
+    
+    "directories": [
+      "migrations/",
+      "node_modules/",
+      ".asv/"
+    ],
+    
+    "patterns": [
+      "test_*.py",
+      "*_test.py",
+      "conftest.py"
+    ]
+  },
+  
+  "custom_rules": {
+    "naming_conventions": {
+      "enabled": true,
+      "class_naming": "PascalCase",
+      "function_naming": "snake_case",
+      "variable_naming": "snake_case",
+      "constant_naming": "SCREAMING_SNAKE_CASE"
+    },
+    
+    "import_organization": {
+      "enabled": true,
+      "group_imports": true,
+      "sort_imports": true,
+      "separate_from_imports": true
+    },
+    
+    "code_structure": {
+      "max_file_length": 1000,
+      "max_function_length": 60,
+      "max_class_length": 500,
+      "max_parameters": 8
+    }
+  },
+  
+  "performance": {
+    "timeout": 300,
+    "parallel_execution": true,
+    "cache_results": true,
+    "incremental_analysis": true
+  },
+  
+  "maintenance": {
+    "auto_fix": {
+      "enabled": true,
+      "safe_fixes_only": true,
+      "backup_files": true
+    },
+    
+    "dependency_updates": {
+      "enabled": true,
+      "security_updates": "auto",
+      "feature_updates": "manual"
+    },
+    
+    "cleanup": {
+      "remove_unused_imports": true,
+      "remove_dead_code": false,
+      "optimize_imports": true
+    }
+  }
+}

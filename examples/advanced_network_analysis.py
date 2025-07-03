@@ -8,7 +8,7 @@ and robustness analysis.
 
 import asyncio
 import json
-from typing import Any, Dict
+from typing import Any
 
 
 class MCPClient:
@@ -18,7 +18,7 @@ class MCPClient:
         self.server_url = server_url
         self.graphs = {}
 
-    async def call_tool(self, tool_name: str, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def call_tool(self, tool_name: str, params: dict[str, Any]) -> dict[str, Any]:
         """Simulate MCP tool calls."""
         print(f"\n🔧 Calling tool: {tool_name}")
         print(f"   Parameters: {json.dumps(params, indent=2)}")

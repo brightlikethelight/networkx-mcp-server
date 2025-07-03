@@ -3,7 +3,7 @@
 import logging
 import random  # Using for non-cryptographic network simulation purposes only
 import time
-from typing import Any, Optional, Union
+from typing import Any
 
 import networkx as nx
 import numpy as np
@@ -22,7 +22,7 @@ class RobustnessAnalysis:
 
     @staticmethod
     def attack_simulation(
-        graph: Union[nx.Graph, nx.DiGraph],
+        graph: nx.Graph | nx.DiGraph,
         attack_type: str = "random",
         fraction: float = 0.5,
         measure: str = "connectivity",
@@ -157,7 +157,7 @@ class RobustnessAnalysis:
 
     @staticmethod
     def _calculate_robustness_metrics(
-        graph: Union[nx.Graph, nx.DiGraph], measure: str
+        graph: nx.Graph | nx.DiGraph, measure: str
     ) -> dict[str, Any]:
         """Calculate robustness metrics for current graph state."""
         metrics = {}
@@ -226,7 +226,7 @@ class RobustnessAnalysis:
 
     @staticmethod
     def _approximate_efficiency(
-        graph: Union[nx.Graph, nx.DiGraph], sample_size: int = 1000
+        graph: nx.Graph | nx.DiGraph, sample_size: int = 1000
     ) -> float:
         """Approximate global efficiency for large graphs."""
         nodes = list(graph.nodes())
@@ -315,7 +315,7 @@ class RobustnessAnalysis:
     @staticmethod
     def _find_critical_fraction(
         removal_sequence: list[dict], measure: str
-    ) -> Optional[float]:
+    ) -> float | None:
         """Find critical fraction where network fails."""
         if not removal_sequence:
             return None
@@ -346,7 +346,7 @@ class RobustnessAnalysis:
 
     @staticmethod
     def percolation_analysis(
-        graph: Union[nx.Graph, nx.DiGraph],
+        graph: nx.Graph | nx.DiGraph,
         percolation_type: str = "site",
         probability_range: tuple[float, float] = (0.0, 1.0),
         num_steps: int = 20,
@@ -487,7 +487,7 @@ class RobustnessAnalysis:
         }
 
     @staticmethod
-    def _find_percolation_threshold(results: list[dict]) -> Optional[float]:
+    def _find_percolation_threshold(results: list[dict]) -> float | None:
         """Find percolation threshold from results."""
         # Look for sharp transition in giant component size
         max_derivative = 0
@@ -520,7 +520,7 @@ class RobustnessAnalysis:
 
     @staticmethod
     def cascading_failure(
-        graph: Union[nx.Graph, nx.DiGraph],
+        graph: nx.Graph | nx.DiGraph,
         initial_failures: list[Any],
         failure_model: str = "threshold",
         **params,
@@ -720,8 +720,8 @@ class RobustnessAnalysis:
 
     @staticmethod
     def network_resilience(
-        graph: Union[nx.Graph, nx.DiGraph],
-        resilience_metrics: Optional[list[str]] = None,
+        graph: nx.Graph | nx.DiGraph,
+        resilience_metrics: list[str] | None = None,
         **params,
     ) -> dict[str, Any]:
         """

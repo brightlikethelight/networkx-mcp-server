@@ -4,11 +4,10 @@ This module handles graph visualization tools using various backends
 including matplotlib, plotly, and pyvis.
 """
 
-from typing import Any, Optional
 import os
+from typing import Any
 
-
-from fastmcp import FastMCP
+from ...compat.fastmcp_compat import FastMCPCompat as FastMCP
 
 
 class VisualizationHandler:
@@ -32,8 +31,8 @@ class VisualizationHandler:
             edge_color: str = "gray",
             node_size: int = 300,
             with_labels: bool = True,
-            title: Optional[str] = None,
-            output_path: Optional[str] = None,
+            title: str | None = None,
+            output_path: str | None = None,
             **kwargs,
         ) -> dict[str, Any]:
             """Visualize a graph using various backends.
@@ -111,7 +110,7 @@ class VisualizationHandler:
         @self.mcp.tool()
         async def visualize_subgraph(
             graph_id: str,
-            center_node: Optional[str] = None,
+            center_node: str | None = None,
             k_hop: int = 2,
             max_nodes: int = 50,
             backend: str = "matplotlib",
@@ -220,7 +219,8 @@ class VisualizationHandler:
 
             try:
                 # Detect communities using the analysis handler
-                from networkx_mcp.server.handlers.analysis import AnalysisHandler
+                from networkx_mcp.server.handlers.analysis import \
+                    AnalysisHandler
 
                 # Create temporary handler for community detection
                 temp_handler = AnalysisHandler(self.mcp, self.graph_manager)
@@ -398,8 +398,9 @@ class VisualizationHandler:
                 return {"error": f"Graph '{graph_id}' not found"}
 
             try:
-                import networkx as nx
                 import json
+
+                import networkx as nx
 
                 # Calculate positions if requested
                 if include_positions:

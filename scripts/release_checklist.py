@@ -11,7 +11,6 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List
 
 # ANSI color codes
 GREEN = "\033[92m"
@@ -23,7 +22,7 @@ RESET = "\033[0m"
 
 
 def run_command(
-    cmd: List[str], capture_output: bool = True, check: bool = False
+    cmd: list[str], capture_output: bool = True, check: bool = False
 ) -> subprocess.CompletedProcess:
     """Run a command and return the result."""
     try:
@@ -251,7 +250,7 @@ class ReleaseChecker:
         content_lower = content.lower()
         return all(section in content_lower for section in required_sections)
 
-    def run_all_checks(self) -> Dict[str, bool]:
+    def run_all_checks(self) -> dict[str, bool]:
         """Run all checks and return results."""
         print(f"{BOLD}{BLUE}🔍 NETWORKX MCP SERVER - RELEASE READINESS CHECK{RESET}")
         print("=" * 60)
@@ -312,7 +311,7 @@ class ReleaseChecker:
         self._print_summary(results)
         return results
 
-    def _print_summary(self, results: Dict[str, bool]):
+    def _print_summary(self, results: dict[str, bool]):
         """Print summary of all checks."""
         total = len(results)
         critical_failed = self.failed

@@ -1,106 +1,169 @@
 name: 🐛 Bug Report
-description: Report a bug or unexpected behavior
-title: "🐛 [Bug]: "
+description: Report a bug to help us improve NetworkX MCP Server
+title: "[Bug]: "
 labels: ["bug", "needs-triage"]
 assignees: []
+
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to report a bug! Please fill out this form completely to help us fix the issue.
+        Thanks for taking the time to report a bug! 🐛
+        
+        Please fill out the sections below to help us understand and reproduce the issue.
 
   - type: checkboxes
-    id: preliminary-checks
+    id: checklist
     attributes:
-      label: Preliminary Checks
-      description: Please confirm you've done these checks before submitting
+      label: Pre-submission Checklist
+      description: Please verify that you have completed the following
       options:
-        - label: I searched existing issues and couldn't find a duplicate
+        - label: I have searched existing issues to ensure this bug hasn't been reported
           required: true
-        - label: I'm using a supported Python version (3.8+)
+        - label: I have read the [documentation](https://networkx-mcp-server.readthedocs.io/)
           required: true
-        - label: I've read the documentation and troubleshooting guide
+        - label: I can reproduce this issue consistently
           required: true
 
   - type: textarea
-    id: bug-description
+    id: description
     attributes:
       label: Bug Description
       description: A clear and concise description of what the bug is
-      placeholder: Describe what happened and what you expected to happen
+      placeholder: Describe the bug...
     validations:
       required: true
 
   - type: textarea
-    id: reproduction-steps
+    id: reproduction
     attributes:
       label: Steps to Reproduce
-      description: Step-by-step instructions to reproduce the bug
+      description: Detailed steps to reproduce the behavior
       placeholder: |
-        1. Start the server with `networkx-mcp-server`
-        2. Call the tool with these parameters: ...
-        3. Observe the error: ...
+        1. Start the server with '...'
+        2. Call the tool '...' with parameters '...'
+        3. Observe the error '...'
     validations:
       required: true
 
   - type: textarea
-    id: expected-behavior
+    id: expected
     attributes:
       label: Expected Behavior
-      description: What should have happened instead?
-      placeholder: Describe the expected behavior
+      description: What should have happened?
+      placeholder: Describe what you expected to happen...
     validations:
       required: true
 
   - type: textarea
-    id: actual-behavior
+    id: actual
     attributes:
       label: Actual Behavior
-      description: What actually happened? Include error messages, logs, or screenshots
-      placeholder: Include full error messages, stack traces, or screenshots
+      description: What actually happened?
+      placeholder: Describe what actually happened...
     validations:
       required: true
 
   - type: textarea
-    id: minimal-example
+    id: code
     attributes:
-      label: Minimal Code Example
-      description: Provide the smallest possible code example that reproduces the issue
-      placeholder: |
-        ```python
-        # Your minimal example here
-        import networkx_mcp
-        # ... rest of the example
-        ```
+      label: Code Sample
+      description: Minimal code to reproduce the issue
       render: python
+      placeholder: |
+        # Minimal reproducible example
+        import networkx_mcp
+        
+        # Your code here...
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error Logs
+      description: Relevant error messages, stack traces, or logs
+      render: text
+      placeholder: Paste error logs here...
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Bug Severity
+      description: How severe is this bug?
+      options:
+        - "Low - Minor inconvenience"
+        - "Medium - Affects functionality but has workaround"
+        - "High - Breaks important functionality"
+        - "Critical - Server crash or data loss"
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: NetworkX MCP Server Version
+      description: Which version are you using?
+      placeholder: "2.0.0"
+    validations:
+      required: true
+
+  - type: input
+    id: python-version
+    attributes:
+      label: Python Version
+      description: Which Python version are you using?
+      placeholder: "3.11.5"
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+      description: Which OS are you using?
+      placeholder: "Ubuntu 22.04, macOS 14.1, Windows 11, etc."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: client
+    attributes:
+      label: MCP Client
+      description: Which MCP client are you using?
+      options:
+        - "Claude Desktop"
+        - "MCP CLI"
+        - "Custom Client"
+        - "Direct API calls"
+        - "Other (please specify in additional context)"
 
   - type: textarea
     id: environment
     attributes:
-      label: Environment Information
-      description: Please provide your environment details
+      label: Environment Details
+      description: Additional environment information
       placeholder: |
-        - OS: [e.g., macOS 13.5, Ubuntu 22.04, Windows 11]
-        - Python version: [e.g., 3.11.5]
-        - NetworkX MCP Server version: [e.g., 1.0.0]
-        - NetworkX version: [e.g., 3.2]
-        - Installation method: [pip, conda, source]
-        - Redis version (if using persistence): [e.g., 7.0]
-    validations:
-      required: true
+        - Redis version (if using): 
+        - Docker version (if using):
+        - Any other relevant environment details...
 
   - type: textarea
-    id: additional-context
+    id: additional
     attributes:
       label: Additional Context
-      description: Any other context about the problem
-      placeholder: Add any other context, configuration files, or relevant information
+      description: Add any other context about the problem here
+      placeholder: |
+        - Screenshots (if applicable)
+        - Related issues or PRs
+        - Possible solutions you've considered
+        - Any other relevant information...
 
   - type: checkboxes
     id: contribution
     attributes:
       label: Contribution
-      description: Are you willing to help fix this issue?
+      description: Would you like to contribute to fixing this bug?
       options:
-        - label: I'm willing to submit a PR to fix this issue
-        - label: I'm willing to help test a fix
+        - label: I would like to work on fixing this bug
+          required: false
+        - label: I can provide additional testing for the fix
+          required: false

@@ -6,11 +6,11 @@ including identifying influential papers, research trends, and collaboration pat
 
 import asyncio
 import json
-from typing import Any, Dict
+from typing import Any
 
 
 # Simulated MCP client calls
-async def call_tool(tool_name: str, **params) -> Dict[str, Any]:
+async def call_tool(tool_name: str, **params) -> dict[str, Any]:
     """Simulate calling an MCP tool."""
     print(f"\n📚 Calling tool: {tool_name}")
     print(f"   Parameters: {json.dumps(params, indent=2)}")

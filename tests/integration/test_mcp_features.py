@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Test MCP features without numpy imports."""
 
-import os
 import ast
+import os
 
 
 def analyze_python_file(filepath):

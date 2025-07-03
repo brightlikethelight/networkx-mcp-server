@@ -3,7 +3,7 @@
 import base64
 import logging
 from io import BytesIO
-from typing import Any, Optional, Union
+from typing import Any
 
 import networkx as nx
 import numpy as np
@@ -40,8 +40,8 @@ class SpecializedVisualizations:
 
     @staticmethod
     def heatmap_adjacency(
-        graph: Union[nx.Graph, nx.DiGraph],
-        node_order: Optional[list] = None,
+        graph: nx.Graph | nx.DiGraph,
+        node_order: list | None = None,
         cmap: str = "viridis",
         figsize: tuple[int, int] = (10, 8),
         title: str = "Adjacency Matrix Heatmap",
@@ -147,8 +147,8 @@ class SpecializedVisualizations:
 
     @staticmethod
     def chord_diagram(
-        graph: Union[nx.Graph, nx.DiGraph],
-        top_nodes: Optional[int] = None,
+        graph: nx.Graph | nx.DiGraph,
+        top_nodes: int | None = None,
         min_weight: float = 0,
         title: str = "Network Chord Diagram",
         **kwargs,
@@ -277,8 +277,8 @@ class SpecializedVisualizations:
     @staticmethod
     def sankey_diagram(
         graph: nx.DiGraph,
-        source_nodes: Optional[list] = None,
-        target_nodes: Optional[list] = None,
+        source_nodes: list | None = None,
+        target_nodes: list | None = None,
         flow_attribute: str = "weight",
         title: str = "Network Flow Sankey Diagram",
         **kwargs,
@@ -376,7 +376,7 @@ class SpecializedVisualizations:
 
     @staticmethod
     def dendrogram_clustering(
-        graph: Union[nx.Graph, nx.DiGraph],
+        graph: nx.Graph | nx.DiGraph,
         method: str = "average",
         metric: str = "euclidean",
         figsize: tuple[int, int] = (12, 8),
@@ -499,8 +499,8 @@ class SpecializedVisualizations:
 
     @staticmethod
     def create_dashboard(
-        graph: Union[nx.Graph, nx.DiGraph],
-        visualizations: Optional[list[str]] = None,
+        graph: nx.Graph | nx.DiGraph,
+        visualizations: list[str] | None = None,
         **kwargs,
     ) -> dict[str, Any]:
         """

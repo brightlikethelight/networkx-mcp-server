@@ -1,7 +1,7 @@
 """Formatting utilities for graph data."""
 
 import json
-from typing import Any, Optional
+from typing import Any
 
 
 class GraphFormatter:
@@ -19,7 +19,7 @@ class GraphFormatter:
 
     @staticmethod
     def format_algorithm_result(
-        algorithm: str, result: Any, execution_time: Optional[float] = None
+        algorithm: str, result: Any, execution_time: float | None = None
     ) -> dict[str, Any]:
         """Format algorithm result."""
         response = {"algorithm": algorithm, "result": result}
@@ -39,7 +39,7 @@ class GraphFormatter:
 
     @staticmethod
     def format_visualization_data(
-        graph, layout: dict[str, Any], options: Optional[dict[str, Any]] = None
+        graph, layout: dict[str, Any], options: dict[str, Any] | None = None
     ) -> dict[str, Any]:
         """Format visualization data."""
         nodes = []

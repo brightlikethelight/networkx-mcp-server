@@ -4,7 +4,7 @@
 import ast
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 # Add project to path
 project_root = Path(__file__).parent.parent
@@ -17,7 +17,7 @@ class MCPToolExtractor:
     def __init__(self):
         self.tools = []
 
-    def extract_tools_from_file(self, file_path: Path) -> List[Dict[str, Any]]:
+    def extract_tools_from_file(self, file_path: Path) -> list[dict[str, Any]]:
         """Extract all MCP tools from a Python file."""
         tools = []
 
@@ -58,7 +58,7 @@ class MCPToolExtractor:
 
     def _extract_tool_info(
         self, node: ast.AsyncFunctionDef, source: str
-    ) -> Optional[Dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """Extract comprehensive information about an MCP tool."""
         try:
             # Get function name
@@ -103,7 +103,7 @@ class MCPToolExtractor:
 
     def _parse_docstring(
         self, docstring: str
-    ) -> Tuple[str, Dict[str, str], str, List[str]]:
+    ) -> tuple[str, dict[str, str], str, list[str]]:
         """Parse docstring into structured components."""
         lines = docstring.strip().split("\n")
 
@@ -154,7 +154,7 @@ class MCPToolExtractor:
 
         return description, params_doc, returns_doc.strip(), examples
 
-    def _extract_parameters(self, node: ast.AsyncFunctionDef) -> List[Dict[str, Any]]:
+    def _extract_parameters(self, node: ast.AsyncFunctionDef) -> list[dict[str, Any]]:
         """Extract function parameters with types and defaults."""
         parameters = []
 
@@ -267,7 +267,7 @@ class MCPToolExtractor:
 
     def _extract_error_codes(
         self, node: ast.AsyncFunctionDef, source: str
-    ) -> List[Dict[str, str]]:
+    ) -> list[dict[str, str]]:
         """Extract error codes and descriptions from function source."""
         error_codes = []
 
@@ -319,7 +319,7 @@ class DocumentationGenerator:
     def __init__(self):
         self.tools = []
 
-    def generate_tool_documentation(self, tool: Dict[str, Any]) -> str:
+    def generate_tool_documentation(self, tool: dict[str, Any]) -> str:
         """Generate markdown documentation for a single tool."""
         md = []
 
@@ -397,7 +397,7 @@ class DocumentationGenerator:
 
         return "\n".join(md)
 
-    def generate_api_index(self, tools: List[Dict[str, Any]]) -> str:
+    def generate_api_index(self, tools: list[dict[str, Any]]) -> str:
         """Generate API index with all tools organized by category."""
         md = []
 

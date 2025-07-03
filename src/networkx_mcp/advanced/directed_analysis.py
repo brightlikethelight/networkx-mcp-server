@@ -3,7 +3,7 @@
 import logging
 import time
 from collections import defaultdict
-from typing import Any, Optional
+from typing import Any
 
 import networkx as nx
 import numpy as np
@@ -742,7 +742,7 @@ class DirectedAnalysis:
     @staticmethod
     def temporal_graph_import(
         edge_list: list[tuple[Any, Any, float]],
-        time_window: Optional[tuple[float, float]] = None,
+        time_window: tuple[float, float] | None = None,
         **params,
     ) -> tuple[nx.DiGraph, dict[str, Any]]:
         """

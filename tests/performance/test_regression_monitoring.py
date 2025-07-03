@@ -4,15 +4,16 @@ These tests establish performance baselines and detect regressions in
 critical operations using pytest-benchmark.
 """
 
-import time
 import json
-import pytest
-import psutil
 import os
+import time
 
 import networkx as nx
-from tests.factories import GraphFactory
+import psutil
+import pytest
+
 from networkx_mcp.core.graph_operations import GraphManager
+from tests.factories import GraphFactory
 
 
 @pytest.mark.performance
@@ -98,7 +99,8 @@ class TestAlgorithmPerformance:
         graph = GraphFactory.social_network(50, 4, 0.3)
 
         def detect_communities():
-            from networkx.algorithms.community import greedy_modularity_communities
+            from networkx.algorithms.community import \
+                greedy_modularity_communities
 
             return list(greedy_modularity_communities(graph))
 
@@ -236,8 +238,8 @@ class TestScalabilityLimits:
 
     def test_concurrent_operations_performance(self, benchmark):
         """Test performance under concurrent load."""
-        import threading
         import queue
+        import threading
 
         manager = GraphManager()
         results_queue = queue.Queue()
@@ -386,8 +388,8 @@ class TestResourceUtilization:
 
     def test_disk_io_monitoring(self):
         """Monitor disk I/O during graph serialization."""
-        import tempfile
         import os
+        import tempfile
 
         graph = GraphFactory.graph_with_attributes(100)
 

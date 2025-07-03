@@ -4,7 +4,7 @@ import logging
 import time
 import warnings
 from collections import defaultdict
-from typing import Any, Optional
+from typing import Any
 
 import networkx as nx
 import numpy as np
@@ -138,7 +138,7 @@ class CommunityDetection:
 
     @staticmethod
     def _girvan_newman(
-        graph: nx.Graph, num_communities: Optional[int] = None, **_kwargs
+        graph: nx.Graph, num_communities: int | None = None, **_kwargs
     ) -> list[set]:
         """Girvan-Newman edge betweenness community detection."""
         # Create a copy to avoid modifying original
@@ -194,7 +194,7 @@ class CommunityDetection:
 
     @staticmethod
     def _spectral_clustering(
-        graph: nx.Graph, num_communities: Optional[int] = None, **kwargs
+        graph: nx.Graph, num_communities: int | None = None, **kwargs
     ) -> list[set]:
         """Spectral clustering for community detection."""
         if SpectralClustering is None:
@@ -533,7 +533,7 @@ class CommunityDetection:
 
     @staticmethod
     def community_comparison(
-        graph: nx.Graph, algorithms: Optional[list[str]] = None, **params
+        graph: nx.Graph, algorithms: list[str] | None = None, **params
     ) -> dict[str, Any]:
         """
         Compare different community detection algorithms.

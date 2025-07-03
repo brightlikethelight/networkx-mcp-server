@@ -4,7 +4,7 @@ import json
 import logging
 import os
 import tempfile
-from typing import Any, Optional, Union
+from typing import Any
 
 import networkx as nx
 
@@ -57,12 +57,12 @@ class PyvisVisualizer:
 
     @staticmethod
     def create_interactive_network(
-        graph: Union[nx.Graph, nx.DiGraph],
+        graph: nx.Graph | nx.DiGraph,
         height: str = "750px",
         width: str = "100%",
         bgcolor: str = "#ffffff",
         font_color: str = "#000000",
-        physics: Union[bool, str, dict] = "barnes_hut",
+        physics: bool | str | dict = "barnes_hut",
         hierarchical: bool = False,
         **kwargs,
     ) -> dict[str, Any]:
@@ -166,7 +166,7 @@ class PyvisVisualizer:
 
     @staticmethod
     def create_community_visualization(
-        graph: Union[nx.Graph, nx.DiGraph],
+        graph: nx.Graph | nx.DiGraph,
         communities: dict[int, list],
         height: str = "750px",
         width: str = "100%",
@@ -277,7 +277,7 @@ class PyvisVisualizer:
     @staticmethod
     def create_hierarchical_tree(
         tree: nx.DiGraph,
-        root: Optional[Any] = None,
+        root: Any | None = None,
         height: str = "750px",
         width: str = "100%",
     ) -> dict[str, Any]:
@@ -371,8 +371,8 @@ class PyvisVisualizer:
     def _add_nodes(
         net: Network,
         graph: nx.Graph,
-        node_size_attr: Optional[str] = None,
-        node_color_attr: Optional[str] = None,
+        node_size_attr: str | None = None,
+        node_color_attr: str | None = None,
         node_shape: str = "dot",
         **kwargs,
     ):
@@ -422,8 +422,8 @@ class PyvisVisualizer:
     def _add_edges(
         net: Network,
         graph: nx.Graph,
-        edge_width_attr: Optional[str] = None,
-        edge_color_attr: Optional[str] = None,
+        edge_width_attr: str | None = None,
+        edge_color_attr: str | None = None,
         **kwargs,
     ):
         """Add edges to PyVis network with attributes."""

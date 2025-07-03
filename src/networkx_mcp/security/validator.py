@@ -7,7 +7,6 @@ from typing import Any
 class SecurityError(Exception):
     """Base security exception."""
 
-    pass
 
 
 class SecurityValidator:

@@ -8,10 +8,11 @@ import logging
 import multiprocessing as mp
 import threading
 import time
+from collections.abc import Callable
 from concurrent.futures import ProcessPoolExecutor
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Callable, Optional, Union
+from typing import Any
 
 import networkx as nx
 import numpy as np
@@ -36,14 +37,8 @@ try:
     from reportlab.lib.pagesizes import letter
     from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
     from reportlab.lib.units import inch
-    from reportlab.platypus import (
-        Image,
-        PageBreak,
-        Paragraph,
-        SimpleDocTemplate,
-        Spacer,
-        Table,
-    )
+    from reportlab.platypus import (Image, PageBreak, Paragraph,
+                                    SimpleDocTemplate, Spacer, Table)
 
     HAS_REPORTLAB = True
 except ImportError:
@@ -80,7 +75,7 @@ logger = logging.getLogger(__name__)
 class EnterpriseFeatures:
     """Enterprise-grade features for production deployments."""
 
-    def __init__(self, cache_dir: str = "./cache", max_workers: Optional[int] = None):
+    def __init__(self, cache_dir: str = "./cache", max_workers: int | None = None):
         """Initialize enterprise features with caching and worker pool."""
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(exist_ok=True)
@@ -95,7 +90,7 @@ class EnterpriseFeatures:
         operations: list[dict[str, Any]],
         parallel: bool = True,
         batch_size: int = 10,
-        progress_callback: Optional[Callable] = None,
+        progress_callback: Callable | None = None,
     ) -> dict[str, Any]:
         """
         Process multiple graphs in parallel with batching.
@@ -254,7 +249,7 @@ class EnterpriseFeatures:
         output_format: str = "pdf",
         include_visualizations: bool = True,
         **kwargs,
-    ) -> Union[bytes, str]:
+    ) -> bytes | str:
         """
         Generate automated PDF/HTML reports.
 
@@ -273,7 +268,7 @@ class EnterpriseFeatures:
         --------
         Report content (bytes for PDF, string for HTML)
         """
-        timestamp = datetime.now(tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        timestamp = datetime.now(tz=UTC).strftime("%Y-%m-%d %H:%M:%S")
 
         if format == "html":
             return self._generate_html_report(
@@ -291,7 +286,7 @@ class EnterpriseFeatures:
         self,
         graph: nx.Graph,
         alert_rules: list[dict[str, Any]],
-        notification_callback: Optional[Callable] = None,
+        notification_callback: Callable | None = None,
     ) -> list[dict[str, Any]]:
         """
         Anomaly detection and alerting system.
@@ -353,7 +348,7 @@ class EnterpriseFeatures:
                         "value": value,
                         "threshold": threshold,
                         "operator": operator,
-                        "timestamp": datetime.now(tz=timezone.utc).isoformat(),
+                        "timestamp": datetime.now(tz=UTC).isoformat(),
                         "severity": rule.get("severity", "medium"),
                     }
                     triggered_alerts.append(alert)
@@ -382,7 +377,7 @@ class EnterpriseFeatures:
                         "mean": mean,
                         "std": std,
                         "z_score": (current_value - mean) / std if std > 0 else 0,
-                        "timestamp": datetime.now(tz=timezone.utc).isoformat(),
+                        "timestamp": datetime.now(tz=UTC).isoformat(),
                         "severity": rule.get("severity", "high"),
                     }
                     triggered_alerts.append(alert)
@@ -400,7 +395,7 @@ class EnterpriseFeatures:
                             "type": "pattern",
                             "pattern": pattern,
                             "num_components": nx.number_connected_components(graph),
-                            "timestamp": datetime.now(tz=timezone.utc).isoformat(),
+                            "timestamp": datetime.now(tz=UTC).isoformat(),
                             "severity": rule.get("severity", "high"),
                         }
                         triggered_alerts.append(alert)
@@ -439,7 +434,7 @@ class EnterpriseFeatures:
         ).hexdigest()[:8]
 
         job_config["job_id"] = job_id
-        job_config["created_at"] = datetime.now(tz=timezone.utc).isoformat()
+        job_config["created_at"] = datetime.now(tz=UTC).isoformat()
         job_config["last_run"] = None
         job_config["next_run"] = None
         job_config["run_count"] = 0
@@ -488,7 +483,7 @@ class EnterpriseFeatures:
         self,
         graph: nx.Graph,
         version_name: str,
-        metadata: Optional[dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> str:
         """
         Save a versioned snapshot of a graph.
@@ -508,14 +503,14 @@ class EnterpriseFeatures:
         """
         # Using MD5 for non-cryptographic version ID generation (not security sensitive)
         version_id = hashlib.md5(
-            f"{version_name}_{datetime.now(tz=timezone.utc).isoformat()}".encode(),
+            f"{version_name}_{datetime.now(tz=UTC).isoformat()}".encode(),
             usedforsecurity=False,
         ).hexdigest()[:12]
 
         version_data = {
             "version_id": version_id,
             "version_name": version_name,
-            "timestamp": datetime.now(tz=timezone.utc).isoformat(),
+            "timestamp": datetime.now(tz=UTC).isoformat(),
             "graph_info": {
                 "num_nodes": graph.number_of_nodes(),
                 "num_edges": graph.number_of_edges(),
@@ -943,7 +938,7 @@ class EnterpriseFeatures:
             result = self._execute_operation(**operation)
 
             # Update job metadata
-            job["last_run"] = datetime.now(tz=timezone.utc).isoformat()
+            job["last_run"] = datetime.now(tz=UTC).isoformat()
             job["run_count"] += 1
             job["last_result"] = result
 
@@ -952,7 +947,7 @@ class EnterpriseFeatures:
                 results_dir = self.cache_dir / "job_results" / job_id
                 results_dir.mkdir(parents=True, exist_ok=True)
 
-                timestamp = datetime.now(tz=timezone.utc).strftime("%Y%m%d_%H%M%S")
+                timestamp = datetime.now(tz=UTC).strftime("%Y%m%d_%H%M%S")
                 with open(results_dir / f"result_{timestamp}.json", "w") as f:
                     json.dump(result, f, indent=2)
 

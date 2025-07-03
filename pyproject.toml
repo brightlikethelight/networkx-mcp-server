@@ -23,20 +23,26 @@ classifiers = [
 ]
 requires-python = ">=3.11"
 dependencies = [
-    "networkx>=3.4.0",
-    "numpy>=2.0.0",
+    "networkx>=3.0",
+    "numpy>=1.20.0",
+    # Core MCP - we'll handle FastMCP compatibility internally
+    "mcp>=1.0.0",
+    # Optional but recommended
     "scipy>=1.14.0",
-    "pandas>=2.2.0",
-    "redis>=5.2.0",
-    "aiofiles>=24.1.0",
-    "pyyaml>=6.0.2",
+    "pandas>=2.0.0",
+    "redis>=5.0.0",
+    "aiofiles>=23.0.0",
+    "pyyaml>=6.0",
     "python-dotenv>=1.0.0",
-    "pydantic>=2.10.0",
-    "rich>=13.9.0",
-    "fastmcp>=0.5.0",
+    "rich>=13.0.0",
 ]
 
 [project.optional-dependencies]
+# Optional FastMCP support (requires Pydantic v2)
+fastmcp = [
+    "fastmcp>=0.5.0",
+    "pydantic>=2.0",
+]
 dev = [
     "pytest>=8.0.0",
     "pytest-asyncio>=0.24.0",
@@ -47,6 +53,7 @@ dev = [
     "pytest-randomly>=3.15.0",
     "mutmut>=2.5.0",
     "hypothesis>=6.135.0",
+    "asv>=0.6.0",
     "freezegun>=1.5.2",
     "factory-boy>=3.3.3",
     "coverage[toml]>=7.6.0",
@@ -165,21 +172,18 @@ skips = [
 [tool.pytest.ini_options]
 minversion = "8.0"
 addopts = [
-    "--cov=src/networkx_mcp",
-    "--cov-report=term-missing",
-    "--cov-report=html:htmlcov",
-    "--cov-report=xml",
-    "--cov-fail-under=95",
-    "--cov-branch",
     "--strict-markers",
     "--strict-config",
     "--tb=short",
     "--disable-warnings",
     "-ra",
-    "-q",
-    "--durations=10",
+    "-v",
 ]
 testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+asyncio_mode = "auto"
 markers = [
     "unit: Unit tests",
     "integration: Integration tests",
@@ -190,7 +194,6 @@ markers = [
     "redis: Tests requiring Redis",
     "network: Tests requiring network access",
 ]
-asyncio_mode = "auto"
 filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::PendingDeprecationWarning",

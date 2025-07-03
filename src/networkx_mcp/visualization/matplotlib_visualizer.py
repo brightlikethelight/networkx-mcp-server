@@ -3,7 +3,7 @@
 import base64
 import logging
 from io import BytesIO
-from typing import Any, Optional, Union
+from typing import Any
 
 import networkx as nx
 import numpy as np
@@ -56,17 +56,17 @@ class MatplotlibVisualizer:
 
     @staticmethod
     def create_static_plot(
-        graph: Union[nx.Graph, nx.DiGraph],
+        graph: nx.Graph | nx.DiGraph,
         layout: str = "spring",
-        node_size: Union[int, dict, str] = 300,
-        node_color: Union[str, dict, str] = "lightblue",
-        node_shape: Union[str, dict] = "circle",
-        edge_width: Union[float, dict, str] = 1.0,
-        edge_color: Union[str, dict, str] = "gray",
-        edge_style: Union[str, dict] = "solid",
+        node_size: int | dict | str = 300,
+        node_color: str | dict | str = "lightblue",
+        node_shape: str | dict = "circle",
+        edge_width: float | dict | str = 1.0,
+        edge_color: str | dict | str = "gray",
+        edge_style: str | dict = "solid",
         show_labels: bool = True,
         label_font_size: int = 10,
-        title: Optional[str] = None,
+        title: str | None = None,
         figsize: tuple[int, int] = (12, 8),
         dpi: int = 100,
         **kwargs,
@@ -139,7 +139,7 @@ class MatplotlibVisualizer:
 
         # Draw edges with custom styles
         for (u, v), width, color, style in zip(
-            graph.edges(), edge_widths, edge_colors, edge_styles
+            graph.edges(), edge_widths, edge_colors, edge_styles, strict=False
         ):
             if graph.is_directed():
                 # Draw directed edges with arrows
@@ -276,7 +276,7 @@ class MatplotlibVisualizer:
 
     @staticmethod
     def _get_node_attributes(
-        graph: nx.Graph, attr: Union[int, float, str, dict], default: Any
+        graph: nx.Graph, attr: int | float | str | dict, default: Any
     ) -> list[Any]:
         """Get node attributes as a list."""
         if isinstance(attr, dict):
@@ -290,7 +290,7 @@ class MatplotlibVisualizer:
 
     @staticmethod
     def _get_edge_attributes(
-        graph: nx.Graph, attr: Union[int, float, str, dict], default: Any
+        graph: nx.Graph, attr: int | float | str | dict, default: Any
     ) -> list[Any]:
         """Get edge attributes as a list."""
         if isinstance(attr, dict):
@@ -338,7 +338,7 @@ class MatplotlibVisualizer:
 
         # Create legend
         patches = []
-        for val, color in zip(sorted(values), colors):
+        for val, color in zip(sorted(values), colors, strict=False):
             patches.append(mpatches.Patch(color=color, label=str(val)))
 
         plt.legend(handles=patches, title=color_attr, loc="best")
@@ -359,7 +359,7 @@ class MatplotlibVisualizer:
 
         results = {"views": []}
 
-        for ax, view_config in zip(axes, views):
+        for ax, view_config in zip(axes, views, strict=False):
             plt.sca(ax)
 
             # Apply view configuration

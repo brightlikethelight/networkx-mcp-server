@@ -1,0 +1,478 @@
+name: 🎉 Release Management
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Release type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      pre_release:
+        description: 'Pre-release suffix (optional)'
+        required: false
+        type: string
+      dry_run:
+        description: 'Dry run (no actual release)'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '18'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # =====================================================
+  # PREPARE RELEASE
+  # =====================================================
+  prepare:
+    name: 🔧 Prepare Release
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      changelog: ${{ steps.changelog.outputs.changelog }}
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: 📦 Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install toml
+
+      - name: 🔢 Calculate Version
+        id: version
+        run: |
+          current_version=$(python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
+          echo "current_version=$current_version" >> $GITHUB_OUTPUT
+          
+          # Calculate next version based on release type
+          IFS='.' read -ra ADDR <<< "$current_version"
+          major=${ADDR[0]}
+          minor=${ADDR[1]}
+          patch=${ADDR[2]}
+          
+          case "${{ github.event.inputs.release_type }}" in
+            major)
+              new_version="$((major + 1)).0.0"
+              ;;
+            minor)
+              new_version="$major.$((minor + 1)).0"
+              ;;
+            patch)
+              new_version="$major.$minor.$((patch + 1))"
+              ;;
+          esac
+          
+          # Add pre-release suffix if specified
+          if [[ -n "${{ github.event.inputs.pre_release }}" ]]; then
+            new_version="${new_version}-${{ github.event.inputs.pre_release }}"
+          fi
+          
+          echo "version=$new_version" >> $GITHUB_OUTPUT
+          echo "🔖 New version will be: $new_version"
+
+      - name: 📝 Generate Changelog
+        id: changelog
+        run: |
+          # Use conventional-changelog or similar tool
+          # For now, generate basic changelog from commits
+          last_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          
+          if [[ -n "$last_tag" ]]; then
+            changelog=$(git log --pretty=format:"- %s" ${last_tag}..HEAD)
+          else
+            changelog=$(git log --pretty=format:"- %s" --max-count=10)
+          fi
+          
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$changelog" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: 🏷️ Update Version and Create Tag
+        if: ${{ !github.event.inputs.dry_run }}
+        run: |
+          new_version="${{ steps.version.outputs.version }}"
+          
+          # Update version in files
+          python -c "
+          import toml
+          data = toml.load('pyproject.toml')
+          data['project']['version'] = '$new_version'
+          with open('pyproject.toml', 'w') as f:
+              toml.dump(data, f)
+          "
+          
+          # Update __version__.py if it exists
+          if [[ -f "src/networkx_mcp/__version__.py" ]]; then
+            sed -i "s/__version__ = .*/__version__ = \"$new_version\"/" src/networkx_mcp/__version__.py
+          fi
+          
+          # Commit and tag
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "chore(release): bump version to $new_version"
+          git tag -a "v$new_version" -m "Release $new_version"
+          git push origin main --tags
+
+  # =====================================================
+  # BUILD AND TEST
+  # =====================================================
+  build-and-test:
+    name: 🏗️ Build and Test
+    runs-on: ubuntu-latest
+    needs: [prepare]
+    if: always() && (needs.prepare.result == 'success' || github.event_name == 'push')
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12']
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🐍 Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: 📦 Install Dependencies
+        run: |
+          python -m pip install --upgrade pip build twine
+          pip install -e ".[dev,test]"
+
+      - name: 🧪 Run Tests
+        run: |
+          python -m pytest tests/ --cov=src/networkx_mcp --cov-report=xml --cov-report=term
+
+      - name: 🏗️ Build Package
+        run: |
+          python -m build
+
+      - name: ✅ Verify Package
+        run: |
+          python -m twine check dist/*
+
+      - name: 📊 Upload Coverage
+        if: matrix.python-version == '3.11'
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+
+      - name: 📦 Upload Artifacts
+        uses: actions/upload-artifact@v3
+        if: matrix.python-version == '3.11'
+        with:
+          name: python-package
+          path: dist/
+          retention-days: 30
+
+  # =====================================================
+  # BUILD DOCKER IMAGES
+  # =====================================================
+  build-docker:
+    name: 🐳 Build Docker Images
+    runs-on: ubuntu-latest
+    needs: [build-and-test]
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+      image-digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🔑 Login to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🏷️ Extract Metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: 🏗️ Build and Push
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+            BUILD_VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+            BUILD_REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
+
+  # =====================================================
+  # BUILD HELM CHART
+  # =====================================================
+  build-helm:
+    name: ⛵ Build Helm Chart
+    runs-on: ubuntu-latest
+    needs: [build-and-test]
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ⚓ Setup Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: 'v3.12.0'
+
+      - name: 🔍 Lint Helm Chart
+        run: |
+          helm lint helm/networkx-mcp/
+
+      - name: 📦 Package Helm Chart
+        run: |
+          helm package helm/networkx-mcp/ --destination ./helm-packages/
+
+      - name: 📊 Upload Helm Package
+        uses: actions/upload-artifact@v3
+        with:
+          name: helm-chart
+          path: helm-packages/
+          retention-days: 30
+
+  # =====================================================
+  # SECURITY SCANNING
+  # =====================================================
+  security-scan:
+    name: 🔒 Security Scanning
+    runs-on: ubuntu-latest
+    needs: [build-docker]
+    steps:
+      - name: 🔍 Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ needs.build-docker.outputs.image-tag }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: 📊 Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # =====================================================
+  # CREATE GITHUB RELEASE
+  # =====================================================
+  create-release:
+    name: 🎉 Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [build-and-test, build-docker, build-helm, security-scan]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📦 Download Python Package
+        uses: actions/download-artifact@v3
+        with:
+          name: python-package
+          path: dist/
+
+      - name: ⛵ Download Helm Chart
+        uses: actions/download-artifact@v3
+        with:
+          name: helm-chart
+          path: helm-packages/
+
+      - name: 📝 Generate Release Notes
+        id: release-notes
+        run: |
+          # Extract version from tag
+          VERSION=${GITHUB_REF#refs/tags/v}
+          
+          # Generate release notes from changelog or commits
+          if [[ -f "CHANGELOG.md" ]]; then
+            # Extract section for this version
+            awk "/^## \[${VERSION}\]/,/^## \[/{if(/^## \[${VERSION}\]/) next; if(/^## \[/) exit; print}" CHANGELOG.md > release-notes.md
+          else
+            # Generate from recent commits
+            git log --pretty=format:"- %s" --no-merges $(git describe --tags --abbrev=0 HEAD^)..HEAD > release-notes.md
+          fi
+
+      - name: 🎉 Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: release-notes.md
+          files: |
+            dist/*
+            helm-packages/*
+          generate_release_notes: true
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # =====================================================
+  # PUBLISH TO PYPI
+  # =====================================================
+  publish-pypi:
+    name: 📦 Publish to PyPI
+    runs-on: ubuntu-latest
+    needs: [create-release]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && !contains(github.ref, '-')
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - name: 📦 Download Package
+        uses: actions/download-artifact@v3
+        with:
+          name: python-package
+          path: dist/
+
+      - name: 🚀 Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  # =====================================================
+  # DEPLOY TO PRODUCTION
+  # =====================================================
+  deploy-production:
+    name: 🚀 Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [create-release]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && !contains(github.ref, '-')
+    environment: production
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ⚓ Setup Helm
+        uses: azure/setup-helm@v3
+
+      - name: ☸️ Setup Kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: 🔑 Configure Kubernetes
+        run: |
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > kubeconfig
+          export KUBECONFIG=kubeconfig
+
+      - name: 🚀 Deploy with Helm
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          
+          helm upgrade --install networkx-mcp helm/networkx-mcp/ \
+            --namespace production \
+            --create-namespace \
+            --set image.tag=$VERSION \
+            --set app.environment=production \
+            --wait \
+            --timeout=600s
+
+      - name: ✅ Verify Deployment
+        run: |
+          kubectl rollout status deployment/networkx-mcp -n production --timeout=300s
+          kubectl get pods -n production
+
+  # =====================================================
+  # NOTIFICATIONS
+  # =====================================================
+  notify:
+    name: 📢 Send Notifications
+    runs-on: ubuntu-latest
+    needs: [deploy-production]
+    if: always() && (needs.deploy-production.result == 'success' || needs.deploy-production.result == 'skipped')
+    steps:
+      - name: 📱 Slack Notification
+        if: vars.SLACK_WEBHOOK_URL
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          channel: '#releases'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+          custom_payload: |
+            {
+              attachments: [{
+                color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
+                title: '🚀 NetworkX MCP Server Release',
+                text: `Version ${process.env.GITHUB_REF.replace('refs/tags/v', '')} has been released!`,
+                fields: [{
+                  title: 'Repository',
+                  value: `${process.env.GITHUB_REPOSITORY}`,
+                  short: true
+                }, {
+                  title: 'Status',
+                  value: '${{ job.status }}',
+                  short: true
+                }],
+                actions: [{
+                  type: 'button',
+                  text: 'View Release',
+                  url: `https://github.com/${process.env.GITHUB_REPOSITORY}/releases/tag/${process.env.GITHUB_REF.replace('refs/tags/', '')}`
+                }]
+              }]
+            }
+
+      - name: 📧 Email Notification
+        if: vars.NOTIFICATION_EMAIL
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "🚀 NetworkX MCP Server Release ${{ github.ref_name }}"
+          to: ${{ vars.NOTIFICATION_EMAIL }}
+          from: "GitHub Actions <noreply@github.com>"
+          body: |
+            NetworkX MCP Server version ${{ github.ref_name }} has been successfully released!
+            
+            🔗 Release: https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}
+            🐳 Docker: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+            📦 PyPI: https://pypi.org/project/networkx-mcp/
+            
+            This is an automated message from GitHub Actions.

@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 import networkx as nx
 
@@ -18,7 +18,7 @@ class CommunityResult:
     modularity: float
     algorithm: str
     parameters: dict[str, Any]
-    metadata: Optional[dict[str, Any]] = None
+    metadata: dict[str, Any] | None = None
 
 
 class CommunityDetector(ABC):

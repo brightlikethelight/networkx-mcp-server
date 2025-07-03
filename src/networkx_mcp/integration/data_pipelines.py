@@ -6,8 +6,8 @@ import logging
 import sqlite3
 import time
 from collections.abc import Iterator
-from datetime import datetime, timezone
-from typing import Any, Optional, Union
+from datetime import UTC, datetime
+from typing import Any
 
 import networkx as nx
 import numpy as np
@@ -30,9 +30,9 @@ class DataPipelines:
     @staticmethod
     def csv_pipeline(
         filepath: str,
-        edge_columns: Optional[tuple[str, str]] = None,
-        node_attributes: Optional[list[str]] = None,
-        edge_attributes: Optional[list[str]] = None,
+        edge_columns: tuple[str, str] | None = None,
+        node_attributes: list[str] | None = None,
+        edge_attributes: list[str] | None = None,
         delimiter: str = ",",
         encoding: str = "utf-8",
         type_inference: bool = True,
@@ -149,8 +149,8 @@ class DataPipelines:
     def json_pipeline(
         filepath: str,
         format_type: str = "auto",
-        node_path: Optional[str] = None,
-        edge_path: Optional[str] = None,
+        node_path: str | None = None,
+        edge_path: str | None = None,
         **kwargs,
     ) -> dict[str, Any]:
         """
@@ -236,7 +236,7 @@ class DataPipelines:
         connection_string: str,
         query: str,
         db_type: str = "sqlite",
-        edge_columns: Optional[tuple[str, str]] = None,
+        edge_columns: tuple[str, str] | None = None,
         **kwargs,
     ) -> dict[str, Any]:
         """
@@ -420,7 +420,7 @@ class DataPipelines:
     @staticmethod
     def streaming_pipeline(
         stream_generator: Iterator[dict[str, Any]],
-        window_size: Optional[int] = None,
+        window_size: int | None = None,
         update_interval: float = 1.0,
         **kwargs,
     ) -> Iterator[dict[str, Any]]:
@@ -479,13 +479,13 @@ class DataPipelines:
                     "num_edges": graph.number_of_edges(),
                     "total_items_processed": total_items,
                     "window_size": len(window) if window_size else None,
-                    "timestamp": datetime.now(tz=timezone.utc).isoformat(),
+                    "timestamp": datetime.now(tz=UTC).isoformat(),
                 }
                 last_update = current_time
 
     @staticmethod
     def excel_pipeline(
-        filepath: str, sheet_mapping: Optional[dict[str, str]] = None, **kwargs
+        filepath: str, sheet_mapping: dict[str, str] | None = None, **kwargs
     ) -> dict[str, Any]:
         """
         Multi-sheet Excel processing.
@@ -576,10 +576,10 @@ class DataPipelines:
 
     @staticmethod
     def _json_tree_to_graph(
-        data: Union[dict, list],
+        data: dict | list,
         graph: nx.DiGraph,
-        parent: Optional[Any] = None,
-        parent_key: Optional[str] = None,
+        parent: Any | None = None,
+        parent_key: str | None = None,
     ):
         """Convert hierarchical JSON to directed graph."""
         if isinstance(data, dict):
@@ -616,7 +616,7 @@ class DataPipelines:
 
     @staticmethod
     def _dataframe_to_graph(
-        df: pd.DataFrame, edge_columns: Optional[tuple[str, str]] = None, **kwargs
+        df: pd.DataFrame, edge_columns: tuple[str, str] | None = None, **kwargs
     ) -> dict[str, Any]:
         """Convert pandas DataFrame to graph."""
         if edge_columns is None:
@@ -641,7 +641,7 @@ class DataPipelines:
 
     @staticmethod
     def _parse_custom_json(
-        data: Any, node_path: Optional[str], edge_path: Optional[str], **kwargs
+        data: Any, node_path: str | None, edge_path: str | None, **kwargs
     ) -> nx.Graph:
         """Parse custom JSON format using JSONPath-like expressions."""
         # Simplified JSONPath implementation

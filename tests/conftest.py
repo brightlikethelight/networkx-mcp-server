@@ -115,7 +115,7 @@ def performance_config():
 @pytest.fixture(scope="session")
 def test_graph_collection():
     """Collection of various graph types for comprehensive testing."""
-    from tests.factories import GraphFactory, DataGenerators
+    from tests.factories import DataGenerators, GraphFactory
 
     return {
         "simple": GraphFactory.simple_graph(10, 15),
@@ -168,8 +168,9 @@ def data_generators():
 @pytest.fixture
 def memory_tracker():
     """Track memory usage during tests."""
-    import psutil
     import os
+
+    import psutil
 
     process = psutil.Process(os.getpid())
     initial_memory = process.memory_info().rss
@@ -263,7 +264,7 @@ def mock_mcp_transport(mocker):
 @pytest.fixture
 def hypothesis_settings():
     """Custom Hypothesis settings for property-based tests."""
-    from hypothesis import settings, HealthCheck
+    from hypothesis import HealthCheck, settings
 
     return settings(
         max_examples=50,  # Reduced for faster CI
@@ -292,8 +293,8 @@ def coverage_tracker():
 @pytest.fixture
 def error_logger():
     """Logger for capturing and analyzing errors in tests."""
-    import logging
     import io
+    import logging
 
     # Create a string buffer to capture log output
     log_buffer = io.StringIO()
@@ -328,8 +329,8 @@ def error_logger():
 @pytest.fixture
 def concurrent_test_helper():
     """Helper for testing concurrent operations."""
-    import threading
     import queue
+    import threading
     import time
 
     class ConcurrentTestHelper:
@@ -396,3 +397,74 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "slow: Slow running tests")
     config.addinivalue_line("markers", "redis: Tests requiring Redis")
     config.addinivalue_line("markers", "network: Tests requiring network access")
+
+
+@pytest.fixture
+def temp_files(temp_dir):
+    """Create temporary test files with sample data."""
+    import json
+
+    import pandas as pd
+
+    # Create sample data files
+    files = {}
+
+    # JSON file
+    json_data = {
+        "nodes": [
+            {"id": "A", "label": "Node A", "value": 10},
+            {"id": "B", "label": "Node B", "value": 20},
+            {"id": "C", "label": "Node C", "value": 15},
+        ],
+        "edges": [
+            {"source": "A", "target": "B", "weight": 1.5},
+            {"source": "B", "target": "C", "weight": 2.0},
+        ],
+    }
+    json_file = temp_dir / "graph.json"
+    with open(json_file, "w") as f:
+        json.dump(json_data, f)
+    files["json"] = str(json_file)
+
+    # CSV file
+    csv_data = [
+        ["source", "target", "weight"],
+        ["A", "B", "1.5"],
+        ["B", "C", "2.0"],
+        ["C", "A", "1.0"],
+    ]
+    csv_file = temp_dir / "graph.csv"
+    with open(csv_file, "w") as f:
+        for row in csv_data:
+            f.write(",".join(row) + "\n")
+    files["csv"] = str(csv_file)
+
+    # Excel file
+    try:
+        excel_file = temp_dir / "graph.xlsx"
+        df = pd.DataFrame(
+            [
+                {"source": "A", "target": "B", "weight": 1.5},
+                {"source": "B", "target": "C", "weight": 2.0},
+            ]
+        )
+        df.to_excel(excel_file, index=False)
+        files["excel"] = str(excel_file)
+    except ImportError:
+        # Skip Excel if openpyxl not available
+        pass
+
+    return files
+
+
+@pytest.fixture
+def performance_thresholds():
+    """Performance thresholds for testing."""
+    return {
+        "create_graph": 0.1,  # seconds
+        "add_nodes": 0.5,
+        "add_edges": 0.5,
+        "shortest_path": 1.0,
+        "centrality": 2.0,
+        "community_detection": 5.0,
+    }

@@ -5,7 +5,7 @@ import json
 import os
 import tempfile
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any
 
 import networkx as nx
 import yaml
@@ -20,7 +20,7 @@ class FileSecurityError(SecurityError):
 class SecureFileHandler:
     """Secure file operations with strict validation."""
 
-    def __init__(self, allowed_dirs: Optional[list[str]] = None):
+    def __init__(self, allowed_dirs: list[str] | None = None):
         """Initialize with allowed directories."""
         if allowed_dirs is None:
             # Default to temp directory only for safety
@@ -46,7 +46,7 @@ class SecureFileHandler:
         # Track created files for cleanup
         self._created_files = set()
 
-    def validate_path(self, filepath: Union[str, Path]) -> Path:
+    def validate_path(self, filepath: str | Path) -> Path:
         """Validate and resolve file path securely."""
         try:
             # Convert to Path and resolve
@@ -140,7 +140,7 @@ class SecureFileHandler:
 
         return secure_path
 
-    def safe_read_graph(self, filepath: Union[str, Path], file_format: str) -> nx.Graph:
+    def safe_read_graph(self, filepath: str | Path, file_format: str) -> nx.Graph:
         """Safely read graph from file."""
         # Validate inputs
         secure_path = self.validate_path(filepath)
@@ -188,7 +188,7 @@ class SecureFileHandler:
             raise FileSecurityError(msg) from e
 
     def safe_write_graph(
-        self, graph: nx.Graph, filepath: Union[str, Path], file_format: str
+        self, graph: nx.Graph, filepath: str | Path, file_format: str
     ) -> Path:
         """Safely write graph to file."""
         # Validate inputs
@@ -364,7 +364,7 @@ class SecureFileHandler:
 
         return graph
 
-    def get_file_hash(self, filepath: Union[str, Path]) -> str:
+    def get_file_hash(self, filepath: str | Path) -> str:
         """Get secure hash of file contents."""
         secure_path = self.validate_path(filepath)
 
@@ -404,7 +404,7 @@ class SecureFileHandler:
         """Context manager entry."""
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, _exc_val, _exc_tb):
         """Context manager exit with cleanup."""
         self.cleanup()
         return False

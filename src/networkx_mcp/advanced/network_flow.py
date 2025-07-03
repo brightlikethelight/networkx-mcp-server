@@ -3,7 +3,7 @@
 import logging
 import time
 from collections import defaultdict, deque
-from typing import Any, Optional, Union
+from typing import Any
 
 import networkx as nx
 
@@ -15,7 +15,7 @@ class NetworkFlow:
 
     @staticmethod
     def max_flow_analysis(
-        graph: Union[nx.Graph, nx.DiGraph],
+        graph: nx.Graph | nx.DiGraph,
         source: Any,
         sink: Any,
         capacity: str = "capacity",
@@ -413,9 +413,9 @@ class NetworkFlow:
 
     @staticmethod
     def min_cut_analysis(
-        graph: Union[nx.Graph, nx.DiGraph],
-        source: Optional[Any] = None,
-        sink: Optional[Any] = None,
+        graph: nx.Graph | nx.DiGraph,
+        source: Any | None = None,
+        sink: Any | None = None,
         capacity: str = "capacity",
         **params,
     ) -> dict[str, Any]:
@@ -512,7 +512,7 @@ class NetworkFlow:
 
     @staticmethod
     def multi_commodity_flow(
-        graph: Union[nx.Graph, nx.DiGraph],
+        graph: nx.Graph | nx.DiGraph,
         demands: list[tuple[Any, Any, float]],
         capacity: str = "capacity",
         **_params,
@@ -622,7 +622,7 @@ class NetworkFlow:
 
     @staticmethod
     def flow_decomposition(
-        _graph: Union[nx.Graph, nx.DiGraph],
+        _graph: nx.Graph | nx.DiGraph,
         flow_dict: dict[Any, dict[Any, float]],
         source: Any,
         sink: Any,
@@ -725,9 +725,7 @@ class NetworkFlow:
         }
 
     @staticmethod
-    def _find_flow_path(
-        flow_graph: nx.DiGraph, source: Any, sink: Any
-    ) -> Optional[list]:
+    def _find_flow_path(flow_graph: nx.DiGraph, source: Any, sink: Any) -> list | None:
         """Find a path from source to sink in flow graph using DFS."""
         visited = set()
         path = []
@@ -753,7 +751,7 @@ class NetworkFlow:
         return None
 
     @staticmethod
-    def _find_flow_cycle(flow_graph: nx.DiGraph) -> Optional[list]:
+    def _find_flow_cycle(flow_graph: nx.DiGraph) -> list | None:
         """Find a cycle in flow graph."""
         visited = set()
         rec_stack = set()
@@ -795,7 +793,7 @@ class NetworkFlow:
 
     @staticmethod
     def circulation_analysis(
-        graph: Union[nx.Graph, nx.DiGraph],
+        graph: nx.Graph | nx.DiGraph,
         demands: dict[Any, float],
         capacity: str = "capacity",
         **_params,

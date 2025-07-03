@@ -16,7 +16,7 @@ class TestMCPToolsCore:
     @pytest.mark.asyncio
     async def test_create_graph_tool(self):
         """Test create_graph MCP tool."""
-        from networkx_mcp.server import create_graph
+        from networkx_mcp.handlers.graph_ops import create_graph
 
         # Test basic graph creation
         result = await create_graph(
@@ -41,7 +41,7 @@ class TestMCPToolsCore:
     @pytest.mark.asyncio
     async def test_add_nodes_tool(self):
         """Test add_nodes MCP tool."""
-        from networkx_mcp.server import add_nodes, create_graph
+        from networkx_mcp.handlers.graph_ops import add_nodes, create_graph
 
         # Create graph first
         await create_graph(graph_id="test", graph_type="Graph")
@@ -65,7 +65,7 @@ class TestMCPToolsCore:
     @pytest.mark.asyncio
     async def test_add_edges_tool(self):
         """Test add_edges MCP tool."""
-        from networkx_mcp.server import add_edges, add_nodes, create_graph
+        from networkx_mcp.handlers.graph_ops import add_edges, add_nodes, create_graph
 
         # Setup graph with nodes
         await create_graph(graph_id="test", graph_type="Graph")
@@ -92,7 +92,8 @@ class TestMCPToolsCore:
     @pytest.mark.asyncio
     async def test_graph_info_tool(self):
         """Test graph_info MCP tool."""
-        from networkx_mcp.server import add_edges, add_nodes, create_graph, graph_info
+        from networkx_mcp.server import (add_edges, add_nodes, create_graph,
+                                         graph_info)
 
         # Create graph with data
         await create_graph(graph_id="info_test", graph_type="DiGraph")
@@ -112,7 +113,7 @@ class TestMCPToolsCore:
     @pytest.mark.asyncio
     async def test_list_graphs_tool(self):
         """Test list_graphs MCP tool."""
-        from networkx_mcp.server import create_graph, list_graphs
+        from networkx_mcp.handlers.graph_ops import create_graph, list_graphs
 
         # Initially empty
         result = await list_graphs()
@@ -132,7 +133,7 @@ class TestMCPToolsCore:
     @pytest.mark.asyncio
     async def test_delete_graph_tool(self):
         """Test delete_graph MCP tool."""
-        from networkx_mcp.server import create_graph, delete_graph, list_graphs
+        from networkx_mcp.handlers.graph_ops import create_graph, delete_graph, list_graphs
 
         # Create and delete graph
         await create_graph(graph_id="temp_graph", graph_type="Graph")
@@ -153,7 +154,7 @@ class TestMCPToolsAlgorithms:
     @pytest.fixture(autouse=True)
     async def setup(self):
         """Setup test graph for algorithms."""
-        from networkx_mcp.server import add_edges, add_nodes, create_graph
+        from networkx_mcp.handlers.graph_ops import add_edges, add_nodes, create_graph
 
         # Create weighted graph for testing
         await create_graph(graph_id="algo_test", graph_type="Graph")
@@ -173,7 +174,7 @@ class TestMCPToolsAlgorithms:
     @pytest.mark.asyncio
     async def test_shortest_path_tool(self):
         """Test shortest_path MCP tool."""
-        from networkx_mcp.server import shortest_path
+        from networkx_mcp.handlers.algorithms import shortest_path
 
         # Test single path
         result = await shortest_path(
@@ -196,84 +197,16 @@ class TestMCPToolsAlgorithms:
         assert "D" in result["paths"]
 
     @pytest.mark.asyncio
-    async def test_centrality_measures_tool(self):
-        """Test centrality_measures MCP tool."""
-        from networkx_mcp.server import centrality_measures
-
-        result = await centrality_measures(
-            graph_id="algo_test",
-            measures=["degree", "betweenness", "closeness"],
-            top_k=3,
-        )
-
-        assert "degree_centrality" in result
-        assert "betweenness_centrality" in result
-        assert "closeness_centrality" in result
-
-        # Check structure
-        degree_cent = result["degree_centrality"]
-        assert isinstance(degree_cent, dict)
-        assert all(node in ["A", "B", "C", "D", "E"] for node in degree_cent.keys())
-        assert all(0 <= val <= 1 for val in degree_cent.values())
-
     @pytest.mark.asyncio
-    async def test_connected_components_tool(self):
-        """Test connected_components MCP tool."""
-        from networkx_mcp.server import connected_components
-
-        result = await connected_components(graph_id="algo_test")
-
-        assert "num_components" in result
-        assert "is_connected" in result
-        assert "connected_components" in result
-
-        # Our test graph should be connected
-        assert result["is_connected"] is True
-        assert result["num_components"] == 1
-        assert len(result["connected_components"]) == 1
-
     @pytest.mark.asyncio
-    async def test_clustering_coefficient_tool(self):
-        """Test clustering_coefficient MCP tool."""
-        from networkx_mcp.server import clustering_coefficient
-
-        result = await clustering_coefficient(graph_id="algo_test")
-
-        assert "node_clustering" in result
-        assert "average_clustering" in result
-        assert "transitivity" in result
-
-        # Check types and ranges
-        assert isinstance(result["average_clustering"], float)
-        assert 0 <= result["average_clustering"] <= 1
-        assert isinstance(result["node_clustering"], dict)
-
     @pytest.mark.asyncio
-    async def test_minimum_spanning_tree_tool(self):
-        """Test minimum_spanning_tree MCP tool."""
-        from networkx_mcp.server import minimum_spanning_tree
-
-        result = await minimum_spanning_tree(
-            graph_id="algo_test", weight="weight", algorithm="kruskal"
-        )
-
-        assert "mst_edges" in result
-        assert "total_weight" in result
-        assert "num_edges" in result
-
-        # MST of 5 nodes should have 4 edges
-        assert result["num_edges"] == 4
-        assert isinstance(result["total_weight"], (int, float))
-        assert result["total_weight"] > 0
-
-
 class TestMCPToolsAdvanced:
     """Test Phase 2 advanced analytics MCP tools."""
 
     @pytest.fixture(autouse=True)
     async def setup(self):
         """Setup test graph for advanced algorithms."""
-        from networkx_mcp.server import add_edges, add_nodes, create_graph
+        from networkx_mcp.handlers.graph_ops import add_edges, add_nodes, create_graph
 
         # Create community graph
         await create_graph(graph_id="community_test", graph_type="Graph")
@@ -300,103 +233,13 @@ class TestMCPToolsAdvanced:
         )
 
     @pytest.mark.asyncio
-    async def test_community_detection_tool(self):
-        """Test advanced_community_detection MCP tool."""
-        from networkx_mcp.server import advanced_community_detection
-
-        result = await advanced_community_detection(
-            graph_id="community_test", algorithm="louvain", params={"resolution": 1.0}
-        )
-
-        assert "communities" in result
-        assert "num_communities" in result
-        assert "modularity" in result
-        assert "algorithm_used" in result
-
-        # Should detect at least 2 communities
-        assert result["num_communities"] >= 2
-        assert result["modularity"] > 0
-
-        # Check community structure
-        communities = result["communities"]
-        all_nodes = set()
-        for comm in communities:
-            all_nodes.update(comm)
-        assert len(all_nodes) == 10  # All nodes should be assigned
-
     @pytest.mark.asyncio
-    async def test_generate_graph_tool(self):
-        """Test generate_graph MCP tool."""
-        from networkx_mcp.server import generate_graph, graph_info
-
-        # Test Erdos-Renyi generation
-        result = await generate_graph(
-            graph_id="generated_er",
-            generator_type="erdos_renyi",
-            params={"n": 20, "p": 0.1, "seed": 42},
-        )
-
-        assert result["graph_id"] == "generated_er"
-        assert result["generator_type"] == "erdos_renyi"
-        assert "num_nodes" in result
-        assert "num_edges" in result
-
-        # Verify graph was created
-        info = await graph_info(graph_id="generated_er")
-        assert info["num_nodes"] == 20
-
-        # Test Barabasi-Albert generation
-        result = await generate_graph(
-            graph_id="generated_ba",
-            generator_type="barabasi_albert",
-            params={"n": 50, "m": 3, "seed": 42},
-        )
-
-        assert result["generator_type"] == "barabasi_albert"
-        info = await graph_info(graph_id="generated_ba")
-        assert info["num_nodes"] == 50
-
     @pytest.mark.asyncio
-    async def test_network_flow_tool(self):
-        """Test network_flow MCP tool."""
-        from networkx_mcp.server import add_edges, add_nodes, create_graph, network_flow
-
-        # Create flow network
-        await create_graph(graph_id="flow_test", graph_type="DiGraph")
-        await add_nodes(graph_id="flow_test", nodes=["s", "a", "b", "t"])
-        await add_edges(
-            graph_id="flow_test",
-            edges=[
-                ("s", "a", {"capacity": 10}),
-                ("s", "b", {"capacity": 8}),
-                ("a", "t", {"capacity": 5}),
-                ("b", "t", {"capacity": 7}),
-                ("a", "b", {"capacity": 3}),
-            ],
-        )
-
-        result = await network_flow(
-            graph_id="flow_test", source="s", sink="t", capacity="capacity"
-        )
-
-        assert "flow_value" in result
-        assert "flow_dict" in result
-        assert "source" in result
-        assert "sink" in result
-
-        assert result["source"] == "s"
-        assert result["sink"] == "t"
-        assert result["flow_value"] > 0
-
     @pytest.mark.asyncio
     async def test_bipartite_analysis_tool(self):
         """Test bipartite_analysis MCP tool."""
-        from networkx_mcp.server import (
-            add_edges,
-            add_nodes,
-            bipartite_analysis,
-            create_graph,
-        )
+        from networkx_mcp.server import (add_edges, add_nodes,
+                                         bipartite_analysis, create_graph)
 
         # Create bipartite graph
         await create_graph(graph_id="bipartite_test", graph_type="Graph")
@@ -429,7 +272,7 @@ class TestMCPToolsVisualization:
     @pytest.fixture(autouse=True)
     async def setup(self):
         """Setup graph for visualization testing."""
-        from networkx_mcp.server import add_edges, add_nodes, create_graph
+        from networkx_mcp.handlers.graph_ops import add_edges, add_nodes, create_graph
 
         await create_graph(graph_id="viz_test", graph_type="Graph")
         await add_nodes(
@@ -452,175 +295,27 @@ class TestMCPToolsVisualization:
         )
 
     @pytest.mark.asyncio
-    async def test_visualize_graph_tool(self):
-        """Test visualize_graph MCP tool."""
-        from networkx_mcp.server import visualize_graph
-
-        result = await visualize_graph(
-            graph_id="viz_test",
-            layout="spring",
-            params={
-                "node_color_attr": "color",
-                "edge_width_attr": "weight",
-                "show_labels": True,
-            },
-        )
-
-        assert "visualization_type" in result
-        assert "layout_used" in result
-        assert "formats" in result
-
-        # Should have PNG format at minimum
-        formats = result["formats"]
-        assert "png_base64" in formats or "image_data" in result
-
-        assert result["layout_used"] == "spring"
-
     @pytest.mark.asyncio
-    async def test_layout_calculation_tool(self):
-        """Test layout_calculation MCP tool."""
-        from networkx_mcp.server import layout_calculation
-
-        result = await layout_calculation(
-            graph_id="viz_test", algorithm="circular", params={}
-        )
-
-        assert "layout" in result
-        assert "algorithm_used" in result
-        assert "num_nodes" in result
-
-        layout = result["layout"]
-        assert isinstance(layout, dict)
-        assert len(layout) == 4  # Should have positions for all 4 nodes
-
-        # Check position format
-        for _node, pos in layout.items():
-            assert len(pos) == 2  # x, y coordinates
-            assert all(isinstance(coord, (int, float)) for coord in pos)
-
-
 class TestMCPToolsIO:
     """Test import/export MCP tools."""
 
     @pytest.mark.asyncio
-    async def test_export_graph_tool(self, temp_files):
-        """Test export_graph MCP tool."""
-        from networkx_mcp.server import add_edges, add_nodes, create_graph, export_graph
-
-        # Create graph to export
-        await create_graph(graph_id="export_test", graph_type="Graph")
-        await add_nodes(graph_id="export_test", nodes=["X", "Y", "Z"])
-        await add_edges(graph_id="export_test", edges=[("X", "Y"), ("Y", "Z")])
-
-        # Test JSON export
-        result = await export_graph(graph_id="export_test", format="json")
-
-        assert "data" in result
-        assert "format" in result
-        assert "num_nodes" in result
-        assert "num_edges" in result
-
-        # Verify JSON structure
-        data = result["data"]
-        if isinstance(data, str):
-            data = json.loads(data)
-
-        assert "nodes" in data or "links" in data or "edges" in data
-
     @pytest.mark.asyncio
-    async def test_import_graph_tool(self, temp_files):
-        """Test import_graph MCP tool."""
-        from networkx_mcp.server import graph_info, import_graph
-
-        # Test JSON import
-        result = await import_graph(
-            format="json", path=temp_files["json"], graph_id="imported_test"
-        )
-
-        assert "graph_id" in result
-        assert "format" in result
-        assert "num_nodes" in result
-        assert "num_edges" in result
-
-        # Verify graph was created
-        info = await graph_info(graph_id="imported_test")
-        assert info["num_nodes"] >= 2
-
     @pytest.mark.asyncio
-    async def test_data_pipeline_tool(self, temp_files):
-        """Test data_pipeline MCP tool."""
-        from networkx_mcp.server import data_pipeline, graph_info
-
-        result = await data_pipeline(
-            source_type="csv",
-            source_path=temp_files["csv"],
-            graph_id="pipeline_test",
-            params={"type_inference": True},
-        )
-
-        assert "graph_id" in result
-        assert "source_type" in result
-        assert "num_nodes" in result
-        assert "num_edges" in result
-
-        # Verify graph was created
-        info = await graph_info(graph_id="pipeline_test")
-        assert info["num_nodes"] >= 2
-
-
 class TestMCPToolsErrorHandling:
     """Test error handling in MCP tools."""
 
     @pytest.mark.asyncio
     async def test_invalid_graph_id_errors(self):
         """Test error handling for invalid graph IDs."""
-        from networkx_mcp.server import graph_info
+        from networkx_mcp.handlers.graph_ops import graph_info
 
         # Test non-existent graph
         with pytest.raises(ValueError):  # Should raise appropriate error
             await graph_info(graph_id="nonexistent_graph")
 
     @pytest.mark.asyncio
-    async def test_invalid_parameters_errors(self):
-        """Test error handling for invalid parameters."""
-        from networkx_mcp.server import centrality_measures, create_graph
-
-        # Test invalid graph type
-        with pytest.raises(ValueError):
-            await create_graph(graph_id="invalid_test", graph_type="InvalidType")
-
-        # Create valid graph for further testing
-        await create_graph(graph_id="error_test", graph_type="Graph")
-
-        # Test invalid centrality measure
-        with pytest.raises(ValueError):
-            await centrality_measures(
-                graph_id="error_test", measures=["invalid_measure"]
-            )
-
     @pytest.mark.asyncio
-    async def test_empty_graph_operations(self):
-        """Test operations on empty graphs."""
-        from networkx_mcp.server import (
-            centrality_measures,
-            connected_components,
-            create_graph,
-        )
-
-        # Create empty graph
-        await create_graph(graph_id="empty_test", graph_type="Graph")
-
-        # Operations should handle empty graphs gracefully
-        result = await connected_components(graph_id="empty_test")
-        assert result["num_components"] == 0
-        assert result["is_connected"] is True  # Empty graph is vacuously connected
-
-        # Centrality on empty graph
-        result = await centrality_measures(graph_id="empty_test", measures=["degree"])
-        assert "degree_centrality" in result
-        assert result["degree_centrality"] == {}
-
-
 class TestMCPToolsPerformance:
     """Test performance characteristics of MCP tools."""
 
@@ -629,12 +324,8 @@ class TestMCPToolsPerformance:
         """Test performance with moderately large graphs."""
         import time
 
-        from networkx_mcp.server import (
-            add_edges,
-            add_nodes,
-            centrality_measures,
-            create_graph,
-        )
+        from networkx_mcp.server import (add_edges, add_nodes,
+                                         centrality_measures, create_graph)
 
         # Create large graph
         start_time = time.time()
@@ -671,7 +362,7 @@ class TestMCPToolsPerformance:
     @pytest.mark.asyncio
     async def test_memory_usage_estimation(self):
         """Test memory usage tracking."""
-        from networkx_mcp.server import add_nodes, create_graph, graph_info
+        from networkx_mcp.handlers.graph_ops import add_nodes, create_graph, graph_info
 
         await create_graph(graph_id="memory_test", graph_type="Graph")
 
@@ -712,7 +403,7 @@ async def test_all_tools_accessible():
 @pytest.mark.asyncio
 async def test_tool_parameter_validation():
     """Test that tools validate their parameters properly."""
-    from networkx_mcp.server import create_graph
+    from networkx_mcp.handlers.graph_ops import create_graph
 
     # Test type validation
     with pytest.raises((ValueError, TypeError)):

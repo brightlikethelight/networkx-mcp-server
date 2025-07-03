@@ -3,7 +3,6 @@
 import argparse
 import asyncio
 from pathlib import Path
-from typing import Optional
 
 from rich.console import Console
 from rich.panel import Panel
@@ -11,7 +10,7 @@ from rich.table import Table
 
 from networkx_mcp.core.algorithms import GraphAlgorithms
 from networkx_mcp.core.graph_operations import GraphManager
-from networkx_mcp.core.io_handlers import GraphIOHandler
+from networkx_mcp.core.io import GraphIOHandler
 from networkx_mcp.utils.monitoring import OperationCounter, PerformanceMonitor
 
 console = Console()
@@ -119,7 +118,7 @@ class NetworkXCLI:
         if self.current_graph:
             console.print(f"\n[bold]Current graph: {self.current_graph}[/bold]")
 
-    def show_graph_info(self, graph_id: Optional[str] = None):
+    def show_graph_info(self, graph_id: str | None = None):
         """Show detailed graph information."""
         if not graph_id:
             graph_id = self.current_graph

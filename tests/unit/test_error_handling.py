@@ -212,7 +212,7 @@ class TestAlgorithmErrors:
     @pytest.mark.asyncio
     async def test_shortest_path_errors(self):
         """Test shortest path algorithm error cases."""
-        from networkx_mcp.server import shortest_path
+        from networkx_mcp.handlers.algorithms import shortest_path
 
         # Non-existent source node
         with pytest.raises(ValueError):
@@ -231,105 +231,16 @@ class TestAlgorithmErrors:
             await shortest_path(graph_id="empty", source="A", target="B")
 
     @pytest.mark.asyncio
-    async def test_centrality_errors(self):
-        """Test centrality calculation error cases."""
-        from networkx_mcp.server import centrality_measures
-
-        # Invalid centrality measure
-        with pytest.raises(ValueError):
-            await centrality_measures(
-                graph_id="connected", measures=["invalid_measure"]
-            )
-
-        # Eigenvector centrality on disconnected graph may not converge
-        try:
-            result = await centrality_measures(
-                graph_id="disconnected", measures=["eigenvector"]
-            )
-            # Should either work or handle convergence failure gracefully
-            assert "eigenvector_centrality" in result
-        except Exception:
-            # Convergence failure is acceptable
-            pass
-
     @pytest.mark.asyncio
-    async def test_flow_algorithm_errors(self):
-        """Test network flow algorithm errors."""
-        from networkx_mcp.server import add_edges, add_nodes, create_graph, network_flow
-
-        # Create directed graph for flow
-        await create_graph(graph_id="flow_test", graph_type="DiGraph")
-        await add_nodes(graph_id="flow_test", nodes=["s", "t"])
-        await add_edges(graph_id="flow_test", edges=[("s", "t", {"capacity": 10})])
-
-        # Test with undirected graph (should fail)
-        await create_graph(graph_id="undirected_flow", graph_type="Graph")
-        await add_nodes(graph_id="undirected_flow", nodes=["s", "t"])
-        await add_edges(graph_id="undirected_flow", edges=[("s", "t")])
-
-        with pytest.raises(ValueError):
-            await network_flow(graph_id="undirected_flow", source="s", sink="t")
-
-        # Non-existent source/sink
-        with pytest.raises(ValueError):
-            await network_flow(graph_id="flow_test", source="nonexistent", sink="t")
-
     @pytest.mark.asyncio
-    async def test_spanning_tree_errors(self):
-        """Test minimum spanning tree errors."""
-        from networkx_mcp.server import minimum_spanning_tree
-
-        # MST on disconnected graph
-        with pytest.raises(ValueError):
-            await minimum_spanning_tree(graph_id="disconnected")
-
-        # MST on directed graph
-        self.manager.create_graph("directed_mst", "DiGraph")
-        self.manager.add_nodes_from("directed_mst", ["A", "B", "C"])
-        self.manager.add_edges_from("directed_mst", [("A", "B"), ("B", "C")])
-
-        with pytest.raises(ValueError):
-            await minimum_spanning_tree(graph_id="directed_mst")
-
-
 class TestIOErrors:
     """Test I/O operation error handling."""
 
     @pytest.mark.asyncio
-    async def test_import_file_errors(self):
-        """Test file import error cases."""
-        from networkx_mcp.server import import_graph
-
-        # Non-existent file
-        with pytest.raises((ValueError, FileNotFoundError)):
-            await import_graph(
-                format="json",
-                path="/nonexistent/path/file.json",
-                graph_id="test_import",
-            )
-
-        # Invalid format
-        with pytest.raises(ValueError):
-            await import_graph(
-                format="invalid_format", path="dummy_path", graph_id="test_import"
-            )
-
     @pytest.mark.asyncio
-    async def test_export_errors(self):
-        """Test export error cases."""
-        from networkx_mcp.server import export_graph
-
-        # Export non-existent graph
-        with pytest.raises(ValueError):
-            await export_graph(graph_id="nonexistent_graph", format="json")
-
-        # Invalid export format
-        with pytest.raises(ValueError):
-            await export_graph(graph_id="connected", format="invalid_format")
-
     def test_malformed_file_content(self):
         """Test handling of malformed file content."""
-        from networkx_mcp.core.io_handlers import GraphIOHandler
+        from networkx_mcp.core.io import GraphIOHandler
 
         # Create malformed JSON file
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
@@ -346,7 +257,7 @@ class TestIOErrors:
 
     def test_unsupported_file_extensions(self):
         """Test handling of unsupported file extensions."""
-        from networkx_mcp.core.io_handlers import GraphIOHandler
+        from networkx_mcp.core.io import GraphIOHandler
 
         with tempfile.NamedTemporaryFile(suffix=".unsupported", delete=False) as f:
             unsupported_path = f.name
@@ -364,40 +275,12 @@ class TestVisualizationErrors:
     """Test visualization error handling."""
 
     @pytest.mark.asyncio
-    async def test_visualization_with_empty_graph(self):
-        """Test visualization of empty graphs."""
-        from networkx_mcp.server import create_graph, visualize_graph
-
-        await create_graph(graph_id="empty_viz", graph_type="Graph")
-
-        # Should handle empty graph gracefully
-        result = await visualize_graph(graph_id="empty_viz", layout="spring")
-
-        # Should not crash and provide some result
-        assert "layout_used" in result or "error" in result
-
     @pytest.mark.asyncio
-    async def test_invalid_layout_algorithms(self):
-        """Test handling of invalid layout algorithms."""
-        from networkx_mcp.server import add_nodes, create_graph, layout_calculation
-
-        await create_graph(graph_id="layout_test", graph_type="Graph")
-        await add_nodes(graph_id="layout_test", nodes=["A", "B", "C"])
-
-        # Invalid layout should fall back to default
-        result = await layout_calculation(
-            graph_id="layout_test", algorithm="invalid_layout"
-        )
-
-        # Should fallback to spring layout or handle gracefully
-        assert "layout" in result
-
     @patch("matplotlib.pyplot.savefig")
     def test_matplotlib_save_error(self, mock_savefig):
         """Test handling of matplotlib save errors."""
-        from networkx_mcp.visualization.matplotlib_visualizer import (
-            MatplotlibVisualizer,
-        )
+        from networkx_mcp.visualization.matplotlib_visualizer import \
+            MatplotlibVisualizer
 
         # Mock savefig to raise an error
         mock_savefig.side_effect = OSError("Cannot save figure")

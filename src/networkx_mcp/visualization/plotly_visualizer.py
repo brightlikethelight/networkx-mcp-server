@@ -1,7 +1,7 @@
 """Plotly-based interactive graph visualization."""
 
 import logging
-from typing import Any, Optional, Union
+from typing import Any
 
 import networkx as nx
 import numpy as np
@@ -29,14 +29,14 @@ class PlotlyVisualizer:
 
     @staticmethod
     def create_interactive_plot(
-        graph: Union[nx.Graph, nx.DiGraph],
+        graph: nx.Graph | nx.DiGraph,
         layout: str = "spring",
-        node_size: Union[int, dict, str] = 10,
-        node_color: Union[str, dict, str] = "degree",
-        edge_width: Union[float, dict, str] = 1.0,
-        edge_color: Union[str, dict, str] = "gray",
-        hover_data: Optional[list[str]] = None,
-        title: Optional[str] = None,
+        node_size: int | dict | str = 10,
+        node_color: str | dict | str = "degree",
+        edge_width: float | dict | str = 1.0,
+        edge_color: str | dict | str = "gray",
+        hover_data: list[str] | None = None,
+        title: str | None = None,
         height: int = 800,
         width: int = 1200,
         show_edge_labels: bool = False,
@@ -123,10 +123,10 @@ class PlotlyVisualizer:
 
     @staticmethod
     def create_3d_plot(
-        graph: Union[nx.Graph, nx.DiGraph],
+        graph: nx.Graph | nx.DiGraph,
         layout: str = "spring3d",
-        node_color: Union[str, dict, str] = "degree",
-        title: Optional[str] = None,
+        node_color: str | dict | str = "degree",
+        title: str | None = None,
         height: int = 800,
         width: int = 1200,
     ) -> dict[str, Any]:
@@ -222,7 +222,7 @@ class PlotlyVisualizer:
     @staticmethod
     def create_animated_plot(
         graphs: list[nx.Graph],
-        timestamps: Optional[list[str]] = None,
+        timestamps: list[str] | None = None,
         layout: str = "spring",
         title: str = "Temporal Network Animation",
         height: int = 800,
@@ -246,7 +246,7 @@ class PlotlyVisualizer:
 
         # Create frames
         frames = []
-        for _i, (graph, timestamp) in enumerate(zip(graphs, timestamps)):
+        for _i, (graph, timestamp) in enumerate(zip(graphs, timestamps, strict=False)):
             # Create traces for this frame
             edge_traces = PlotlyVisualizer._create_edge_traces(
                 graph, base_pos, edge_width=1.0, edge_color="gray"
@@ -332,8 +332,8 @@ class PlotlyVisualizer:
     def _create_edge_traces(
         graph: nx.Graph,
         pos: dict,
-        edge_width: Union[float, str, dict],
-        edge_color: Union[str, dict],
+        edge_width: float | str | dict,
+        edge_color: str | dict,
         show_labels: bool = False,
     ) -> list[Any]:
         """Create edge traces for plotly."""
@@ -389,9 +389,9 @@ class PlotlyVisualizer:
     def _create_node_trace(
         graph: nx.Graph,
         pos: dict,
-        node_size: Union[int, str, dict],
-        node_color: Union[str, dict],
-        hover_data: Optional[list[str]] = None,
+        node_size: int | str | dict,
+        node_color: str | dict,
+        hover_data: list[str] | None = None,
     ) -> Any:
         """Create node trace for plotly."""
         if not HAS_PLOTLY:
@@ -467,7 +467,7 @@ class PlotlyVisualizer:
         figure: dict[str, Any],
         filename: str,
         include_plotlyjs: str = "cdn",
-        config: Optional[dict[str, Any]] = None,
+        config: dict[str, Any] | None = None,
     ) -> str:
         """Export interactive plot as standalone HTML."""
         if config is None:

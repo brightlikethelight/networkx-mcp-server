@@ -4,7 +4,7 @@ import logging
 import random  # Using for non-cryptographic algorithm simulation only
 import time
 from collections import defaultdict
-from typing import Any, Optional, Union
+from typing import Any
 
 import networkx as nx
 import numpy as np
@@ -17,9 +17,9 @@ class SpecializedAlgorithms:
 
     @staticmethod
     def spanning_trees(
-        graph: Union[nx.Graph, nx.DiGraph],
+        graph: nx.Graph | nx.DiGraph,
         algorithm: str = "kruskal",
-        weight: Optional[str] = "weight",
+        weight: str | None = "weight",
         k: int = 1,
         **params,
     ) -> dict[str, Any]:
@@ -532,7 +532,7 @@ class SpecializedAlgorithms:
     def graph_matching(
         graph: nx.Graph,
         matching_type: str = "maximum",
-        weight: Optional[str] = None,
+        weight: str | None = None,
         **_params,
     ) -> dict[str, Any]:
         """
@@ -828,7 +828,7 @@ class SpecializedAlgorithms:
     def link_prediction(
         graph: nx.Graph,
         method: str = "common_neighbors",
-        node_pairs: Optional[list[tuple]] = None,
+        node_pairs: list[tuple] | None = None,
         top_k: int = 10,
         **_params,
     ) -> dict[str, Any]:

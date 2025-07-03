@@ -5,7 +5,7 @@ import random  # Using for non-cryptographic ML training purposes only
 import time
 from collections import defaultdict
 from itertools import combinations
-from typing import Any, Optional, Union
+from typing import Any
 
 import networkx as nx
 import numpy as np
@@ -53,7 +53,7 @@ class MLIntegration:
 
     @staticmethod
     def node_embeddings(
-        graph: Union[nx.Graph, nx.DiGraph],
+        graph: nx.Graph | nx.DiGraph,
         method: str = "node2vec",
         dimensions: int = 128,
         **params,
@@ -126,7 +126,7 @@ class MLIntegration:
 
     @staticmethod
     def _node2vec_embeddings(
-        graph: Union[nx.Graph, nx.DiGraph],
+        graph: nx.Graph | nx.DiGraph,
         dimensions: int,
         walk_length: int = DEFAULT_NUM_WALKS,
         num_walks: int = DEFAULT_WALK_LENGTH,
@@ -180,7 +180,7 @@ class MLIntegration:
 
     @staticmethod
     def _generate_node2vec_walks(
-        graph: Union[nx.Graph, nx.DiGraph],
+        graph: nx.Graph | nx.DiGraph,
         walk_length: int,
         num_walks: int,
         p: float,
@@ -235,7 +235,7 @@ class MLIntegration:
 
     @staticmethod
     def _deepwalk_embeddings(
-        graph: Union[nx.Graph, nx.DiGraph],
+        graph: nx.Graph | nx.DiGraph,
         dimensions: int,
         walk_length: int = DEFAULT_NUM_WALKS,
         num_walks: int = DEFAULT_WALK_LENGTH,
@@ -249,7 +249,7 @@ class MLIntegration:
 
     @staticmethod
     def _spectral_embeddings(
-        graph: Union[nx.Graph, nx.DiGraph], dimensions: int, **_params
+        graph: nx.Graph | nx.DiGraph, dimensions: int, **_params
     ) -> dict[Any, np.ndarray]:
         """Generate spectral embeddings using graph Laplacian."""
         # Get adjacency matrix
@@ -280,7 +280,7 @@ class MLIntegration:
 
     @staticmethod
     def _structural_embeddings(
-        graph: Union[nx.Graph, nx.DiGraph], dimensions: int, **_params
+        graph: nx.Graph | nx.DiGraph, dimensions: int, **_params
     ) -> dict[Any, np.ndarray]:
         """Generate structural feature embeddings."""
         features = []
@@ -373,8 +373,8 @@ class MLIntegration:
 
     @staticmethod
     def graph_features(
-        graph: Union[nx.Graph, nx.DiGraph],
-        feature_types: Optional[list[str]] = None,
+        graph: nx.Graph | nx.DiGraph,
+        feature_types: list[str] | None = None,
         **_params,
     ) -> dict[str, Any]:
         """
@@ -615,7 +615,7 @@ class MLIntegration:
     def similarity_metrics(
         graph1: nx.Graph,
         graph2: nx.Graph,
-        metrics: Optional[list[str]] = None,
+        metrics: list[str] | None = None,
         **_params,
     ) -> dict[str, Any]:
         """
@@ -662,7 +662,7 @@ class MLIntegration:
 
             if deg1 and deg2:
                 # Cosine similarity of degree sequences
-                dot_product = sum(d1 * d2 for d1, d2 in zip(deg1, deg2))
+                dot_product = sum(d1 * d2 for d1, d2 in zip(deg1, deg2, strict=False))
                 norm1 = np.sqrt(sum(d * d for d in deg1))
                 norm2 = np.sqrt(sum(d * d for d in deg2))
 
@@ -696,7 +696,7 @@ class MLIntegration:
 
                 # Spectral distance
                 spectral_distance = np.sqrt(
-                    sum((e1 - e2) ** 2 for e1, e2 in zip(eig1, eig2))
+                    sum((e1 - e2) ** 2 for e1, e2 in zip(eig1, eig2, strict=False))
                 )
 
                 results["spectral"] = {
@@ -742,7 +742,7 @@ class MLIntegration:
 
     @staticmethod
     def anomaly_detection(
-        graph: Union[nx.Graph, nx.DiGraph],
+        graph: nx.Graph | nx.DiGraph,
         method: str = "statistical",
         contamination: float = 0.1,
         **_params,

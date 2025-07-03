@@ -7,8 +7,8 @@ import os
 import uuid
 from collections import defaultdict
 from contextvars import ContextVar
-from datetime import datetime, timedelta, timezone
-from typing import Any, Optional
+from datetime import UTC, datetime, timedelta
+from typing import Any
 
 from ..storage.base import StorageBackend, Transaction
 
@@ -29,11 +29,11 @@ class AuditEvent:
         action: str,
         user_id: str,
         status: str = "success",
-        details: Optional[dict[str, Any]] = None,
-        error: Optional[str] = None,
+        details: dict[str, Any] | None = None,
+        error: str | None = None,
     ):
         self.event_id = str(uuid.uuid4())
-        self.timestamp = datetime.now(timezone.utc).isoformat()
+        self.timestamp = datetime.now(UTC).isoformat()
         self.action = action
         self.user_id = user_id
         self.status = status
@@ -87,7 +87,7 @@ class SecurityAlert:
         evidence: dict[str, Any],
     ):
         self.alert_id = str(uuid.uuid4())
-        self.timestamp = datetime.now(timezone.utc).isoformat()
+        self.timestamp = datetime.now(UTC).isoformat()
         self.alert_type = alert_type
         self.severity = severity
         self.user_id = user_id
@@ -146,9 +146,9 @@ class AuditLogger:
         action: str,
         user_id: str,
         status: str = "success",
-        details: Optional[dict[str, Any]] = None,
-        error: Optional[str] = None,
-        tx: Optional[Transaction] = None,
+        details: dict[str, Any] | None = None,
+        error: str | None = None,
+        tx: Transaction | None = None,
     ) -> str:
         """Log an audit event."""
         # Create event
@@ -170,11 +170,11 @@ class AuditLogger:
 
         return event.event_id
 
-    async def _store_event(self, event: AuditEvent, tx: Optional[Transaction] = None):
+    async def _store_event(self, event: AuditEvent, tx: Transaction | None = None):
         """Store audit event."""
         # Store in time-based buckets for efficient querying
-        date_str = datetime.now(timezone.utc).strftime("%Y%m%d")
-        hour_str = datetime.now(timezone.utc).strftime("%H")
+        date_str = datetime.now(UTC).strftime("%Y%m%d")
+        hour_str = datetime.now(UTC).strftime("%H")
 
         # Keys for different access patterns
         keys = [
@@ -189,9 +189,7 @@ class AuditLogger:
         if hasattr(self.storage, "_client"):  # Redis backend
             client = tx.pipeline if tx else self.storage._client
             for key in keys:
-                await client.zadd(
-                    key, {event_json: datetime.now(timezone.utc).timestamp()}
-                )
+                await client.zadd(key, {event_json: datetime.now(UTC).timestamp()})
                 # Set TTL (90 days)
                 await client.expire(key, 90 * 24 * 3600)
         else:
@@ -238,7 +236,7 @@ class AuditLogger:
             (sum(recent_activity.values()) > 1000),  # 1000 actions recently
             # Time anomalies (activity at unusual hours)
             (
-                datetime.now(timezone.utc).hour in [1, 2, 3, 4]
+                datetime.now(UTC).hour in [1, 2, 3, 4]
                 and sum(recent_activity.values()) > 100
             ),
         ]
@@ -294,7 +292,7 @@ class AuditLogger:
 
     async def _store_alert(self, alert: SecurityAlert):
         """Store security alert."""
-        date_str = datetime.now(timezone.utc).strftime("%Y%m%d")
+        date_str = datetime.now(UTC).strftime("%Y%m%d")
 
         if hasattr(self.storage, "_client"):  # Redis backend
             # Store in sorted set by severity
@@ -310,7 +308,7 @@ class AuditLogger:
             # Also store by user
             await self.storage._client.zadd(
                 f"audit:alerts:user:{alert.user_id}",
-                {json.dumps(alert.to_dict()): datetime.now(timezone.utc).timestamp()},
+                {json.dumps(alert.to_dict()): datetime.now(UTC).timestamp()},
             )
 
     def add_alert_handler(self, handler: callable) -> None:
@@ -326,7 +324,7 @@ class AuditLogger:
 
         # Get from storage for longer period
         if hasattr(self.storage, "_client"):
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
             stored_activity = defaultdict(int)
 
             for h in range(hours):

@@ -4,11 +4,12 @@ This module handles basic graph operations including creation, deletion,
 modification, and querying of graphs.
 """
 
-from typing import Any, Optional, Union
+from typing import Any
+
 import networkx as nx
 from networkx.readwrite import json_graph
 
-from fastmcp import FastMCP
+from ...compat.fastmcp_compat import FastMCPCompat as FastMCP
 
 
 class GraphOpsHandler:
@@ -27,7 +28,7 @@ class GraphOpsHandler:
         async def create_graph(
             graph_id: str,
             graph_type: str = "undirected",
-            from_data: Optional[dict[str, Any]] = None,
+            from_data: dict[str, Any] | None = None,
         ) -> dict[str, Any]:
             """Create a new graph.
 
@@ -149,17 +150,17 @@ class GraphOpsHandler:
                 if G.is_directed():
                     info["is_weakly_connected"] = nx.is_weakly_connected(G)
                     info["is_strongly_connected"] = nx.is_strongly_connected(G)
-                    info[
-                        "number_weakly_connected_components"
-                    ] = nx.number_weakly_connected_components(G)
-                    info[
-                        "number_strongly_connected_components"
-                    ] = nx.number_strongly_connected_components(G)
+                    info["number_weakly_connected_components"] = (
+                        nx.number_weakly_connected_components(G)
+                    )
+                    info["number_strongly_connected_components"] = (
+                        nx.number_strongly_connected_components(G)
+                    )
                 else:
                     info["is_connected"] = nx.is_connected(G)
-                    info[
-                        "number_connected_components"
-                    ] = nx.number_connected_components(G)
+                    info["number_connected_components"] = (
+                        nx.number_connected_components(G)
+                    )
 
             # Sample nodes and edges
             info["sample_nodes"] = list(G.nodes())[:10]
@@ -170,8 +171,8 @@ class GraphOpsHandler:
         @self.mcp.tool()
         async def add_nodes(
             graph_id: str,
-            nodes: list[Union[str, int]],
-            attributes: Optional[dict[str, dict[str, Any]]] = None,
+            nodes: list[str | int],
+            attributes: dict[str, dict[str, Any]] | None = None,
         ) -> dict[str, Any]:
             """Add nodes to a graph.
 
@@ -209,8 +210,8 @@ class GraphOpsHandler:
         @self.mcp.tool()
         async def add_edges(
             graph_id: str,
-            edges: list[Union[list[Any], tuple[Any, Any]]],
-            attributes: Optional[dict[str, dict[str, Any]]] = None,
+            edges: list[list[Any] | tuple[Any, Any]],
+            attributes: dict[str, dict[str, Any]] | None = None,
         ) -> dict[str, Any]:
             """Add edges to a graph.
 
@@ -248,9 +249,7 @@ class GraphOpsHandler:
                 return {"error": f"Failed to add edges: {str(e)}"}
 
         @self.mcp.tool()
-        async def remove_nodes(
-            graph_id: str, nodes: list[Union[str, int]]
-        ) -> dict[str, Any]:
+        async def remove_nodes(graph_id: str, nodes: list[str | int]) -> dict[str, Any]:
             """Remove nodes from a graph.
 
             Args:
@@ -280,7 +279,7 @@ class GraphOpsHandler:
 
         @self.mcp.tool()
         async def remove_edges(
-            graph_id: str, edges: list[Union[list[Any], tuple[Any, Any]]]
+            graph_id: str, edges: list[list[Any] | tuple[Any, Any]]
         ) -> dict[str, Any]:
             """Remove edges from a graph.
 
@@ -338,10 +337,10 @@ class GraphOpsHandler:
         @self.mcp.tool()
         async def subgraph_extraction(
             graph_id: str,
-            nodes: Optional[list[Union[str, int]]] = None,
-            k_hop: Optional[int] = None,
-            center_node: Optional[Union[str, int]] = None,
-            new_graph_id: Optional[str] = None,
+            nodes: list[str | int] | None = None,
+            k_hop: int | None = None,
+            center_node: str | int | None = None,
+            new_graph_id: str | None = None,
         ) -> dict[str, Any]:
             """Extract a subgraph from an existing graph.
 
