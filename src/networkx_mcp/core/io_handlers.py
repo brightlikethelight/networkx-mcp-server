@@ -812,11 +812,16 @@ class GraphIOHandler:
 
     @staticmethod
     def _export_pickle(graph: nx.Graph, path: str | Path) -> str:
-        """Export graph to pickle format."""
+        """Export graph to pickle format.
+        
+        WARNING: Pickle format can contain arbitrary code. Only use with trusted data.
+        Consider using safer formats like JSON or GraphML for data interchange.
+        """
         if path is None:
             msg = "Path required for pickle export"
             raise ValueError(msg)
 
+        logger.warning("Using pickle format - ensure data is from trusted sources only")
         with open(path, "wb") as f:
             pickle.dump(graph, f, pickle.HIGHEST_PROTOCOL)
 
@@ -824,10 +829,27 @@ class GraphIOHandler:
 
     @staticmethod
     def _import_pickle(path: str | Path) -> nx.Graph:
-        """Import graph from pickle format."""
+        """Import graph from pickle format.
+        
+        SECURITY WARNING: Pickle can execute arbitrary code during deserialization.
+        Only load pickle files from trusted sources. Consider using safer formats.
+        """
         if path is None:
             msg = "Path required for pickle import"
             raise ValueError(msg)
+
+        logger.warning(f"Loading pickle file {path} - ensure this is from a trusted source")
+        
+        # Basic file size check to prevent loading extremely large files
+        try:
+            file_size = Path(path).stat().st_size
+            MAX_PICKLE_SIZE = 100 * 1024 * 1024  # 100MB limit
+            if file_size > MAX_PICKLE_SIZE:
+                msg = f"Pickle file too large: {file_size} bytes (max {MAX_PICKLE_SIZE})"
+                raise ValueError(msg)
+        except OSError as e:
+            logger.error(f"Error checking pickle file size: {e}")
+            raise
 
         with open(path, "rb") as f:
             return pickle.load(f)

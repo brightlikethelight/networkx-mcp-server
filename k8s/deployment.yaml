@@ -57,16 +57,9 @@ data:
 
 ---
 # Secret for sensitive configuration
-apiVersion: v1
-kind: Secret
-metadata:
-  name: networkx-mcp-secrets
-  namespace: networkx-mcp
-type: Opaque
-data:
-  postgres-password: cGFzc3dvcmQ=  # base64 encoded "password"
-  jwt-secret: c3VwZXItc2VjcmV0LWp3dC1rZXk=  # base64 encoded
-  redis-password: ""  # empty for development
+# IMPORTANT: Secrets must be created before deployment!
+# Run: ./k8s/create-secrets.sh
+# This will generate secure passwords and create the Kubernetes secret
 
 ---
 # Persistent Volume Claim for data storage

@@ -217,29 +217,59 @@ class FeatureFlagService(Component):
         return result
 
     def _evaluate_condition(self, condition: str, context: dict[str, Any]) -> bool:
-        """Evaluate a condition string with context variables."""
-        # Simple condition evaluation - in production, use a safe expression evaluator
+        """Evaluate a condition string with context variables using safe evaluation."""
         try:
-            # Create a safe evaluation environment
-            safe_globals = {
-                "__builtins__": {},
-                "str": str,
-                "int": int,
-                "float": float,
-                "bool": bool,
-                "len": len,
-                "isinstance": isinstance,
-                "in": lambda x, y: x in y,
-                "not": lambda x: not x,
-                "and": lambda x, y: x and y,
-                "or": lambda x, y: x or y,
-            }
-
-            # Add context variables
-            safe_locals = context.copy()
-
-            # Evaluate condition
-            return eval(condition, safe_globals, safe_locals)
+            # SECURITY: Use simple string matching instead of eval()
+            # This prevents code injection attacks
+            
+            # Support simple conditions like:
+            # - "user_type == 'premium'"
+            # - "region in ['us', 'eu']"
+            # - "version >= 2.0"
+            
+            # Parse condition safely
+            if " == " in condition:
+                key, value = condition.split(" == ", 1)
+                key = key.strip()
+                value = value.strip().strip("'\"")
+                return str(context.get(key, "")) == value
+                
+            elif " != " in condition:
+                key, value = condition.split(" != ", 1)
+                key = key.strip()
+                value = value.strip().strip("'\"")
+                return str(context.get(key, "")) != value
+                
+            elif " in " in condition:
+                key, values = condition.split(" in ", 1)
+                key = key.strip()
+                # Parse list safely - only allow simple string lists
+                if values.strip().startswith('[') and values.strip().endswith(']'):
+                    values_str = values.strip()[1:-1]
+                    value_list = [v.strip().strip("'\"") for v in values_str.split(',')]
+                    return str(context.get(key, "")) in value_list
+                    
+            elif " >= " in condition:
+                key, value = condition.split(" >= ", 1)
+                key = key.strip()
+                try:
+                    threshold = float(value.strip())
+                    return float(context.get(key, 0)) >= threshold
+                except ValueError:
+                    return False
+                    
+            elif " <= " in condition:
+                key, value = condition.split(" <= ", 1)
+                key = key.strip()
+                try:
+                    threshold = float(value.strip())
+                    return float(context.get(key, 0)) <= threshold
+                except ValueError:
+                    return False
+                    
+            # If no recognized pattern, default to False for security
+            logger.warning(f"Unrecognized condition pattern: {condition}")
+            return False
 
         except Exception as e:
             logger.error(f"Error evaluating condition '{condition}': {e}")

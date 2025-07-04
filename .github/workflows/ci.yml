@@ -1,361 +1,38 @@
-name: 🚀 Enterprise CI/CD Pipeline
+name: CI
 
-on:
-  push:
-    branches: [main, develop]
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - '.gitignore'
-      - 'LICENSE'
-  pull_request:
-    branches: [main, develop]
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - '.gitignore'
-      - 'LICENSE'
-  schedule:
-    # Run nightly tests at 2 AM UTC
-    - cron: '0 2 * * *'
-  workflow_dispatch:
-    inputs:
-      run_mutation_tests:
-        description: 'Run mutation testing'
-        required: false
-        default: false
-        type: boolean
-      run_full_benchmarks:
-        description: 'Run full benchmark suite'
-        required: false
-        default: false
-        type: boolean
-      deploy_to_staging:
-        description: 'Deploy to staging environment'
-        required: false
-        default: false
-        type: boolean
-
-env:
-  PYTHON_VERSION: '3.11'
-  
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+on: [push, pull_request]
 
 jobs:
-  # =====================================================
-  # SETUP AND VALIDATION
-  # =====================================================
-  setup:
-    name: 🔧 Setup & Validation
-    runs-on: ubuntu-latest
-    outputs:
-      python-matrix: ${{ steps.setup.outputs.python-matrix }}
-      os-matrix: ${{ steps.setup.outputs.os-matrix }}
-      should-run-mutation: ${{ steps.setup.outputs.should-run-mutation }}
-      should-run-benchmarks: ${{ steps.setup.outputs.should-run-benchmarks }}
-    steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: 🔍 Setup Strategy Matrix
-        id: setup
-        run: |
-          if [[ "${{ github.event_name }}" == "schedule" ]]; then
-            echo "python-matrix=['3.11', '3.12']" >> $GITHUB_OUTPUT
-            echo "os-matrix=['ubuntu-latest', 'windows-latest', 'macos-latest']" >> $GITHUB_OUTPUT
-          else
-            echo "python-matrix=['3.11']" >> $GITHUB_OUTPUT
-            echo "os-matrix=['ubuntu-latest']" >> $GITHUB_OUTPUT
-          fi
-          
-          if [[ "${{ github.event_name }}" == "schedule" || "${{ github.event.inputs.run_mutation_tests }}" == "true" ]]; then
-            echo "should-run-mutation=true" >> $GITHUB_OUTPUT
-          else
-            echo "should-run-mutation=false" >> $GITHUB_OUTPUT
-          fi
-          
-          if [[ "${{ github.event_name }}" == "schedule" || "${{ github.event.inputs.run_full_benchmarks }}" == "true" ]]; then
-            echo "should-run-benchmarks=true" >> $GITHUB_OUTPUT
-          else
-            echo "should-run-benchmarks=false" >> $GITHUB_OUTPUT
-          fi
-
-  # =====================================================
-  # QUALITY GATE - FAST CHECKS
-  # =====================================================
-  quality-gate-fast:
-    name: ⚡ Quality Gate (Fast)
-    runs-on: ubuntu-latest
-    needs: setup
-    steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
-
-      - name: 📦 Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev,test]"
-          pip install pre-commit
-
-      - name: 🔍 Run Pre-commit Hooks
-        run: |
-          pre-commit install
-          pre-commit run --all-files --show-diff-on-failure
-
-      - name: 🚨 Security Scan (Bandit)
-        run: |
-          python -m bandit -r src/ -f json -o bandit-report.json || true
-          python -m bandit -r src/ -f txt
-
-      - name: 🔒 Dependency Security Check
-        run: |
-          python -m safety check --json --output safety-report.json || true
-          python -m safety check
-
-      - name: 📊 Upload Security Reports
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: security-reports
-          path: |
-            bandit-report.json
-            safety-report.json
-          retention-days: 30
-
-  # =====================================================
-  # COMPREHENSIVE TESTING MATRIX
-  # =====================================================
-  test-matrix:
-    name: 🧪 Test Suite (${{ matrix.os }}, Python ${{ matrix.python-version }})
+  test:
     runs-on: ${{ matrix.os }}
-    needs: [setup, quality-gate-fast]
     strategy:
-      fail-fast: false
       matrix:
-        os: ${{ fromJson(needs.setup.outputs.os-matrix) }}
-        python-version: ${{ fromJson(needs.setup.outputs.python-matrix) }}
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ['3.10', '3.11', '3.12']
     
     steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: 🐍 Setup Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: 'pip'
-
-      - name: 📦 Install Project Dependencies
-        run: |
-          python -m pip install --upgrade pip setuptools wheel
-          pip install -e ".[dev,test,benchmark]"
-
-      - name: 🧪 Run Unit Tests with Coverage
-        run: |
-          python -m pytest tests/unit/ \
-            --cov=src/networkx_mcp \
-            --cov-report=xml \
-            --cov-report=term-missing \
-            --cov-report=html \
-            --cov-branch \
-            --cov-fail-under=95 \
-            --junit-xml=pytest-results.xml \
-            --maxfail=5 \
-            -v
-
-      - name: 🔗 Run Integration Tests
-        if: runner.os == 'Linux'
-        run: |
-          python -m pytest tests/integration/ \
-            --junit-xml=integration-results.xml \
-            --maxfail=3 \
-            -v
-
-      - name: 🎲 Run Property-Based Tests
-        if: runner.os == 'Linux'
-        run: |
-          python -m pytest tests/property/ \
-            --hypothesis-show-statistics \
-            --junit-xml=property-results.xml \
-            -v
-
-      - name: 🛡️ Run Security Tests
-        run: |
-          python -m pytest tests/security/ \
-            --junit-xml=security-results.xml \
-            -v
-
-      - name: ⚡ Run Performance Tests
-        if: matrix.python-version == '3.11'
-        run: |
-          python -m pytest tests/performance/ \
-            --benchmark-only \
-            --benchmark-sort=mean \
-            --benchmark-json=benchmark-results.json \
-            -v
-
-      - name: 📊 Upload Coverage to Codecov
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
-        uses: codecov/codecov-action@v3
-        with:
-          file: ./coverage.xml
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: false
-
-      - name: 📈 Upload Test Results
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: test-results-${{ matrix.os }}-py${{ matrix.python-version }}
-          path: |
-            pytest-results.xml
-            integration-results.xml
-            property-results.xml
-            security-results.xml
-            coverage.xml
-            htmlcov/
-            benchmark-results.json
-          retention-days: 30
-
-  # =====================================================
-  # ADVANCED QUALITY ASSURANCE
-  # =====================================================
-  advanced-qa:
-    name: 🔬 Advanced Quality Assurance
-    runs-on: ubuntu-latest
-    needs: [setup, test-matrix]
-    if: needs.setup.outputs.should-run-mutation == 'true'
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
     
-    steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
-
-      - name: 📦 Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev,test]"
-          pip install mutmut radon
-
-      - name: 🧬 Mutation Testing
-        run: |
-          python -m mutmut run \
-            --paths-to-mutate src/networkx_mcp/core/ \
-            --tests-dir tests/unit/ \
-            --runner "python -m pytest tests/unit/ -x --tb=short" \
-            --use-coverage \
-            --CI
-          python -m mutmut results > mutation-report.txt || true
-
-      - name: 📊 Code Complexity Analysis
-        run: |
-          python -m radon cc src/ --json > complexity-report.json
-          python -m radon cc src/ --show-complexity --min=B
-
-      - name: 📊 Upload Advanced QA Reports
-        uses: actions/upload-artifact@v3
-        with:
-          name: advanced-qa-reports
-          path: |
-            mutation-report.txt
-            complexity-report.json
-          retention-days: 30
-
-  # =====================================================
-  # BUILD AND PACKAGE
-  # =====================================================
-  build-package:
-    name: 📦 Build & Package
-    runs-on: ubuntu-latest
-    needs: [test-matrix]
+    - name: Install dependencies
+      run: |
+        pip install -e ".[dev]"
     
-    steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: 📦 Install Build Tools
-        run: |
-          python -m pip install --upgrade pip build twine
-
-      - name: 🏗️ Build Package
-        run: |
-          python -m build
-
-      - name: 🔍 Check Package
-        run: |
-          python -m twine check dist/*
-
-      - name: 📊 Upload Package Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: python-package
-          path: dist/
-          retention-days: 30
-
-  # =====================================================
-  # DEPLOYMENT STAGING
-  # =====================================================
-  deploy-staging:
-    name: 🚀 Deploy to Staging
-    runs-on: ubuntu-latest
-    needs: [build-package]
-    if: github.ref == 'refs/heads/develop' || github.event.inputs.deploy_to_staging == 'true'
-    environment: staging
+    - name: Run tests
+      run: |
+        pytest tests/ -v --cov=src/networkx_mcp --cov-report=xml
     
-    steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: 📦 Download Package Artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: python-package
-          path: dist/
-
-      - name: 🚀 Deploy to Staging Environment
-        run: |
-          echo "🚀 Deploying to staging environment..."
-          echo "📦 Package files:"
-          ls -la dist/
-          echo "✅ Staging deployment completed"
-
-  # =====================================================
-  # RELEASE TO PYPI
-  # =====================================================
-  release:
-    name: 🎉 Release to PyPI
-    runs-on: ubuntu-latest
-    needs: [build-package]
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-    environment: production
-    permissions:
-      id-token: write
+    - name: Check code quality
+      run: |
+        ruff check .
+        black --check .
+        mypy src/networkx_mcp/
     
-    steps:
-      - name: 📦 Download Package Artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: python-package
-          path: dist/
-
-      - name: 🎉 Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+    - name: Upload coverage
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: true

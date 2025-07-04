@@ -30,6 +30,21 @@
 - **📊 Overall Status**: 20/20 features working (100% functionality)
 - **🧪 Test Coverage**: Comprehensive with 33+ test files
 
+## 🔒 Security Notice
+
+**⚠️ IMPORTANT: This server is in active development and has security limitations:**
+
+- **No Authentication**: Currently no user authentication or API keys
+- **No Authorization**: All users have full access to all operations
+- **HTTP Only**: No built-in HTTPS/TLS support (use reverse proxy)
+- **In-Memory Storage**: All data is lost on restart
+
+**For production use:**
+1. Deploy behind an authenticated reverse proxy (nginx, traefik)
+2. Use environment variables for all secrets
+3. Enable rate limiting and monitoring
+4. See [SECURITY.md](SECURITY.md) for full details
+
 ## 🚀 Quick Start
 
 ### Prerequisites

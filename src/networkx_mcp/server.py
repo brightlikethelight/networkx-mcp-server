@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Minimal working NetworkX MCP Server - Critical Fix Version."""
+"""Minimal working NetworkX MCP Server - Security Hardened Version."""
 
 import logging
 from typing import Any
@@ -12,6 +12,31 @@ logger = logging.getLogger(__name__)
 
 # Use compatibility layer instead of direct FastMCP import
 from .compat.fastmcp_compat import FastMCPCompat
+
+# Import security validation
+from .security.input_validation import (
+    validate_id,
+    validate_node_list,
+    validate_edge_list,
+    validate_attributes,
+    validate_graph_type,
+    safe_error_message,
+    ValidationError,
+    MAX_NODES_PER_REQUEST,
+    MAX_EDGES_PER_REQUEST,
+)
+
+# Import resource limits
+from .security.resource_limits import (
+    with_resource_limits,
+    check_memory_limit,
+    check_graph_size,
+    check_operation_feasibility,
+    estimate_graph_size_mb,
+    get_resource_status,
+    ResourceLimitError,
+    LIMITS,
+)
 
 # Create the MCP server instance
 mcp = FastMCPCompat(
@@ -34,98 +59,155 @@ except ImportError:
 
 
 @mcp.tool(description="Create a new graph")
+@with_resource_limits
 def create_graph(
     name: str, graph_type: str = "undirected", data: dict[str, Any] | None = None
 ) -> dict[str, Any]:
-    """Create a new NetworkX graph."""
+    """Create a new NetworkX graph with security validation and resource limits."""
     try:
-        if name in graphs:
-            return {"error": f"Graph '{name}' already exists"}
+        # Validate inputs
+        safe_name = validate_id(name, "Graph name")
+        safe_type = validate_graph_type(graph_type)
+        
+        if safe_name in graphs:
+            return {"error": f"Graph '{safe_name}' already exists"}
 
         # Create appropriate graph type
-        if graph_type == "directed":
+        if safe_type == "directed":
             G = nx.DiGraph()
-        elif graph_type == "multi":
+        elif safe_type == "multi":
             G = nx.MultiGraph()
-        elif graph_type == "multi_directed":
+        elif safe_type == "multi_directed":
             G = nx.MultiDiGraph()
         else:
             G = nx.Graph()
 
-        # Add any initial data
+        # Add any initial data with validation
         if data:
             if "nodes" in data:
-                G.add_nodes_from(data["nodes"])
+                validated_nodes = validate_node_list(data["nodes"])
+                G.add_nodes_from(validated_nodes)
             if "edges" in data:
-                G.add_edges_from(data["edges"])
+                validated_edges = validate_edge_list(data["edges"])
+                G.add_edges_from(validated_edges)
 
-        graphs[name] = G
+        # Check graph size before storing
+        check_graph_size(G)
+        
+        graphs[safe_name] = G
 
         return {
             "success": True,
-            "name": name,
-            "type": graph_type,
+            "name": safe_name,
+            "type": safe_type,
             "nodes": G.number_of_nodes(),
             "edges": G.number_of_edges(),
+            "estimated_size_mb": estimate_graph_size_mb(G),
         }
+    except ValidationError as e:
+        logger.warning(f"Validation error in create_graph: {e}")
+        return {"error": str(e)}
+    except ResourceLimitError as e:
+        logger.warning(f"Resource limit in create_graph: {e}")
+        return {"error": str(e)}
     except Exception as e:
         logger.error(f"Error creating graph: {e}")
-        return {"error": str(e)}
+        return {"error": safe_error_message(e)}
 
 
 @mcp.tool(description="Add nodes to a graph")
+@with_resource_limits
 def add_nodes(graph_name: str, nodes: list[Any]) -> dict[str, Any]:
-    """Add nodes to an existing graph."""
+    """Add nodes to an existing graph with security validation and resource limits."""
     try:
-        if graph_name not in graphs:
-            return {"error": f"Graph '{graph_name}' not found"}
+        # Validate inputs
+        safe_graph_name = validate_id(graph_name, "Graph name")
+        validated_nodes = validate_node_list(nodes, MAX_NODES_PER_REQUEST)
+        
+        if safe_graph_name not in graphs:
+            return {"error": f"Graph '{safe_graph_name}' not found"}
 
-        G = graphs[graph_name]
-        G.add_nodes_from(nodes)
+        G = graphs[safe_graph_name]
+        
+        # Check if adding these nodes would exceed limits
+        total_nodes = G.number_of_nodes() + len(validated_nodes)
+        if total_nodes > MAX_NODES_PER_REQUEST * 10:  # Reasonable total limit
+            return {"error": f"Graph would exceed maximum node limit"}
+
+        G.add_nodes_from(validated_nodes)
+        
+        # Check graph size after adding nodes
+        check_graph_size(G)
 
         return {
             "success": True,
-            "graph": graph_name,
-            "nodes_added": len(nodes),
+            "graph": safe_graph_name,
+            "nodes_added": len(validated_nodes),
             "total_nodes": G.number_of_nodes(),
+            "estimated_size_mb": estimate_graph_size_mb(G),
         }
+    except ValidationError as e:
+        logger.warning(f"Validation error in add_nodes: {e}")
+        return {"error": str(e)}
     except Exception as e:
         logger.error(f"Error adding nodes: {e}")
-        return {"error": str(e)}
+        return {"error": safe_error_message(e)}
 
 
 @mcp.tool(description="Add edges to a graph")
+@with_resource_limits
 def add_edges(graph_name: str, edges: list[list[Any]]) -> dict[str, Any]:
-    """Add edges to an existing graph."""
+    """Add edges to an existing graph with security validation and resource limits."""
     try:
-        if graph_name not in graphs:
-            return {"error": f"Graph '{graph_name}' not found"}
+        # Validate inputs
+        safe_graph_name = validate_id(graph_name, "Graph name")
+        validated_edges = validate_edge_list(edges, MAX_EDGES_PER_REQUEST)
+        
+        if safe_graph_name not in graphs:
+            return {"error": f"Graph '{safe_graph_name}' not found"}
 
-        G = graphs[graph_name]
-        G.add_edges_from(edges)
+        G = graphs[safe_graph_name]
+        
+        # Check if adding these edges would exceed limits
+        total_edges = G.number_of_edges() + len(validated_edges)
+        if total_edges > MAX_EDGES_PER_REQUEST * 10:  # Reasonable total limit
+            return {"error": f"Graph would exceed maximum edge limit"}
+
+        G.add_edges_from(validated_edges)
+        
+        # Check graph size after adding edges
+        check_graph_size(G)
 
         return {
             "success": True,
-            "graph": graph_name,
-            "edges_added": len(edges),
+            "graph": safe_graph_name,
+            "edges_added": len(validated_edges),
             "total_edges": G.number_of_edges(),
+            "estimated_size_mb": estimate_graph_size_mb(G),
         }
+    except ValidationError as e:
+        logger.warning(f"Validation error in add_edges: {e}")
+        return {"error": str(e)}
     except Exception as e:
         logger.error(f"Error adding edges: {e}")
-        return {"error": str(e)}
+        return {"error": safe_error_message(e)}
 
 
 @mcp.tool(description="Get basic graph information")
+@with_resource_limits
 def graph_info(graph_name: str) -> dict[str, Any]:
-    """Get information about a graph."""
+    """Get information about a graph with security validation and resource limits."""
     try:
-        if graph_name not in graphs:
-            return {"error": f"Graph '{graph_name}' not found"}
+        # Validate input
+        safe_graph_name = validate_id(graph_name, "Graph name")
+        
+        if safe_graph_name not in graphs:
+            return {"error": f"Graph '{safe_graph_name}' not found"}
 
-        G = graphs[graph_name]
+        G = graphs[safe_graph_name]
 
         info = {
-            "name": graph_name,
+            "name": safe_graph_name,
             "type": G.__class__.__name__,
             "nodes": G.number_of_nodes(),
             "edges": G.number_of_edges(),
@@ -134,22 +216,30 @@ def graph_info(graph_name: str) -> dict[str, Any]:
             "density": nx.density(G) if G.number_of_nodes() > 0 else 0,
         }
 
-        # Add more info for non-empty graphs
-        if G.number_of_nodes() > 0:
+        # Add more info for non-empty graphs (with safety checks for large graphs)
+        if G.number_of_nodes() > 0 and G.number_of_nodes() < 10000:
             if not G.is_directed():
-                info["is_connected"] = nx.is_connected(G)
-                if info["is_connected"]:
-                    info["diameter"] = nx.diameter(G)
+                try:
+                    info["is_connected"] = nx.is_connected(G)
+                    if info["is_connected"] and G.number_of_nodes() < 1000:
+                        info["diameter"] = nx.diameter(G)
+                except Exception:
+                    # Skip expensive operations on large graphs
+                    pass
 
         return info
+    except ValidationError as e:
+        logger.warning(f"Validation error in graph_info: {e}")
+        return {"error": str(e)}
     except Exception as e:
         logger.error(f"Error getting graph info: {e}")
-        return {"error": str(e)}
+        return {"error": safe_error_message(e)}
 
 
 @mcp.tool(description="List all available graphs")
+@with_resource_limits
 def list_graphs() -> dict[str, Any]:
-    """List all graphs in memory."""
+    """List all graphs in memory with resource limits."""
     try:
         graph_list = []
         for name, G in graphs.items():
@@ -169,83 +259,133 @@ def list_graphs() -> dict[str, Any]:
 
 
 @mcp.tool(description="Delete a graph")
+@with_resource_limits
 def delete_graph(graph_name: str) -> dict[str, Any]:
-    """Delete a graph from memory."""
+    """Delete a graph from memory with security validation and resource limits."""
     try:
-        if graph_name not in graphs:
-            return {"error": f"Graph '{graph_name}' not found"}
+        # Validate input
+        safe_graph_name = validate_id(graph_name, "Graph name")
+        
+        if safe_graph_name not in graphs:
+            return {"error": f"Graph '{safe_graph_name}' not found"}
 
-        del graphs[graph_name]
+        del graphs[safe_graph_name]
 
-        return {"success": True, "deleted": graph_name, "remaining_graphs": len(graphs)}
+        return {"success": True, "deleted": safe_graph_name, "remaining_graphs": len(graphs)}
+    except ValidationError as e:
+        logger.warning(f"Validation error in delete_graph: {e}")
+        return {"error": str(e)}
     except Exception as e:
         logger.error(f"Error deleting graph: {e}")
-        return {"error": str(e)}
+        return {"error": safe_error_message(e)}
 
 
 @mcp.tool(description="Compute shortest path between two nodes")
+@with_resource_limits
 def shortest_path(
     graph_name: str, source: Any, target: Any, weight: str | None = None
 ) -> dict[str, Any]:
-    """Find shortest path between two nodes."""
+    """Find shortest path between two nodes with security validation and resource limits."""
     try:
-        if graph_name not in graphs:
-            return {"error": f"Graph '{graph_name}' not found"}
+        # Validate inputs
+        safe_graph_name = validate_id(graph_name, "Graph name")
+        
+        # Allow integers for node IDs
+        if isinstance(source, int):
+            safe_source = source
+        else:
+            safe_source = validate_id(source, "Source node")
+            
+        if isinstance(target, int):
+            safe_target = target
+        else:
+            safe_target = validate_id(target, "Target node")
+        
+        if weight is not None:
+            safe_weight = validate_id(weight, "Weight attribute")
+        else:
+            safe_weight = None
+        
+        if safe_graph_name not in graphs:
+            return {"error": f"Graph '{safe_graph_name}' not found"}
 
-        G = graphs[graph_name]
+        G = graphs[safe_graph_name]
+        
+        # Check if operation is feasible for graph size
+        check_operation_feasibility(G, "shortest_path")
 
-        if source not in G:
-            return {"error": f"Source node '{source}' not in graph"}
-        if target not in G:
-            return {"error": f"Target node '{target}' not in graph"}
+        if safe_source not in G:
+            return {"error": f"Source node '{safe_source}' not in graph"}
+        if safe_target not in G:
+            return {"error": f"Target node '{safe_target}' not in graph"}
 
         try:
-            if weight:
-                path = nx.shortest_path(G, source, target, weight=weight)
-                length = nx.shortest_path_length(G, source, target, weight=weight)
+            if safe_weight:
+                path = nx.shortest_path(G, safe_source, safe_target, weight=safe_weight)
+                length = nx.shortest_path_length(G, safe_source, safe_target, weight=safe_weight)
             else:
-                path = nx.shortest_path(G, source, target)
-                length = nx.shortest_path_length(G, source, target)
+                path = nx.shortest_path(G, safe_source, safe_target)
+                length = nx.shortest_path_length(G, safe_source, safe_target)
 
             return {
                 "success": True,
                 "path": path,
                 "length": length,
-                "weighted": weight is not None,
+                "weighted": safe_weight is not None,
             }
         except nx.NetworkXNoPath:
             return {
                 "success": False,
-                "error": f"No path exists between '{source}' and '{target}'",
+                "error": f"No path exists between '{safe_source}' and '{safe_target}'",
             }
+    except ValidationError as e:
+        logger.warning(f"Validation error in shortest_path: {e}")
+        return {"error": str(e)}
     except Exception as e:
         logger.error(f"Error finding shortest path: {e}")
-        return {"error": str(e)}
+        return {"error": safe_error_message(e)}
 
 
 @mcp.tool(description="Get node degree information")
+@with_resource_limits
 def node_degree(graph_name: str, node: Any | None = None) -> dict[str, Any]:
-    """Get degree information for nodes."""
+    """Get degree information for nodes with security validation and resource limits."""
     try:
-        if graph_name not in graphs:
-            return {"error": f"Graph '{graph_name}' not found"}
-
-        G = graphs[graph_name]
-
+        # Validate inputs
+        safe_graph_name = validate_id(graph_name, "Graph name")
+        
         if node is not None:
-            if node not in G:
-                return {"error": f"Node '{node}' not in graph"}
+            # Allow integers for node IDs
+            if isinstance(node, int):
+                safe_node = node
+            else:
+                safe_node = validate_id(node, "Node")
+        else:
+            safe_node = None
+        
+        if safe_graph_name not in graphs:
+            return {"error": f"Graph '{safe_graph_name}' not found"}
+
+        G = graphs[safe_graph_name]
+
+        if safe_node is not None:
+            if safe_node not in G:
+                return {"error": f"Node '{safe_node}' not in graph"}
 
             if G.is_directed():
                 return {
-                    "node": node,
-                    "in_degree": G.in_degree(node),
-                    "out_degree": G.out_degree(node),
-                    "total_degree": G.degree(node),
+                    "node": safe_node,
+                    "in_degree": G.in_degree(safe_node),
+                    "out_degree": G.out_degree(safe_node),
+                    "total_degree": G.degree(safe_node),
                 }
             else:
-                return {"node": node, "degree": G.degree(node)}
+                return {"node": safe_node, "degree": G.degree(safe_node)}
         else:
+            # Limit output for large graphs
+            if G.number_of_nodes() > 10000:
+                return {"error": "Graph too large to return all degrees. Please query specific nodes."}
+                
             # Return degree for all nodes
             if G.is_directed():
                 degrees = {
@@ -257,9 +397,22 @@ def node_degree(graph_name: str, node: Any | None = None) -> dict[str, Any]:
                 degrees = {"degrees": dict(G.degree())}
 
             return degrees
+    except ValidationError as e:
+        logger.warning(f"Validation error in node_degree: {e}")
+        return {"error": str(e)}
     except Exception as e:
         logger.error(f"Error getting node degree: {e}")
-        return {"error": str(e)}
+        return {"error": safe_error_message(e)}
+
+
+@mcp.tool(description="Get current resource usage and limits")
+def resource_status() -> dict[str, Any]:
+    """Get current resource usage and limits."""
+    try:
+        return get_resource_status()
+    except Exception as e:
+        logger.error(f"Error getting resource status: {e}")
+        return {"error": safe_error_message(e)}
 
 
 class NetworkXMCPServer:
