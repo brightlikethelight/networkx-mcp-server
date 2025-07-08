@@ -7,7 +7,7 @@ from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from typing import Any
 
-from ..core.base import Component
+from ..core.base import Component, ComponentStatus
 
 logger = logging.getLogger(__name__)
 
@@ -177,6 +177,28 @@ class MetricsCollector(Component):
             self._histograms.clear()
             self.metrics.clear()
             logger.info("All metrics reset")
+    
+    async def initialize(self) -> None:
+        """Initialize the metrics collector."""
+        await self._set_status(ComponentStatus.READY)
+        logger.info(f"Metrics collector {self.name} initialized")
+    
+    async def shutdown(self) -> None:
+        """Shutdown the metrics collector."""
+        await self._set_status(ComponentStatus.SHUTTING_DOWN)
+        self.reset_metrics()
+        await self._set_status(ComponentStatus.SHUTDOWN)
+        logger.info(f"Metrics collector {self.name} shutdown")
+    
+    async def health_check(self) -> dict[str, Any]:
+        """Check metrics collector health."""
+        return {
+            "healthy": self.status == ComponentStatus.READY,
+            "metric_series_count": len(self.metrics),
+            "counter_count": len(self._counters),
+            "gauge_count": len(self._gauges),
+            "histogram_count": len(self._histograms)
+        }
 
     def export_prometheus_format(self) -> str:
         """Export metrics in Prometheus format."""
@@ -288,3 +310,55 @@ class MetricsExporter(Component):
         else:
             logger.error(f"Unsupported export format: {format_type}")
             return False
+
+
+# Simple metric classes for basic use cases
+class Counter:
+    """Simple counter metric."""
+    
+    def __init__(self, name: str, description: str = ""):
+        self.name = name
+        self.description = description
+        self._value = 0.0
+    
+    def increment(self, value: float = 1.0):
+        """Increment the counter."""
+        self._value += value
+    
+    def get_value(self) -> float:
+        """Get current counter value."""
+        return self._value
+
+
+class Gauge:
+    """Simple gauge metric."""
+    
+    def __init__(self, name: str, description: str = ""):
+        self.name = name
+        self.description = description
+        self._value = 0.0
+    
+    def set(self, value: float):
+        """Set the gauge value."""
+        self._value = value
+    
+    def get_value(self) -> float:
+        """Get current gauge value."""
+        return self._value
+
+
+class Histogram:
+    """Simple histogram metric."""
+    
+    def __init__(self, name: str, description: str = ""):
+        self.name = name
+        self.description = description
+        self._observations = []
+    
+    def observe(self, value: float):
+        """Record an observation."""
+        self._observations.append(value)
+    
+    def get_observations(self) -> list[float]:
+        """Get all observations."""
+        return self._observations.copy()

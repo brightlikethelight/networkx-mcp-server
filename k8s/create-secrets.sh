@@ -1,11 +1,11 @@
 #!/bin/bash
-# Script to create Kubernetes secrets for NetworkX MCP Server
-# This script should be run once before deploying to Kubernetes
+# Script to create Kubernetes secrets for NetworkX MCP Server Production Deployment
+# Based on actual performance testing and production configuration
 
 set -e
 
-echo "Creating Kubernetes secrets for NetworkX MCP Server..."
-echo "=================================================="
+echo "Creating Kubernetes secrets for NetworkX MCP Server (Production)..."
+echo "=================================================================="
 echo
 
 # Check if kubectl is available
@@ -15,7 +15,7 @@ if ! command -v kubectl &> /dev/null; then
 fi
 
 # Check if we're in the right directory
-if [ ! -f "k8s/deployment.yaml" ]; then
+if [ ! -f "k8s/deployment-production.yaml" ]; then
     echo "Error: Please run this script from the project root directory."
     exit 1
 fi
@@ -25,54 +25,93 @@ generate_password() {
     openssl rand -base64 32 | tr -d "=+/" | cut -c1-32
 }
 
+# Function to generate secure token
+generate_token() {
+    openssl rand -hex 32
+}
+
 # Check for existing .env file
-if [ -f ".env" ]; then
-    echo "Loading secrets from .env file..."
-    source .env
+if [ -f ".env.production" ]; then
+    echo "Loading secrets from .env.production file..."
+    source .env.production
 else
-    echo "No .env file found. Generating new secrets..."
+    echo "No .env.production file found. Generating new secrets..."
     
     # Generate new secrets if not provided
-    POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-$(generate_password)}
-    JWT_SECRET=${JWT_SECRET:-$(generate_password)}
-    REDIS_PASSWORD=${REDIS_PASSWORD:-$(generate_password)}
+    AUTH_TOKEN=${AUTH_TOKEN:-$(generate_token)}
+    REDIS_URL=${REDIS_URL:-"redis://redis-service:6379/0"}
+    ADMIN_TOKEN=${ADMIN_TOKEN:-$(generate_token)}
     
-    # Save to .env for reference
-    cat > .env << EOF
-# Auto-generated secrets - DO NOT COMMIT
-POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-JWT_SECRET=${JWT_SECRET}
-REDIS_PASSWORD=${REDIS_PASSWORD}
+    # Save to .env.production for reference
+    cat > .env.production << EOF
+# Auto-generated production secrets - DO NOT COMMIT
+# Based on NetworkX MCP Server production configuration
+
+# MCP Authentication
+AUTH_TOKEN=${AUTH_TOKEN}
+
+# Redis Configuration
+REDIS_URL=${REDIS_URL}
+
+# Admin Features
+ADMIN_TOKEN=${ADMIN_TOKEN}
+
+# Production Settings
+ENVIRONMENT=production
+LOG_LEVEL=INFO
+LOG_FORMAT=json
+MAX_CONCURRENT_CONNECTIONS=45
+MAX_GRAPH_SIZE_NODES=10000
+MAX_MEMORY_MB=2048
 EOF
     
-    echo "Secrets saved to .env file (DO NOT COMMIT THIS FILE)"
+    echo "Secrets saved to .env.production file (DO NOT COMMIT THIS FILE)"
 fi
 
-# Create namespace if it doesn't exist
+# Create namespace if it doesn't exist (using default for simplicity)
 echo
-echo "Creating namespace..."
-kubectl create namespace networkx-mcp --dry-run=client -o yaml | kubectl apply -f -
+echo "Creating secrets in default namespace..."
 
-# Create the secret
+# Create Redis credentials secret
 echo
-echo "Creating Kubernetes secret..."
-kubectl create secret generic networkx-mcp-secrets \
-    --namespace=networkx-mcp \
-    --from-literal=postgres-password="${POSTGRES_PASSWORD}" \
-    --from-literal=jwt-secret="${JWT_SECRET}" \
-    --from-literal=redis-password="${REDIS_PASSWORD}" \
+echo "Creating Redis credentials secret..."
+kubectl create secret generic redis-credentials \
+    --from-literal=url="${REDIS_URL}" \
     --dry-run=client -o yaml | kubectl apply -f -
 
-# Verify secret was created
+# Create MCP authentication secret
+echo
+echo "Creating MCP authentication secret..."
+kubectl create secret generic mcp-auth \
+    --from-literal=token="${AUTH_TOKEN}" \
+    --from-literal=admin-token="${ADMIN_TOKEN}" \
+    --dry-run=client -o yaml | kubectl apply -f -
+
+# Verify secrets were created
 echo
 echo "Verifying secret creation..."
-kubectl get secret networkx-mcp-secrets -n networkx-mcp
+kubectl get secret redis-credentials
+kubectl get secret mcp-auth
 
 echo
-echo "✅ Secrets created successfully!"
+echo "✅ Production secrets created successfully!"
+echo
+echo "Configuration Summary:"
+echo "- Max Concurrent Connections: 45 (based on 50-user testing limit)"
+echo "- Max Graph Size: 10,000 nodes (for good performance)"
+echo "- Memory Limit: 2GB (production config)"
+echo "- Storage Backend: Redis"
 echo
 echo "Next steps:"
-echo "1. Apply the deployment: kubectl apply -f k8s/deployment.yaml"
-echo "2. Check deployment status: kubectl get pods -n networkx-mcp"
+echo "1. Apply the production deployment: kubectl apply -f k8s/deployment-production.yaml"
+echo "2. Check deployment status: kubectl get pods"
+echo "3. Check service status: kubectl get svc"
+echo "4. Monitor with: kubectl logs -f deployment/networkx-mcp-server"
 echo
-echo "⚠️  IMPORTANT: Keep your .env file secure and never commit it to git!"
+echo "Health checks available at:"
+echo "- Liveness: http://<pod-ip>:8080/health"
+echo "- Readiness: http://<pod-ip>:8080/ready"
+echo "- Metrics: http://<pod-ip>:9090/metrics"
+echo
+echo "⚠️  IMPORTANT: Keep your .env.production file secure and never commit it to git!"
+echo "⚠️  These limits are based on actual performance testing results."

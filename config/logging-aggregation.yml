@@ -1,0 +1,431 @@
+# Log Aggregation Configuration for NetworkX MCP Server
+# This file demonstrates configurations for popular log aggregation tools
+
+# Fluentd Configuration
+fluentd:
+  source:
+    "@type": "tail"
+    path: "/var/log/networkx-mcp/*.json"
+    pos_file: "/var/log/fluentd/networkx-mcp.log.pos"
+    tag: "networkx.mcp.*"
+    format: "json"
+    time_key: "timestamp"
+    time_format: "%Y-%m-%dT%H:%M:%S.%LZ"
+  
+  filter:
+    - "@type": "record_transformer"
+      record:
+        service: "networkx-mcp-server"
+        environment: "${ENV}"
+    
+    - "@type": "grep"
+      regexp:
+        level: "INFO|WARN|ERROR|CRITICAL"
+  
+  match:
+    "@type": "elasticsearch"
+    host: "elasticsearch.logging.svc.cluster.local"
+    port: 9200
+    index_name: "networkx-mcp-logs"
+    type_name: "_doc"
+    include_timestamp: true
+    
+    # Index template for Elasticsearch
+    template_name: "networkx-mcp"
+    template_overwrite: true
+    template:
+      settings:
+        number_of_shards: 1
+        number_of_replicas: 1
+      mappings:
+        properties:
+          timestamp:
+            type: "date"
+            format: "strict_date_optional_time"
+          level:
+            type: "keyword"
+          logger:
+            type: "keyword"
+          message:
+            type: "text"
+          correlation_id:
+            type: "keyword"
+          context:
+            type: "object"
+            properties:
+              operation:
+                type: "keyword"
+              user_id:
+                type: "keyword"
+              graph_name:
+                type: "keyword"
+              duration_ms:
+                type: "float"
+          extra:
+            type: "object"
+          exception:
+            type: "object"
+            properties:
+              type:
+                type: "keyword"
+              message:
+                type: "text"
+
+# Logstash Configuration
+logstash:
+  input:
+    file:
+      path: "/var/log/networkx-mcp/*.json"
+      start_position: "beginning"
+      codec: "json"
+      type: "networkx-mcp"
+  
+  filter:
+    - if: '[level] == "DEBUG"'
+      drop: {}
+    
+    - mutate:
+        add_field:
+          service: "networkx-mcp-server"
+          environment: "%{ENV}"
+    
+    - if: '[correlation_id]'
+      mutate:
+        add_field:
+          trace_id: "%{correlation_id}"
+    
+    - if: '[context][duration_ms]'
+      mutate:
+        convert:
+          "[context][duration_ms]": "float"
+    
+    - date:
+        match: ["timestamp", "ISO8601"]
+        target: "@timestamp"
+  
+  output:
+    elasticsearch:
+      hosts: ["elasticsearch:9200"]
+      index: "networkx-mcp-logs-%{+YYYY.MM.dd}"
+      template_name: "networkx-mcp"
+      template_overwrite: true
+
+# Promtail (Grafana Loki) Configuration
+promtail:
+  server:
+    http_listen_port: 9080
+    grpc_listen_port: 0
+  
+  positions:
+    filename: /tmp/positions.yaml
+  
+  clients:
+    - url: http://loki:3100/loki/api/v1/push
+  
+  scrape_configs:
+    - job_name: networkx-mcp
+      static_configs:
+        - targets:
+            - localhost
+          labels:
+            job: networkx-mcp-server
+            service: networkx-mcp
+            environment: "${ENV}"
+            __path__: /var/log/networkx-mcp/*.json
+      
+      pipeline_stages:
+        - json:
+            expressions:
+              level: level
+              timestamp: timestamp
+              logger: logger
+              message: message
+              correlation_id: correlation_id
+              operation: context.operation
+              user_id: context.user_id
+              duration_ms: context.duration_ms
+        
+        - timestamp:
+            source: timestamp
+            format: RFC3339Nano
+        
+        - labels:
+            level:
+            logger:
+            operation:
+        
+        - output:
+            source: message
+
+# Vector Configuration
+vector:
+  sources:
+    networkx_mcp_logs:
+      type: "file"
+      include:
+        - "/var/log/networkx-mcp/*.json"
+      read_from: "beginning"
+      encoding:
+        codec: "json"
+  
+  transforms:
+    parse_and_enhance:
+      type: "remap"
+      inputs: ["networkx_mcp_logs"]
+      source: |
+        # Add service metadata
+        .service = "networkx-mcp-server"
+        .environment = get_env_var!("ENV")
+        
+        # Parse timestamp
+        .timestamp = parse_timestamp!(.timestamp, format: "%Y-%m-%dT%H:%M:%S%.fZ")
+        
+        # Extract correlation ID for tracing
+        if exists(.correlation_id) {
+          .trace_id = .correlation_id
+        }
+        
+        # Convert duration to float if present
+        if exists(.context.duration_ms) {
+          .context.duration_ms = to_float!(.context.duration_ms)
+        }
+        
+        # Add severity level for alerting
+        .severity = if .level == "ERROR" || .level == "CRITICAL" {
+          "high"
+        } else if .level == "WARNING" {
+          "medium"
+        } else {
+          "low"
+        }
+  
+  sinks:
+    elasticsearch:
+      type: "elasticsearch"
+      inputs: ["parse_and_enhance"]
+      endpoints: ["https://elasticsearch:9200"]
+      index: "networkx-mcp-logs-%Y-%m-%d"
+      
+    console_debug:
+      type: "console"
+      inputs: ["parse_and_enhance"]
+      encoding:
+        codec: "json"
+      healthcheck:
+        enabled: false
+
+# Filebeat Configuration
+filebeat:
+  filebeat.inputs:
+    - type: log
+      enabled: true
+      paths:
+        - /var/log/networkx-mcp/*.json
+      json.keys_under_root: true
+      json.add_error_key: true
+      fields:
+        service: networkx-mcp-server
+        environment: "${ENV}"
+      fields_under_root: true
+      processors:
+        - timestamp:
+            field: timestamp
+            layouts:
+              - '2006-01-02T15:04:05.000Z'
+            test:
+              - '2023-12-01T10:30:45.123Z'
+        
+        - script:
+            lang: javascript
+            source: >
+              function process(event) {
+                  var correlationId = event.Get("correlation_id");
+                  if (correlationId) {
+                      event.Put("trace_id", correlationId);
+                  }
+                  
+                  var level = event.Get("level");
+                  if (level === "ERROR" || level === "CRITICAL") {
+                      event.Put("alert_priority", "high");
+                  } else if (level === "WARNING") {
+                      event.Put("alert_priority", "medium");
+                  }
+              }
+  
+  output.elasticsearch:
+    hosts: ["elasticsearch:9200"]
+    index: "networkx-mcp-logs-%{+yyyy.MM.dd}"
+    template.name: "networkx-mcp"
+    template.pattern: "networkx-mcp-logs-*"
+    template.settings:
+      index.number_of_shards: 1
+      index.number_of_replicas: 1
+
+# Grafana Loki Configuration
+loki:
+  auth_enabled: false
+  
+  server:
+    http_listen_port: 3100
+  
+  ingester:
+    lifecycler:
+      address: 127.0.0.1
+      ring:
+        kvstore:
+          store: inmemory
+        replication_factor: 1
+    chunk_idle_period: 5m
+    chunk_retain_period: 30s
+  
+  schema_config:
+    configs:
+      - from: 2023-01-01
+        store: boltdb
+        object_store: filesystem
+        schema: v11
+        index:
+          prefix: networkx_mcp_index_
+          period: 168h
+  
+  storage_config:
+    boltdb:
+      directory: /tmp/loki/index
+    filesystem:
+      directory: /tmp/loki/chunks
+  
+  limits_config:
+    enforce_metric_name: false
+    reject_old_samples: true
+    reject_old_samples_max_age: 168h
+
+# Sample Kibana Dashboard Configuration
+kibana_dashboard:
+  version: "7.15.0"
+  objects:
+    - id: "networkx-mcp-overview"
+      type: "dashboard"
+      attributes:
+        title: "NetworkX MCP Server Overview"
+        panelsJSON: |
+          [
+            {
+              "id": "requests-over-time",
+              "type": "line",
+              "gridData": {"x": 0, "y": 0, "w": 24, "h": 15},
+              "panelIndex": "1",
+              "title": "Requests Over Time",
+              "embeddableConfig": {
+                "vis": {
+                  "params": {
+                    "grid": {"categoryLines": false, "style": {"color": "#eee"}},
+                    "categoryAxes": [{"id": "CategoryAxis-1", "type": "category", "position": "bottom", "show": true}],
+                    "valueAxes": [{"id": "ValueAxis-1", "name": "LeftAxis-1", "type": "value", "position": "left", "show": true}],
+                    "seriesParams": [{"show": true, "type": "line", "mode": "normal", "data": {"label": "Count", "id": "1"}}]
+                  }
+                }
+              }
+            },
+            {
+              "id": "error-rate-by-operation",
+              "type": "pie",
+              "gridData": {"x": 0, "y": 15, "w": 12, "h": 15},
+              "panelIndex": "2",
+              "title": "Error Rate by Operation"
+            },
+            {
+              "id": "response-time-distribution",
+              "type": "histogram",
+              "gridData": {"x": 12, "y": 15, "w": 12, "h": 15},
+              "panelIndex": "3",
+              "title": "Response Time Distribution"
+            }
+          ]
+
+# Sample alerts configuration
+alerts:
+  prometheus:
+    groups:
+      - name: networkx-mcp-alerts
+        rules:
+          - alert: HighErrorRate
+            expr: |
+              (
+                rate(networkx_mcp_logs_total{level="ERROR"}[5m]) /
+                rate(networkx_mcp_logs_total[5m])
+              ) > 0.1
+            for: 2m
+            labels:
+              severity: warning
+              service: networkx-mcp
+            annotations:
+              summary: "High error rate detected in NetworkX MCP Server"
+              description: "Error rate is {{ $value | humanizePercentage }} for the last 5 minutes"
+          
+          - alert: SlowResponseTime
+            expr: |
+              histogram_quantile(0.95, 
+                rate(networkx_mcp_request_duration_ms_bucket[5m])
+              ) > 5000
+            for: 1m
+            labels:
+              severity: warning
+              service: networkx-mcp
+            annotations:
+              summary: "Slow response times detected"
+              description: "95th percentile response time is {{ $value }}ms"
+
+# Example LogQL queries for Grafana Loki
+loki_queries:
+  all_logs: '{service="networkx-mcp"}'
+  error_logs: '{service="networkx-mcp"} |= "ERROR"'
+  by_operation: '{service="networkx-mcp"} | json | line_format "{{.context.operation}}: {{.message}}"'
+  slow_operations: '{service="networkx-mcp"} | json | context_duration_ms > 1000'
+  by_user: '{service="networkx-mcp"} | json | context_user_id != ""'
+  trace_request: '{service="networkx-mcp"} | json | correlation_id="YOUR_CORRELATION_ID"'
+
+# Example Elasticsearch queries
+elasticsearch_queries:
+  all_logs:
+    query:
+      match:
+        service: "networkx-mcp-server"
+  
+  error_analysis:
+    query:
+      bool:
+        must:
+          - match:
+              service: "networkx-mcp-server"
+          - terms:
+              level: ["ERROR", "CRITICAL"]
+    aggs:
+      errors_by_operation:
+        terms:
+          field: "context.operation.keyword"
+          size: 10
+  
+  performance_analysis:
+    query:
+      bool:
+        must:
+          - match:
+              service: "networkx-mcp-server"
+          - exists:
+              field: "context.duration_ms"
+    aggs:
+      avg_duration_by_operation:
+        terms:
+          field: "context.operation.keyword"
+        aggs:
+          avg_duration:
+            avg:
+              field: "context.duration_ms"
+  
+  trace_request:
+    query:
+      match:
+        correlation_id: "YOUR_CORRELATION_ID"
+    sort:
+      - timestamp:
+          order: "asc"

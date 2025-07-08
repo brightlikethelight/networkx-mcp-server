@@ -10,7 +10,7 @@ from typing import Any
 
 import psutil
 
-from ..core.base import Component
+from ..core.base import Component, ComponentStatus
 
 logger = logging.getLogger(__name__)
 
@@ -320,3 +320,35 @@ class HealthCheckService(Component):
         """Cleanup the health check service."""
         await self.stop_background_monitoring()
         await super().cleanup()
+    
+    async def shutdown(self) -> None:
+        """Shutdown the health check service."""
+        await self.stop_background_monitoring()
+        await self._set_status(ComponentStatus.SHUTDOWN)
+    
+    async def health_check(self) -> dict[str, Any]:
+        """Perform health check and return status."""
+        system_health = await self.get_system_health()
+        return {
+            "healthy": system_health.status in [HealthStatus.HEALTHY, HealthStatus.DEGRADED],
+            "status": system_health.status.value,
+            "uptime_seconds": system_health.uptime_seconds,
+            "check_count": len(system_health.checks),
+            "version": system_health.version
+        }
+
+
+# Alias for backward compatibility
+SystemHealthMonitor = HealthCheckService
+
+
+# Global health checker instance
+_health_checker: HealthCheckService | None = None
+
+
+def get_health_checker() -> HealthCheckService:
+    """Get the global health checker instance."""
+    global _health_checker
+    if _health_checker is None:
+        _health_checker = HealthCheckService()
+    return _health_checker

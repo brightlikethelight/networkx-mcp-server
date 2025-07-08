@@ -1,0 +1,79 @@
+# Testing Environment Configuration
+# This configuration is optimized for automated testing
+
+environment: testing
+name: networkx-mcp-server-test
+version: 1.0.0
+debug: false
+
+server:
+  host: localhost
+  port: 8766  # Different port to avoid conflicts
+  workers: 1
+  max_connections: 10
+  request_timeout: 10
+  keepalive_timeout: 2
+  debug: false
+
+security:
+  enable_auth: false
+  api_key_required: false
+  allowed_origins: ["*"]
+  rate_limit_enabled: false  # Disable for testing
+  rate_limit_requests: 10000
+  rate_limit_window: 60
+  audit_enabled: false
+  audit_log_file: /tmp/audit-test.log
+  max_request_size: 1048576  # 1MB
+  max_nodes_per_request: 100
+  max_edges_per_request: 1000
+  safe_id_pattern: "^[a-zA-Z0-9_-]{1,100}$"
+
+performance:
+  max_nodes: 10000
+  max_edges: 100000
+  memory_limit_mb: 512
+  timeout_seconds: 30
+  enable_caching: false  # Disable caching for consistent tests
+  cache_size_mb: 64
+  cache_ttl: 300
+  parallel_processing: false  # Disable for deterministic tests
+  use_cython: false
+  numpy_optimization: false
+  max_memory_mb: 256
+  operation_timeout: 10
+  max_concurrent_requests: 2
+
+storage:
+  backend: memory  # Always use memory for tests
+  redis_url: null
+  redis_host: localhost
+  redis_port: 6379
+  redis_db: 15  # Use separate Redis DB for tests
+  redis_prefix: networkx_mcp_test
+  redis_pool_size: 2
+  redis_timeout: 2
+  redis_retry_attempts: 1
+  redis_ttl: 300
+  compression_level: 0  # No compression for speed
+  max_graph_size_mb: 10
+
+features:
+  machine_learning: false  # Disable to speed up tests
+  visualization: false
+  gpu_acceleration: false
+  enterprise_features: false
+  monitoring: false
+  metrics_endpoint: /metrics
+  health_endpoint: /health
+  api_v2_enabled: true
+  advanced_algorithms: false
+  caching_enabled: false
+
+logging:
+  level: WARNING  # Reduce log noise in tests
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: null  # No file logging in tests
+  max_file_size: 1048576
+  backup_count: 1
+  json_format: false

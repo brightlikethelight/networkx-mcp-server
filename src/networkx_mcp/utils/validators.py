@@ -22,7 +22,19 @@ class GraphValidator:
     @staticmethod
     def validate_node_id(node_id: Any) -> bool:
         """Validate node ID format."""
-        # Node IDs can be strings, integers, or tuples
+        # None is not valid
+        if node_id is None:
+            return False
+            
+        # Empty strings are not valid
+        if isinstance(node_id, str) and not node_id:
+            return False
+            
+        # Lists and dicts are not valid node IDs
+        if isinstance(node_id, (list, dict)):
+            return False
+            
+        # Node IDs can be non-empty strings, integers, or tuples
         return isinstance(node_id, (str, int, tuple))
 
     @staticmethod
@@ -52,9 +64,9 @@ class GraphValidator:
             if not isinstance(key, str):
                 return False
 
-            # Warn about reserved names but don't fail
+            # Reserved names are not allowed
             if key in reserved:
-                pass
+                return False
 
         return True
 
@@ -195,8 +207,20 @@ class GraphValidator:
         return measure in valid_measures
 
     @staticmethod
-    def validate_file_format(file_format: str, operation: str = "export") -> bool:
-        """Validate file format for import/export."""
+    def validate_file_format(file_format: str | Any, operation: str | list = "export") -> bool | tuple[bool, str | None]:
+        """Validate file format for import/export.
+        
+        This method supports two signatures for backward compatibility:
+        1. validate_file_format(format_str, operation="export") -> bool
+        2. validate_file_format(filepath, [formats]) -> tuple[bool, str | None]
+        """
+        # Handle the case where it's called with (filepath, [formats])
+        if isinstance(operation, list):
+            filepath = file_format
+            expected_formats = operation
+            return GraphValidator.validate_file_path_format(filepath, expected_formats)
+        
+        # Original implementation
         if operation == "export":
             valid_formats = {
                 "json",
@@ -311,8 +335,13 @@ class GraphValidator:
                 "Graph ID must contain only alphanumeric characters, underscores, and hyphens",
             )
 
-        # Reserved names
-        reserved_names = {"graph", "graphs", "list", "all", "none", "null", "undefined"}
+        # Reserved names (including Windows reserved names)
+        reserved_names = {
+            "graph", "graphs", "list", "all", "none", "null", "undefined",
+            "con", "prn", "aux", "nul", "com1", "com2", "com3", "com4",
+            "com5", "com6", "com7", "com8", "com9", "lpt1", "lpt2", "lpt3",
+            "lpt4", "lpt5", "lpt6", "lpt7", "lpt8", "lpt9"
+        }
         if graph_id.lower() in reserved_names:
             return False, f"Graph ID '{graph_id}' is reserved"
 
@@ -320,7 +349,7 @@ class GraphValidator:
 
     @staticmethod
     def validate_file_path_format(
-        filepath: str | Path, expected_formats: list[str] | None = None
+        filepath: str | Path | None, expected_formats: list[str] | None = None
     ) -> tuple[bool, str | None]:
         """Validate file format based on extension and expected formats.
 
@@ -331,8 +360,23 @@ class GraphValidator:
         Returns:
             Tuple of (is_valid, error_message)
         """
+        # Handle None and empty string cases
+        if filepath is None:
+            return False, "File path cannot be None"
+        
+        if isinstance(filepath, str) and not filepath.strip():
+            return False, "File path cannot be empty"
+            
         try:
             path = Path(filepath)
+            
+            # Security checks for path traversal
+            if ".." in str(filepath):
+                return False, "Path traversal attempts are not allowed"
+            
+            # Check for URL-like paths
+            if isinstance(filepath, str) and ("://" in filepath or filepath.startswith("file:")):
+                return False, "URL paths are not allowed"
 
             # Check file exists
             if not path.exists():
@@ -420,6 +464,8 @@ class GraphValidator:
                     if isinstance(node, dict):
                         if "id" not in node:
                             errors.append(f"Node at index {i} missing 'id' field")
+                        elif not GraphValidator.validate_node_id(node.get("id")):
+                            errors.append(f"Invalid node ID at index {i}: {node.get('id')}")
                     elif not GraphValidator.validate_node_id(node):
                         errors.append(f"Invalid node ID at index {i}: {node}")
 
@@ -439,6 +485,10 @@ class GraphValidator:
                         if len(edge) < 2:
                             errors.append(
                                 f"Edge at index {i} must have at least 2 elements"
+                            )
+                        elif len(edge) > 3:  # source, target, and optional attributes
+                            errors.append(
+                                f"Edge at index {i} has too many elements ({len(edge)})"
                             )
                     else:
                         errors.append(f"Invalid edge format at index {i}")

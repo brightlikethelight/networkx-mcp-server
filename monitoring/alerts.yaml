@@ -1,0 +1,272 @@
+# Prometheus alerting rules for NetworkX MCP Server
+# Based on empirical performance testing and production limits
+
+groups:
+- name: mcp_critical_alerts
+  interval: 30s
+  rules:
+  
+  # Critical Memory Issues (based on testing: 450MB for 50K nodes, 2GB production limit)
+  - alert: MCPMemoryUsageCritical
+    expr: mcp_memory_usage_bytes / 1024 / 1024 > 1800  # 90% of 2GB limit
+    for: 2m
+    labels:
+      severity: critical
+      component: memory
+    annotations:
+      summary: "MCP Server memory usage critically high"
+      description: "Memory usage is {{ $value | humanize }}MB, exceeding 90% of 2GB limit. Based on testing, this indicates potential instability."
+      runbook_url: "https://docs.company.com/runbooks/mcp-memory-issues"
+      action: "Investigate large graphs, consider horizontal scaling"
+  
+  # Performance Degradation (based on testing: 50 users = 95.2% success, 320ms avg)
+  - alert: MCPHighErrorRate
+    expr: rate(mcp_requests_total{status="error"}[5m]) / rate(mcp_requests_total[5m]) > 0.15  # >15% error rate
+    for: 3m
+    labels:
+      severity: critical
+      component: requests
+    annotations:
+      summary: "High error rate detected in MCP server"
+      description: "Error rate is {{ $value | humanizePercentage }}, exceeding 15% threshold. Normal operation shows <5% error rate."
+      runbook_url: "https://docs.company.com/runbooks/mcp-high-errors"
+      action: "Check logs for error patterns, validate inputs"
+  
+  # Connection Pool Exhaustion (based on testing: 50 concurrent users limit)
+  - alert: MCPConnectionPoolExhausted
+    expr: sum(mcp_active_connections) > 45  # 90% of tested 50-user limit
+    for: 1m
+    labels:
+      severity: critical
+      component: connections
+    annotations:
+      summary: "Connection pool nearly exhausted"
+      description: "Active connections: {{ $value }}, approaching limit of 50. Testing shows degradation beyond this point."
+      runbook_url: "https://docs.company.com/runbooks/mcp-connection-limits"
+      action: "Scale horizontally, check for stuck connections"
+  
+  # Response Time Degradation (based on testing: P95 650ms at 50 users)
+  - alert: MCPResponseTimesCritical
+    expr: histogram_quantile(0.95, rate(mcp_request_duration_seconds_bucket[5m])) > 5.0
+    for: 5m
+    labels:
+      severity: critical
+      component: performance
+    annotations:
+      summary: "MCP response times critically high"
+      description: "P95 response time is {{ $value | humanizeDuration }}, far exceeding acceptable limits. Normal P95: <2s"
+      runbook_url: "https://docs.company.com/runbooks/mcp-performance"
+      action: "Check algorithm complexity on large graphs, consider sampling"
+
+- name: mcp_warning_alerts
+  interval: 60s
+  rules:
+  
+  # Memory Warning (75% of limit)
+  - alert: MCPMemoryUsageHigh
+    expr: mcp_memory_usage_bytes / 1024 / 1024 > 1500  # 75% of 2GB limit
+    for: 5m
+    labels:
+      severity: warning
+      component: memory
+    annotations:
+      summary: "MCP Server memory usage high"
+      description: "Memory usage is {{ $value | humanize }}MB, exceeding 75% of limit"
+      action: "Monitor for growth, check graph sizes"
+  
+  # Moderate Error Rate (based on normal <5% rate)
+  - alert: MCPModerateErrorRate
+    expr: rate(mcp_requests_total{status="error"}[10m]) / rate(mcp_requests_total[10m]) > 0.05
+    for: 10m
+    labels:
+      severity: warning
+      component: requests
+    annotations:
+      summary: "Elevated error rate in MCP server"
+      description: "Error rate is {{ $value | humanizePercentage }}, above normal 5% threshold"
+      action: "Review recent changes, check input validation"
+  
+  # High Connection Usage
+  - alert: MCPHighConnectionUsage
+    expr: sum(mcp_active_connections) > 35  # 70% of limit
+    for: 5m
+    labels:
+      severity: warning
+      component: connections
+    annotations:
+      summary: "High connection usage"
+      description: "Active connections: {{ $value }}, approaching capacity"
+      action: "Monitor growth, prepare for scaling"
+  
+  # Slow Responses (based on testing: good performance <500ms)
+  - alert: MCPSlowResponses
+    expr: histogram_quantile(0.95, rate(mcp_request_duration_seconds_bucket[10m])) > 2.0
+    for: 10m
+    labels:
+      severity: warning
+      component: performance
+    annotations:
+      summary: "MCP responses slower than expected"
+      description: "P95 response time: {{ $value | humanizeDuration }}, above 2s threshold"
+      action: "Check for large graph operations"
+  
+  # Algorithm Performance Anomalies (based on testing data)
+  - alert: MCPAlgorithmPerformanceDegraded
+    expr: histogram_quantile(0.95, rate(mcp_algorithm_duration_seconds_bucket[15m])) > 10.0
+    for: 10m
+    labels:
+      severity: warning
+      component: algorithms
+    annotations:
+      summary: "Graph algorithms performing poorly"
+      description: "Algorithm P95 duration: {{ $value | humanizeDuration }}, indicating large graphs or complexity issues"
+      action: "Review graph sizes, consider algorithm approximations"
+
+- name: mcp_capacity_alerts
+  interval: 120s
+  rules:
+  
+  # Graph Size Warnings (based on testing: 10K nodes = good, 50K = slow)
+  - alert: MCPLargeGraphsDetected
+    expr: histogram_quantile(0.90, rate(mcp_graph_nodes_bucket[30m])) > 10000
+    for: 15m
+    labels:
+      severity: warning
+      component: capacity
+    annotations:
+      summary: "Large graphs detected"
+      description: "90th percentile graph size: {{ $value }} nodes, approaching performance degradation threshold"
+      action: "Consider graph partitioning for >10K node graphs"
+  
+  # Throughput Degradation
+  - alert: MCPThroughputLow
+    expr: mcp_throughput_ops_per_second < 10
+    for: 10m
+    labels:
+      severity: warning
+      component: performance
+    annotations:
+      summary: "MCP throughput below expected levels"
+      description: "Current throughput: {{ $value }} ops/sec, below expected minimum"
+      action: "Check for blocking operations or resource constraints"
+  
+  # Memory Growth Rate (early warning)
+  - alert: MCPMemoryGrowthRate
+    expr: increase(mcp_memory_usage_bytes[1h]) / 1024 / 1024 > 500  # Growing >500MB/hour
+    for: 30m
+    labels:
+      severity: warning
+      component: memory
+    annotations:
+      summary: "Rapid memory growth detected"
+      description: "Memory grew {{ $value | humanize }}MB in the last hour"
+      action: "Investigate memory leaks or large graph accumulation"
+
+- name: mcp_business_alerts
+  interval: 300s
+  rules:
+  
+  # Authentication Issues
+  - alert: MCPAuthenticationFailureSpike
+    expr: rate(mcp_auth_attempts_total{result="failure"}[15m]) > 5
+    for: 10m
+    labels:
+      severity: warning
+      component: security
+    annotations:
+      summary: "High authentication failure rate"
+      description: "Authentication failures: {{ $value }}/min, possible attack or misconfiguration"
+      action: "Review authentication logs, check for brute force attempts"
+  
+  # Rate Limiting Triggers
+  - alert: MCPRateLimitingActive
+    expr: rate(mcp_rate_limit_hits_total[10m]) > 1
+    for: 5m
+    labels:
+      severity: info
+      component: security
+    annotations:
+      summary: "Rate limiting is actively triggered"
+      description: "Rate limit hits: {{ $value }}/min, clients may be throttled"
+      action: "Monitor client behavior, adjust limits if legitimate traffic"
+  
+  # Component Health Degradation
+  - alert: MCPComponentUnhealthy
+    expr: mcp_component_health != 2  # 2 = healthy
+    for: 5m
+    labels:
+      severity: warning
+      component: health
+    annotations:
+      summary: "MCP component health degraded"
+      description: "Component {{ $labels.component }} is not healthy"
+      action: "Check component-specific health status and logs"
+  
+  # Performance Tier Degradation
+  - alert: MCPPerformanceTierDegraded
+    expr: mcp_performance_tier < 2  # Below "acceptable" (excellent=4, good=3, acceptable=2)
+    for: 10m
+    labels:
+      severity: warning
+      component: performance
+    annotations:
+      summary: "MCP performance tier degraded"
+      description: "Performance tier degraded below acceptable levels"
+      action: "Review system load and optimize performance"
+
+- name: mcp_predictive_alerts
+  interval: 600s
+  rules:
+  
+  # Predictive Memory Alert (based on growth trends)
+  - alert: MCPMemoryExhaustionPredicted
+    expr: predict_linear(mcp_memory_usage_bytes[2h], 4*3600) / 1024 / 1024 > 1900  # Predict 4h ahead
+    for: 30m
+    labels:
+      severity: warning
+      component: capacity
+    annotations:
+      summary: "Memory exhaustion predicted"
+      description: "Current growth trend suggests memory limit will be reached in ~4 hours"
+      action: "Plan for scaling or memory optimization"
+  
+  # Predictive Connection Exhaustion
+  - alert: MCPConnectionExhaustionPredicted
+    expr: predict_linear(mcp_active_connections[1h], 2*3600) > 48  # Predict 2h ahead
+    for: 20m
+    labels:
+      severity: warning
+      component: capacity
+    annotations:
+      summary: "Connection exhaustion predicted"
+      description: "Current growth trend suggests connection limit will be reached in ~2 hours"
+      action: "Plan for horizontal scaling"
+
+# Alert routing and notification rules
+- name: mcp_meta_alerts
+  interval: 300s
+  rules:
+  
+  # Alert fatigue prevention
+  - alert: MCPHighAlertVolume
+    expr: rate(prometheus_notifications_total[1h]) > 10
+    for: 30m
+    labels:
+      severity: info
+      component: alerting
+    annotations:
+      summary: "High volume of MCP alerts"
+      description: "Sent {{ $value }} alerts in the last hour, possible alert storm"
+      action: "Review alert thresholds and reduce noise"
+  
+  # Dead man's switch (heartbeat)
+  - alert: MCPServerDown
+    expr: up{job="mcp-server"} == 0
+    for: 2m
+    labels:
+      severity: critical
+      component: availability
+    annotations:
+      summary: "MCP Server is down"
+      description: "MCP server instance {{ $labels.instance }} is not responding"
+      action: "Check server health and restart if necessary"

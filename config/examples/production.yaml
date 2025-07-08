@@ -1,0 +1,81 @@
+# Production Environment Configuration
+# This configuration is optimized for production deployment
+
+environment: production
+name: networkx-mcp-server
+version: 1.0.0
+debug: false
+
+server:
+  host: 0.0.0.0
+  port: 8765
+  workers: 8
+  max_connections: 1000
+  request_timeout: 30
+  keepalive_timeout: 5
+  debug: false
+
+security:
+  enable_auth: true
+  api_key_required: true
+  allowed_origins: 
+    - "https://yourdomain.com"
+    - "https://api.yourdomain.com"
+  rate_limit_enabled: true
+  rate_limit_requests: 1000
+  rate_limit_window: 60
+  audit_enabled: true
+  audit_log_file: /var/log/networkx-mcp/audit.log
+  max_request_size: 5242880  # 5MB (smaller for production)
+  max_nodes_per_request: 500
+  max_edges_per_request: 5000
+  safe_id_pattern: "^[a-zA-Z0-9_-]{1,50}$"
+
+performance:
+  max_nodes: 1000000
+  max_edges: 10000000
+  memory_limit_mb: 8192
+  timeout_seconds: 180
+  enable_caching: true
+  cache_size_mb: 1024
+  cache_ttl: 3600
+  parallel_processing: true
+  use_cython: true
+  numpy_optimization: true
+  max_memory_mb: 2048
+  operation_timeout: 30
+  max_concurrent_requests: 20
+
+storage:
+  backend: redis
+  redis_url: null  # Set via REDIS_URL environment variable
+  redis_host: redis-cluster.internal
+  redis_port: 6379
+  redis_db: 0
+  redis_prefix: networkx_mcp_prod
+  redis_pool_size: 20
+  redis_timeout: 5
+  redis_retry_attempts: 5
+  redis_ttl: 7200
+  compression_level: 6
+  max_graph_size_mb: 200
+
+features:
+  machine_learning: true
+  visualization: true
+  gpu_acceleration: false  # Enable if GPU available
+  enterprise_features: true
+  monitoring: true
+  metrics_endpoint: /metrics
+  health_endpoint: /health
+  api_v2_enabled: true
+  advanced_algorithms: true
+  caching_enabled: true
+
+logging:
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: /var/log/networkx-mcp/app.log
+  max_file_size: 104857600  # 100MB
+  backup_count: 10
+  json_format: true  # Structured logging for production

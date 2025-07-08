@@ -1,0 +1,25 @@
+# Core dependencies
+networkx>=3.0
+fastapi>=0.100.0
+uvicorn>=0.20.0
+pydantic>=2.0.0
+redis>=4.5.0
+prometheus-client>=0.16.0
+
+# HTTP client for testing
+requests>=2.28.0
+aiohttp>=3.8.0
+
+# MCP protocol (optional, for full MCP support)
+# mcp>=0.1.0
+
+# Testing (dev dependencies)
+pytest>=7.0.0
+pytest-cov>=4.0.0
+pytest-asyncio>=0.21.0
+
+# Logging and monitoring
+structlog>=22.0.0
+opentelemetry-api>=1.15.0
+opentelemetry-sdk>=1.15.0
+opentelemetry-instrumentation>=0.36b0

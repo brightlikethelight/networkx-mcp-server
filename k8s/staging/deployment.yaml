@@ -1,0 +1,196 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: networkx-mcp-server
+  namespace: networkx-mcp-staging
+  labels:
+    app: networkx-mcp
+    environment: staging
+    version: "${GITHUB_SHA:0:8}"
+spec:
+  replicas: 2  # Reduced for staging
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: networkx-mcp
+      environment: staging
+  template:
+    metadata:
+      labels:
+        app: networkx-mcp
+        environment: staging
+        version: "${GITHUB_SHA:0:8}"
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: mcp-server
+        image: ${IMAGE}
+        imagePullPolicy: Always
+        command: ["python", "-m", "networkx_mcp", "--jsonrpc"]
+        
+        ports:
+        - name: health
+          containerPort: 8080
+        - name: metrics
+          containerPort: 9090
+          
+        env:
+        - name: ENVIRONMENT
+          value: "staging"
+        - name: LOG_LEVEL
+          value: "DEBUG"  # More verbose for staging
+        - name: LOG_FORMAT
+          value: "json"
+        - name: STORAGE_BACKEND
+          value: "redis"
+        - name: REDIS_URL
+          value: "redis://redis-service:6379/0"
+        - name: MAX_CONCURRENT_CONNECTIONS
+          value: "25"  # Reduced for staging
+        - name: MAX_GRAPH_SIZE_NODES
+          value: "5000"  # Smaller limits for staging
+        - name: MAX_MEMORY_MB
+          value: "1024"  # 1GB for staging
+        - name: ENABLE_AUTH
+          value: "false"  # Simplified for staging
+        - name: TRACING_ENABLED
+          value: "true"
+        - name: JAEGER_ENDPOINT
+          value: "jaeger-collector:14268"
+          
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+            
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: health
+          initialDelaySeconds: 15
+          periodSeconds: 20
+          timeoutSeconds: 5
+          failureThreshold: 3
+          
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: health
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 2
+          
+        startupProbe:
+          httpGet:
+            path: /startup
+            port: health
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 6
+          
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1000
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+            
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: cache
+          mountPath: /app/cache
+          
+      securityContext:
+        fsGroup: 1000
+        
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: cache
+        emptyDir:
+          sizeLimit: 100Mi
+          
+      terminationGracePeriodSeconds: 30
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: networkx-mcp-service
+  namespace: networkx-mcp-staging
+  labels:
+    app: networkx-mcp
+    environment: staging
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9090"
+spec:
+  selector:
+    app: networkx-mcp
+    environment: staging
+  ports:
+  - name: health
+    port: 8080
+    targetPort: health
+  - name: metrics
+    port: 9090
+    targetPort: metrics
+  type: LoadBalancer
+
+---
+# Redis for staging
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: networkx-mcp-staging
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        ports:
+        - containerPort: 6379
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+  namespace: networkx-mcp-staging
+spec:
+  selector:
+    app: redis
+  ports:
+  - port: 6379
+    targetPort: 6379

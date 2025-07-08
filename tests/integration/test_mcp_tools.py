@@ -3,6 +3,7 @@
 import json
 
 import pytest
+import pytest_asyncio
 
 
 class TestMCPToolsCore:
@@ -16,12 +17,12 @@ class TestMCPToolsCore:
     @pytest.mark.asyncio
     async def test_create_graph_tool(self):
         """Test create_graph MCP tool."""
-        from networkx_mcp.handlers.graph_ops import create_graph
+        from networkx_mcp.server import create_graph
 
         # Test basic graph creation
-        result = await create_graph(
-            graph_id="test_graph",
-            graph_type="Graph",
+        result = create_graph(
+            name="test_graph",
+            graph_type="undirected",
             params={"name": "Test Graph", "description": "A test graph"},
         )
 
@@ -31,24 +32,24 @@ class TestMCPToolsCore:
         assert "created_at" in result
 
         # Test directed graph
-        result = await create_graph(graph_id="directed_test", graph_type="DiGraph")
+        result = create_graph(name="directed_test", graph_type="DiGraph")
         assert result["graph_type"] == "DiGraph"
 
         # Test error case - duplicate ID
         with pytest.raises(ValueError):
-            await create_graph(graph_id="test_graph", graph_type="Graph")
+            create_graph(name="test_graph", graph_type="undirected")
 
     @pytest.mark.asyncio
     async def test_add_nodes_tool(self):
         """Test add_nodes MCP tool."""
-        from networkx_mcp.handlers.graph_ops import add_nodes, create_graph
+        from networkx_mcp.server import add_nodes, create_graph
 
         # Create graph first
-        await create_graph(graph_id="test", graph_type="Graph")
+        create_graph(name="test", graph_type="undirected")
 
         # Test adding nodes
-        result = await add_nodes(
-            graph_id="test", nodes=["A", "B", "C"], params={"color": "red"}
+        result = add_nodes(
+            name="test", nodes=["A", "B", "C"], params={"color": "red"}
         )
 
         assert result["nodes_added"] == 3
@@ -56,8 +57,8 @@ class TestMCPToolsCore:
         assert set(result["added_nodes"]) == {"A", "B", "C"}
 
         # Test adding nodes with individual attributes
-        result = await add_nodes(
-            graph_id="test", nodes=[("D", {"weight": 1}), ("E", {"weight": 2})]
+        result = add_nodes(
+            name="test", nodes=[("D", {"weight": 1}), ("E", {"weight": 2})]
         )
         assert result["nodes_added"] == 2
         assert result["total_nodes"] == 5
@@ -65,15 +66,15 @@ class TestMCPToolsCore:
     @pytest.mark.asyncio
     async def test_add_edges_tool(self):
         """Test add_edges MCP tool."""
-        from networkx_mcp.handlers.graph_ops import add_edges, add_nodes, create_graph
+        from networkx_mcp.server import add_edges, add_nodes, create_graph
 
         # Setup graph with nodes
-        await create_graph(graph_id="test", graph_type="Graph")
-        await add_nodes(graph_id="test", nodes=["A", "B", "C", "D"])
+        create_graph(name="test", graph_type="undirected")
+        add_nodes(name="test", nodes=["A", "B", "C", "D"])
 
         # Test adding edges
-        result = await add_edges(
-            graph_id="test",
+        result = add_edges(
+            name="test",
             edges=[("A", "B"), ("B", "C"), ("C", "D")],
             params={"weight": 1.0},
         )
@@ -82,8 +83,8 @@ class TestMCPToolsCore:
         assert result["total_edges"] == 3
 
         # Test adding edges with individual attributes
-        result = await add_edges(
-            graph_id="test",
+        result = add_edges(
+            name="test",
             edges=[("A", "C", {"weight": 2.5}), ("B", "D", {"weight": 1.8})],
         )
         assert result["edges_added"] == 2
@@ -96,11 +97,11 @@ class TestMCPToolsCore:
                                          graph_info)
 
         # Create graph with data
-        await create_graph(graph_id="info_test", graph_type="DiGraph")
-        await add_nodes(graph_id="info_test", nodes=["X", "Y", "Z"])
-        await add_edges(graph_id="info_test", edges=[("X", "Y"), ("Y", "Z")])
+        create_graph(name="info_test", graph_type="DiGraph")
+        add_nodes(name="info_test", nodes=["X", "Y", "Z"])
+        add_edges(name="info_test", edges=[("X", "Y"), ("Y", "Z")])
 
-        result = await graph_info(graph_id="info_test")
+        result = graph_info(name="info_test")
 
         assert result["graph_id"] == "info_test"
         assert result["graph_type"] == "DiGraph"
@@ -113,17 +114,17 @@ class TestMCPToolsCore:
     @pytest.mark.asyncio
     async def test_list_graphs_tool(self):
         """Test list_graphs MCP tool."""
-        from networkx_mcp.handlers.graph_ops import create_graph, list_graphs
+        from networkx_mcp.server import create_graph, list_graphs
 
         # Initially empty
-        result = await list_graphs()
+        result = list_graphs()
         initial_count = len(result)
 
         # Create multiple graphs
-        await create_graph(graph_id="graph1", graph_type="Graph")
-        await create_graph(graph_id="graph2", graph_type="DiGraph")
+        create_graph(name="graph1", graph_type="undirected")
+        create_graph(name="graph2", graph_type="DiGraph")
 
-        result = await list_graphs()
+        result = list_graphs()
         assert len(result) == initial_count + 2
 
         graph_ids = [g["graph_id"] for g in result]
@@ -133,17 +134,17 @@ class TestMCPToolsCore:
     @pytest.mark.asyncio
     async def test_delete_graph_tool(self):
         """Test delete_graph MCP tool."""
-        from networkx_mcp.handlers.graph_ops import create_graph, delete_graph, list_graphs
+        from networkx_mcp.server import create_graph, delete_graph, list_graphs
 
         # Create and delete graph
-        await create_graph(graph_id="temp_graph", graph_type="Graph")
+        create_graph(name="temp_graph", graph_type="undirected")
 
-        result = await delete_graph(graph_id="temp_graph")
+        result = delete_graph(name="temp_graph")
         assert result["deleted"] is True
         assert result["graph_id"] == "temp_graph"
 
         # Verify deletion
-        graphs = await list_graphs()
+        graphs = list_graphs()
         graph_ids = [g["graph_id"] for g in graphs]
         assert "temp_graph" not in graph_ids
 
@@ -151,16 +152,16 @@ class TestMCPToolsCore:
 class TestMCPToolsAlgorithms:
     """Test algorithm MCP tools."""
 
-    @pytest.fixture(autouse=True)
+    @pytest_asyncio.fixture(autouse=True)
     async def setup(self):
         """Setup test graph for algorithms."""
-        from networkx_mcp.handlers.graph_ops import add_edges, add_nodes, create_graph
+        from networkx_mcp.server import add_edges, add_nodes, create_graph
 
         # Create weighted graph for testing
-        await create_graph(graph_id="algo_test", graph_type="Graph")
-        await add_nodes(graph_id="algo_test", nodes=["A", "B", "C", "D", "E"])
-        await add_edges(
-            graph_id="algo_test",
+        create_graph(name="algo_test", graph_type="undirected")
+        add_nodes(name="algo_test", nodes=["A", "B", "C", "D", "E"])
+        add_edges(
+            name="algo_test",
             edges=[
                 ("A", "B", {"weight": 1.0}),
                 ("B", "C", {"weight": 2.0}),
@@ -174,11 +175,11 @@ class TestMCPToolsAlgorithms:
     @pytest.mark.asyncio
     async def test_shortest_path_tool(self):
         """Test shortest_path MCP tool."""
-        from networkx_mcp.handlers.algorithms import shortest_path
+        from networkx_mcp.server import shortest_path
 
         # Test single path
-        result = await shortest_path(
-            graph_id="algo_test", source="A", target="D", weight="weight"
+        result = shortest_path(
+            name="algo_test", source="A", target="D", weight="weight"
         )
 
         assert result["source"] == "A"
@@ -189,31 +190,28 @@ class TestMCPToolsAlgorithms:
         assert result["path"][-1] == "D"
 
         # Test all paths from source
-        result = await shortest_path(graph_id="algo_test", source="A")
+        result = shortest_path(name="algo_test", source="A")
 
         assert "paths" in result
         assert "lengths" in result
         assert "A" in result["paths"]
         assert "D" in result["paths"]
 
-    @pytest.mark.asyncio
-    @pytest.mark.asyncio
-    @pytest.mark.asyncio
-    @pytest.mark.asyncio
+
 class TestMCPToolsAdvanced:
     """Test Phase 2 advanced analytics MCP tools."""
 
-    @pytest.fixture(autouse=True)
+    @pytest_asyncio.fixture(autouse=True)
     async def setup(self):
         """Setup test graph for advanced algorithms."""
-        from networkx_mcp.handlers.graph_ops import add_edges, add_nodes, create_graph
+        from networkx_mcp.server import add_edges, add_nodes, create_graph
 
         # Create community graph
-        await create_graph(graph_id="community_test", graph_type="Graph")
+        create_graph(name="community_test", graph_type="undirected")
 
         # Add two communities
-        await add_nodes(
-            graph_id="community_test",
+        add_nodes(
+            name="community_test",
             nodes=[f"A{i}" for i in range(5)] + [f"B{i}" for i in range(5)],
         )
 
@@ -227,14 +225,11 @@ class TestMCPToolsAdvanced:
         # Sparse connections between communities
         inter_edges = [("A0", "B0"), ("A2", "B3")]
 
-        await add_edges(
-            graph_id="community_test",
+        add_edges(
+            name="community_test",
             edges=community_a_edges + community_b_edges + inter_edges,
         )
 
-    @pytest.mark.asyncio
-    @pytest.mark.asyncio
-    @pytest.mark.asyncio
     @pytest.mark.asyncio
     async def test_bipartite_analysis_tool(self):
         """Test bipartite_analysis MCP tool."""
@@ -242,9 +237,9 @@ class TestMCPToolsAdvanced:
                                          bipartite_analysis, create_graph)
 
         # Create bipartite graph
-        await create_graph(graph_id="bipartite_test", graph_type="Graph")
-        await add_nodes(
-            graph_id="bipartite_test",
+        create_graph(name="bipartite_test", graph_type="undirected")
+        add_nodes(
+            name="bipartite_test",
             nodes=[
                 ("A1", {"bipartite": 0}),
                 ("A2", {"bipartite": 0}),
@@ -252,11 +247,11 @@ class TestMCPToolsAdvanced:
                 ("B2", {"bipartite": 1}),
             ],
         )
-        await add_edges(
-            graph_id="bipartite_test", edges=[("A1", "B1"), ("A1", "B2"), ("A2", "B1")]
+        add_edges(
+            name="bipartite_test", edges=[("A1", "B1"), ("A1", "B2"), ("A2", "B1")]
         )
 
-        result = await bipartite_analysis(graph_id="bipartite_test")
+        result = bipartite_analysis(name="bipartite_test")
 
         assert "is_bipartite" in result
         assert "node_sets" in result
@@ -269,14 +264,14 @@ class TestMCPToolsAdvanced:
 class TestMCPToolsVisualization:
     """Test Phase 3 visualization MCP tools."""
 
-    @pytest.fixture(autouse=True)
+    @pytest_asyncio.fixture(autouse=True)
     async def setup(self):
         """Setup graph for visualization testing."""
-        from networkx_mcp.handlers.graph_ops import add_edges, add_nodes, create_graph
+        from networkx_mcp.server import add_edges, add_nodes, create_graph
 
-        await create_graph(graph_id="viz_test", graph_type="Graph")
-        await add_nodes(
-            graph_id="viz_test",
+        create_graph(name="viz_test", graph_type="undirected")
+        add_nodes(
+            name="viz_test",
             nodes=[
                 ("A", {"color": "red"}),
                 ("B", {"color": "blue"}),
@@ -284,8 +279,8 @@ class TestMCPToolsVisualization:
                 ("D", {"color": "yellow"}),
             ],
         )
-        await add_edges(
-            graph_id="viz_test",
+        add_edges(
+            name="viz_test",
             edges=[
                 ("A", "B", {"weight": 1}),
                 ("B", "C", {"weight": 2}),
@@ -294,28 +289,21 @@ class TestMCPToolsVisualization:
             ],
         )
 
-    @pytest.mark.asyncio
-    @pytest.mark.asyncio
 class TestMCPToolsIO:
     """Test import/export MCP tools."""
 
-    @pytest.mark.asyncio
-    @pytest.mark.asyncio
-    @pytest.mark.asyncio
 class TestMCPToolsErrorHandling:
     """Test error handling in MCP tools."""
 
     @pytest.mark.asyncio
     async def test_invalid_graph_id_errors(self):
         """Test error handling for invalid graph IDs."""
-        from networkx_mcp.handlers.graph_ops import graph_info
+        from networkx_mcp.server import graph_info
 
         # Test non-existent graph
         with pytest.raises(ValueError):  # Should raise appropriate error
-            await graph_info(graph_id="nonexistent_graph")
+            graph_info(name="nonexistent_graph")
 
-    @pytest.mark.asyncio
-    @pytest.mark.asyncio
 class TestMCPToolsPerformance:
     """Test performance characteristics of MCP tools."""
 
@@ -329,7 +317,7 @@ class TestMCPToolsPerformance:
 
         # Create large graph
         start_time = time.time()
-        await create_graph(graph_id="perf_test", graph_type="Graph")
+        create_graph(name="perf_test", graph_type="undirected")
         creation_time = time.time() - start_time
 
         assert creation_time < performance_thresholds["create_graph"]
@@ -337,7 +325,7 @@ class TestMCPToolsPerformance:
         # Add many nodes
         nodes = list(range(500))
         start_time = time.time()
-        await add_nodes(graph_id="perf_test", nodes=nodes)
+        add_nodes(name="perf_test", nodes=nodes)
         node_time = time.time() - start_time
 
         # Should be reasonably fast
@@ -346,14 +334,14 @@ class TestMCPToolsPerformance:
         # Add edges
         edges = [(i, (i + 1) % 500) for i in range(500)]
         start_time = time.time()
-        await add_edges(graph_id="perf_test", edges=edges)
+        add_edges(name="perf_test", edges=edges)
         edge_time = time.time() - start_time
 
         assert edge_time < 1.0
 
         # Test algorithm performance
         start_time = time.time()
-        await centrality_measures(graph_id="perf_test", measures=["degree"])
+        centrality_measures(name="perf_test", measures=["degree"])
         centrality_time = time.time() - start_time
 
         # Degree centrality should be very fast
@@ -362,15 +350,15 @@ class TestMCPToolsPerformance:
     @pytest.mark.asyncio
     async def test_memory_usage_estimation(self):
         """Test memory usage tracking."""
-        from networkx_mcp.handlers.graph_ops import add_nodes, create_graph, graph_info
+        from networkx_mcp.server import add_nodes, create_graph, graph_info
 
-        await create_graph(graph_id="memory_test", graph_type="Graph")
+        create_graph(name="memory_test", graph_type="undirected")
 
         # Add nodes with attributes
         nodes_with_attrs = [(i, {"data": "x" * 100}) for i in range(100)]
-        await add_nodes(graph_id="memory_test", nodes=nodes_with_attrs)
+        add_nodes(name="memory_test", nodes=nodes_with_attrs)
 
-        info = await graph_info(graph_id="memory_test")
+        info = graph_info(name="memory_test")
 
         # Should provide memory estimates
         assert "num_nodes" in info
@@ -403,15 +391,15 @@ async def test_all_tools_accessible():
 @pytest.mark.asyncio
 async def test_tool_parameter_validation():
     """Test that tools validate their parameters properly."""
-    from networkx_mcp.handlers.graph_ops import create_graph
+    from networkx_mcp.server import create_graph
 
     # Test type validation
     with pytest.raises((ValueError, TypeError)):
-        await create_graph(graph_id=123, graph_type="Graph")  # Invalid ID type
+        create_graph(name=123, graph_type="undirected")  # Invalid ID type
 
     with pytest.raises((ValueError, TypeError)):
-        await create_graph(
-            graph_id="test", graph_type="InvalidType"
+        create_graph(
+            name="test", graph_type="InvalidType"
         )  # Invalid graph type
 
 

@@ -39,10 +39,16 @@ class TestGraphValidationErrors:
                 assert valid is False
                 assert error is not None
 
-    def test_malformed_graph_data(self, error_scenarios):
+    def test_malformed_graph_data(self):
         """Test validation of malformed graph data."""
-        for malformed_data in error_scenarios["malformed_data"]:
-            valid, errors = GraphValidator.validate_graph_data(malformed_data)
+        malformed_data = [
+            {"nodes": "not_a_list"},
+            {"edges": 123},
+            {"nodes": [{"id": None}]},
+            {"edges": [[1, 2, 3, 4, 5]]}
+        ]
+        for data in malformed_data:
+            valid, errors = GraphValidator.validate_graph_data(data)
             assert valid is False
             assert len(errors) > 0
 
@@ -138,9 +144,11 @@ class TestGraphOperationErrors:
         with pytest.raises(ValueError):
             self.manager.remove_edge("test", "A", "C")  # C doesn't exist
 
-        # Add edge with non-existent nodes
-        with pytest.raises(ValueError):  # NetworkX will raise an error
-            self.manager.add_edge("test", "A", "nonexistent")
+        # Add edge with non-existent nodes (NetworkX creates them automatically)
+        # This is standard NetworkX behavior - it creates missing nodes
+        result = self.manager.add_edge("test", "A", "nonexistent")
+        assert result["added"] is True
+        assert "nonexistent" in self.manager.get_graph("test").nodes()
 
         # Get attributes of non-existent edge
         with pytest.raises(ValueError):
@@ -196,7 +204,14 @@ class TestAlgorithmErrors:
 
     def setup_method(self):
         """Setup test graphs."""
-        self.manager = GraphManager()
+        # Import the global graph_manager from the server
+        from networkx_mcp.server import graph_manager
+        self.manager = graph_manager
+
+        # Clean up any existing test graphs
+        for graph_id in ["connected", "disconnected", "empty"]:
+            if graph_id in self.manager.graphs:
+                del self.manager.graphs[graph_id]
 
         # Create test graphs
         self.manager.create_graph("connected", "Graph")
@@ -209,38 +224,40 @@ class TestAlgorithmErrors:
 
         self.manager.create_graph("empty", "Graph")
 
-    @pytest.mark.asyncio
-    async def test_shortest_path_errors(self):
+    def teardown_method(self):
+        """Clean up test graphs."""
+        for graph_id in ["connected", "disconnected", "empty"]:
+            if graph_id in self.manager.graphs:
+                del self.manager.graphs[graph_id]
+
+    def test_shortest_path_errors(self):
         """Test shortest path algorithm error cases."""
         from networkx_mcp.handlers.algorithms import shortest_path
 
         # Non-existent source node
-        with pytest.raises(ValueError):
-            await shortest_path(graph_id="connected", source="X", target="A")
+        result = shortest_path(graph_name="connected", source="X", target="A")
+        assert "error" in result
+        assert "not in graph" in result["error"]
 
         # Non-existent target node
-        with pytest.raises(ValueError):
-            await shortest_path(graph_id="connected", source="A", target="X")
+        result = shortest_path(graph_name="connected", source="A", target="X")
+        assert "error" in result
+        assert "not in graph" in result["error"]
 
         # Path in disconnected graph
-        with pytest.raises(ValueError):
-            await shortest_path(graph_id="disconnected", source="A", target="C")
+        result = shortest_path(graph_name="disconnected", source="A", target="C")
+        assert result.get("success") is False or "error" in result
 
         # Empty graph
-        with pytest.raises(ValueError):
-            await shortest_path(graph_id="empty", source="A", target="B")
+        result = shortest_path(graph_name="empty", source="A", target="B")
+        assert "error" in result
 
-    @pytest.mark.asyncio
-    @pytest.mark.asyncio
-    @pytest.mark.asyncio
 class TestIOErrors:
     """Test I/O operation error handling."""
 
-    @pytest.mark.asyncio
-    @pytest.mark.asyncio
     def test_malformed_file_content(self):
         """Test handling of malformed file content."""
-        from networkx_mcp.core.io import GraphIOHandler
+        from networkx_mcp.core.io_handlers import GraphIOHandler
 
         # Create malformed JSON file
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
@@ -249,7 +266,7 @@ class TestIOErrors:
 
         try:
             with pytest.raises((ValueError, json.JSONDecodeError)):
-                GraphIOHandler.import_from_file(malformed_path, "json")
+                GraphIOHandler.import_graph(path=malformed_path, format="json")
         finally:
             import os
 
@@ -257,14 +274,14 @@ class TestIOErrors:
 
     def test_unsupported_file_extensions(self):
         """Test handling of unsupported file extensions."""
-        from networkx_mcp.core.io import GraphIOHandler
+        from networkx_mcp.core.io_handlers import GraphIOHandler
 
         with tempfile.NamedTemporaryFile(suffix=".unsupported", delete=False) as f:
             unsupported_path = f.name
 
         try:
             with pytest.raises(ValueError):
-                GraphIOHandler.import_from_file(unsupported_path, "auto")
+                GraphIOHandler.import_graph(path=unsupported_path, format="auto")
         finally:
             import os
 
@@ -274,8 +291,6 @@ class TestIOErrors:
 class TestVisualizationErrors:
     """Test visualization error handling."""
 
-    @pytest.mark.asyncio
-    @pytest.mark.asyncio
     @patch("matplotlib.pyplot.savefig")
     def test_matplotlib_save_error(self, mock_savefig):
         """Test handling of matplotlib save errors."""

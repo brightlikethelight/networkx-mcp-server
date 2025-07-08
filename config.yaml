@@ -1,0 +1,38 @@
+# NetworkX MCP Server Configuration
+# This file can be used to override default settings
+
+# Environment-specific configuration
+environment: development
+
+# Server settings
+server:
+  host: localhost
+  port: 8765
+  workers: 4
+
+# Security settings
+security:
+  rate_limit_enabled: true
+  rate_limit_requests: 100
+  rate_limit_window: 60
+
+# Performance settings
+performance:
+  enable_caching: true
+  cache_ttl: 1800
+  parallel_processing: true
+
+# Storage settings
+storage:
+  backend: auto  # auto, redis, or memory
+
+# Feature flags
+features:
+  machine_learning: true
+  visualization: true
+  monitoring: true
+
+# Logging configuration
+logging:
+  level: INFO
+  json_format: false

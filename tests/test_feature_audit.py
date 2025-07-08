@@ -4,6 +4,11 @@ This test provides an honest assessment of what works and what doesn't,
 ensuring we only claim features that actually function.
 """
 
+import pytest
+
+# Skip this module - it's not a proper test suite
+pytestmark = pytest.mark.skip(reason="Feature audit module is not a test suite")
+
 
 def test_feature_import(module_path: str, class_name: str) -> tuple[bool, str]:
     """Test if a feature can be imported and instantiated."""

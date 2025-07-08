@@ -1,0 +1,367 @@
+{
+  "3d_visualization": {
+    "category": "visualization",
+    "conflicts": [],
+    "dependencies": [],
+    "description": "Enable 3D graph visualization",
+    "disabled_for_users": [],
+    "enabled_environments": [],
+    "enabled_for_users": [],
+    "requires_restart": false,
+    "rollout_percentage": 0.0,
+    "status": "enabled",
+    "tags": [
+      "visualization"
+    ]
+  },
+  "advanced_auth": {
+    "category": "security",
+    "conflicts": [],
+    "dependencies": [],
+    "description": "Enable advanced authentication features",
+    "disabled_for_users": [],
+    "enabled_environments": [],
+    "enabled_for_users": [],
+    "requires_restart": false,
+    "rollout_percentage": 0.0,
+    "status": "disabled",
+    "tags": [
+      "security",
+      "enterprise"
+    ]
+  },
+  "advanced_community_detection": {
+    "category": "algorithms",
+    "conflicts": [],
+    "dependencies": [],
+    "description": "Enable advanced community detection algorithms",
+    "disabled_for_users": [],
+    "enabled_environments": [],
+    "enabled_for_users": [],
+    "requires_restart": false,
+    "rollout_percentage": 0.0,
+    "status": "beta",
+    "tags": [
+      "algorithms",
+      "beta"
+    ]
+  },
+  "ar_visualization": {
+    "category": "visualization",
+    "conflicts": [],
+    "dependencies": [],
+    "description": "Enable AR/VR visualization support",
+    "disabled_for_users": [],
+    "enabled_environments": [],
+    "enabled_for_users": [],
+    "requires_restart": false,
+    "rollout_percentage": 0.0,
+    "status": "experimental",
+    "tags": [
+      "visualization",
+      "experimental"
+    ]
+  },
+  "audit_logging": {
+    "category": "security",
+    "conflicts": [],
+    "dependencies": [],
+    "description": "Enable detailed audit logging",
+    "disabled_for_users": [],
+    "enabled_environments": [],
+    "enabled_for_users": [],
+    "requires_restart": false,
+    "rollout_percentage": 0.0,
+    "status": "enabled",
+    "tags": [
+      "security",
+      "compliance"
+    ]
+  },
+  "batch_operations": {
+    "category": "api",
+    "conflicts": [],
+    "dependencies": [],
+    "description": "Enable batch graph operations",
+    "disabled_for_users": [],
+    "enabled_environments": [],
+    "enabled_for_users": [],
+    "requires_restart": false,
+    "rollout_percentage": 0.0,
+    "status": "enabled",
+    "tags": [
+      "api",
+      "performance"
+    ]
+  },
+  "distributed_storage": {
+    "category": "storage",
+    "conflicts": [],
+    "dependencies": [],
+    "description": "Enable distributed graph storage",
+    "disabled_for_users": [],
+    "enabled_environments": [],
+    "enabled_for_users": [],
+    "requires_restart": true,
+    "rollout_percentage": 0.0,
+    "status": "disabled",
+    "tags": [
+      "storage",
+      "enterprise"
+    ]
+  },
+  "gpu_acceleration": {
+    "category": "performance",
+    "conflicts": [],
+    "dependencies": [],
+    "description": "Enable GPU acceleration for algorithms",
+    "disabled_for_users": [],
+    "enabled_environments": [],
+    "enabled_for_users": [],
+    "requires_restart": true,
+    "rollout_percentage": 0.0,
+    "status": "disabled",
+    "tags": [
+      "performance",
+      "experimental"
+    ]
+  },
+  "graph_diffing": {
+    "category": "experimental",
+    "conflicts": [],
+    "dependencies": [],
+    "description": "Enable graph diffing and versioning",
+    "disabled_for_users": [],
+    "enabled_environments": [],
+    "enabled_for_users": [],
+    "requires_restart": false,
+    "rollout_percentage": 0.0,
+    "status": "experimental",
+    "tags": [
+      "experimental",
+      "versioning"
+    ]
+  },
+  "graph_sharding": {
+    "category": "storage",
+    "conflicts": [],
+    "dependencies": [
+      "distributed_storage"
+    ],
+    "description": "Enable automatic graph sharding",
+    "disabled_for_users": [],
+    "enabled_environments": [],
+    "enabled_for_users": [],
+    "requires_restart": false,
+    "rollout_percentage": 0.0,
+    "status": "experimental",
+    "tags": [
+      "storage",
+      "performance",
+      "experimental"
+    ]
+  },
+  "graphql_api": {
+    "category": "api",
+    "conflicts": [],
+    "dependencies": [],
+    "description": "Enable GraphQL API endpoint",
+    "disabled_for_users": [],
+    "enabled_environments": [],
+    "enabled_for_users": [],
+    "requires_restart": false,
+    "rollout_percentage": 0.0,
+    "status": "experimental",
+    "tags": [
+      "api",
+      "experimental"
+    ]
+  },
+  "incremental_computation": {
+    "category": "performance",
+    "conflicts": [],
+    "dependencies": [],
+    "description": "Enable incremental algorithm computation",
+    "disabled_for_users": [],
+    "enabled_environments": [],
+    "enabled_for_users": [],
+    "requires_restart": false,
+    "rollout_percentage": 0.0,
+    "status": "beta",
+    "tags": [
+      "performance",
+      "beta"
+    ]
+  },
+  "ml_anomaly_detection": {
+    "category": "machine_learning",
+    "conflicts": [],
+    "dependencies": [
+      "ml_base_features"
+    ],
+    "description": "Enable graph anomaly detection",
+    "disabled_for_users": [],
+    "enabled_environments": [],
+    "enabled_for_users": [],
+    "requires_restart": false,
+    "rollout_percentage": 0.0,
+    "status": "disabled",
+    "tags": [
+      "ml",
+      "experimental"
+    ]
+  },
+  "ml_base_features": {
+    "category": "machine_learning",
+    "conflicts": [],
+    "dependencies": [],
+    "description": "Enable basic ML features",
+    "disabled_for_users": [],
+    "enabled_environments": [],
+    "enabled_for_users": [],
+    "requires_restart": false,
+    "rollout_percentage": 0.0,
+    "status": "disabled",
+    "tags": [
+      "ml"
+    ]
+  },
+  "ml_graph_embeddings": {
+    "category": "machine_learning",
+    "conflicts": [],
+    "dependencies": [
+      "ml_base_features"
+    ],
+    "description": "Enable graph embedding generation",
+    "disabled_for_users": [],
+    "enabled_environments": [],
+    "enabled_for_users": [],
+    "requires_restart": false,
+    "rollout_percentage": 0.0,
+    "status": "enabled",
+    "tags": [
+      "ml",
+      "experimental"
+    ]
+  },
+  "ml_link_prediction": {
+    "category": "machine_learning",
+    "conflicts": [],
+    "dependencies": [
+      "ml_base_features"
+    ],
+    "description": "Enable link prediction algorithms",
+    "disabled_for_users": [],
+    "enabled_environments": [],
+    "enabled_for_users": [],
+    "requires_restart": false,
+    "rollout_percentage": 0.0,
+    "status": "disabled",
+    "tags": [
+      "ml",
+      "experimental"
+    ]
+  },
+  "ml_node_classification": {
+    "category": "machine_learning",
+    "conflicts": [],
+    "dependencies": [
+      "ml_base_features"
+    ],
+    "description": "Enable node classification",
+    "disabled_for_users": [],
+    "enabled_environments": [],
+    "enabled_for_users": [],
+    "requires_restart": false,
+    "rollout_percentage": 0.0,
+    "status": "disabled",
+    "tags": [
+      "ml",
+      "experimental"
+    ]
+  },
+  "natural_language_queries": {
+    "category": "experimental",
+    "conflicts": [],
+    "dependencies": [
+      "ml_base_features"
+    ],
+    "description": "Enable natural language graph queries",
+    "disabled_for_users": [],
+    "enabled_environments": [],
+    "enabled_for_users": [],
+    "requires_restart": false,
+    "rollout_percentage": 0.0,
+    "status": "experimental",
+    "tags": [
+      "experimental",
+      "ai",
+      "nlp"
+    ]
+  },
+  "parallel_algorithms": {
+    "category": "performance",
+    "conflicts": [],
+    "dependencies": [],
+    "description": "Enable parallel algorithm execution",
+    "disabled_for_users": [],
+    "enabled_environments": [],
+    "enabled_for_users": [],
+    "requires_restart": false,
+    "rollout_percentage": 0.0,
+    "status": "enabled",
+    "tags": [
+      "performance"
+    ]
+  },
+  "performance_profiling": {
+    "category": "monitoring",
+    "conflicts": [],
+    "dependencies": [],
+    "description": "Enable performance profiling",
+    "disabled_for_users": [],
+    "enabled_environments": [],
+    "enabled_for_users": [],
+    "requires_restart": false,
+    "rollout_percentage": 0.0,
+    "status": "beta",
+    "tags": [
+      "monitoring",
+      "performance"
+    ]
+  },
+  "quantum_algorithms": {
+    "category": "algorithms",
+    "conflicts": [],
+    "dependencies": [],
+    "description": "Enable quantum-inspired graph algorithms",
+    "disabled_for_users": [],
+    "enabled_environments": [],
+    "enabled_for_users": [],
+    "requires_restart": false,
+    "rollout_percentage": 0.0,
+    "status": "experimental",
+    "tags": [
+      "algorithms",
+      "experimental",
+      "research"
+    ]
+  },
+  "websocket_streaming": {
+    "category": "api",
+    "conflicts": [],
+    "dependencies": [],
+    "description": "Enable WebSocket streaming for real-time updates",
+    "disabled_for_users": [],
+    "enabled_environments": [],
+    "enabled_for_users": [],
+    "requires_restart": false,
+    "rollout_percentage": 0.0,
+    "status": "beta",
+    "tags": [
+      "api",
+      "beta",
+      "realtime"
+    ]
+  }
+}

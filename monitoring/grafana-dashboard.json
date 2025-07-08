@@ -1,0 +1,349 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "NetworkX MCP Server - Production Monitoring",
+    "tags": ["networkx", "mcp", "production"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Request Rate",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "rate(mcp_requests_total[5m])",
+            "legendFormat": "{{method}} requests/sec"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "reqps",
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 10},
+                {"color": "red", "value": 50}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Active Connections",
+        "type": "gauge",
+        "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0},
+        "targets": [
+          {
+            "expr": "sum(mcp_active_connections)",
+            "legendFormat": "Active Connections"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "min": 0,
+            "max": 50,
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 30},
+                {"color": "red", "value": 45}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Memory Usage",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0},
+        "targets": [
+          {
+            "expr": "mcp_memory_usage_bytes / 1024 / 1024",
+            "legendFormat": "Memory Usage (MB)"
+          },
+          {
+            "expr": "mcp_memory_limit_bytes / 1024 / 1024",
+            "legendFormat": "Memory Limit (MB)"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "decbytes",
+            "color": {"mode": "palette-classic"},
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 1600},
+                {"color": "red", "value": 1800}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Performance Tier",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0},
+        "targets": [
+          {
+            "expr": "mcp_performance_tier",
+            "legendFormat": "Performance Tier"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {"options": {"0": {"text": "Critical", "color": "red"}}, "type": "value"},
+              {"options": {"1": {"text": "Degraded", "color": "orange"}}, "type": "value"},
+              {"options": {"2": {"text": "Acceptable", "color": "yellow"}}, "type": "value"},
+              {"options": {"3": {"text": "Good", "color": "green"}}, "type": "value"},
+              {"options": {"4": {"text": "Excellent", "color": "blue"}}, "type": "value"}
+            ]
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Response Time Percentiles",
+        "type": "timeseries",
+        "gridPos": {"h": 9, "w": 12, "x": 0, "y": 8},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(mcp_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "P50"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(mcp_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "P95"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(mcp_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "P99"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "color": {"mode": "palette-classic"},
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 0.5},
+                {"color": "red", "value": 2.0}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "Error Rate",
+        "type": "timeseries",
+        "gridPos": {"h": 9, "w": 12, "x": 12, "y": 8},
+        "targets": [
+          {
+            "expr": "rate(mcp_requests_total{status=\"error\"}[5m]) / rate(mcp_requests_total[5m]) * 100",
+            "legendFormat": "Error Rate %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "color": {"mode": "palette-classic"},
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 5},
+                {"color": "red", "value": 15}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Graph Operations",
+        "type": "timeseries",
+        "gridPos": {"h": 9, "w": 8, "x": 0, "y": 17},
+        "targets": [
+          {
+            "expr": "rate(mcp_graph_operations_total[5m])",
+            "legendFormat": "{{operation}} ({{graph_type}})"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops",
+            "color": {"mode": "palette-classic"}
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "Algorithm Performance",
+        "type": "timeseries",
+        "gridPos": {"h": 9, "w": 8, "x": 8, "y": 17},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(mcp_algorithm_duration_seconds_bucket[5m]))",
+            "legendFormat": "{{algorithm}} P95"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "color": {"mode": "palette-classic"},
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 1.0},
+                {"color": "red", "value": 5.0}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 9,
+        "title": "Graph Size Distribution",
+        "type": "heatmap",
+        "gridPos": {"h": 9, "w": 8, "x": 16, "y": 17},
+        "targets": [
+          {
+            "expr": "rate(mcp_graph_nodes_bucket[5m])",
+            "legendFormat": "{{le}} nodes"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "color": {"mode": "spectrum"}
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Transport Comparison",
+        "type": "bargauge",
+        "gridPos": {"h": 8, "w": 6, "x": 0, "y": 26},
+        "targets": [
+          {
+            "expr": "rate(mcp_requests_total[5m])",
+            "legendFormat": "{{transport}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps",
+            "color": {"mode": "palette-classic"}
+          }
+        }
+      },
+      {
+        "id": 11,
+        "title": "Authentication Success Rate",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 6, "x": 6, "y": 26},
+        "targets": [
+          {
+            "expr": "rate(mcp_auth_attempts_total{result=\"success\"}[5m]) / rate(mcp_auth_attempts_total[5m]) * 100",
+            "legendFormat": "Auth Success %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 80},
+                {"color": "green", "value": 95}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 12,
+        "title": "System Resources",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 6, "x": 12, "y": 26},
+        "targets": [
+          {
+            "expr": "mcp_cpu_usage_percent",
+            "legendFormat": "CPU %"
+          },
+          {
+            "expr": "mcp_file_descriptors_open",
+            "legendFormat": "File Descriptors"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "color": {"mode": "palette-classic"}
+          }
+        }
+      },
+      {
+        "id": 13,
+        "title": "Component Health",
+        "type": "table",
+        "gridPos": {"h": 8, "w": 6, "x": 18, "y": 26},
+        "targets": [
+          {
+            "expr": "mcp_component_health",
+            "legendFormat": "{{component}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {"options": {"0": {"text": "Unhealthy", "color": "red"}}, "type": "value"},
+              {"options": {"1": {"text": "Degraded", "color": "yellow"}}, "type": "value"},
+              {"options": {"2": {"text": "Healthy", "color": "green"}}, "type": "value"}
+            ]
+          }
+        }
+      }
+    ],
+    "annotations": {
+      "list": [
+        {
+          "name": "Deployments",
+          "datasource": "prometheus",
+          "expr": "changes(mcp_server_info[1h])",
+          "iconColor": "blue",
+          "titleFormat": "Deployment"
+        }
+      ]
+    },
+    "templating": {
+      "list": [
+        {
+          "name": "instance",
+          "type": "query",
+          "query": "label_values(mcp_requests_total, instance)",
+          "refresh": 1
+        },
+        {
+          "name": "method",
+          "type": "query", 
+          "query": "label_values(mcp_requests_total, method)",
+          "refresh": 1
+        }
+      ]
+    }
+  }
+}

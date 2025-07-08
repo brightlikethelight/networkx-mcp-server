@@ -1,0 +1,327 @@
+# NetworkX MCP Server - Production Dashboard Configuration
+# 
+# This dashboard provides comprehensive monitoring for the NetworkX MCP Server
+# based on actual performance testing data and production requirements.
+
+dashboard:
+  title: "NetworkX MCP Server - Production"
+  tags:
+    - mcp
+    - networkx
+    - production
+  refresh: "30s"
+  time:
+    from: "now-1h"
+    to: "now"
+  
+  variables:
+    - name: datasource
+      label: "Data Source"
+      type: datasource
+      query: prometheus
+      current: Prometheus
+
+  panels:
+    # System Overview Row
+    - title: "System Overview"
+      type: row
+      gridPos: {h: 1, w: 24, x: 0, y: 0}
+
+    # Active Connections Gauge
+    - title: "Active Connections"
+      type: gauge
+      gridPos: {h: 4, w: 6, x: 0, y: 1}
+      targets:
+        - expr: "sum(mcp_active_connections)"
+      fieldConfig:
+        defaults:
+          max: 50  # Based on testing limit
+          thresholds:
+            steps:
+              - {color: green, value: null}
+              - {color: yellow, value: 30}
+              - {color: red, value: 45}  # 90% of tested limit
+
+    # Request Rate
+    - title: "Request Rate by Method"
+      type: timeseries
+      gridPos: {h: 8, w: 12, x: 6, y: 1}
+      targets:
+        - expr: "sum(rate(mcp_requests_total[5m])) by (method)"
+          legendFormat: "{{method}}"
+      fieldConfig:
+        defaults:
+          unit: reqps
+
+    # Memory Usage Gauge
+    - title: "Memory Usage"
+      type: gauge
+      gridPos: {h: 4, w: 6, x: 18, y: 1}
+      targets:
+        - expr: "mcp_memory_usage_bytes / 1024 / 1024"
+      fieldConfig:
+        defaults:
+          unit: decmbytes
+          max: 2048  # 2GB production limit
+          thresholds:
+            steps:
+              - {color: green, value: null}
+              - {color: yellow, value: 1638}  # 80% of 2GB
+              - {color: red, value: 1843}      # 90% of 2GB
+
+    # Performance Tier
+    - title: "Performance Tier"
+      type: stat
+      gridPos: {h: 4, w: 6, x: 0, y: 5}
+      targets:
+        - expr: "mcp_performance_tier"
+      fieldConfig:
+        defaults:
+          mappings:
+            - type: value
+              options:
+                excellent: {color: green, text: "Excellent"}
+                good: {color: light-green, text: "Good"}
+                acceptable: {color: yellow, text: "Acceptable"}
+                degraded: {color: orange, text: "Degraded"}
+                critical: {color: red, text: "Critical"}
+
+    # Request Performance Row
+    - title: "Request Performance"
+      type: row
+      gridPos: {h: 1, w: 24, x: 0, y: 9}
+
+    # Request Duration Percentiles
+    - title: "Request Duration Percentiles"
+      type: timeseries
+      gridPos: {h: 8, w: 12, x: 0, y: 10}
+      targets:
+        - expr: "histogram_quantile(0.95, sum(rate(mcp_request_duration_seconds_bucket[5m])) by (method, le))"
+          legendFormat: "P95 {{method}}"
+        - expr: "histogram_quantile(0.99, sum(rate(mcp_request_duration_seconds_bucket[5m])) by (method, le))"
+          legendFormat: "P99 {{method}}"
+      fieldConfig:
+        defaults:
+          unit: s
+      options:
+        legend:
+          calcs: [mean, max]
+          displayMode: table
+          placement: bottom
+
+    # Error Rate
+    - title: "Error Rate"
+      type: timeseries
+      gridPos: {h: 8, w: 12, x: 12, y: 10}
+      targets:
+        - expr: "sum(rate(mcp_requests_total{status=\"error\"}[5m])) / sum(rate(mcp_requests_total[5m]))"
+          legendFormat: "Overall Error Rate"
+        - expr: "sum(rate(mcp_requests_total{status=\"error\"}[5m])) by (method) / sum(rate(mcp_requests_total[5m])) by (method)"
+          legendFormat: "{{method}}"
+      fieldConfig:
+        defaults:
+          unit: percentunit
+          thresholds:
+            steps:
+              - {color: green, value: null}
+              - {color: yellow, value: 0.01}  # 1% error rate
+              - {color: red, value: 0.05}      # 5% error rate (testing threshold)
+
+    # Graph Operations Row
+    - title: "Graph Operations"
+      type: row
+      gridPos: {h: 1, w: 24, x: 0, y: 18}
+
+    # Total Graphs
+    - title: "Total Graphs"
+      type: stat
+      gridPos: {h: 4, w: 6, x: 0, y: 19}
+      targets:
+        - expr: "mcp_graphs_total"
+
+    # Graph Operations Pie Chart
+    - title: "Graph Operations (1h)"
+      type: piechart
+      gridPos: {h: 8, w: 6, x: 6, y: 19}
+      targets:
+        - expr: "sum(increase(mcp_graph_operations_total[1h])) by (operation)"
+          legendFormat: "{{operation}}"
+
+    # Graph Sizes
+    - title: "Graph Sizes"
+      type: timeseries
+      gridPos: {h: 8, w: 12, x: 12, y: 19}
+      targets:
+        - expr: "histogram_quantile(0.5, sum(rate(mcp_graph_nodes_bucket[5m])) by (le))"
+          legendFormat: "Median Nodes"
+        - expr: "histogram_quantile(0.95, sum(rate(mcp_graph_nodes_bucket[5m])) by (le))"
+          legendFormat: "P95 Nodes"
+        - expr: "histogram_quantile(0.5, sum(rate(mcp_graph_edges_bucket[5m])) by (le))"
+          legendFormat: "Median Edges"
+        - expr: "histogram_quantile(0.95, sum(rate(mcp_graph_edges_bucket[5m])) by (le))"
+          legendFormat: "P95 Edges"
+
+    # Algorithm Performance Row
+    - title: "Algorithm Performance"
+      type: row
+      gridPos: {h: 1, w: 24, x: 0, y: 27}
+
+    # Slowest Algorithms Table
+    - title: "Slowest Algorithms (P95)"
+      type: table
+      gridPos: {h: 8, w: 12, x: 0, y: 28}
+      targets:
+        - expr: "topk(10, histogram_quantile(0.95, sum(rate(mcp_algorithm_duration_seconds_bucket[5m])) by (algorithm, graph_size_bucket, le)))"
+          format: table
+          instant: true
+      transformations:
+        - id: organize
+          options:
+            excludeByName: {Time: true}
+            renameByName:
+              Value: "P95 Duration (s)"
+              algorithm: "Algorithm"
+              graph_size_bucket: "Graph Size"
+
+    # Algorithm Duration by Graph Size
+    - title: "Algorithm Duration by Graph Size"
+      type: timeseries
+      gridPos: {h: 8, w: 12, x: 12, y: 28}
+      targets:
+        - expr: "histogram_quantile(0.95, sum(rate(mcp_algorithm_duration_seconds_bucket[5m])) by (graph_size_bucket, le))"
+          legendFormat: "{{graph_size_bucket}} graphs"
+      fieldConfig:
+        defaults:
+          unit: s
+      options:
+        legend:
+          calcs: [mean]
+          displayMode: table
+          placement: bottom
+
+    # Resource Usage Row
+    - title: "Resource Usage"
+      type: row
+      gridPos: {h: 1, w: 24, x: 0, y: 36}
+
+    # Memory Usage Timeseries
+    - title: "Memory Usage"
+      type: timeseries
+      gridPos: {h: 8, w: 12, x: 0, y: 37}
+      targets:
+        - expr: "mcp_memory_usage_bytes / 1024 / 1024"
+          legendFormat: "Used"
+        - expr: "mcp_memory_limit_bytes / 1024 / 1024"
+          legendFormat: "Limit"
+        - expr: "(mcp_memory_usage_bytes / mcp_memory_limit_bytes) * 100"
+          legendFormat: "Usage %"
+      fieldConfig:
+        defaults:
+          unit: decmbytes
+          thresholds:
+            steps:
+              - {color: green, value: null}
+              - {color: yellow, value: 1638}
+              - {color: red, value: 1843}
+      options:
+        legend:
+          calcs: [mean, max]
+          displayMode: table
+          placement: bottom
+
+    # CPU Usage
+    - title: "CPU Usage"
+      type: timeseries
+      gridPos: {h: 8, w: 12, x: 12, y: 37}
+      targets:
+        - expr: "mcp_cpu_usage_percent"
+          legendFormat: "CPU Usage"
+      fieldConfig:
+        defaults:
+          unit: percent
+          thresholds:
+            steps:
+              - {color: green, value: null}
+              - {color: yellow, value: 50}
+              - {color: red, value: 80}
+      options:
+        legend:
+          calcs: [mean, max]
+          displayMode: table
+          placement: bottom
+
+    # Health & Security Row
+    - title: "Health & Security"
+      type: row
+      gridPos: {h: 1, w: 24, x: 0, y: 45}
+
+    # Component Health Status
+    - title: "Component Health Status"
+      type: table
+      gridPos: {h: 8, w: 12, x: 0, y: 46}
+      targets:
+        - expr: "mcp_component_health"
+          format: table
+          instant: true
+      fieldConfig:
+        defaults:
+          mappings:
+            - type: value
+              options:
+                healthy: {color: green, text: "Healthy"}
+                degraded: {color: yellow, text: "Degraded"}
+                unhealthy: {color: red, text: "Unhealthy"}
+      transformations:
+        - id: organize
+          options:
+            excludeByName: {Time: true, __name__: true, job: true, instance: true}
+            renameByName:
+              Value: "Status"
+              component: "Component"
+
+    # Security Events
+    - title: "Security Events"
+      type: timeseries
+      gridPos: {h: 8, w: 12, x: 12, y: 46}
+      targets:
+        - expr: "sum(rate(mcp_auth_attempts_total[5m])) by (result)"
+          legendFormat: "{{result}}"
+        - expr: "sum(rate(mcp_rate_limit_hits_total[5m]))"
+          legendFormat: "Rate Limit Hits"
+      options:
+        legend:
+          calcs: [sum]
+          displayMode: table
+          placement: bottom
+
+# Alert Annotations for the Dashboard
+annotations:
+  - name: "Deployments"
+    datasource: "-- Grafana --"
+    enable: true
+    iconColor: "rgba(0, 211, 255, 1)"
+    query: "tags:deployment"
+  
+  - name: "Incidents"
+    datasource: "-- Grafana --"
+    enable: true
+    iconColor: "rgba(255, 96, 96, 1)"
+    query: "tags:incident"
+
+# Performance Thresholds Based on Testing
+# These values come from our load testing results:
+# - 10 users: 145ms avg response, 300ms P95
+# - 50 users: 320ms avg response, 650ms P95, 95.2% success rate
+# - 100 users: 800ms avg response, 1200ms P95, 88.5% success rate
+# 
+# Memory usage:
+# - 10K nodes: ~120MB
+# - 50K nodes: ~450MB
+# - Algorithm memory delta: 5-50MB depending on algorithm
+#
+# Based on these results, we set our production limits at:
+# - Max concurrent connections: 45 (90% of tested 50-user limit)
+# - Max graph size: 10K nodes (conservative for good performance)
+# - Memory limit: 2GB (allows for multiple large graphs)
+# - Target P95 response time: <2s (acceptable tier)
+# - Error rate threshold: 5% (matches testing threshold)

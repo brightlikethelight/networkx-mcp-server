@@ -10,6 +10,9 @@ from typing import Any
 import networkx as nx
 import numpy as np
 
+# Import feature flags
+from ..features import feature_flag, is_feature_enabled, FeatureNotEnabledError
+
 try:
     from sklearn.preprocessing import StandardScaler
 
@@ -52,6 +55,11 @@ class MLIntegration:
     """Machine learning integrations for graph analysis."""
 
     @staticmethod
+    @feature_flag("ml_graph_embeddings", fallback=lambda *args, **kwargs: {
+        "error": "ML embeddings feature is disabled",
+        "enabled": False,
+        "suggestion": "Enable 'ml_graph_embeddings' feature flag to use this functionality"
+    })
     def node_embeddings(
         graph: nx.Graph | nx.DiGraph,
         method: str = "node2vec",
@@ -741,6 +749,11 @@ class MLIntegration:
         return results
 
     @staticmethod
+    @feature_flag("ml_anomaly_detection", fallback=lambda *args, **kwargs: {
+        "error": "ML anomaly detection feature is disabled",
+        "enabled": False,
+        "suggestion": "Enable 'ml_anomaly_detection' feature flag to use this functionality"
+    })
     def anomaly_detection(
         graph: nx.Graph | nx.DiGraph,
         method: str = "statistical",

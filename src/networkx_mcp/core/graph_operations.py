@@ -85,6 +85,16 @@ class GraphManager:
             }
             for gid in self.graphs
         ]
+    
+    def list_graphs_with_info(self) -> dict[str, dict[str, Any]]:
+        """List all graphs with full metadata info."""
+        return {
+            gid: {
+                "graph": self.graphs[gid],
+                "metadata": self.metadata[gid]
+            }
+            for gid in self.graphs
+        }
 
     def add_node(
         self, graph_id: str, node_id: str | int, **attributes

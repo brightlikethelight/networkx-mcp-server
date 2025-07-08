@@ -420,3 +420,18 @@ def with_logging_context(**context_data):
             return sync_wrapper
 
     return decorator
+
+
+# Aliases for backward compatibility
+ContextualLogger = StructuredLogger
+
+
+def setup_logging(level="INFO", format_type="json", output_file=None):
+    """Setup global structured logging."""
+    global _structured_logger
+    _structured_logger = StructuredLogger(
+        level=level,
+        format_type=format_type,
+        output_file=output_file
+    )
+    return _structured_logger

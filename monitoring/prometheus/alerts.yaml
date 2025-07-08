@@ -1,0 +1,393 @@
+# NetworkX MCP Server - Prometheus Alerting Rules
+# 
+# Based on production performance testing data:
+# - 50 concurrent users: 95.2% success rate, 320ms avg response
+# - 100 concurrent users: 88.5% success rate, degraded performance
+# - 10K nodes: ~120MB memory, good performance
+# - 50K nodes: ~450MB memory, 2.1s algorithm execution
+#
+# Production limits:
+# - Max connections: 45 (90% of tested 50-user limit)
+# - Max memory: 2GB
+# - Target P95 response time: <2s
+# - Error rate threshold: 5%
+
+groups:
+  - name: mcp_availability
+    interval: 30s
+    rules:
+      # Critical: Service is down
+      - alert: MCPServerDown
+        expr: up{job="networkx-mcp-server"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "NetworkX MCP Server is down"
+          description: "NetworkX MCP Server instance {{ $labels.instance }} has been down for more than 2 minutes."
+          runbook: "https://wiki.example.com/runbooks/mcp-server-down"
+          
+      # Critical: All pods are down
+      - alert: MCPAllPodsDown
+        expr: sum(up{job="networkx-mcp-server"}) == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+          pager: true
+        annotations:
+          summary: "All NetworkX MCP Server pods are down"
+          description: "All NetworkX MCP Server pods have been down for more than 1 minute. Immediate action required."
+          runbook: "https://wiki.example.com/runbooks/mcp-all-pods-down"
+
+  - name: mcp_performance
+    interval: 30s
+    rules:
+      # Warning: High error rate approaching threshold
+      - alert: MCPHighErrorRateWarning
+        expr: |
+          (
+            sum(rate(mcp_requests_total{status="error"}[5m]))
+            /
+            sum(rate(mcp_requests_total[5m]))
+          ) > 0.02
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "MCP error rate above 2%"
+          description: "MCP error rate is {{ $value | humanizePercentage }} over the last 5 minutes. Threshold is 5%."
+          dashboard: "https://grafana.example.com/d/networkx-mcp-prod"
+          
+      # Critical: High error rate exceeds testing threshold
+      - alert: MCPHighErrorRateCritical
+        expr: |
+          (
+            sum(rate(mcp_requests_total{status="error"}[5m]))
+            /
+            sum(rate(mcp_requests_total[5m]))
+          ) > 0.05
+        for: 3m
+        labels:
+          severity: critical
+          team: platform
+          pager: true
+        annotations:
+          summary: "MCP error rate critical - above 5%"
+          description: "MCP error rate is {{ $value | humanizePercentage }}. This exceeds our tested threshold of 5%."
+          runbook: "https://wiki.example.com/runbooks/mcp-high-error-rate"
+          impact: "Users experiencing degraded service"
+          
+      # Warning: P95 response time degraded
+      - alert: MCPHighResponseTimeP95
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(mcp_request_duration_seconds_bucket[5m])) by (le)
+          ) > 2
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "MCP P95 response time above 2s"
+          description: "P95 response time is {{ $value | humanizeDuration }}. Target is <2s for acceptable performance."
+          dashboard: "https://grafana.example.com/d/networkx-mcp-prod?viewPanel=5"
+          
+      # Critical: P95 response time severely degraded
+      - alert: MCPHighResponseTimeP95Critical
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(mcp_request_duration_seconds_bucket[5m])) by (le)
+          ) > 5
+        for: 3m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "MCP P95 response time critical - above 5s"
+          description: "P95 response time is {{ $value | humanizeDuration }}. Service is severely degraded."
+          runbook: "https://wiki.example.com/runbooks/mcp-high-response-time"
+          
+      # Performance tier degradation
+      - alert: MCPPerformanceTierDegraded
+        expr: mcp_performance_tier != 0 and mcp_performance_tier >= 3
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "MCP performance tier degraded"
+          description: "Performance tier is '{{ $labels.mcp_performance_tier }}'. Service operating below optimal levels."
+
+  - name: mcp_resource_usage
+    interval: 30s
+    rules:
+      # Connection pool approaching limit
+      - alert: MCPConnectionPoolHighUsage
+        expr: |
+          sum(mcp_active_connections) > 35
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Connection pool usage high - {{ $value }} active"
+          description: "Active connections ({{ $value }}) approaching limit of 45. Consider scaling."
+          threshold: "45 connections (based on 50-user test limit)"
+          
+      # Connection pool exhausted
+      - alert: MCPConnectionPoolExhausted
+        expr: |
+          sum(mcp_active_connections) >= 45
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+          pager: true
+        annotations:
+          summary: "Connection pool exhausted - {{ $value }} connections"
+          description: "Connection pool at capacity. New connections will be rejected."
+          runbook: "https://wiki.example.com/runbooks/mcp-connection-pool-exhausted"
+          action: "Scale horizontally or investigate stuck connections"
+          
+      # Memory usage warning (80% of 2GB limit)
+      - alert: MCPHighMemoryUsage
+        expr: |
+          mcp_memory_usage_bytes > 1.7e9
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Memory usage high - {{ $value | humanize1024 }}B"
+          description: "Memory usage at {{ $value | humanize1024 }}B ({{ $value / 2147483648 * 100 | humanize }}% of 2GB limit)"
+          context: "50K node graphs use ~450MB, current usage indicates {{ $value / 4.5e8 | humanize }} large graphs"
+          
+      # Memory critical (90% of 2GB limit)
+      - alert: MCPMemoryCritical
+        expr: |
+          mcp_memory_usage_bytes > 1.9e9
+        for: 3m
+        labels:
+          severity: critical
+          team: platform
+          pager: true
+        annotations:
+          summary: "Memory usage critical - {{ $value | humanize1024 }}B"
+          description: "Memory at {{ $value / 2147483648 * 100 | humanize }}% of limit. OOM killer risk."
+          runbook: "https://wiki.example.com/runbooks/mcp-memory-critical"
+          action: "Reduce graph count, restart service, or scale vertically"
+          
+      # CPU usage high
+      - alert: MCPHighCPUUsage
+        expr: |
+          mcp_cpu_usage_percent > 80
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "CPU usage sustained above 80%"
+          description: "CPU at {{ $value }}% for 10 minutes. May indicate algorithm performance issues."
+          
+      # File descriptor leak
+      - alert: MCPFileDescriptorLeak
+        expr: |
+          rate(mcp_file_descriptors_open[10m]) > 0.1
+        for: 20m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Possible file descriptor leak detected"
+          description: "File descriptors increasing at {{ $value }} per second. Current: {{ mcp_file_descriptors_open }}."
+
+  - name: mcp_graph_operations
+    interval: 30s
+    rules:
+      # Large graph operations
+      - alert: MCPLargeGraphOperations
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(mcp_graph_nodes_bucket[5m])) by (le)
+          ) > 10000
+        for: 10m
+        labels:
+          severity: info
+          team: platform
+        annotations:
+          summary: "Processing large graphs (>10K nodes)"
+          description: "P95 graph size is {{ $value | humanize }} nodes. Monitor memory and performance."
+          context: "10K nodes use ~120MB memory with ~180ms algorithm time"
+          
+      # Very large graph warning
+      - alert: MCPVeryLargeGraphWarning
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(mcp_graph_nodes_bucket[5m])) by (le)
+          ) > 50000
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Processing very large graphs (>50K nodes)"
+          description: "P95 graph size is {{ $value | humanize }} nodes. Performance degradation expected."
+          context: "50K nodes use ~450MB memory with ~2.1s algorithm time"
+          recommendation: "Consider using approximate algorithms or sampling"
+          
+      # Algorithm performance degradation
+      - alert: MCPSlowAlgorithms
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(mcp_algorithm_duration_seconds_bucket[5m])) by (algorithm, le)
+          ) > 5
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Algorithm {{ $labels.algorithm }} running slowly"
+          description: "P95 execution time for {{ $labels.algorithm }} is {{ $value | humanizeDuration }}."
+          threshold: "Expected <2s for large graphs based on testing"
+
+  - name: mcp_security
+    interval: 30s
+    rules:
+      # Authentication failures spike
+      - alert: MCPAuthFailureSpike
+        expr: |
+          sum(rate(mcp_auth_attempts_total{result="failure"}[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+          team: security
+        annotations:
+          summary: "Elevated authentication failures"
+          description: "{{ $value | humanize }} auth failures per second. Possible brute force attempt."
+          dashboard: "https://grafana.example.com/d/networkx-mcp-security"
+          
+      # Rate limiting triggered frequently
+      - alert: MCPRateLimitHigh
+        expr: |
+          sum(rate(mcp_rate_limit_hits_total[5m])) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High rate limit violations"
+          description: "Rate limits hit {{ $value | humanize }} times per second. Client may need higher limits."
+          
+      # Input validation errors high
+      - alert: MCPValidationErrorsHigh
+        expr: |
+          sum(rate(mcp_validation_errors_total[5m])) > 0.2
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High input validation error rate"
+          description: "{{ $value | humanize }} validation errors per second. Check client implementation."
+
+  - name: mcp_data_integrity
+    interval: 1m
+    rules:
+      # Graph count mismatch (possible data loss)
+      - alert: MCPGraphCountAnomaly
+        expr: |
+          abs(delta(mcp_graphs_total[5m])) > 10
+          and
+          delta(mcp_graphs_total[5m]) < 0
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Unexpected graph count decrease"
+          description: "Graph count decreased by {{ $value | humanize }} in 5 minutes without corresponding deletions."
+          action: "Check for crashes, OOM kills, or storage issues"
+          
+      # Storage backend issues
+      - alert: MCPStorageLatencyHigh
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(mcp_storage_operation_duration_seconds_bucket[5m])) by (operation, le)
+          ) > 1
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Storage operation {{ $labels.operation }} slow"
+          description: "P95 latency for {{ $labels.operation }} is {{ $value | humanizeDuration }}."
+          impact: "May cause request timeouts and degraded performance"
+
+  - name: mcp_health_checks
+    interval: 30s
+    rules:
+      # Component health degraded
+      - alert: MCPComponentUnhealthy
+        expr: |
+          mcp_component_health != 0 and mcp_component_health == 2
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Component {{ $labels.component }} is unhealthy"
+          description: "Health check for {{ $labels.component }} has been failing for 5 minutes."
+          dashboard: "https://grafana.example.com/d/networkx-mcp-prod?viewPanel=14"
+          
+      # Slow health checks
+      - alert: MCPHealthCheckSlow
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(mcp_health_check_duration_seconds_bucket[5m])) by (check_type, le)
+          ) > 5
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Health check {{ $labels.check_type }} is slow"
+          description: "Health check taking {{ $value | humanizeDuration }}. May indicate underlying issues."
+
+# Recording rules for efficiency
+  - name: mcp_recording_rules
+    interval: 30s
+    rules:
+      # Pre-calculate error rates
+      - record: mcp:request_error_rate5m
+        expr: |
+          sum(rate(mcp_requests_total{status="error"}[5m]))
+          /
+          sum(rate(mcp_requests_total[5m]))
+          
+      # Pre-calculate P95 response times
+      - record: mcp:request_duration_p95_5m
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(mcp_request_duration_seconds_bucket[5m])) by (method, le)
+          )
+          
+      # Active connection percentage
+      - record: mcp:connection_usage_percent
+        expr: |
+          sum(mcp_active_connections) / 45 * 100
+          
+      # Memory usage percentage
+      - record: mcp:memory_usage_percent
+        expr: |
+          mcp_memory_usage_bytes / 2147483648 * 100
+          
+      # Algorithm performance by size
+      - record: mcp:algorithm_duration_by_size
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(mcp_algorithm_duration_seconds_bucket[5m])) 
+            by (algorithm, graph_size_bucket, le)
+          )

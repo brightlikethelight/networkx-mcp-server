@@ -14,7 +14,31 @@ from typing import Any, Callable, Optional
 
 import networkx as nx
 
+# Try to import configuration
+try:
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+    from config import get_settings
+    _settings = get_settings()
+except (ImportError, Exception):
+    _settings = None
+
 logger = logging.getLogger(__name__)
+
+
+def _get_limit_value(env_var: str, default: int, config_path: Optional[str] = None) -> int:
+    """Get limit value from config or environment variable."""
+    # First try config if available
+    if _settings and config_path:
+        value = _settings
+        for part in config_path.split('.'):
+            value = getattr(value, part, None)
+            if value is None:
+                break
+        if value is not None:
+            return int(value)
+    
+    # Fall back to environment variable
+    return int(os.environ.get(env_var, str(default)))
 
 
 @dataclass
@@ -22,22 +46,22 @@ class ResourceLimits:
     """Configurable resource limits."""
     
     # Memory limits
-    max_memory_mb: int = int(os.environ.get("MAX_MEMORY_MB", "1024"))  # 1GB default
-    max_graph_size_mb: int = int(os.environ.get("MAX_GRAPH_SIZE_MB", "100"))  # 100MB per graph
+    max_memory_mb: int = _get_limit_value("MAX_MEMORY_MB", 1024, "performance.max_memory_mb")
+    max_graph_size_mb: int = _get_limit_value("MAX_GRAPH_SIZE_MB", 100, "storage.max_graph_size_mb")
     memory_check_threshold: float = 0.8  # Warn at 80% memory usage
     
     # Time limits
-    operation_timeout_seconds: int = int(os.environ.get("OPERATION_TIMEOUT", "30"))
+    operation_timeout_seconds: int = _get_limit_value("OPERATION_TIMEOUT", 30, "performance.operation_timeout")
     
     # Concurrency limits
-    max_concurrent_requests: int = int(os.environ.get("MAX_CONCURRENT_REQUESTS", "10"))
+    max_concurrent_requests: int = _get_limit_value("MAX_CONCURRENT_REQUESTS", 10, "performance.max_concurrent_requests")
     
     # Graph size limits
-    max_nodes_per_graph: int = int(os.environ.get("MAX_NODES_PER_GRAPH", "100000"))
-    max_edges_per_graph: int = int(os.environ.get("MAX_EDGES_PER_GRAPH", "1000000"))
+    max_nodes_per_graph: int = _get_limit_value("MAX_NODES_PER_GRAPH", 100000, "performance.max_nodes")
+    max_edges_per_graph: int = _get_limit_value("MAX_EDGES_PER_GRAPH", 1000000, "performance.max_edges")
     
     # Rate limiting
-    requests_per_minute: int = int(os.environ.get("REQUESTS_PER_MINUTE", "60"))
+    requests_per_minute: int = _get_limit_value("REQUESTS_PER_MINUTE", 60, "security.rate_limit_requests")
     
 
 # Global instance

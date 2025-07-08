@@ -1,0 +1,20 @@
+{
+  "name": "networkx-mcp-integration-tests",
+  "version": "1.0.0",
+  "description": "Integration tests for NetworkX MCP server with JavaScript SDK",
+  "type": "module",
+  "scripts": {
+    "test": "node test_mcp_client.js",
+    "test:batch": "node test_batch_operations.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

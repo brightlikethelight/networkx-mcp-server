@@ -1,0 +1,79 @@
+# Development Environment Configuration
+# This configuration is optimized for local development
+
+environment: development
+name: networkx-mcp-server
+version: 1.0.0
+debug: true
+
+server:
+  host: localhost
+  port: 8765
+  workers: 2
+  max_connections: 100
+  request_timeout: 60
+  keepalive_timeout: 10
+  debug: true
+
+security:
+  enable_auth: false
+  api_key_required: false
+  allowed_origins: ["*"]
+  rate_limit_enabled: true
+  rate_limit_requests: 100
+  rate_limit_window: 60
+  audit_enabled: false
+  audit_log_file: logs/audit-dev.log
+  max_request_size: 10485760  # 10MB
+  max_nodes_per_request: 1000
+  max_edges_per_request: 10000
+  safe_id_pattern: "^[a-zA-Z0-9_-]{1,100}$"
+
+performance:
+  max_nodes: 100000
+  max_edges: 1000000
+  memory_limit_mb: 2048
+  timeout_seconds: 300
+  enable_caching: true
+  cache_size_mb: 256
+  cache_ttl: 1800
+  parallel_processing: true
+  use_cython: false  # Disable for easier debugging
+  numpy_optimization: true
+  max_memory_mb: 512
+  operation_timeout: 30
+  max_concurrent_requests: 5
+
+storage:
+  backend: memory  # Use memory backend for development
+  redis_url: null
+  redis_host: localhost
+  redis_port: 6379
+  redis_db: 0
+  redis_prefix: networkx_mcp_dev
+  redis_pool_size: 5
+  redis_timeout: 5
+  redis_retry_attempts: 3
+  redis_ttl: 1800
+  compression_level: 1  # Low compression for speed
+  max_graph_size_mb: 50
+
+features:
+  machine_learning: true
+  visualization: true
+  gpu_acceleration: false
+  enterprise_features: false
+  monitoring: true
+  metrics_endpoint: /metrics
+  health_endpoint: /health
+  api_v2_enabled: true
+  advanced_algorithms: true
+  caching_enabled: true
+
+logging:
+  level: DEBUG
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: logs/networkx-mcp-dev.log
+  max_file_size: 10485760  # 10MB
+  backup_count: 3
+  json_format: false

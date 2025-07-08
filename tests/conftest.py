@@ -468,3 +468,41 @@ def performance_thresholds():
         "centrality": 2.0,
         "community_detection": 5.0,
     }
+
+
+@pytest.fixture
+def error_scenarios():
+    """Common error scenarios for testing error handling."""
+    return {
+        "invalid_graph_ids": [
+            "",  # Empty string
+            None,  # None value
+            123,  # Number instead of string
+            "a" * 256,  # Very long string
+            "../../../etc/passwd",  # Path traversal attempt
+            "<script>alert('xss')</script>",  # XSS attempt
+            "'; DROP TABLE graphs; --",  # SQL injection attempt
+            "\x00\x01\x02",  # Binary data
+            "CON",  # Windows reserved name
+            "PRN",  # Windows reserved name
+        ],
+        "invalid_node_ids": [
+            None,  # None value
+            "",  # Empty string
+            [],  # Empty list
+            {},  # Empty dict
+            {"id": "nested"},  # Dict instead of simple value
+            [1, 2, 3],  # List instead of simple value
+        ],
+        "invalid_file_paths": [
+            None,  # None value
+            "",  # Empty string
+            "/nonexistent/path/to/file.json",  # Non-existent path
+            "relative/path.json",  # Relative path
+            "/path/with spaces/file.json",  # Path with spaces
+            "/path/to/file.invalid",  # Invalid extension
+            "../../../etc/passwd",  # Path traversal
+            "file://malicious.json",  # File URL
+            "http://example.com/file.json",  # HTTP URL
+        ],
+    }

@@ -267,10 +267,6 @@ class TestDataPipelinesIntegration:
 class TestEndToEndWorkflows:
     """Test complete end-to-end workflows using MCP tools."""
 
-    @pytest.mark.asyncio
-    @pytest.mark.asyncio
-    @pytest.mark.asyncio
-    @pytest.mark.asyncio
 class TestComplexDataIntegration:
     """Test integration with complex, real-world-like data scenarios."""
 
