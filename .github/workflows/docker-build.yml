@@ -9,7 +9,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: ${{ github.repository_owner }}/networkx-mcp-server
 
 jobs:
   build:
@@ -37,7 +37,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        images: ${{ env.REGISTRY }}/bright-l01/networkx-mcp-server
         tags: |
           type=ref,event=branch
           type=ref,event=pr
@@ -58,7 +58,7 @@ jobs:
     
     - name: Test Docker image
       run: |
-        docker run --rm ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }} --help || true
+        docker run --rm ${{ env.REGISTRY }}/bright-l01/networkx-mcp-server:${{ steps.meta.outputs.version }} --help || true
         echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | \
-          docker run -i --rm ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }} | \
+          docker run -i --rm ${{ env.REGISTRY }}/bright-l01/networkx-mcp-server:${{ steps.meta.outputs.version }} | \
           grep -q "protocolVersion"
