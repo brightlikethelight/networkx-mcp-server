@@ -852,7 +852,7 @@ class GraphIOHandler:
             raise
 
         with open(path, "rb") as f:
-            return pickle.load(f)
+            return pickle.load(f)  # nosec B301 - documented security warning above
 
     @staticmethod
     def _export_dot(graph: nx.Graph, **kwargs) -> str:

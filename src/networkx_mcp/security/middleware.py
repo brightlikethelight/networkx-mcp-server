@@ -191,7 +191,7 @@ class SecurityMiddleware:
 
     def generate_request_id(self) -> str:
         """Generate unique request ID."""
-        return hashlib.md5(f"{time.time()}{id(self)}".encode()).hexdigest()[:16]
+        return hashlib.sha256(f"{time.time()}{id(self)}".encode()).hexdigest()[:16]
 
     def extract_client_identifier(
         self, headers: dict[str, str], source_ip: str | None = None

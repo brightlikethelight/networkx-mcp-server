@@ -302,7 +302,7 @@ class AuditLogger:
 
     def generate_event_id(self) -> str:
         """Generate unique event ID."""
-        return hashlib.md5(f"{time.time()}{id(self)}".encode()).hexdigest()[:16]
+        return hashlib.sha256(f"{time.time()}{id(self)}".encode()).hexdigest()[:16]
 
     async def log_event(
         self,

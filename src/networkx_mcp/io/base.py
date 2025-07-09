@@ -1,5 +1,6 @@
 """Base interfaces for graph I/O operations."""
 
+import tempfile
 from abc import ABC, abstractmethod
 from pathlib import Path
 
@@ -40,7 +41,8 @@ def validate_file_path(filepath: str | Path, must_exist: bool = True) -> Path:
     path = Path(filepath)
 
     # Security: prevent directory traversal
-    if ".." in str(path) or (path.is_absolute() and not str(path).startswith("/tmp")):
+    allowed_temp_dir = Path(tempfile.gettempdir())
+    if ".." in str(path) or (path.is_absolute() and not path.is_relative_to(allowed_temp_dir)):
         msg = "Invalid file path - no directory traversal allowed"
         raise ValueError(msg)
 

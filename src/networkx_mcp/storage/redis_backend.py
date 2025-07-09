@@ -240,7 +240,7 @@ class RedisBackend(StorageBackend):
 
         # Deserialize
         try:
-            graph = pickle.loads(graph_data)
+            graph = pickle.loads(graph_data)  # nosec B301 - controlled storage context
         except Exception as e:
             msg = f"Failed to deserialize graph: {e}"
             raise StorageError(msg) from e
