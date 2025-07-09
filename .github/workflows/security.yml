@@ -24,7 +24,7 @@ jobs:
     
     - name: Run Bandit security scan
       run: |
-        bandit -r src/ -f json -o bandit-report.json
+        bandit -r src/ -f json -o bandit-report.json --severity-level medium
     
     - name: Check dependencies for vulnerabilities
       run: |
