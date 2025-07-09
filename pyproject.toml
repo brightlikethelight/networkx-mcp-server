@@ -3,123 +3,72 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "networkx-mcp-server"
-version = "2.0.0"
-description = "Production-ready MCP server for NetworkX graph analysis with Tools, Resources, and Prompts"
+name = "networkx-mcp"
+version = "0.1.0-alpha.2"  # Architectural fix version
+description = "Actually minimal MCP server for NetworkX operations (54.6MB, not 118MB)"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [{name = "Bright Liu", email = "brightliu@example.com"}]
 maintainers = [{name = "Bright Liu", email = "brightliu@example.com"}]
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
+    "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Information Analysis",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 requires-python = ">=3.11"
 dependencies = [
     "networkx>=3.0",
-    "numpy>=1.20.0",
-    # Core MCP - we'll handle FastMCP compatibility internally
-    "mcp>=1.0.0",
-    # Optional but recommended
-    "scipy>=1.14.0",
-    "pandas>=2.0.0",
-    "redis>=5.0.0",
-    "aiofiles>=23.0.0",
-    "pyyaml>=6.0",
-    "python-dotenv>=1.0.0",
-    "rich>=13.0.0",
-    "psutil>=5.9.0",
+    # NumPy removed from core - only needed for certain algorithms
 ]
 
 [project.optional-dependencies]
-# Optional FastMCP support (requires Pydantic v2)
-fastmcp = [
-    "fastmcp>=0.5.0",
-    "pydantic>=2.0",
-]
+# Development dependencies
 dev = [
-    "pytest>=8.0.0",
-    "pytest-asyncio>=0.24.0",
-    "pytest-cov>=6.0.0",
-    "pytest-xdist>=3.7.0",
-    "pytest-benchmark>=5.1.0",
-    "pytest-mock>=3.14.0",
-    "pytest-randomly>=3.15.0",
-    "mutmut>=2.5.0",
-    "hypothesis>=6.135.0",
-    "asv>=0.6.0",
-    "freezegun>=1.5.2",
-    "factory-boy>=3.3.3",
-    "coverage[toml]>=7.6.0",
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
     "black>=24.0.0",
     "ruff>=0.8.0",
-    "mypy>=1.13.0",
-    "bandit[toml]>=1.8.0",
-    "safety>=3.2.0",
-    "pre-commit>=4.0.0",
-    "types-PyYAML>=6.0.12",
-    "types-aiofiles>=24.1.0",
-    "types-redis>=4.6.0",
-    "types-psutil>=6.1.0",
-    "pandas-stubs>=2.2.2",
-    "types-requests>=2.32.0",
-    "sphinx>=8.1.0",
-    "sphinx-rtd-theme>=3.0.0",
-    "mkdocs>=1.6.0",
-    "mkdocs-material>=9.5.0",
+    "psutil>=5.9.0",  # For memory testing
 ]
-ml = [
-    "scikit-learn>=1.6.0",
-    "torch>=2.5.0",
-    "sentence-transformers>=3.3.0",
-    "transformers>=4.47.0",
-    "numpy-ml>=0.1.2",
+
+# I/O format support (adds 35MB!)
+excel = [
+    "pandas>=1.3.0",
+    "openpyxl>=3.0.0",
 ]
-visualization = [
-    "matplotlib>=3.9.0",
-    "plotly>=5.24.0",
-    "pyvis>=0.3.4",
-    "seaborn>=0.13.2",
-    "pygraphviz>=1.14",
-    "bokeh>=3.6.0",
-    "ipython>=8.29.0",
-    "jupyter>=1.1.1",
+
+# Scientific computing support (adds 15MB!)
+scipy = [
+    "scipy>=1.7.0",
+    "numpy>=1.21.0",
 ]
-enterprise = [
-    "psutil>=6.1.0",
-    "aiohttp>=3.11.0",
-    "jinja2>=3.1.4",
-    "reportlab>=4.2.0",
-    "schedule>=1.2.2",
-    "prometheus-client>=0.21.0",
-    "opentelemetry-api>=1.28.0",
-    "opentelemetry-sdk>=1.28.0",
-    "structlog>=24.4.0",
-]
-all = [
-    "networkx-mcp-server[dev,ml,visualization,enterprise]",
+
+# Full installation with all features (adds 60MB!)
+full = [
+    "pandas>=1.3.0",
+    "scipy>=1.7.0",
+    "numpy>=1.21.0",
+    "matplotlib>=3.4.0",
+    "openpyxl>=3.0.0",
 ]
 
 [project.urls]
 Homepage = "https://github.com/Bright-L01/networkx-mcp-server"
-Documentation = "https://networkx-mcp-server.readthedocs.io"
 Repository = "https://github.com/Bright-L01/networkx-mcp-server"
 Issues = "https://github.com/Bright-L01/networkx-mcp-server/issues"
 
 [project.scripts]
-networkx-mcp-server = "networkx_mcp.cli:main"
+networkx-mcp = "networkx_mcp.server_minimal:main"  # Default: truly minimal
+networkx-mcp-full = "networkx_mcp.server:main"     # With pandas/scipy support
 
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["networkx_mcp*"]
-
 
 [tool.ruff]
 line-length = 88
@@ -131,53 +80,15 @@ select = [
     "W",  # pycodestyle warnings
     "F",  # pyflakes
     "I",  # isort
-    "B",  # flake8-bugbear
-    "C4", # flake8-comprehensions
-    "UP", # pyupgrade
 ]
-ignore = ["E501", "B008", "C901", "W191", "I001"]
+ignore = ["E501"]  # line too long
 
-[tool.ruff.lint.isort]
-lines-after-imports = 1
-
-[tool.mypy]
-python_version = "3.11"
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = false
-disallow_incomplete_defs = false
-check_untyped_defs = true
-disallow_untyped_decorators = false
-no_implicit_optional = true
-warn_redundant_casts = true
-warn_unused_ignores = true
-warn_no_return = true
-follow_imports = "normal"
-ignore_missing_imports = true
-strict_optional = false
-show_error_codes = true
-
-[tool.bandit]
-exclude_dirs = ["tests", "scripts", "docs", "build", "dist"]
-skips = [
-    "B101",  # assert_used - we use assert in tests
-    "B311",  # random - we use random for non-crypto purposes
-    "B404",  # subprocess - we need subprocess for some operations
-    "B603",  # subprocess_without_shell_equals_true - false positives
-    "B607",  # start_process_with_partial_path - false positives
-    "B324",  # hashlib - we use MD5 for non-crypto purposes
-    "B104",  # hardcoded_bind_all_interfaces - false positive
-]
-
-# Testing Configuration
 [tool.pytest.ini_options]
-minversion = "8.0"
+minversion = "7.0"
 addopts = [
     "--strict-markers",
     "--strict-config",
     "--tb=short",
-    "--disable-warnings",
-    "-ra",
     "-v",
 ]
 testpaths = ["tests"]
@@ -185,143 +96,8 @@ python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
 asyncio_mode = "auto"
-markers = [
-    "unit: Unit tests",
-    "integration: Integration tests",
-    "performance: Performance tests",
-    "security: Security tests",
-    "property: Property-based tests",
-    "slow: Slow running tests",
-    "redis: Tests requiring Redis",
-    "network: Tests requiring network access",
-]
-filterwarnings = [
-    "ignore::DeprecationWarning",
-    "ignore::PendingDeprecationWarning",
-]
 
-[tool.coverage.run]
-source = ["src/networkx_mcp"]
-branch = true
-parallel = true
-omit = [
-    "src/networkx_mcp/__init__.py",
-    "src/networkx_mcp/cli.py",
-    "tests/*",
-    "*/migrations/*",
-    "*/venv/*",
-    "*/__pycache__/*",
-]
-
-[tool.coverage.report]
-exclude_lines = [
-    "pragma: no cover",
-    "def __repr__",
-    "if self.debug:",
-    "if settings.DEBUG",
-    "raise AssertionError",
-    "raise NotImplementedError",
-    "if 0:",
-    "if __name__ == .__main__.:",
-    "class .*\\bProtocol\\):",
-    "@(abc\\.)?abstractmethod",
-]
-precision = 2
-show_missing = true
-skip_covered = false
-
-[tool.coverage.html]
-directory = "htmlcov"
-
-[tool.coverage.xml]
-output = "coverage.xml"
-
-# Property-based testing configuration
-[tool.hypothesis]
-max_examples = 100
-deadline = 10000  # 10 seconds
-derandomize = true
-database_file = ".hypothesis/examples"
-suppress_health_check = ["too_slow"]
-
-# Enhanced ruff configuration for 2024 standards
-[tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["F401", "F403"]  # Allow unused imports in __init__.py
-"tests/*" = ["S101", "PLR2004", "S311"]  # Allow asserts and magic values in tests
-
-[tool.ruff.lint.mccabe]
-max-complexity = 10
-
-[tool.ruff.lint.flake8-quotes]
-docstring-quotes = "double"
-
-[tool.ruff.lint.flake8-type-checking]
-strict = true
-
-# Enhanced mypy configuration (applied above)
-
-# Mutation testing configuration
-[tool.mutmut]
-backup = false
-runner = "pytest"
-tests_dir = "tests/"
-paths_to_mutate = "src/networkx_mcp/"
-exclude_patterns = [
-    "*__init__.py",
-    "*__version__.py",
-    "*/tests/*",
-]
-
-# Safety configuration for dependency scanning
-[tool.safety]
-# Ignore known false positives
-ignore = []
-full-report = true
-
-# Pre-commit configuration (referenced by .pre-commit-config.yaml)
-[tool.pre-commit]
-default_stages = ["commit", "push"]
-
-# Enhanced bandit configuration
-[tool.bandit.assert_used]
-skips = ["*_test.py", "*/test_*.py", "*/tests/*"]
-
-# Black configuration for consistent formatting
 [tool.black]
 line-length = 88
-target-version = ['py311', 'py312', 'py313']
+target-version = ['py311', 'py312']
 include = '\.pyi?$'
-extend-exclude = '''
-/(
-  # directories
-  \.eggs
-  | \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | build
-  | dist
-)/
-'''
-
-# Enhanced performance testing
-[tool.pytest.benchmark]
-min_rounds = 5
-max_time = 2.0
-sort = "mean"
-histogram = true
-save_data = true
-json_output = "benchmark.json"
-
-# Documentation configuration
-[tool.sphinx]
-source_dir = "docs"
-build_dir = "docs/_build"
-extensions = [
-    "sphinx.ext.autodoc",
-    "sphinx.ext.viewcode",
-    "sphinx.ext.napoleon",
-    "sphinx.ext.intersphinx",
-    "sphinx_rtd_theme",
-]

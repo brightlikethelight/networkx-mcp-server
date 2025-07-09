@@ -7,7 +7,7 @@ from collections import deque
 from dataclasses import dataclass
 
 from ..core.base import Component
-from ..monitoring.logging import with_logging_context
+# Monitoring module removed - using simple logging instead
 
 logger = logging.getLogger(__name__)
 
@@ -144,7 +144,7 @@ class RateLimiter(Component):
 
         return self.limiters[identifier]
 
-    @with_logging_context(component="rate_limiter")
+    # @with_logging_context removed - monitoring module deleted
     async def check_rate_limit(
         self, identifier: str, limit_type: str = "user", tokens: int = 1
     ) -> RateLimitResult:
@@ -193,7 +193,7 @@ class RateLimiter(Component):
 
         return result
 
-    @with_logging_context(component="rate_limiter")
+    # @with_logging_context removed - monitoring module deleted
     async def check_multiple_limits(
         self, checks: list[tuple[str, str]]  # [(identifier, limit_type), ...]
     ) -> RateLimitResult:

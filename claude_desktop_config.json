@@ -4,8 +4,7 @@
       "command": "python",
       "args": [
         "-m", 
-        "src.networkx_mcp", 
-        "--minimal"
+        "networkx_mcp"
       ],
       "cwd": "/Users/brightliu/Coding_Projects/networkx-mcp-server",
       "env": {

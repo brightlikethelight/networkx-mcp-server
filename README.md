@@ -1,280 +1,216 @@
-# 🕸️ NetworkX MCP Server
+# NetworkX MCP Server
 
-<div align="center">
+A **truly minimal** MCP server providing NetworkX graph operations to AI assistants.
+
+> **⚠️ Architecture Fix**: v0.1.0-alpha.2 reduces memory from 118MB to 54MB by removing forced pandas/scipy imports. See [ADR-001](docs/ADR-001-remove-heavyweight-dependencies.md) for details.
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![NetworkX](https://img.shields.io/badge/NetworkX-3.4+-orange.svg)](https://networkx.org/)
+[![NetworkX](https://img.shields.io/badge/NetworkX-3.0+-orange.svg)](https://networkx.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-[![Feature Status](https://img.shields.io/badge/features-20/20%20working-brightgreen.svg)](#-feature-status)
-[![Core Stability](https://img.shields.io/badge/core-100%25%20stable-green.svg)](#-core-features)
-[![Test Coverage](https://img.shields.io/badge/tests-comprehensive-blue.svg)](#-testing)
+## Current Status: Alpha (v0.1.0-alpha.2)
 
-**Honest, reliable MCP server for NetworkX graph analysis • Core features stable • Active development**
+**This is a minimal, working implementation - not production software.**
 
-[🚀 Quick Start](#-quick-start) • [📊 Feature Status](#-feature-status) • [🛠️ API Reference](#-api-reference) • [🧪 Testing](#-testing)
+### 🎯 Memory Footprint (Honest Numbers)
 
-</div>
+| Version | Memory | Modules | What You Get |
+|---------|--------|---------|---------------|
+| **Minimal** (default) | **54MB** | ~600 | Core graph operations only |
+| **With Excel** | **89MB** | ~800 | + pandas for Excel/CSV I/O |
+| **Full** | **118MB** | ~900 | + scipy, matplotlib |
 
----
+<details>
+<summary>Why these numbers?</summary>
 
-## 🌟 What is NetworkX MCP Server?
+- Python interpreter: 16MB
+- NetworkX library: 20MB  
+- Our server code: 18MB
+- **Total: 54MB** (not 20MB - let's be honest)
 
-**NetworkX MCP Server** is a [Model Context Protocol](https://github.com/anthropics/mcp) server that provides access to [NetworkX](https://networkx.org/) graph analysis capabilities. This project prioritizes **honesty and reliability** over marketing claims.
+The original v0.1.0 forced everyone to load pandas (+35MB) even for basic operations. We fixed this architectural disaster.
+</details>
 
-### ✨ Current Status (Honest Assessment)
+### ✅ What Works
+- **7 graph tools** via MCP protocol (tested and verified)
+- **Stdio transport** for local operation  
+- **Claude Desktop integration** (works out of the box)
+- **Core NetworkX algorithms** (shortest path, centrality measures)
+- **Basic graph operations** (create, add nodes/edges, delete)
 
-- **🎯 Core Features**: 100% working and tested (graph CRUD, algorithms, unified API)
-- **🚀 Advanced Features**: 83% working (ML, community detection, robustness analysis)
-- **🏢 Enterprise Features**: 40% working (circuit breakers, feature flags implemented)
-- **📊 Overall Status**: 20/20 features working (100% functionality)
-- **🧪 Test Coverage**: Comprehensive with 33+ test files
+### ❌ What Doesn't Work Yet
+- HTTP transport (doesn't exist - stdio only)
+- Persistent storage (exists but not integrated into server) 
+- Multi-user support (stdio limitation)
+- Authentication/authorization (not applicable for stdio)
 
-## 🔒 Security Notice
+### ⚠️ Current Limitations (REAL TESTED LIMITS)
+- **Server Memory**: 54MB minimum (not 20MB - NetworkX needs ~20MB alone)
+- **Graph Capacity**: 10,000 nodes tested (performance degrades beyond this)
+- **Graph Memory**: ~0.2KB per node (~2MB for 10K nodes)
+- **Speed**: Graph creation ~935ms for 10K nodes (MCP protocol overhead)
+- **Concurrency**: Single-user only (one graph operation at a time)
+- **Transport**: Stdio only (no remote access)
+- **Storage**: In-memory only (data lost on restart)
+- **Security**: Local process isolation only
 
-**⚠️ IMPORTANT: This server is in active development and has security limitations:**
+> **Performance Reality**: Claims were 5x inflated. See `docs/PERFORMANCE_REALITY_CHECK.md` for actual benchmarks.
+> **Memory Reality**: Was using 118MB while claiming "minimal". Now actually 54MB. See [MEMORY_BLOAT_ANALYSIS.md](MEMORY_BLOAT_ANALYSIS.md).
 
-- **No Authentication**: Currently no user authentication or API keys
-- **No Authorization**: All users have full access to all operations
-- **HTTP Only**: No built-in HTTPS/TLS support (use reverse proxy)
-- **In-Memory Storage**: All data is lost on restart
+## Installation
 
-**For production use:**
-1. Deploy behind an authenticated reverse proxy (nginx, traefik)
-2. Use environment variables for all secrets
-3. Enable rate limiting and monitoring
-4. See [SECURITY.md](SECURITY.md) for full details
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- **Python 3.11+** (tested on 3.12)
-- **pip** for package management
-- **NetworkX** for graph operations
-
-### Installation
-
+### Option 1: Minimal (Recommended) - 54MB
 ```bash
-# Clone the repository
-git clone https://github.com/brightliu/networkx-mcp-server.git
+pip install networkx-mcp
+```
+Only NetworkX, no data science bloat. Perfect for 90% of use cases.
+
+### Option 2: With Excel/CSV Support - 89MB
+```bash
+pip install networkx-mcp[excel]
+```
+Adds pandas for data I/O. Only install if you actually need it.
+
+### Option 3: Everything - 118MB  
+```bash
+pip install networkx-mcp[full]
+```
+Includes pandas, scipy, matplotlib. The old bloated default.
+
+### From Source
+```bash
+git clone https://github.com/your-username/networkx-mcp-server
 cd networkx-mcp-server
-
-# Install in development mode
-pip install -e .
-
-# Optional: Install development dependencies
-pip install -e ".[dev,fastmcp]"
+pip install -e .  # Minimal by default
 ```
 
-### Basic Usage
+## Usage with Claude Desktop
 
-```python
-from networkx_mcp.services.unified_graph_service import UnifiedGraphService
+Add to your `claude_desktop_config.json`:
 
-# Create service instance
-service = UnifiedGraphService()
-
-# Create and analyze a graph
-service.create_graph("social", "Graph")
-service.add_nodes("social", ["Alice", "Bob", "Charlie"])
-service.add_edges("social", [("Alice", "Bob"), ("Bob", "Charlie")])
-
-# Run algorithms
-path = service.shortest_path("social", "Alice", "Charlie")
-components = service.connected_components("social")
-centrality = service.centrality_measures("social")
-
-print(f"Shortest path: {path['path']}")
-print(f"Connected components: {components['num_components']}")
+```json
+{
+  "mcpServers": {
+    "networkx": {
+      "command": "python",
+      "args": ["-m", "networkx_mcp"],
+      "cwd": "/path/to/networkx-mcp-server",
+      "env": {
+        "PYTHONPATH": "/path/to/networkx-mcp-server/src"
+      }
+    }
+  }
+}
 ```
 
-### MCP Server Usage
+## Available Tools
+
+| Tool | Description | Status |
+|------|-------------|--------|
+| `create_graph` | Create new graph (directed/undirected) | ✅ Working |
+| `add_nodes` | Add nodes to graph | ✅ Working |
+| `add_edges` | Add edges between nodes | ✅ Working |
+| `get_graph_info` | Get graph statistics and metadata | ✅ Working |
+| `shortest_path` | Find shortest path between nodes | ✅ Working |
+| `centrality_measures` | Calculate network centrality | ✅ Working |
+| `delete_graph` | Remove graph from memory | ✅ Working |
+
+## Performance Characteristics
+
+**Measured with real subprocess benchmarks and memory profiling:**
+
+| Metric | Tested Result | Performance |
+|--------|---------------|-------------|
+| **Max Tested Nodes** | 10,000 | Good |
+| **Max Tested Edges** | 10,000 | Good |
+| **Memory Usage** | ~0.2KB/node, ~234 bytes/edge | Reasonable |
+| **Basic Operations** | 10-25ms | Acceptable |
+| **Graph Creation** | 935ms | Slow ⚠️ |
+| **Shortest Path** | 10.5ms (100 nodes) | Fast |
+| **Centrality** | 11.1ms (100 nodes) | Fast |
+
+*See [benchmarks/REAL_PERFORMANCE_REPORT.md](benchmarks/REAL_PERFORMANCE_REPORT.md) for detailed results.*
+
+### Performance Guidance
+- **Small graphs (1-1K nodes)**: Fast (0.01-0.13s)
+- **Medium graphs (1K-5K nodes)**: Good (0.13-0.59s)  
+- **Large graphs (5K-10K nodes)**: Acceptable (0.59-1.19s)
+- **Very large graphs (10K+ nodes)**: Untested
+
+## Docker Support
+
+### Quick Start with Docker
+```bash
+# Build the image
+docker build -t networkx-mcp:0.1.0 .
+
+# Run with JSON-RPC input
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | \
+  docker run -i networkx-mcp:0.1.0
+
+# Run test suite
+./test_docker.sh
+```
+
+See [docs/DOCKER_USAGE.md](docs/DOCKER_USAGE.md) for detailed Docker instructions.
+
+## Testing
 
 ```bash
-# Run as MCP server
-python -m networkx_mcp.server
+# Run honest tests that verify actual functionality
+python -m pytest tests/test_brutally_honest_tools.py -v
 
-# The server provides tools for graph operations via MCP protocol
+# Test with real MCP protocol
+echo '{"jsonrpc": "2.0", "id": 1, "method": "tools/list"}' | python -m networkx_mcp
 ```
 
-## 📊 Feature Status
+## Limitations & Roadmap
 
-| Category | Status | Working Features | Notes |
-|----------|--------|------------------|-------|
-| **🔧 Core** | 100% | 3/3 | GraphManager, Algorithms, UnifiedService |
-| **🚀 Advanced** | 83% | 5/6 | ML, Community Detection, Robustness |
-| **🏢 Enterprise** | 100% | 2/2 | Circuit Breakers, Feature Flags |
-| **🏗️ Infrastructure** | 100% | 9/9 | Security, Monitoring, Caching |
-| **Overall** | **100%** | **20/20** | All claimed features work |
+### v0.1.0 (Current) - Minimal Working Server
+- ✅ Basic graph operations
+- ✅ Stdio transport only
+- ✅ Single-user, in-memory
 
-### ✅ What Actually Works
+### v0.2.0 (Planned) - Network Transport
+- ❌ HTTP transport
+- ❌ Basic authentication
+- ❌ Multi-client support
 
-**Core Graph Operations (Rock Solid)**
-- ✅ Graph creation, modification, deletion
-- ✅ Node and edge operations with attributes
-- ✅ 15+ graph algorithms (shortest path, centrality, clustering)
-- ✅ Unified API that eliminates boilerplate
-- ✅ Comprehensive error handling
+### v0.3.0 (Planned) - Persistence  
+- ❌ File-based storage
+- ❌ Session management
+- ❌ Graph import/export
 
-**Advanced Analytics (Mostly Working)**
-- ✅ Machine Learning integration (node classification, link prediction)
-- ✅ Community detection algorithms
-- ✅ Network robustness analysis
-- ✅ Bipartite graph analysis
-- ✅ Graph generators
+### v1.0.0 (Future) - Production Ready
+- ❌ Security features
+- ❌ Monitoring & logging
+- ❌ Performance optimizations
 
-**Infrastructure (Fully Implemented)**
-- ✅ Security middleware with authentication
-- ✅ Request validation and sanitization
-- ✅ Audit logging and monitoring
-- ✅ Health checks and metrics
-- ✅ Caching service with multiple backends
-- ✅ Event system for graph operations
-- ✅ Repository pattern with storage abstraction
+## Contributing
 
-**Enterprise Features (Partial)**
-- ✅ Circuit breaker pattern for resilience
-- ✅ Feature flags service
-- ❌ Config management (planned for v2.0)
-- ❌ Graceful shutdown (planned for v2.0)
-- ❌ Database migrations (planned for v2.0)
+This project values **honesty over hype**. Before contributing:
 
-### 🚧 Development Roadmap
+1. Verify your feature actually works
+2. Write tests that prove it works
+3. Document limitations clearly
+4. No marketing claims without evidence
 
-**Version 1.0 (Current Focus)**
-- [x] Core graph operations
-- [x] Basic algorithms
-- [x] Unified API
-- [x] Comprehensive testing
-- [ ] Documentation improvements
-- [ ] Performance optimizations
+## Security Warning
 
-**Version 2.0 (Planned)**
-- [ ] Complete enterprise features
-- [ ] Advanced ML integrations
-- [ ] Real-time graph updates
-- [ ] WebSocket support
-- [ ] Distributed processing
+**⚠️ DO NOT USE IN PRODUCTION**
 
-## 🛠️ API Reference
+This is alpha software with:
+- No authentication
+- No input validation
+- No rate limiting
+- No access controls
 
-### UnifiedGraphService (Recommended)
+Use only for local development and experimentation.
 
-The `UnifiedGraphService` provides a consistent, graph ID-based API:
+## License
 
-```python
-from networkx_mcp.services.unified_graph_service import UnifiedGraphService
+MIT License - see [LICENSE](LICENSE) file.
 
-service = UnifiedGraphService()
+## Honest Assessment
 
-# All methods return consistent {"status": "success/error", ...} format
-result = service.create_graph("my_graph", "Graph")
-result = service.add_nodes("my_graph", [1, 2, 3])
-result = service.shortest_path("my_graph", 1, 3)
-```
-
-### Core Components (Advanced Usage)
-
-```python
-from networkx_mcp.core.graph_operations import GraphManager
-from networkx_mcp.core.algorithms import GraphAlgorithms
-
-# Lower-level APIs for advanced users
-gm = GraphManager()
-alg = GraphAlgorithms()
-
-# Manual bridging required
-gm.create_graph("test", "Graph")
-graph = gm.get_graph("test")  # Bridge step
-result = alg.shortest_path(graph, 1, 2)
-```
-
-## 🧪 Testing
-
-We prioritize testing and provide comprehensive coverage:
-
-```bash
-# Run all tests
-python -m pytest
-
-# Run feature audit
-python tests/test_feature_audit.py
-
-# Run core operations tests
-python tests/test_core_operations.py
-
-# Run unified service tests
-python tests/test_unified_service.py
-
-# Test API improvements
-python tests/test_api_improvements.py
-```
-
-### Test Categories
-
-- **Unit Tests**: Core functionality testing
-- **Integration Tests**: End-to-end workflow testing
-- **Property Tests**: Edge case and fuzz testing
-- **Performance Tests**: Load and benchmark testing
-- **Security Tests**: Vulnerability and boundary testing
-
-## 🔧 Development
-
-### Project Structure
-
-```
-src/networkx_mcp/
-├── core/                 # Core graph operations and algorithms
-├── services/             # High-level service layer (UnifiedGraphService)
-├── advanced/             # Advanced analytics (ML, community detection)
-├── enterprise/           # Enterprise features (partial)
-├── security/             # Security and validation
-├── monitoring/           # Health checks and metrics
-├── caching/              # Cache service
-└── storage/              # Data persistence
-```
-
-### Code Quality
-
-- **Type Hints**: Full static typing with mypy
-- **Code Formatting**: Black + isort
-- **Linting**: ruff for code quality
-- **Testing**: pytest with comprehensive coverage
-- **Documentation**: Sphinx with API docs
-
-## 🤝 Contributing
-
-We welcome contributions! This project values:
-
-1. **Honesty**: Only claim features that actually work
-2. **Testing**: All features must have comprehensive tests
-3. **Documentation**: Clear, accurate documentation
-4. **Quality**: Type hints, formatting, and code quality
-
-## 📚 Documentation
-
-- **README**: You're reading it (honest status)
-- **API Reference**: In-code docstrings with examples
-- **Testing Guide**: Comprehensive test coverage
-- **Development Guide**: Setup and contribution guidelines
-
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **NetworkX**: Powerful graph analysis library
-- **FastMCP**: Modern MCP framework (optional dependency)
-- **Model Context Protocol**: Standard for AI tool integration
-
----
-
-<div align="center">
-
-**🎯 This project prioritizes honesty and reliability over marketing claims.**
-
-*All features listed in this README have been tested and verified to work.*
-
-</div>
+This project was built to demonstrate a working MCP server, not as production software. It prioritizes clarity and reliability over features. If you need production graph analysis, consider established solutions like Neo4j or AWS Neptune.

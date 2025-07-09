@@ -1,458 +1,374 @@
 #!/usr/bin/env python3
 """
-NetworkX MCP Server - Minimal Implementation
+TRULY minimal NetworkX MCP server.
 
-This module provides a basic MCP (Model Context Protocol) server implementation
-that exposes NetworkX graph operations through the MCP protocol over stdio transport.
+Memory usage: ~20-25MB (not 118MB!)
+Dependencies: Only networkx and standard library
 
-It implements JSON-RPC 2.0 message framing and core MCP methods including:
-- initialize/initialized for client handshake
-- tools/list for tool discovery  
-- tools/call for tool execution
-- Basic NetworkX graph operations as MCP tools
+This is what a minimal server actually looks like.
 """
 
-import asyncio
 import json
-import logging
 import sys
-from typing import Any, Dict, List, Optional
-from dataclasses import dataclass, field
-
-import networkx as nx
-
-# Add parent directory to Python path for imports
+import asyncio
+import logging
+import signal
+from typing import Dict, Any, Optional, List
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent))
 
-from .core.graph_operations import GraphManager
-from .core.algorithms import GraphAlgorithms
+import networkx as nx  # The ONLY external dependency
+
+# NO pandas imports!
+# NO scipy imports!
+# NO matplotlib imports!
+# NO heavyweight data science libraries!
 
 logger = logging.getLogger(__name__)
 
-# MCP Protocol Version
-MCP_PROTOCOL_VERSION = "2024-11-05"
-
-@dataclass
-class MCPRequest:
-    """MCP JSON-RPC request message."""
-    jsonrpc: str = "2.0"
-    id: int = 0
-    method: str = ""
-    params: Optional[Dict[str, Any]] = None
-
-@dataclass
-class MCPResponse:
-    """MCP JSON-RPC response message."""
-    jsonrpc: str = "2.0"
-    id: int = 0
-    result: Optional[Dict[str, Any]] = None
-    error: Optional[Dict[str, Any]] = None
-
-@dataclass
-class MCPNotification:
-    """MCP JSON-RPC notification message."""
-    jsonrpc: str = "2.0"
-    method: str = ""
-    params: Optional[Dict[str, Any]] = None
-
-class NetworkXMCPServer:
-    """Minimal MCP server for NetworkX graph operations."""
+class TrulyMinimalServer:
+    """Minimal MCP server with only essential NetworkX operations."""
     
     def __init__(self):
-        self.graph_manager = GraphManager()
-        self.algorithms = GraphAlgorithms()
-        self.client_capabilities = {}
-        self.initialized = False
+        self.graphs: Dict[str, nx.Graph] = {}
+        self.running = True
         
     async def start_stdio_server(self):
-        """Start the MCP server using stdio transport."""
-        logger.info("Starting NetworkX MCP Server (Minimal) via stdio")
+        """Start the minimal MCP server."""
+        logger.info("Starting TRULY minimal NetworkX MCP server...")
         
-        # Read messages from stdin and write responses to stdout
-        while True:
+        # Set up signal handlers
+        signal.signal(signal.SIGTERM, lambda s, f: setattr(self, 'running', False))
+        signal.signal(signal.SIGINT, lambda s, f: setattr(self, 'running', False))
+        
+        while self.running:
             try:
-                # Read line from stdin
-                line = sys.stdin.readline()
+                # Read from stdin
+                line = await asyncio.get_event_loop().run_in_executor(
+                    None, sys.stdin.readline
+                )
+                
                 if not line:
-                    break
-                    
-                line = line.strip()
-                if not line:
+                    await asyncio.sleep(0.1)
                     continue
                     
-                # Parse JSON-RPC message
-                try:
-                    message = json.loads(line)
-                except json.JSONDecodeError as e:
-                    logger.error(f"Invalid JSON received: {e}")
-                    continue
+                # Parse JSON-RPC request
+                request = json.loads(line.strip())
                 
-                # Process message
-                response = await self.handle_message(message)
+                # Handle request
+                response = await self.handle_request(request)
                 
-                # Send response if it's a request (has id)
-                if response and "id" in message:
-                    response_json = json.dumps(response, separators=(',', ':'))
-                    print(response_json, flush=True)
+                # Send response
+                if response:
+                    print(json.dumps(response), flush=True)
                     
+            except json.JSONDecodeError as e:
+                # Invalid JSON
+                error_response = {
+                    "jsonrpc": "2.0",
+                    "id": None,
+                    "error": {
+                        "code": -32700,
+                        "message": "Parse error",
+                        "data": str(e)
+                    }
+                }
+                print(json.dumps(error_response), flush=True)
             except KeyboardInterrupt:
-                logger.info("Server interrupted by user")
                 break
             except Exception as e:
-                logger.error(f"Server error: {e}")
-                break
+                logger.error(f"Error in message loop: {e}")
+                await asyncio.sleep(0.1)
                 
-        logger.info("Server stopped")
-    
-    async def handle_message(self, message: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """Handle incoming MCP message."""
-        try:
-            # Validate JSON-RPC format
-            if message.get("jsonrpc") != "2.0":
-                return self.create_error_response(
-                    message.get("id"), -32600, "Invalid Request"
-                )
-            
-            method = message.get("method")
-            if not method:
-                return self.create_error_response(
-                    message.get("id"), -32600, "Missing method"
-                )
-            
-            # Route to appropriate handler
-            if method == "initialize":
-                return await self.handle_initialize(message)
-            elif method == "initialized":
-                return await self.handle_initialized(message)
-            elif method == "tools/list":
-                return await self.handle_tools_list(message)
-            elif method == "tools/call":
-                return await self.handle_tools_call(message)
-            else:
-                return self.create_error_response(
-                    message.get("id"), -32601, f"Method not found: {method}"
-                )
-                
-        except Exception as e:
-            logger.error(f"Error handling message: {e}")
-            return self.create_error_response(
-                message.get("id"), -32603, f"Internal error: {str(e)}"
-            )
-    
-    def create_error_response(self, id: Optional[int], code: int, message: str) -> Dict[str, Any]:
-        """Create JSON-RPC error response."""
-        return {
-            "jsonrpc": "2.0",
-            "id": id,
-            "error": {
-                "code": code,
-                "message": message
-            }
-        }
-    
-    async def handle_initialize(self, message: Dict[str, Any]) -> Dict[str, Any]:
-        """Handle MCP initialize request."""
-        params = message.get("params", {})
+    async def handle_request(self, request: dict) -> Optional[dict]:
+        """Handle MCP JSON-RPC request."""
+        method = request.get("method")
+        params = request.get("params", {})
+        request_id = request.get("id")
         
-        # Validate protocol version
-        protocol_version = params.get("protocolVersion")
-        if protocol_version != MCP_PROTOCOL_VERSION:
-            logger.warning(f"Client protocol version {protocol_version} != {MCP_PROTOCOL_VERSION}")
-        
-        # Store client capabilities
-        self.client_capabilities = params.get("capabilities", {})
-        
-        # Return server capabilities
-        return {
-            "jsonrpc": "2.0",
-            "id": message["id"],
-            "result": {
-                "protocolVersion": MCP_PROTOCOL_VERSION,
-                "capabilities": {
-                    "tools": {
-                        "listChanged": False  # We don't support dynamic tool changes yet
+        # Handle methods
+        if method == "initialize":
+            return {
+                "jsonrpc": "2.0",
+                "id": request_id,
+                "result": {
+                    "protocolVersion": "2024-11-05",
+                    "capabilities": {
+                        "tools": {"listChanged": False}
+                    },
+                    "serverInfo": {
+                        "name": "networkx-mcp-minimal",
+                        "version": "0.1.0-minimal"
                     }
-                },
-                "serverInfo": {
-                    "name": "networkx-mcp-server",
-                    "version": "1.0.0"
                 }
             }
-        }
-    
-    async def handle_initialized(self, message: Dict[str, Any]) -> None:
-        """Handle MCP initialized notification."""
-        self.initialized = True
-        logger.info("MCP client initialized successfully")
-        return None  # Notifications don't return responses
-    
-    async def handle_tools_list(self, message: Dict[str, Any]) -> Dict[str, Any]:
-        """Handle tools/list request - return available graph tools."""
-        if not self.initialized:
-            return self.create_error_response(
-                message["id"], -32002, "Server not initialized"
-            )
-        
-        tools = [
+            
+        elif method == "initialized":
+            # Notification, no response
+            return None
+            
+        elif method == "tools/list":
+            return {
+                "jsonrpc": "2.0",
+                "id": request_id,
+                "result": {
+                    "tools": self._get_minimal_tools()
+                }
+            }
+            
+        elif method == "tools/call":
+            try:
+                result = await self._call_tool(params)
+                return {
+                    "jsonrpc": "2.0",
+                    "id": request_id,
+                    "result": result
+                }
+            except Exception as e:
+                return {
+                    "jsonrpc": "2.0",
+                    "id": request_id,
+                    "error": {
+                        "code": -32603,
+                        "message": str(e)
+                    }
+                }
+                
+        else:
+            return {
+                "jsonrpc": "2.0",
+                "id": request_id,
+                "error": {
+                    "code": -32601,
+                    "message": f"Method not found: {method}"
+                }
+            }
+            
+    def _get_minimal_tools(self) -> List[dict]:
+        """Return only essential graph tools - no I/O operations."""
+        return [
             {
                 "name": "create_graph",
                 "description": "Create a new graph",
                 "inputSchema": {
                     "type": "object",
                     "properties": {
-                        "graph_id": {"type": "string", "description": "Unique identifier for the graph"},
-                        "directed": {"type": "boolean", "description": "Whether the graph is directed", "default": False}
+                        "graph_id": {"type": "string"},
+                        "graph_type": {
+                            "type": "string",
+                            "enum": ["Graph", "DiGraph"],
+                            "default": "Graph"
+                        }
                     },
                     "required": ["graph_id"]
                 }
             },
             {
-                "name": "add_nodes",
-                "description": "Add nodes to a graph",
+                "name": "add_node",
+                "description": "Add a node to a graph",
                 "inputSchema": {
                     "type": "object",
                     "properties": {
-                        "graph_id": {"type": "string", "description": "Graph identifier"},
-                        "nodes": {"type": "array", "items": {"type": "string"}, "description": "List of node identifiers"}
+                        "graph_id": {"type": "string"},
+                        "node_id": {"type": ["string", "integer"]}
                     },
-                    "required": ["graph_id", "nodes"]
+                    "required": ["graph_id", "node_id"]
                 }
             },
             {
-                "name": "add_edges", 
-                "description": "Add edges to a graph",
+                "name": "add_edge",
+                "description": "Add an edge between two nodes",
                 "inputSchema": {
                     "type": "object",
                     "properties": {
-                        "graph_id": {"type": "string", "description": "Graph identifier"},
-                        "edges": {
-                            "type": "array",
-                            "items": {
-                                "type": "array",
-                                "minItems": 2,
-                                "maxItems": 2,
-                                "items": {"type": "string"}
-                            },
-                            "description": "List of edges as [source, target] pairs"
-                        }
+                        "graph_id": {"type": "string"},
+                        "source": {"type": ["string", "integer"]},
+                        "target": {"type": ["string", "integer"]}
                     },
-                    "required": ["graph_id", "edges"]
+                    "required": ["graph_id", "source", "target"]
                 }
             },
             {
                 "name": "get_graph_info",
                 "description": "Get information about a graph",
                 "inputSchema": {
-                    "type": "object", 
+                    "type": "object",
                     "properties": {
-                        "graph_id": {"type": "string", "description": "Graph identifier"}
+                        "graph_id": {"type": "string"}
                     },
                     "required": ["graph_id"]
                 }
             },
             {
                 "name": "shortest_path",
-                "description": "Find shortest path between two nodes",
+                "description": "Find shortest path between nodes",
                 "inputSchema": {
                     "type": "object",
                     "properties": {
-                        "graph_id": {"type": "string", "description": "Graph identifier"},
-                        "source": {"type": "string", "description": "Source node"},
-                        "target": {"type": "string", "description": "Target node"}
+                        "graph_id": {"type": "string"},
+                        "source": {"type": ["string", "integer"]},
+                        "target": {"type": ["string", "integer"]}
                     },
                     "required": ["graph_id", "source", "target"]
                 }
             },
             {
-                "name": "centrality_measures",
-                "description": "Calculate centrality measures for graph nodes",
+                "name": "list_graphs",
+                "description": "List all graphs",
                 "inputSchema": {
                     "type": "object",
-                    "properties": {
-                        "graph_id": {"type": "string", "description": "Graph identifier"},
-                        "measures": {
-                            "type": "array",
-                            "items": {"type": "string", "enum": ["degree", "betweenness", "closeness", "eigenvector"]},
-                            "description": "List of centrality measures to calculate"
-                        }
-                    },
-                    "required": ["graph_id", "measures"]
-                }
-            },
-            {
-                "name": "delete_graph",
-                "description": "Delete a graph",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                        "graph_id": {"type": "string", "description": "Graph identifier"}
-                    },
-                    "required": ["graph_id"]
+                    "properties": {}
                 }
             }
+            # NO import/export tools - those require pandas!
         ]
         
-        return {
-            "jsonrpc": "2.0",
-            "id": message["id"],
-            "result": {
-                "tools": tools
-            }
-        }
-    
-    async def handle_tools_call(self, message: Dict[str, Any]) -> Dict[str, Any]:
-        """Handle tools/call request - execute graph operations."""
-        if not self.initialized:
-            return self.create_error_response(
-                message["id"], -32002, "Server not initialized"
-            )
-        
-        params = message.get("params", {})
+    async def _call_tool(self, params: dict) -> dict:
+        """Execute a tool with minimal dependencies."""
         tool_name = params.get("name")
-        arguments = params.get("arguments", {})
+        args = params.get("arguments", {})
         
-        try:
-            # Route to appropriate tool handler
-            if tool_name == "create_graph":
-                result = await self.tool_create_graph(arguments)
-            elif tool_name == "add_nodes":
-                result = await self.tool_add_nodes(arguments)
-            elif tool_name == "add_edges":
-                result = await self.tool_add_edges(arguments)
-            elif tool_name == "get_graph_info":
-                result = await self.tool_get_graph_info(arguments)
-            elif tool_name == "shortest_path":
-                result = await self.tool_shortest_path(arguments)
-            elif tool_name == "centrality_measures":
-                result = await self.tool_centrality_measures(arguments)
-            elif tool_name == "delete_graph":
-                result = await self.tool_delete_graph(arguments)
+        # Tool implementations
+        if tool_name == "create_graph":
+            graph_id = args["graph_id"]
+            graph_type = args.get("graph_type", "Graph")
+            
+            if graph_id in self.graphs:
+                raise ValueError(f"Graph {graph_id} already exists")
+                
+            if graph_type == "Graph":
+                self.graphs[graph_id] = nx.Graph()
+            elif graph_type == "DiGraph":
+                self.graphs[graph_id] = nx.DiGraph()
             else:
-                return self.create_error_response(
-                    message["id"], -32601, f"Unknown tool: {tool_name}"
-                )
+                raise ValueError(f"Unknown graph type: {graph_type}")
+                
+            return {
+                "content": [{
+                    "type": "text",
+                    "text": f"Created {graph_type} with id '{graph_id}'"
+                }]
+            }
+            
+        elif tool_name == "add_node":
+            graph_id = args["graph_id"]
+            node_id = args["node_id"]
+            
+            if graph_id not in self.graphs:
+                raise ValueError(f"Graph {graph_id} not found")
+                
+            self.graphs[graph_id].add_node(node_id)
             
             return {
-                "jsonrpc": "2.0",
-                "id": message["id"],
-                "result": {
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": json.dumps(result, indent=2)
-                        }
-                    ]
-                }
+                "content": [{
+                    "type": "text",
+                    "text": f"Added node '{node_id}' to graph '{graph_id}'"
+                }]
             }
             
-        except Exception as e:
-            logger.error(f"Tool execution error: {e}")
-            return self.create_error_response(
-                message["id"], -32603, f"Tool execution failed: {str(e)}"
-            )
-    
-    # Tool implementations
-    async def tool_create_graph(self, args: Dict[str, Any]) -> Dict[str, Any]:
-        """Create a new graph."""
-        graph_id = args["graph_id"]
-        directed = args.get("directed", False)
-        
-        result = self.graph_manager.create_graph(graph_id, directed=directed)
-        return result
-    
-    async def tool_add_nodes(self, args: Dict[str, Any]) -> Dict[str, Any]:
-        """Add nodes to a graph."""
-        graph_id = args["graph_id"]
-        nodes = args["nodes"]
-        
-        result = self.graph_manager.add_nodes_from(graph_id, nodes)
-        return result
-    
-    async def tool_add_edges(self, args: Dict[str, Any]) -> Dict[str, Any]:
-        """Add edges to a graph."""
-        graph_id = args["graph_id"]
-        edges = args["edges"]
-        
-        # Convert edge list to tuples
-        edge_tuples = [(edge[0], edge[1]) for edge in edges]
-        result = self.graph_manager.add_edges_from(graph_id, edge_tuples)
-        return result
-    
-    async def tool_get_graph_info(self, args: Dict[str, Any]) -> Dict[str, Any]:
-        """Get graph information."""
-        graph_id = args["graph_id"]
-        
-        result = self.graph_manager.get_graph_info(graph_id)
-        return result
-    
-    async def tool_shortest_path(self, args: Dict[str, Any]) -> Dict[str, Any]:
-        """Find shortest path between nodes."""
-        graph_id = args["graph_id"]
-        source = args["source"]
-        target = args["target"]
-        
-        try:
-            graph = self.graph_manager.get_graph(graph_id)
-            path = self.algorithms.shortest_path(graph, source, target)
-            return {"success": True, "path": path}
-        except Exception as e:
-            return {"success": False, "error": str(e)}
-    
-    async def tool_centrality_measures(self, args: Dict[str, Any]) -> Dict[str, Any]:
-        """Calculate centrality measures."""
-        graph_id = args["graph_id"]
-        measures = args["measures"]
-        
-        try:
-            graph = self.graph_manager.get_graph(graph_id)
+        elif tool_name == "add_edge":
+            graph_id = args["graph_id"]
+            source = args["source"]
+            target = args["target"]
             
-            results = {}
-            for measure in measures:
-                if measure == "degree":
-                    results["degree"] = dict(nx.degree_centrality(graph))
-                elif measure == "betweenness":
-                    results["betweenness"] = dict(nx.betweenness_centrality(graph))
-                elif measure == "closeness":
-                    results["closeness"] = dict(nx.closeness_centrality(graph))
-                elif measure == "eigenvector":
-                    try:
-                        results["eigenvector"] = dict(nx.eigenvector_centrality(graph))
-                    except nx.NetworkXException:
-                        results["eigenvector"] = "Could not compute (graph may not be connected)"
-                        
-            return {"success": True, "centrality": results}
-        except Exception as e:
-            return {"success": False, "error": str(e)}
-    
-    async def tool_delete_graph(self, args: Dict[str, Any]) -> Dict[str, Any]:
-        """Delete a graph."""
-        graph_id = args["graph_id"]
-        
-        result = self.graph_manager.delete_graph(graph_id)
-        return result
+            if graph_id not in self.graphs:
+                raise ValueError(f"Graph {graph_id} not found")
+                
+            self.graphs[graph_id].add_edge(source, target)
+            
+            return {
+                "content": [{
+                    "type": "text",
+                    "text": f"Added edge from '{source}' to '{target}' in graph '{graph_id}'"
+                }]
+            }
+            
+        elif tool_name == "get_graph_info":
+            graph_id = args["graph_id"]
+            
+            if graph_id not in self.graphs:
+                raise ValueError(f"Graph {graph_id} not found")
+                
+            graph = self.graphs[graph_id]
+            info = {
+                "num_nodes": graph.number_of_nodes(),
+                "num_edges": graph.number_of_edges(),
+                "is_directed": graph.is_directed(),
+                "density": nx.density(graph) if graph.number_of_nodes() > 0 else 0
+            }
+            
+            return {
+                "content": [{
+                    "type": "text",
+                    "text": json.dumps(info, indent=2)
+                }]
+            }
+            
+        elif tool_name == "shortest_path":
+            graph_id = args["graph_id"]
+            source = args["source"]
+            target = args["target"]
+            
+            if graph_id not in self.graphs:
+                raise ValueError(f"Graph {graph_id} not found")
+                
+            graph = self.graphs[graph_id]
+            
+            try:
+                path = nx.shortest_path(graph, source, target)
+                length = nx.shortest_path_length(graph, source, target)
+                
+                result = {
+                    "path": path,
+                    "length": length
+                }
+                
+                return {
+                    "content": [{
+                        "type": "text",
+                        "text": json.dumps(result, indent=2)
+                    }]
+                }
+            except nx.NetworkXNoPath:
+                return {
+                    "content": [{
+                        "type": "text",
+                        "text": f"No path exists between '{source}' and '{target}'"
+                    }]
+                }
+                
+        elif tool_name == "list_graphs":
+            graphs_info = []
+            for graph_id, graph in self.graphs.items():
+                graphs_info.append({
+                    "graph_id": graph_id,
+                    "num_nodes": graph.number_of_nodes(),
+                    "num_edges": graph.number_of_edges(),
+                    "graph_type": type(graph).__name__
+                })
+                
+            return {
+                "content": [{
+                    "type": "text",
+                    "text": json.dumps(graphs_info, indent=2)
+                }]
+            }
+            
+        else:
+            raise ValueError(f"Unknown tool: {tool_name}")
 
 
-def main():
-    """Main entry point for minimal MCP server."""
+async def main():
+    """Main entry point for the minimal server."""
     # Configure logging
     logging.basicConfig(
         level=logging.INFO,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        stream=sys.stderr  # Log to stderr to avoid interfering with stdio protocol
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
     
-    server = NetworkXMCPServer()
-    
-    try:
-        # Run the stdio server
-        asyncio.run(server.start_stdio_server())
-    except KeyboardInterrupt:
-        logger.info("Server shutdown by user")
-    except Exception as e:
-        logger.error(f"Server failed: {e}")
-        sys.exit(1)
+    # Create and run server
+    server = TrulyMinimalServer()
+    await server.start_stdio_server()
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

@@ -1,236 +1,30 @@
-# Docker Compose for NetworkX MCP Server
-# Production-ready with monitoring, caching, and observability
-
+# docker-compose.yml
 version: '3.8'
 
 services:
-  # ================================
-  # NetworkX MCP Server
-  # ================================
-  networkx-mcp:
-    build:
+  mcp-server:
+    build: 
       context: .
       dockerfile: Dockerfile
-      target: runtime
-      args:
-        BUILD_ENV: production
-        VERSION: 2.0.0
-        BUILD_DATE: ${BUILD_DATE:-$(date -u +'%Y-%m-%dT%H:%M:%SZ')}
-        GIT_COMMIT: ${GIT_COMMIT:-$(git rev-parse HEAD)}
+    image: networkx-mcp:0.1.0
     container_name: networkx-mcp-server
-    restart: unless-stopped
-    ports:
-      - "8000:8000"
+    stdin_open: true      # Keep stdin open (-i flag)
+    tty: true             # Allocate pseudo-TTY (-t flag)
+    init: true            # Use init process for signal handling
+    # No ports - stdio only
     environment:
-      - APP_ENV=production
       - LOG_LEVEL=INFO
-      - REDIS_URL=redis://redis:6379/0
-      - POSTGRES_URL=postgresql://networkx:password@postgres:5432/networkx_mcp
-      - MONITORING_ENABLED=true
-      - TRACING_ENABLED=true
-      - FEATURE_FLAGS_FILE=/app/config/feature_flags.json
-    volumes:
-      - ./config:/app/config:ro
-      - ./data:/app/data
-      - ./logs:/app/logs
-    depends_on:
-      - redis
-      - postgres
-      - jaeger
-    networks:
-      - networkx-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      - PYTHONUNBUFFERED=1  # Ensure unbuffered output
+      - DOCKER_CONTAINER=true  # Indicate running in container
+    # Resource limits for safety
     deploy:
       resources:
         limits:
-          memory: 2G
-          cpus: '1.0'
+          cpus: '1'
+          memory: 512M
         reservations:
-          memory: 512M
           cpus: '0.25'
-
-  # ================================
-  # Redis (Caching & Session Store)
-  # ================================
-  redis:
-    image: redis:7-alpine
-    container_name: networkx-redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
-    volumes:
-      - redis_data:/data
-    networks:
-      - networkx-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
-
-  # ================================
-  # PostgreSQL (Metadata Store)
-  # ================================
-  postgres:
-    image: postgres:15-alpine
-    container_name: networkx-postgres
-    restart: unless-stopped
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_DB: networkx_mcp
-      POSTGRES_USER: networkx
-      POSTGRES_PASSWORD: password
-      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-    networks:
-      - networkx-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U networkx -d networkx_mcp"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: '0.5'
-
-  # ================================
-  # Jaeger (Distributed Tracing)
-  # ================================
-  jaeger:
-    image: jaegertracing/all-in-one:1.49
-    container_name: networkx-jaeger
-    restart: unless-stopped
-    ports:
-      - "16686:16686"  # Web UI
-      - "14268:14268"  # HTTP collector
-    environment:
-      COLLECTOR_OTLP_ENABLED: true
-    networks:
-      - networkx-network
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.25'
-
-  # ================================
-  # Prometheus (Metrics)
-  # ================================
-  prometheus:
-    image: prom/prometheus:v2.45.0
-    container_name: networkx-prometheus
-    restart: unless-stopped
-    ports:
-      - "9090:9090"
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/etc/prometheus/console_libraries'
-      - '--web.console.templates=/etc/prometheus/consoles'
-      - '--storage.tsdb.retention.time=200h'
-      - '--web.enable-lifecycle'
-    volumes:
-      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus_data:/prometheus
-    networks:
-      - networkx-network
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: '0.5'
-
-  # ================================
-  # Grafana (Dashboards)
-  # ================================
-  grafana:
-    image: grafana/grafana:10.1.0
-    container_name: networkx-grafana
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    environment:
-      GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: admin
-      GF_USERS_ALLOW_SIGN_UP: false
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - ./docker/grafana/datasources:/etc/grafana/provisioning/datasources:ro
-      - ./docker/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
-    networks:
-      - networkx-network
-    depends_on:
-      - prometheus
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.25'
-
-  # ================================
-  # NGINX (Reverse Proxy)
-  # ================================
-  nginx:
-    image: nginx:1.25-alpine
-    container_name: networkx-nginx
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
-      - ./logs/nginx:/var/log/nginx
-    depends_on:
-      - networkx-mcp
-    networks:
-      - networkx-network
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-          cpus: '0.25'
-
-# ================================
-# Networks
-# ================================
-networks:
-  networkx-network:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
-
-# ================================
-# Volumes
-# ================================
-volumes:
-  redis_data:
-    driver: local
-  postgres_data:
-    driver: local
-  prometheus_data:
-    driver: local
-  grafana_data:
-    driver: local
+          memory: 128M
+    # Health check disabled - stdio mode doesn't support HTTP health checks
+    # healthcheck:
+    #   disable: true

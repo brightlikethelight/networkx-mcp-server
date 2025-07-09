@@ -1,0 +1,46 @@
+# Dockerfile.multiplatform - Multi-architecture build
+# Build with: docker buildx build --platform linux/amd64,linux/arm64 -t networkx-mcp:0.1.0 .
+
+FROM --platform=$TARGETPLATFORM python:3.11-slim
+
+# Build args for multi-platform
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+
+# Security: Run as non-root user
+RUN useradd -m -s /bin/bash mcp
+
+WORKDIR /app
+
+# Install build dependencies if needed for numpy on ARM
+RUN if [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
+      apt-get update && \
+      apt-get install -y --no-install-recommends gcc g++ && \
+      rm -rf /var/lib/apt/lists/*; \
+    fi
+
+# Install only what we need
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Clean up build dependencies
+RUN if [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
+      apt-get purge -y gcc g++ && \
+      apt-get autoremove -y && \
+      rm -rf /var/lib/apt/lists/*; \
+    fi
+
+# Copy only working code
+COPY src/ ./src/
+
+# Set Python path to find our module
+ENV PYTHONPATH=/app/src
+
+# Switch to non-root user
+USER mcp
+
+# Use unbuffered output for better container logging
+ENV PYTHONUNBUFFERED=1
+
+# Default to stdio mode (the only mode that works)
+ENTRYPOINT ["python", "-m", "networkx_mcp.server"]

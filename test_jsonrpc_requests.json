@@ -1,9 +1,0 @@
-[
-  {"jsonrpc":"2.0","id":"init","method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"test","version":"1.0"}}},
-  {"jsonrpc":"2.0","id":"tools","method":"tools/list"},
-  {"jsonrpc":"2.0","id":"create","method":"tools/call","params":{"name":"create_graph","arguments":{"name":"test_graph","graph_type":"directed"}}},
-  {"jsonrpc":"2.0","id":"add_nodes","method":"tools/call","params":{"name":"add_nodes","arguments":{"graph_name":"test_graph","nodes":["A","B","C"]}}},
-  {"jsonrpc":"2.0","id":"add_edges","method":"tools/call","params":{"name":"add_edges","arguments":{"graph_name":"test_graph","edges":[["A","B"],["B","C"]]}}},
-  {"jsonrpc":"2.0","id":"info","method":"tools/call","params":{"name":"graph_info","arguments":{"graph_name":"test_graph"}}}
-]
-EOF < /dev/null

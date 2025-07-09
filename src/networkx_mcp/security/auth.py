@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from ..core.base import Component
-from ..monitoring.logging import with_logging_context
+# Monitoring module removed - using simple logging instead
 
 logger = logging.getLogger(__name__)
 
@@ -173,7 +173,7 @@ class AuthService(Component):
             "readonly": {"graph:read"},
         }
 
-    @with_logging_context(component="auth_service")
+    # @with_logging_context removed - monitoring module deleted
     async def register_user(
         self,
         username: str,
@@ -207,7 +207,7 @@ class AuthService(Component):
         logger.info(f"Registered user: {username} with roles: {roles}")
         return user
 
-    @with_logging_context(component="auth_service")
+    # @with_logging_context removed - monitoring module deleted
     async def authenticate_user(self, username: str, password: str) -> AuthToken | None:
         """Authenticate a user with username/password."""
         # Verify credentials
@@ -238,7 +238,7 @@ class AuthService(Component):
         logger.info(f"User authenticated: {username}")
         return token
 
-    @with_logging_context(component="auth_service")
+    # @with_logging_context removed - monitoring module deleted
     async def validate_token(self, token: str) -> AuthToken | None:
         """Validate an authentication token."""
         auth_token = self.token_validator.validate_token(token)
@@ -252,12 +252,12 @@ class AuthService(Component):
 
         return auth_token
 
-    @with_logging_context(component="auth_service")
+    # @with_logging_context removed - monitoring module deleted
     async def get_user(self, user_id: str) -> User | None:
         """Get user by ID."""
         return self.users.get(user_id)
 
-    @with_logging_context(component="auth_service")
+    # @with_logging_context removed - monitoring module deleted
     async def check_permission(self, user_id: str, permission: str) -> bool:
         """Check if user has a specific permission."""
         user = await self.get_user(user_id)
@@ -266,7 +266,7 @@ class AuthService(Component):
 
         return user.has_permission(permission)
 
-    @with_logging_context(component="auth_service")
+    # @with_logging_context removed - monitoring module deleted
     async def revoke_token(self, token: str) -> bool:
         """Revoke an authentication token."""
         if token in self.active_tokens:
@@ -275,7 +275,7 @@ class AuthService(Component):
             return True
         return False
 
-    @with_logging_context(component="auth_service")
+    # @with_logging_context removed - monitoring module deleted
     async def cleanup_expired_tokens(self) -> int:
         """Clean up expired tokens."""
         now = time.time()
