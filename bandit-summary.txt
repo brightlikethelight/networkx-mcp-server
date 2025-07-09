@@ -1,0 +1,24 @@
+/Users/brightliu/Coding_Projects/networkx-mcp-server/src/networkx_mcp/advanced/generators.py:472: B311[bandit]: LOW: Standard pseudo-random generators are not suitable for security/cryptographic purposes.
+/Users/brightliu/Coding_Projects/networkx-mcp-server/src/networkx_mcp/advanced/ml_integration.py:213: B311[bandit]: LOW: Standard pseudo-random generators are not suitable for security/cryptographic purposes.
+/Users/brightliu/Coding_Projects/networkx-mcp-server/src/networkx_mcp/advanced/robustness.py:59: B311[bandit]: LOW: Standard pseudo-random generators are not suitable for security/cryptographic purposes.
+/Users/brightliu/Coding_Projects/networkx-mcp-server/src/networkx_mcp/advanced/robustness.py:240: B311[bandit]: LOW: Standard pseudo-random generators are not suitable for security/cryptographic purposes.
+/Users/brightliu/Coding_Projects/networkx-mcp-server/src/networkx_mcp/advanced/robustness.py:241: B311[bandit]: LOW: Standard pseudo-random generators are not suitable for security/cryptographic purposes.
+/Users/brightliu/Coding_Projects/networkx-mcp-server/src/networkx_mcp/advanced/robustness.py:393: B311[bandit]: LOW: Standard pseudo-random generators are not suitable for security/cryptographic purposes.
+/Users/brightliu/Coding_Projects/networkx-mcp-server/src/networkx_mcp/advanced/robustness.py:401: B311[bandit]: LOW: Standard pseudo-random generators are not suitable for security/cryptographic purposes.
+/Users/brightliu/Coding_Projects/networkx-mcp-server/src/networkx_mcp/advanced/robustness.py:676: B311[bandit]: LOW: Standard pseudo-random generators are not suitable for security/cryptographic purposes.
+/Users/brightliu/Coding_Projects/networkx-mcp-server/src/networkx_mcp/advanced/specialized.py:110: B311[bandit]: LOW: Standard pseudo-random generators are not suitable for security/cryptographic purposes.
+/Users/brightliu/Coding_Projects/networkx-mcp-server/src/networkx_mcp/advanced/specialized.py:176: B311[bandit]: LOW: Standard pseudo-random generators are not suitable for security/cryptographic purposes.
+/Users/brightliu/Coding_Projects/networkx-mcp-server/src/networkx_mcp/advanced/specialized.py:873: B311[bandit]: LOW: Standard pseudo-random generators are not suitable for security/cryptographic purposes.
+/Users/brightliu/Coding_Projects/networkx-mcp-server/src/networkx_mcp/advanced/specialized.py:874: B311[bandit]: LOW: Standard pseudo-random generators are not suitable for security/cryptographic purposes.
+/Users/brightliu/Coding_Projects/networkx-mcp-server/src/networkx_mcp/cli.py:341: B311[bandit]: LOW: Standard pseudo-random generators are not suitable for security/cryptographic purposes.
+/Users/brightliu/Coding_Projects/networkx-mcp-server/src/networkx_mcp/core/io_handlers.py:6: B403[bandit]: LOW: Consider possible security implications associated with pickle module.
+/Users/brightliu/Coding_Projects/networkx-mcp-server/src/networkx_mcp/core/io_handlers.py:855: B301[bandit]: MEDIUM: Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.
+/Users/brightliu/Coding_Projects/networkx-mcp-server/src/networkx_mcp/io/base.py:43: B108[bandit]: MEDIUM: Probable insecure usage of temp file/directory.
+/Users/brightliu/Coding_Projects/networkx-mcp-server/src/networkx_mcp/security/audit.py:27: B105[bandit]: LOW: Possible hardcoded password: 'auth.token.created'
+/Users/brightliu/Coding_Projects/networkx-mcp-server/src/networkx_mcp/security/audit.py:28: B105[bandit]: LOW: Possible hardcoded password: 'auth.token.revoked'
+/Users/brightliu/Coding_Projects/networkx-mcp-server/src/networkx_mcp/security/audit.py:305: B324[bandit]: HIGH: Use of weak MD5 hash for security. Consider usedforsecurity=False
+/Users/brightliu/Coding_Projects/networkx-mcp-server/src/networkx_mcp/security/file_security.py:391: B110[bandit]: LOW: Try, Except, Pass detected.
+/Users/brightliu/Coding_Projects/networkx-mcp-server/src/networkx_mcp/security/file_security.py:400: B110[bandit]: LOW: Try, Except, Pass detected.
+/Users/brightliu/Coding_Projects/networkx-mcp-server/src/networkx_mcp/security/middleware.py:194: B324[bandit]: HIGH: Use of weak MD5 hash for security. Consider usedforsecurity=False
+/Users/brightliu/Coding_Projects/networkx-mcp-server/src/networkx_mcp/storage/redis_backend.py:5: B403[bandit]: LOW: Consider possible security implications associated with pickle module.
+/Users/brightliu/Coding_Projects/networkx-mcp-server/src/networkx_mcp/storage/redis_backend.py:243: B301[bandit]: MEDIUM: Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.
