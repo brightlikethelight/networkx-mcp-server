@@ -34,6 +34,8 @@ dev = [
     "black>=24.0.0",
     "ruff>=0.8.0",
     "psutil>=5.9.0",  # For memory testing
+    "hypothesis>=6.0.0",  # For property-based testing
+    "pandas>=1.3.0",  # For IO handler tests
 ]
 
 # I/O format support (adds 35MB!)
