@@ -1,4 +1,4 @@
 # Core functionality only
 networkx>=3.0
-numpy>=1.21.0
+numpy>=1.21.0  # Required for NetworkX and core algorithms
 mcp[cli]>=1.0.0  # Official MCP SDK with CLI support
