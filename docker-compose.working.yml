@@ -1,0 +1,51 @@
+# Docker Compose for NetworkX MCP Server
+# Demonstrates both minimal and legacy implementations
+
+version: '3.8'
+
+services:
+  # Minimal implementation (recommended)
+  networkx-mcp-minimal:
+    build:
+      context: .
+      dockerfile: Dockerfile.working
+    environment:
+      - USE_MINIMAL_SERVER=true
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "python", "-c", "from networkx_mcp.server import __implementation__; print(__implementation__)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "implementation=minimal"
+      - "lines_of_code=150"
+      - "status=production_ready"
+
+  # Legacy implementation (deprecated)
+  networkx-mcp-legacy:
+    build:
+      context: .
+      dockerfile: Dockerfile.working
+    environment:
+      - USE_MINIMAL_SERVER=false
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "python", "-c", "from networkx_mcp.server import __implementation__; print(__implementation__)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "implementation=legacy"
+      - "lines_of_code=16348"
+      - "status=deprecated"
+
+# Usage:
+# docker-compose -f docker-compose.working.yml up networkx-mcp-minimal  # Recommended
+# docker-compose -f docker-compose.working.yml up networkx-mcp-legacy   # Deprecated

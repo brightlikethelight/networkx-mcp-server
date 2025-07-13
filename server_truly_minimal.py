@@ -13,48 +13,6 @@ import networkx as nx
 # Global state - simple and effective
 graphs: Dict[str, nx.Graph] = {}
 
-# Compatibility exports for tests
-def create_graph(name: str, directed: bool = False):
-    """Create a graph - compatibility function."""
-    graphs[name] = nx.DiGraph() if directed else nx.Graph()
-    return {"created": name, "type": "directed" if directed else "undirected"}
-
-def add_nodes(graph_name: str, nodes: List):
-    """Add nodes - compatibility function."""
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    graph = graphs[graph_name]
-    graph.add_nodes_from(nodes)
-    return {"added": len(nodes), "total": graph.number_of_nodes()}
-
-def add_edges(graph_name: str, edges: List):
-    """Add edges - compatibility function."""
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    graph = graphs[graph_name]
-    edge_tuples = [tuple(e) for e in edges]
-    graph.add_edges_from(edge_tuples)
-    return {"added": len(edge_tuples), "total": graph.number_of_edges()}
-
-def get_graph_info(graph_name: str):
-    """Get graph info - compatibility function."""
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    graph = graphs[graph_name]
-    return {
-        "nodes": graph.number_of_nodes(),
-        "edges": graph.number_of_edges(),
-        "directed": graph.is_directed()
-    }
-
-def shortest_path(graph_name: str, source, target):
-    """Find shortest path - compatibility function."""
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    graph = graphs[graph_name]
-    path = nx.shortest_path(graph, source, target)
-    return {"path": path, "length": len(path) - 1}
-
 class MinimalMCPServer:
     """Minimal MCP server - no unnecessary abstraction."""
     

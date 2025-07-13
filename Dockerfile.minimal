@@ -1,0 +1,17 @@
+# Actually minimal Docker image for NetworkX MCP Server
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Copy only what we need
+COPY server_truly_minimal.py .
+
+# Install minimal dependencies
+RUN pip install --no-cache-dir networkx
+
+# Run the server
+CMD ["python", "server_truly_minimal.py"]
+
+# Total size: ~95MB (Python base + NetworkX)
+# Not 200MB+ like the current implementation
