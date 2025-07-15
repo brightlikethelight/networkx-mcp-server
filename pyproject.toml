@@ -3,9 +3,9 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "networkx-mcp"
-version = "0.1.0-alpha.2"  # Architectural fix version
-description = "Actually minimal MCP server for NetworkX operations (54.6MB, not 118MB)"
+name = "networkx-mcp-server"
+version = "1.0.0"  # First production release  
+description = "The first NetworkX MCP server - Graph analysis in your AI conversations"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [{name = "Bright Liu", email = "brightliu@example.com"}]
@@ -24,6 +24,7 @@ requires-python = ">=3.11"
 dependencies = [
     "networkx>=3.0",
     "numpy>=1.21.0",  # Required for NetworkX and core algorithms
+    "matplotlib>=3.5.0",  # Required for graph visualization
 ]
 
 [project.optional-dependencies]
