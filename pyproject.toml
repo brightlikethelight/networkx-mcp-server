@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "networkx-mcp-server"
-version = "1.1.0"  # Enterprise features release  
-description = "The first NetworkX MCP server - Graph analysis in your AI conversations"
+version = "2.0.0"  # Security Fortress release
+description = "NetworkX MCP Server with Security Fortress - Enterprise-grade secure graph analysis with AI-powered threat detection"
 readme = "README.md"
 license = {text = "MIT"}
-keywords = ["networkx", "graph", "analysis", "mcp", "ai", "claude", "visualization", "network", "centrality", "community"]
+keywords = ["networkx", "graph", "analysis", "mcp", "ai", "claude", "visualization", "network", "centrality", "community", "security", "fortress", "threat-detection", "zero-trust", "enterprise"]
 authors = [{name = "Bright Liu", email = "brightliu@college.harvard.edu"}]
 maintainers = [{name = "Bright Liu", email = "brightliu@college.harvard.edu"}]
 classifiers = [
@@ -59,7 +59,7 @@ scipy = [
     "scipy>=1.7.0",
 ]
 
-# Enterprise security and production features (adds 25MB)
+# Enterprise security and production features (adds 35MB)
 enterprise = [
     "authlib>=1.3.0",          # OAuth 2.1 with PKCE compliance
     "pyjwt>=2.8.0",            # JWT token handling
@@ -70,9 +70,11 @@ enterprise = [
     "aiohttp>=3.9.0",          # Async HTTP server
     "slowapi>=0.1.9",          # Rate limiting
     "cryptography>=41.0.0",    # Security primitives
+    "psutil>=5.9.0",           # System monitoring for sandbox
+    "docker>=7.0.0",           # Container orchestration (optional)
 ]
 
-# Full installation with all features (adds 85MB!)
+# Full installation with all features (adds 95MB!)
 full = [
     "pandas>=1.3.0",
     "scipy>=1.7.0",
@@ -88,6 +90,8 @@ full = [
     "aiohttp>=3.9.0",
     "slowapi>=0.1.9",
     "cryptography>=41.0.0",
+    "psutil>=5.9.0",
+    "docker>=7.0.0",
 ]
 
 [project.urls]
@@ -99,6 +103,7 @@ Issues = "https://github.com/Bright-L01/networkx-mcp-server/issues"
 networkx-mcp = "networkx_mcp.server_minimal:main"           # Default: truly minimal
 networkx-mcp-full = "networkx_mcp.server:main"              # With pandas/scipy support  
 networkx-mcp-enterprise = "networkx_mcp.enterprise.server:main"  # Enterprise edition
+networkx-mcp-fortress = "networkx_mcp.security_fortress.fortress_server:main"  # Security Fortress
 
 [tool.setuptools.packages.find]
 where = ["src"]
