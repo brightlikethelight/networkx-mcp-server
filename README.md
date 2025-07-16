@@ -1,24 +1,28 @@
-# NetworkX MCP Server
+# NetworkX MCP Server with Security Fortress
 
-**The first NetworkX integration for Model Context Protocol** - Bringing graph analysis directly into your AI conversations.
+**The first secure NetworkX integration for Model Context Protocol** - Bringing enterprise-grade graph analysis directly into your AI conversations.
 
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 [![NetworkX](https://img.shields.io/badge/NetworkX-3.0%2B-orange.svg)](https://networkx.org/)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-green.svg)](https://modelcontextprotocol.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Security](https://img.shields.io/badge/Security-Fortress-red.svg)](#-security-fortress)
 [![Enterprise](https://img.shields.io/badge/Enterprise-Ready-purple.svg)](#-enterprise-edition)
 
 ## 🚀 What is this?
 
 NetworkX MCP Server enables Large Language Models (like Claude) to perform graph analysis operations directly within conversations. No more context switching between tools - analyze networks, find communities, calculate centrality, and visualize graphs all through natural language.
 
+**NEW in v2.0**: Industry-first **Security Fortress** - comprehensive security framework addressing critical vulnerabilities in the MCP ecosystem.
+
 ### 🎯 Key Features
 
 - **13 Essential Graph Operations**: From basic graph creation to advanced algorithms like PageRank and community detection
+- **🛡️ Security Fortress**: AI-powered threat detection, zero-trust validation, secure sandboxing
 - **Visualization**: Generate graph visualizations on-demand with multiple layout options
 - **Import/Export**: Load graphs from CSV, export to JSON
 - **Zero Setup**: Works immediately with Claude Desktop or any MCP-compatible client
-- **First of Its Kind**: The first NetworkX server in the MCP ecosystem
+- **First of Its Kind**: The first secure NetworkX server in the MCP ecosystem
 
 ## 🌟 Why NetworkX MCP Server?
 
@@ -26,7 +30,68 @@ NetworkX MCP Server enables Large Language Models (like Claude) to perform graph
 - **No Database Required**: Unlike graph database integrations, this works with in-memory graphs
 - **Instant Insights**: Get centrality metrics, find communities, and discover patterns immediately
 - **Visual Understanding**: See your graphs, don't just analyze them
-- **Enterprise Ready**: Production-grade security, monitoring, and scale (Enterprise Edition)
+- **Enterprise Security**: Production-grade security, monitoring, and scale (Enterprise Edition)
+- **Industry-Leading Security**: First MCP server with comprehensive security framework
+
+## 🛡️ Security Fortress
+
+**NEW in v2.0**: Industry-first comprehensive security framework for MCP servers, addressing critical vulnerabilities identified in the MCP ecosystem.
+
+### 🔍 Security Research Findings
+- **43%** of MCP servers vulnerable to command injection attacks
+- **33%** vulnerable to URL fetch exploitation
+- **Prompt injection** remains unsolved after 2.5 years
+- **Zero comprehensive security frameworks** existed until now
+
+### 🏰 Security Fortress Architecture
+
+**5-Layer Defense System**:
+
+1. **🧠 AI-Powered Threat Detection**
+   - Real-time prompt injection detection
+   - 10+ attack pattern recognition
+   - Behavioral anomaly analysis
+   - Context-aware risk assessment
+
+2. **🔒 Zero-Trust Input/Output Validation**
+   - Comprehensive schema validation
+   - Content sanitization & DLP
+   - Encoding attack prevention
+   - Output filtering & validation
+
+3. **🛡️ Security Broker & Firewall**
+   - Centralized authorization engine
+   - Human-in-the-loop approval workflows
+   - Dynamic risk assessment
+   - Policy enforcement & compliance
+
+4. **📦 Secure Sandboxing**
+   - Docker-based container isolation
+   - Resource limits (CPU, memory, disk)
+   - Network isolation & monitoring
+   - Execution time constraints
+
+5. **📊 Real-Time Security Monitoring**
+   - Comprehensive audit logging
+   - Security event correlation
+   - Prometheus metrics & alerting
+   - Compliance reporting (SOC 2, ISO 27001)
+
+### 🎯 Security Capabilities
+
+- **Threat Levels**: Benign → Suspicious → Malicious → Critical
+- **Attack Vectors**: Code injection, privilege escalation, data exfiltration
+- **Mitigation**: Auto-blocking, approval workflows, enhanced monitoring
+- **Performance**: Sub-second security validation
+- **Compliance**: Enterprise-grade audit trails
+
+```bash
+# Enable Security Fortress
+pip install networkx-mcp-server[enterprise]
+networkx-mcp-fortress
+```
+
+📖 **[Security Architecture](SECURITY_FORTRESS_ARCHITECTURE.md)** | **[Security Guide](SECURITY_FORTRESS_GUIDE.md)**
 
 ## 📊 Editions
 
@@ -53,7 +118,21 @@ pip install networkx-mcp-server
 pip install networkx-mcp-server[enterprise]
 ```
 
-📖 **[Enterprise Guide](ENTERPRISE_GUIDE.md)** | **[Demo](demos/)** | **[Security](SECURITY.md)**
+### 🛡️ Security Fortress Edition
+- **Everything in Enterprise Edition** +
+- **🧠 AI Threat Detection**: Real-time prompt injection prevention
+- **🔒 Zero-Trust Validation**: Comprehensive input/output sanitization
+- **🛡️ Security Broker**: Human-in-the-loop approval workflows
+- **📦 Secure Sandboxing**: Container-based isolation
+- **📊 Security Monitoring**: Real-time threat detection & alerting
+- **🏆 Industry-Leading**: First comprehensive MCP security framework
+
+```bash
+pip install networkx-mcp-server[enterprise]
+networkx-mcp-fortress  # Security Fortress mode
+```
+
+📖 **[Enterprise Guide](ENTERPRISE_GUIDE.md)** | **[Security Fortress Guide](SECURITY_FORTRESS_GUIDE.md)** | **[Demo](demos/)** | **[Security](SECURITY.md)**
 
 ## 📊 Available Operations
 
