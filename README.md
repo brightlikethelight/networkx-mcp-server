@@ -6,6 +6,7 @@
 [![NetworkX](https://img.shields.io/badge/NetworkX-3.0%2B-orange.svg)](https://networkx.org/)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-green.svg)](https://modelcontextprotocol.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Enterprise](https://img.shields.io/badge/Enterprise-Ready-purple.svg)](#-enterprise-edition)
 
 ## 🚀 What is this?
 
@@ -25,6 +26,34 @@ NetworkX MCP Server enables Large Language Models (like Claude) to perform graph
 - **No Database Required**: Unlike graph database integrations, this works with in-memory graphs
 - **Instant Insights**: Get centrality metrics, find communities, and discover patterns immediately
 - **Visual Understanding**: See your graphs, don't just analyze them
+- **Enterprise Ready**: Production-grade security, monitoring, and scale (Enterprise Edition)
+
+## 📊 Editions
+
+### Community Edition (Free)
+- **13 Graph Operations**: Complete NetworkX functionality
+- **Visualization**: PNG output with multiple layouts
+- **Import/Export**: CSV and JSON support
+- **Zero Setup**: Works with Claude Desktop immediately
+
+```bash
+pip install networkx-mcp-server
+```
+
+### 🏢 Enterprise Edition
+- **Everything in Community Edition** +
+- **🔐 Enterprise Security**: OAuth 2.1, API keys, RBAC
+- **⚡ Rate Limiting**: Per-user and per-operation quotas
+- **📊 Monitoring**: Prometheus metrics, audit logging
+- **🛡️ Input Validation**: Comprehensive security validation
+- **📈 Resource Control**: Memory and execution limits
+- **🚀 Production Ready**: Health checks, Docker support
+
+```bash
+pip install networkx-mcp-server[enterprise]
+```
+
+📖 **[Enterprise Guide](ENTERPRISE_GUIDE.md)** | **[Demo](demos/)** | **[Security](SECURITY.md)**
 
 ## 📊 Available Operations
 
@@ -49,13 +78,12 @@ NetworkX MCP Server enables Large Language Models (like Claude) to perform graph
 
 ## 🚦 Quick Start
 
-### Installation
+### Community Edition
 
 ```bash
+# Install community edition
 pip install networkx-mcp-server
 ```
-
-### Configuration for Claude Desktop
 
 Add to your `claude_desktop_config.json`:
 
@@ -69,6 +97,36 @@ Add to your `claude_desktop_config.json`:
   }
 }
 ```
+
+### Enterprise Edition
+
+```bash
+# Install enterprise edition with security features
+pip install networkx-mcp-server[enterprise]
+
+# Set up authentication (generate secure key)
+export NETWORKX_MCP_SECURITY_API_KEYS="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
+```
+
+Add to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "networkx-enterprise": {
+      "command": "networkx-mcp-enterprise",
+      "args": [],
+      "env": {
+        "NETWORKX_MCP_SECURITY_API_KEYS": "your-secure-api-key-here",
+        "NETWORKX_MCP_RATE_LIMIT_ENABLED": "true",
+        "NETWORKX_MCP_MONITORING_METRICS_ENABLED": "true"
+      }
+    }
+  }
+}
+```
+
+📖 **[Complete Enterprise Setup Guide](ENTERPRISE_GUIDE.md)**
 
 ### Basic Usage Example
 

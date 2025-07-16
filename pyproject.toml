@@ -4,21 +4,27 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "networkx-mcp-server"
-version = "1.0.0"  # First production release  
+version = "1.1.0"  # Enterprise features release  
 description = "The first NetworkX MCP server - Graph analysis in your AI conversations"
 readme = "README.md"
 license = {text = "MIT"}
-authors = [{name = "Bright Liu", email = "brightliu@example.com"}]
-maintainers = [{name = "Bright Liu", email = "brightliu@example.com"}]
+keywords = ["networkx", "graph", "analysis", "mcp", "ai", "claude", "visualization", "network", "centrality", "community"]
+authors = [{name = "Bright Liu", email = "brightliu@college.harvard.edu"}]
+maintainers = [{name = "Bright Liu", email = "brightliu@college.harvard.edu"}]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Scientific/Engineering :: Visualization",
     "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Environment :: Console",
+    "Operating System :: OS Independent",
 ]
 requires-python = ">=3.11"
 dependencies = [
@@ -53,12 +59,35 @@ scipy = [
     "scipy>=1.7.0",
 ]
 
-# Full installation with all features (adds 60MB!)
+# Enterprise security and production features (adds 25MB)
+enterprise = [
+    "authlib>=1.3.0",          # OAuth 2.1 with PKCE compliance
+    "pyjwt>=2.8.0",            # JWT token handling
+    "pydantic>=2.5.0",         # Input validation and settings
+    "pydantic-settings>=2.1.0", # Configuration management
+    "structlog>=23.2.0",       # Structured logging
+    "prometheus-client>=0.19.0", # Metrics collection
+    "aiohttp>=3.9.0",          # Async HTTP server
+    "slowapi>=0.1.9",          # Rate limiting
+    "cryptography>=41.0.0",    # Security primitives
+]
+
+# Full installation with all features (adds 85MB!)
 full = [
     "pandas>=1.3.0",
     "scipy>=1.7.0",
     "matplotlib>=3.4.0",
     "openpyxl>=3.0.0",
+    # Include enterprise features
+    "authlib>=1.3.0",
+    "pyjwt>=2.8.0",
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+    "structlog>=23.2.0",
+    "prometheus-client>=0.19.0",
+    "aiohttp>=3.9.0",
+    "slowapi>=0.1.9",
+    "cryptography>=41.0.0",
 ]
 
 [project.urls]
@@ -67,8 +96,9 @@ Repository = "https://github.com/Bright-L01/networkx-mcp-server"
 Issues = "https://github.com/Bright-L01/networkx-mcp-server/issues"
 
 [project.scripts]
-networkx-mcp = "networkx_mcp.server_minimal:main"  # Default: truly minimal
-networkx-mcp-full = "networkx_mcp.server:main"     # With pandas/scipy support
+networkx-mcp = "networkx_mcp.server_minimal:main"           # Default: truly minimal
+networkx-mcp-full = "networkx_mcp.server:main"              # With pandas/scipy support  
+networkx-mcp-enterprise = "networkx_mcp.enterprise.server:main"  # Enterprise edition
 
 [tool.setuptools.packages.find]
 where = ["src"]
