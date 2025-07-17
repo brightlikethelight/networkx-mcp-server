@@ -1,156 +1,92 @@
-# NetworkX MCP Server with Security Fortress
+# NetworkX MCP Server
 
-**The first secure NetworkX integration for Model Context Protocol** - Bringing enterprise-grade graph analysis directly into your AI conversations.
+**Academic-focused graph analysis in your AI conversations** - The first and only NetworkX MCP server specialized for academic research and citation analysis.
 
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 [![NetworkX](https://img.shields.io/badge/NetworkX-3.0%2B-orange.svg)](https://networkx.org/)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-green.svg)](https://modelcontextprotocol.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Security](https://img.shields.io/badge/Security-Fortress-red.svg)](#-security-fortress)
-[![Enterprise](https://img.shields.io/badge/Enterprise-Ready-purple.svg)](#-enterprise-edition)
+[![Academic](https://img.shields.io/badge/Academic-Research-red.svg)](https://crossref.org/)
 
-## 🚀 What is this?
+## 🎓 What is this?
 
-NetworkX MCP Server enables Large Language Models (like Claude) to perform graph analysis operations directly within conversations. No more context switching between tools - analyze networks, find communities, calculate centrality, and visualize graphs all through natural language.
+NetworkX MCP Server enables Large Language Models (like Claude) to perform sophisticated **academic research and citation analysis** directly within conversations. Built specifically for researchers, academics, and students who need to analyze citation networks, calculate author impact metrics, and discover literature patterns.
 
-**NEW in v2.0**: Industry-first **Security Fortress** - comprehensive security framework addressing critical vulnerabilities in the MCP ecosystem.
+**Stop switching between VOSviewer, CitNetExplorer, and manual analysis. Start doing academic research in your AI conversations.**
 
 ### 🎯 Key Features
 
-- **13 Essential Graph Operations**: From basic graph creation to advanced algorithms like PageRank and community detection
-- **🛡️ Security Fortress**: AI-powered threat detection, zero-trust validation, secure sandboxing
-- **Visualization**: Generate graph visualizations on-demand with multiple layout options
-- **Import/Export**: Load graphs from CSV, export to JSON
-- **Zero Setup**: Works immediately with Claude Desktop or any MCP-compatible client
-- **First of Its Kind**: The first secure NetworkX server in the MCP ecosystem
+#### 🔬 Academic Research Tools
+- **Citation Network Analysis**: Build citation networks from DOIs using CrossRef API
+- **Author Impact Metrics**: Calculate h-index, total citations, and academic influence
+- **Literature Discovery**: Automated paper recommendations based on citation patterns
+- **Collaboration Analysis**: Map co-authorship networks and identify key researchers
+- **Research Trend Detection**: Analyze publication and citation trends over time
 
-## 🌟 Why NetworkX MCP Server?
+#### 📊 Core Graph Operations
+- **20+ Graph Functions**: From basic operations to advanced algorithms like PageRank
+- **BibTeX Export**: Export citation networks in academic-standard BibTeX format
+- **CrossRef Integration**: Access 156+ million academic papers via DOI resolution
+- **Visualization**: Generate publication-ready network visualizations
+- **First of Its Kind**: The only academic-focused NetworkX MCP server
 
-- **Natural Language Graph Analysis**: Describe what you want to analyze in plain English
-- **No Database Required**: Unlike graph database integrations, this works with in-memory graphs
-- **Instant Insights**: Get centrality metrics, find communities, and discover patterns immediately
-- **Visual Understanding**: See your graphs, don't just analyze them
-- **Enterprise Security**: Production-grade security, monitoring, and scale (Enterprise Edition)
-- **Industry-Leading Security**: First MCP server with comprehensive security framework
+## 🌟 Why NetworkX MCP Server for Academic Research?
 
-## 🛡️ Security Fortress
+- **Built for Researchers**: Designed specifically for academic workflows and citation analysis
+- **Real-time Literature Discovery**: Find related papers and collaboration opportunities instantly
+- **Reproducible Research**: Python-based, version-controlled, and shareable analysis workflows
+- **Academic Data Integration**: Direct access to CrossRef's 156+ million paper database
+- **No Enterprise Complexity**: Focus on research, not IT infrastructure
+- **Cost-Effective**: Free alternative to expensive commercial citation analysis tools
 
-**NEW in v2.0**: Industry-first comprehensive security framework for MCP servers, addressing critical vulnerabilities identified in the MCP ecosystem.
-
-### 🔍 Security Research Findings
-- **43%** of MCP servers vulnerable to command injection attacks
-- **33%** vulnerable to URL fetch exploitation
-- **Prompt injection** remains unsolved after 2.5 years
-- **Zero comprehensive security frameworks** existed until now
-
-### 🏰 Security Fortress Architecture
-
-**5-Layer Defense System**:
-
-1. **🧠 AI-Powered Threat Detection**
-   - Real-time prompt injection detection
-   - 10+ attack pattern recognition
-   - Behavioral anomaly analysis
-   - Context-aware risk assessment
-
-2. **🔒 Zero-Trust Input/Output Validation**
-   - Comprehensive schema validation
-   - Content sanitization & DLP
-   - Encoding attack prevention
-   - Output filtering & validation
-
-3. **🛡️ Security Broker & Firewall**
-   - Centralized authorization engine
-   - Human-in-the-loop approval workflows
-   - Dynamic risk assessment
-   - Policy enforcement & compliance
-
-4. **📦 Secure Sandboxing**
-   - Docker-based container isolation
-   - Resource limits (CPU, memory, disk)
-   - Network isolation & monitoring
-   - Execution time constraints
-
-5. **📊 Real-Time Security Monitoring**
-   - Comprehensive audit logging
-   - Security event correlation
-   - Prometheus metrics & alerting
-   - Compliance reporting (SOC 2, ISO 27001)
-
-### 🎯 Security Capabilities
-
-- **Threat Levels**: Benign → Suspicious → Malicious → Critical
-- **Attack Vectors**: Code injection, privilege escalation, data exfiltration
-- **Mitigation**: Auto-blocking, approval workflows, enhanced monitoring
-- **Performance**: Sub-second security validation
-- **Compliance**: Enterprise-grade audit trails
-
-```bash
-# Enable Security Fortress
-pip install networkx-mcp-server[enterprise]
-networkx-mcp-fortress
-```
-
-📖 **[Security Architecture](SECURITY_FORTRESS_ARCHITECTURE.md)** | **[Security Guide](SECURITY_FORTRESS_GUIDE.md)**
-
-## 📊 Editions
-
-### Community Edition (Free)
-- **13 Graph Operations**: Complete NetworkX functionality
-- **Visualization**: PNG output with multiple layouts
-- **Import/Export**: CSV and JSON support
-- **Zero Setup**: Works with Claude Desktop immediately
+## 📦 Installation
 
 ```bash
 pip install networkx-mcp-server
 ```
 
-### 🏢 Enterprise Edition
-- **Everything in Community Edition** +
-- **🔐 Enterprise Security**: OAuth 2.1, API keys, RBAC
-- **⚡ Rate Limiting**: Per-user and per-operation quotas
-- **📊 Monitoring**: Prometheus metrics, audit logging
-- **🛡️ Input Validation**: Comprehensive security validation
-- **📈 Resource Control**: Memory and execution limits
-- **🚀 Production Ready**: Health checks, Docker support
+## 🚀 Setup
 
-```bash
-pip install networkx-mcp-server[enterprise]
+Add to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "networkx": {
+      "command": "python",
+      "args": ["-m", "networkx_mcp.server"]
+    }
+  }
+}
 ```
 
-### 🛡️ Security Fortress Edition
-- **Everything in Enterprise Edition** +
-- **🧠 AI Threat Detection**: Real-time prompt injection prevention
-- **🔒 Zero-Trust Validation**: Comprehensive input/output sanitization
-- **🛡️ Security Broker**: Human-in-the-loop approval workflows
-- **📦 Secure Sandboxing**: Container-based isolation
-- **📊 Security Monitoring**: Real-time threat detection & alerting
-- **🏆 Industry-Leading**: First comprehensive MCP security framework
-
-```bash
-pip install networkx-mcp-server[enterprise]
-networkx-mcp-fortress  # Security Fortress mode
-```
-
-📖 **[Enterprise Guide](ENTERPRISE_GUIDE.md)** | **[Security Fortress Guide](SECURITY_FORTRESS_GUIDE.md)** | **[Demo](demos/)** | **[Security](SECURITY.md)**
 
 ## 📊 Available Operations
 
-### Core Operations
+### 🔬 Academic Research Functions
+- `resolve_doi` - Resolve DOI to publication metadata using CrossRef API
+- `build_citation_network` - Build citation networks from seed DOIs
+- `analyze_author_impact` - Calculate h-index and impact metrics for authors
+- `find_collaboration_patterns` - Analyze co-authorship networks
+- `detect_research_trends` - Identify publication and citation trends over time
+- `recommend_papers` - Get paper recommendations based on citation patterns
+- `export_bibtex` - Export citation networks in BibTeX format
+
+### 📊 Core Graph Operations
 - `create_graph` - Create directed or undirected graphs
 - `add_nodes` - Add nodes to your graph
 - `add_edges` - Connect nodes with edges
 - `get_info` - Get basic graph statistics
 - `shortest_path` - Find optimal paths between nodes
 
-### Analysis Operations
+### 🔍 Analysis Operations
 - `degree_centrality` - Find the most connected nodes
 - `betweenness_centrality` - Identify bridges and key connectors
 - `pagerank` - Google's PageRank algorithm for node importance
 - `connected_components` - Find isolated subgraphs
 - `community_detection` - Discover natural groupings
 
-### Visualization & I/O
+### 🎨 Visualization & I/O
 - `visualize_graph` - Create PNG visualizations with multiple layouts
 - `import_csv` - Load graphs from edge lists
 - `export_json` - Export graphs in standard formats
@@ -177,78 +113,74 @@ Add to your `claude_desktop_config.json`:
 }
 ```
 
-### Enterprise Edition
 
-```bash
-# Install enterprise edition with security features
-pip install networkx-mcp-server[enterprise]
-
-# Set up authentication (generate secure key)
-export NETWORKX_MCP_SECURITY_API_KEYS="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
-```
-
-Add to your `claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "networkx-enterprise": {
-      "command": "networkx-mcp-enterprise",
-      "args": [],
-      "env": {
-        "NETWORKX_MCP_SECURITY_API_KEYS": "your-secure-api-key-here",
-        "NETWORKX_MCP_RATE_LIMIT_ENABLED": "true",
-        "NETWORKX_MCP_MONITORING_METRICS_ENABLED": "true"
-      }
-    }
-  }
-}
-```
-
-📖 **[Complete Enterprise Setup Guide](ENTERPRISE_GUIDE.md)**
-
-### Basic Usage Example
+### Academic Research Example
 
 ```
-Human: Create a social network graph and analyze it
+Human: Analyze citation patterns for the paper "Attention Is All You Need"
 
-Claude: I'll help you create and analyze a social network graph.
+Claude: I'll help you analyze citation patterns for that influential paper.
 
-[Creates graph "social_network"]
-[Adds nodes: Alice, Bob, Charlie, David, Eve]
-[Adds edges: Alice-Bob, Alice-Charlie, Bob-Charlie, Bob-David, Charlie-Eve]
+[Resolves DOI: 10.5555/3295222.3295349]
+Found paper: "Attention Is All You Need" by Vaswani et al. (2017)
+Citations: 82,892 | Journal: NIPS
 
-Now let me analyze this network:
+[Builds citation network from seed DOI]
+Built citation network with 847 nodes and 2,341 edges from 2-hop analysis
 
-[Calculates degree centrality]
-Most connected: Bob and Charlie (degree centrality: 0.75)
+[Analyzes author impact]
+Ashish Vaswani: h-index 45, total citations 127,436
+Most impactful paper: "Attention Is All You Need" (82,892 citations)
 
-[Calculates betweenness centrality]
-Key bridges: Charlie (betweenness: 0.58) - connects different parts of the network
+[Finds collaboration patterns]
+Key collaborators: Noam Shazeer (Google), Niki Parmar (Google)
+Research cluster: Google Brain team with 47 collaborations
 
-[Detects communities]
-Found 2 communities: [Alice, Bob, Charlie] and [David, Eve]
+[Detects research trends]
+Trend: MASSIVE INCREASE in attention mechanism research post-2017
+2017: 12 papers → 2023: 3,847 papers (320x growth)
 
-[Visualizes the graph]
-Here's what your social network looks like: [displays graph image]
+[Recommends related papers]
+Top recommendations based on co-citation patterns:
+1. "BERT: Pre-training of Deep Bidirectional Transformers" (2018)
+2. "GPT-2: Language Models are Unsupervised Multitask Learners" (2019)
+3. "RoBERTa: A Robustly Optimized BERT Pretraining Approach" (2019)
+
+[Exports BibTeX]
+Generated BibTeX file with 847 entries ready for LaTeX integration
 ```
 
-## 🎓 Example Use Cases
+## 🎓 Academic Use Cases
 
-### 1. Social Network Analysis
-- Identify influencers and key connectors
-- Find communities and cliques
-- Analyze information flow patterns
+### 1. Literature Review & Meta-Analysis
+- Automatically expand citation networks from key papers
+- Identify research gaps and emerging trends
+- Calculate field-wide impact metrics
+- Generate comprehensive BibTeX databases
 
-### 2. Transportation Planning
-- Find shortest routes between locations
-- Identify critical intersections
-- Analyze network resilience
+### 2. Collaboration Network Analysis
+- Map research collaborations within and across institutions
+- Identify key researchers and potential collaborators
+- Analyze interdisciplinary connections
+- Study research community evolution
 
-### 3. Knowledge Graphs
-- Map concept relationships
-- Find learning paths
-- Identify prerequisite chains
+### 3. Citation Pattern Analysis
+- Track knowledge diffusion through citation networks
+- Identify influential papers and breakthrough research
+- Analyze citation bias and self-citation patterns
+- Study geographic and institutional citation patterns
+
+### 4. Research Trend Detection
+- Identify emerging research areas and hot topics
+- Analyze publication volume and citation trends
+- Track research lifecycle from emergence to maturity
+- Predict future research directions
+
+### 5. Academic Impact Assessment
+- Calculate comprehensive author impact metrics
+- Compare researchers across different career stages
+- Analyze journal and conference impact patterns
+- Study citation half-life and research longevity
 
 See the [demos/](demos/) folder for complete examples.
 
@@ -265,7 +197,7 @@ See the [demos/](demos/) folder for complete examples.
 
 ```bash
 # Clone the repository
-git clone https://github.com/Bright-L01/networkx-mcp-server
+git clone https://github.com/brightlikethelight/networkx-mcp-server
 cd networkx-mcp-server
 
 # Install dependencies
