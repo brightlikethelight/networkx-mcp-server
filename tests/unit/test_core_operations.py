@@ -111,7 +111,7 @@ class TestGraphAlgorithms:
 
     def test_shortest_path(self, sample_graph):
         """Test shortest path calculation."""
-        
+
         result = GraphAlgorithms.shortest_path(sample_graph, 1, 4)
 
         # Should return path and length when target is specified
@@ -122,15 +122,17 @@ class TestGraphAlgorithms:
 
     def test_shortest_path_no_path(self, sample_graph):
         """Test shortest path when no path exists."""
-        
+
         # Use a node that doesn't exist
         with pytest.raises(ValueError):
             result = GraphAlgorithms.shortest_path(sample_graph, 1, 99)
 
     def test_centrality_measures(self, sample_graph):
         """Test centrality calculations."""
-        
-        result = GraphAlgorithms.centrality_measures(sample_graph, ["degree", "betweenness"])
+
+        result = GraphAlgorithms.centrality_measures(
+            sample_graph, ["degree", "betweenness"]
+        )
 
         assert "degree_centrality" in result
         assert "betweenness_centrality" in result
@@ -140,7 +142,7 @@ class TestGraphAlgorithms:
     @pytest.mark.parametrize("algorithm", ["bfs", "dfs"])
     def test_connected_components(self, sample_graph, algorithm):
         """Test connected components."""
-        
+
         result = GraphAlgorithms.connected_components(sample_graph)
 
         assert "connected_components" in result

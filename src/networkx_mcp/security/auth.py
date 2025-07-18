@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from ..core.base import Component
+
 # Monitoring module removed - using simple logging instead
 
 logger = logging.getLogger(__name__)

@@ -7,12 +7,14 @@ This document outlines the security measures implemented in NetworkX MCP Server 
 ## 🔒 Implemented Security Measures
 
 ### 1. Input Validation (COMPLETED)
+
 - **Pattern**: All IDs validated against `^[a-zA-Z0-9_-]{1,100}$`
 - **Size Limits**: Max 1000 nodes, 10000 edges per request
 - **Injection Prevention**: Blocks SQL injection, path traversal, XSS, command injection
 - **Implementation**: `/src/networkx_mcp/security/input_validation.py`
 
 ### 2. Resource Limits (COMPLETED)
+
 - **Memory Protection**: 1GB process limit, 100MB per graph
 - **Timeout Protection**: 30-second operation timeout
 - **Concurrency Limits**: Max 10 concurrent requests
@@ -20,12 +22,14 @@ This document outlines the security measures implemented in NetworkX MCP Server 
 - **Implementation**: `/src/networkx_mcp/security/resource_limits.py`
 
 ### 3. Credential Management (COMPLETED)
+
 - **Environment Variables**: All secrets moved to environment variables
 - **No Hardcoded Secrets**: Removed base64 passwords from k8s manifests
 - **Safe Defaults**: `.env.example` with dummy values
 - **Implementation**: Updated k8s/deployment.yaml to use `${VAR}` placeholders
 
 ### 4. Dangerous Functions (COMPLETED)
+
 - **eval() Removed**: Replaced with safe string parsing in feature_flags.py
 - **pickle Warnings**: Added security warnings and size limits
 - **Safe Error Messages**: No stack traces exposed to users
@@ -33,21 +37,25 @@ This document outlines the security measures implemented in NetworkX MCP Server 
 ## ⚠️ Known Limitations
 
 ### 1. Authentication & Authorization
+
 - **Status**: NOT IMPLEMENTED
 - **Risk**: High - No user authentication or API key validation
 - **Recommendation**: Implement JWT or API key authentication before production
 
 ### 2. Network Security
+
 - **Status**: PARTIAL
 - **Risk**: Medium - No built-in TLS/HTTPS support
 - **Recommendation**: Deploy behind HTTPS proxy (nginx, traefik)
 
 ### 3. Audit Logging
+
 - **Status**: BASIC
 - **Risk**: Medium - Limited security event logging
 - **Recommendation**: Implement comprehensive audit trail
 
 ### 4. Data Persistence Security
+
 - **Status**: NOT APPLICABLE
 - **Risk**: Low - In-memory only, no persistent storage
 - **Note**: Graphs are lost on restart
@@ -55,8 +63,9 @@ This document outlines the security measures implemented in NetworkX MCP Server 
 ## 🚨 Vulnerability Disclosure
 
 ### Reporting Security Issues
+
 1. **DO NOT** open public issues for security vulnerabilities
-2. Email security concerns to: security@networkx-mcp.example.com
+2. Email security concerns to: <security@networkx-mcp.example.com>
 3. Include:
    - Description of the vulnerability
    - Steps to reproduce
@@ -64,6 +73,7 @@ This document outlines the security measures implemented in NetworkX MCP Server 
    - Suggested fix (if any)
 
 ### Response Timeline
+
 - **Acknowledgment**: Within 48 hours
 - **Initial Assessment**: Within 7 days
 - **Fix Timeline**: Based on severity
@@ -75,6 +85,7 @@ This document outlines the security measures implemented in NetworkX MCP Server 
 ## 🛡️ Security Best Practices
 
 ### For Deployment
+
 1. Always use environment variables for secrets
 2. Deploy behind HTTPS proxy
 3. Enable firewall rules
@@ -82,6 +93,7 @@ This document outlines the security measures implemented in NetworkX MCP Server 
 5. Regular security updates
 
 ### For Development
+
 1. Never commit secrets
 2. Use input validation for all user inputs
 3. Implement proper error handling
@@ -105,6 +117,7 @@ This document outlines the security measures implemented in NetworkX MCP Server 
 ## 🔄 Recent Security Fixes
 
 ### Version 2.0.0 (Current)
+
 1. **Input Validation**: Prevents injection attacks
 2. **Resource Limits**: Prevents DoS attacks
 3. **Secret Management**: Removed hardcoded credentials
@@ -113,18 +126,21 @@ This document outlines the security measures implemented in NetworkX MCP Server 
 ## 📅 Security Roadmap
 
 ### Phase 1 (Completed)
+
 - ✅ Input validation
 - ✅ Resource limits
 - ✅ Secret management
 - ✅ Remove dangerous functions
 
 ### Phase 2 (Planned)
+
 - ⏳ JWT authentication
 - ⏳ Role-based access control
 - ⏳ Comprehensive audit logging
 - ⏳ Security headers
 
 ### Phase 3 (Future)
+
 - ⏳ End-to-end encryption
 - ⏳ Security scanning integration
 - ⏳ Compliance certifications
@@ -133,6 +149,7 @@ This document outlines the security measures implemented in NetworkX MCP Server 
 ## 🔍 Security Testing
 
 Run security tests:
+
 ```bash
 # Input validation tests
 python -m pytest tests/security/test_input_validation.py -v
@@ -148,11 +165,13 @@ python tests/security/test_dos_prevention_demo.py
 ## 📝 Compliance Notes
 
 This server implements security best practices but has NOT been:
+
 - Penetration tested
 - Formally audited
 - Certified for any compliance standards
 
 Use in production at your own risk. Additional security measures required for:
+
 - HIPAA compliance
 - PCI-DSS compliance
 - SOC 2 compliance
@@ -161,4 +180,4 @@ Use in production at your own risk. Additional security measures required for:
 ---
 
 **Last Updated**: 2024-01-09
-**Security Contact**: security@networkx-mcp.example.com
+**Security Contact**: <security@networkx-mcp.example.com>

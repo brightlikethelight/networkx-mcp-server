@@ -9,7 +9,7 @@ body:
     attributes:
       value: |
         Thanks for suggesting a new feature! ✨
-        
+
         Help us understand your idea and its potential impact on the NetworkX MCP Server.
 
   - type: checkboxes
@@ -90,10 +90,10 @@ body:
       render: python
       placeholder: |
         # Example of how the feature would be used
-        
+
         # Current approach (if any):
         # current_method()
-        
+
         # Proposed approach:
         # new_feature_method()
 

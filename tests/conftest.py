@@ -1,6 +1,7 @@
 """Pytest configuration and fixtures."""
 
 import asyncio
+
 import networkx as nx
 import pytest
 

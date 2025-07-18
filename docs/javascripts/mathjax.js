@@ -13,7 +13,7 @@ window.MathJax = {
     macros: {
       // Graph theory notation macros
       G: "\\mathcal{G}",
-      V: "\\mathcal{V}", 
+      V: "\\mathcal{V}",
       E: "\\mathcal{E}",
       N: "\\mathcal{N}",
       deg: "\\text{deg}",
@@ -22,27 +22,27 @@ window.MathJax = {
       dist: "\\text{dist}",
       diam: "\\text{diam}",
       ecc: "\\text{ecc}",
-      
+
       // Centrality measures
       BC: "\\text{BC}",
       CC: "\\text{CC}",
       EC: "\\text{EC}",
       PR: "\\text{PR}",
-      
+
       // Common mathematical notations
       argmax: "\\text{argmax}",
       argmin: "\\text{argmin}",
       bigO: "\\mathcal{O}",
-      
+
       // Set operations
       Union: "\\bigcup",
       Intersection: "\\bigcap",
-      
+
       // Probability
       Prob: "\\mathbb{P}",
       Expect: "\\mathbb{E}",
       Var: "\\text{Var}",
-      
+
       // Graph specific functions
       clustering: "\\text{clustering}",
       modularity: "\\text{modularity}",
@@ -50,19 +50,19 @@ window.MathJax = {
       betweenness: "\\text{betweenness}",
       closeness: "\\text{closeness}",
       eigenvector: "\\text{eigenvector}",
-      
-      // Matrix notation  
+
+      // Matrix notation
       A: "\\mathbf{A}",
       D: "\\mathbf{D}",
       L: "\\mathbf{L}",
       I: "\\mathbf{I}",
-      
+
       // Common symbols
       infty: "\\infty",
       approx: "\\approx",
       propto: "\\propto",
       sim: "\\sim",
-      
+
       // Complexity notation
       On: ["\\mathcal{O}(#1)", 1],
       Omegan: ["\\Omega(#1)", 1],
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
   mathElements.forEach(element => {
     element.classList.add('math-formula');
   });
-  
+
   // Add copy functionality to math formulas
   const displayMathElements = document.querySelectorAll('.MathJax_Display');
   displayMathElements.forEach(element => {
@@ -121,15 +121,15 @@ function showCopyNotification(element) {
     opacity: 0;
     transition: opacity 0.3s;
   `;
-  
+
   element.appendChild(notification);
-  
+
   // Position the notification
   const rect = element.getBoundingClientRect();
   notification.style.left = '50%';
   notification.style.top = '-30px';
   notification.style.transform = 'translateX(-50%)';
-  
+
   // Show and hide animation
   setTimeout(() => notification.style.opacity = '1', 10);
   setTimeout(() => {

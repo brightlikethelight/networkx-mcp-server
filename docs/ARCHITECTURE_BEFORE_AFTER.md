@@ -74,6 +74,7 @@ Lazy Loading Pattern:
 ## Memory Breakdown Comparison
 
 ### Before (Monolithic)
+
 ```
 Python interpreter          16MB ████
 NetworkX                    24MB ██████
@@ -86,6 +87,7 @@ TOTAL                      118MB ███████████████�
 ```
 
 ### After (Modular)
+
 ```
 MINIMAL (Default):
 Python interpreter          16MB ████
@@ -112,6 +114,7 @@ TOTAL                      118MB ███████████████�
 ## Code Changes
 
 ### The Fatal Import (Before)
+
 ```python
 # core/__init__.py (v0.1.0-alpha.1)
 from networkx_mcp.core.algorithms import GraphAlgorithms
@@ -122,6 +125,7 @@ __all__ = ["GraphAlgorithms", "GraphIOHandler", "GraphManager"]
 ```
 
 ### The Fix (After)
+
 ```python
 # core/__init__.py (v0.1.0-alpha.2)
 from networkx_mcp.core.algorithms import GraphAlgorithms
@@ -139,6 +143,7 @@ def get_io_handler():
 ## Installation Flow
 
 ### Before
+
 ```
 pip install networkx-mcp
 │
@@ -147,17 +152,18 @@ pip install networkx-mcp
     ├─→ pandas (forced) ✗
     ├─→ scipy (forced) ✗
     └─→ numpy (forced) ✗
-    
+
 Result: 118MB for everyone
 ```
 
 ### After
+
 ```
 pip install networkx-mcp
 │
 └─→ Installs MINIMAL
     └─→ networkx (required) ✓
-    
+
 Result: 54MB default
 
 pip install networkx-mcp[excel]
@@ -165,7 +171,7 @@ pip install networkx-mcp[excel]
 └─→ Installs MINIMAL + EXCEL
     ├─→ networkx (required) ✓
     └─→ pandas (optional) ✓
-    
+
 Result: 89MB when needed
 
 pip install networkx-mcp[full]
@@ -175,7 +181,7 @@ pip install networkx-mcp[full]
     ├─→ pandas (optional) ✓
     ├─→ scipy (optional) ✓
     └─→ matplotlib (optional) ✓
-    
+
 Result: 118MB by choice
 ```
 

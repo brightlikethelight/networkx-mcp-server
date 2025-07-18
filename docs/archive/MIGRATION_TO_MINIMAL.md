@@ -17,7 +17,7 @@ The current implementation is unsalvageable. You're not migrating code, you're m
 $ find src -name "*.py" | xargs wc -l | tail -1
   16348 total
 
-# Minimal implementation stats  
+# Minimal implementation stats
 $ wc -l server_truly_minimal.py
   158 server_truly_minimal.py
 ```
@@ -35,6 +35,7 @@ pip install networkx
 ### Step 3: Update Your Code (10 minutes)
 
 #### Old Way (Broken)
+
 ```python
 from networkx_mcp.server import NetworkXMCPServer
 from networkx_mcp.core.graph_operations import GraphManager
@@ -47,6 +48,7 @@ server = NetworkXMCPServer()
 ```
 
 #### New Way (Works)
+
 ```python
 from server_truly_minimal import MinimalMCPServer
 
@@ -57,12 +59,14 @@ asyncio.run(server.run())
 ### Step 4: Update Tests (30 minutes)
 
 #### Old Way
+
 ```python
 # 0 working tests across 50+ test files
 # "Comprehensive" coverage that doesn't run
 ```
 
 #### New Way
+
 ```python
 # 8 tests that actually verify functionality
 python test_minimal_server.py
@@ -72,6 +76,7 @@ python test_minimal_server.py
 ### Step 5: Deploy (5 minutes)
 
 #### Old Way
+
 ```yaml
 # 200-line docker-compose.yml
 # Multiple Dockerfiles
@@ -81,6 +86,7 @@ python test_minimal_server.py
 ```
 
 #### New Way
+
 ```dockerfile
 FROM python:3.11-slim
 WORKDIR /app

@@ -2,16 +2,17 @@
 """Demonstrate security validation against malicious inputs."""
 
 import sys
-sys.path.insert(0, '/Users/brightliu/Coding_Projects/networkx-mcp-server')
 
-from src.networkx_mcp.security.input_validation import validate_id, ValidationError
+sys.path.insert(0, "/Users/brightliu/Coding_Projects/networkx-mcp-server")
+
+from src.networkx_mcp.security.input_validation import ValidationError, validate_id
 
 
 def test_malicious_inputs():
     """Test various malicious inputs to demonstrate security."""
-    
+
     print("=== NetworkX MCP Server Security Validation Demo ===\n")
-    
+
     # Test cases with malicious inputs
     malicious_inputs = [
         ("../../../etc/passwd", "Path traversal attempt"),
@@ -25,10 +26,10 @@ def test_malicious_inputs():
         ("node\r\nSet-Cookie: admin=true", "CRLF injection"),
         ("a" * 101, "Buffer overflow attempt"),
     ]
-    
+
     print("Testing malicious inputs:")
     print("-" * 60)
-    
+
     for malicious_input, description in malicious_inputs:
         try:
             # Attempt to validate the malicious input
@@ -45,11 +46,11 @@ def test_malicious_inputs():
             print(f"   Input: {repr(malicious_input)}")
             print(f"   Error: {type(e).__name__}: {e}")
         print()
-    
+
     # Test valid inputs
     print("\nTesting valid inputs:")
     print("-" * 60)
-    
+
     valid_inputs = [
         ("graph1", "Simple alphanumeric"),
         ("node_123", "With underscore"),
@@ -58,7 +59,7 @@ def test_malicious_inputs():
         ("123", "Numeric string"),
         (456, "Integer (will be converted)"),
     ]
-    
+
     for valid_input, description in valid_inputs:
         try:
             result = validate_id(valid_input, "test_field")

@@ -7,10 +7,13 @@ to achieve 95%+ code coverage through systematic testing.
 import pytest
 
 # Skip comprehensive coverage tests as they test internal implementation details
-pytestmark = pytest.mark.skip(reason="Comprehensive coverage tests need architecture updates")
+pytestmark = pytest.mark.skip(
+    reason="Comprehensive coverage tests need architecture updates"
+)
 
 # Skip all imports if marked for skipping
 if pytestmark:
+
     def test_skip_placeholder():
         """Placeholder test to avoid import errors."""
         pass
@@ -19,7 +22,6 @@ else:
 
     import networkx as nx
     import pytest
-    import pytest_asyncio
 
     from networkx_mcp.core.graph_operations import GraphManager
 

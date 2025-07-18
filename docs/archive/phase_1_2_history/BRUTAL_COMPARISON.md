@@ -15,6 +15,7 @@
 ## Code Comparison
 
 ### Current "Minimal" Server (909 lines)
+
 ```python
 # 47 imports
 # 6 error classes
@@ -27,6 +28,7 @@
 ```
 
 ### Actually Minimal Server (158 lines)
+
 ```python
 # 5 imports
 # 1 class
@@ -50,6 +52,7 @@
 ## Architecture Comparison
 
 ### Current Architecture
+
 ```
 src/
 ├── networkx_mcp/          # 16,348 lines
@@ -63,6 +66,7 @@ src/
 ```
 
 ### Minimal Architecture
+
 ```
 server_truly_minimal.py    # 158 lines, everything works
 test_minimal_server.py     # 180 lines, actually tests
@@ -72,6 +76,7 @@ Dockerfile.minimal         # 10 lines, actually deploys
 ## Performance Claims vs Reality
 
 ### Current Implementation Claims
+
 - "Minimal server" → 909 lines
 - "54.6MB memory" → After fixing 118MB disaster
 - "Comprehensive tests" → 0 executable tests
@@ -79,6 +84,7 @@ Dockerfile.minimal         # 10 lines, actually deploys
 - "High performance" → Benchmarks show negative memory 🤔
 
 ### Minimal Implementation Reality
+
 - Actually minimal → 158 lines
 - ~30MB memory → Honest measurement
 - 8 working tests → 100% coverage of features
@@ -89,13 +95,15 @@ Dockerfile.minimal         # 10 lines, actually deploys
 
 The current implementation is **architectural masturbation** - complexity for the sake of complexity. It's what happens when developers forget that the goal is to solve problems, not to showcase how many design patterns they know.
 
-### Current Implementation Is:
+### Current Implementation Is
+
 - A 900-line "minimal" server (contradiction)
 - 68 files to do what 1 file can do
 - More documentation about failures than working code
 - A monument to over-engineering
 
-### Minimal Implementation Is:
+### Minimal Implementation Is
+
 - What the project claimed to be
 - What users actually need
 - Maintainable by humans
@@ -104,6 +112,7 @@ The current implementation is **architectural masturbation** - complexity for th
 ## Time Investment Comparison
 
 ### To Fix Current Implementation
+
 - **Week 1-2**: Delete 80% of code
 - **Week 3-4**: Fix broken tests
 - **Week 5-6**: Make deployable
@@ -111,6 +120,7 @@ The current implementation is **architectural masturbation** - complexity for th
 - **Total**: 2 months of cleanup
 
 ### To Use Minimal Implementation
+
 - **Hour 1**: Read code, understand everything
 - **Hour 2**: Deploy and use
 - **Total**: 2 hours

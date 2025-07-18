@@ -76,8 +76,13 @@ def test_server_instantiation():
 
 def test_basic_graph_operations():
     """Test basic graph operations work."""
-    from networkx_mcp.server import (add_edges, add_nodes, create_graph,
-                                     graph_info, graphs)
+    from networkx_mcp.server import (
+        add_edges,
+        add_nodes,
+        create_graph,
+        graph_info,
+        graphs,
+    )
 
     # Clear any existing graphs
     graphs.clear()

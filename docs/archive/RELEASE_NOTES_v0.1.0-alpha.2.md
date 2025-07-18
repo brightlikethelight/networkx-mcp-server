@@ -7,16 +7,19 @@ We discovered our "minimal" server was secretly loading the entire scientific Py
 ### What Changed
 
 #### Memory Usage (THE BIG FIX)
+
 - **Before**: 118MB (loaded pandas, scipy, matplotlib for everyone)
 - **After**: 54.6MB minimal, 118MB full (user choice)
 - **Reduction**: 54% for basic operations (not 83% - let's be honest)
 
 #### Import Hygiene
+
 - **Before**: 900+ modules loaded at startup
 - **After**: ~600 modules (removed scientific stack)
 - **Improvement**: No pandas/scipy unless explicitly needed
 
 #### Architecture
+
 - Removed eager loading of I/O handlers from core
 - Made pandas/scipy truly optional via lazy loading
 - Created separate minimal and full installation options
@@ -32,6 +35,7 @@ pip install networkx-mcp[excel]  # Adds pandas support
 ```
 
 **Import changes:**
+
 ```python
 # Old (no longer works):
 from networkx_mcp.core import GraphIOHandler
@@ -59,8 +63,9 @@ pip install networkx-mcp[full]  # ~118MB
 The previous version falsely claimed to be "minimal" while loading 900+ modules and using 118MB for basic operations. **We apologize for this architectural dishonesty.**
 
 This version is actually minimal by default, with heavy dependencies as optional extras. The 54.6MB includes:
+
 - Python interpreter: ~16MB
-- NetworkX library: ~20MB  
+- NetworkX library: ~20MB
 - Server + asyncio: ~18MB
 
 This is the realistic minimum for a Python-based NetworkX server.

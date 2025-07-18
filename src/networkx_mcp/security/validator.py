@@ -8,7 +8,6 @@ class SecurityError(Exception):
     """Base security exception."""
 
 
-
 class SecurityValidator:
     """Security validation for user inputs."""
 

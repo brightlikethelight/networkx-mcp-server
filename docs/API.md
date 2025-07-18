@@ -5,6 +5,7 @@ This document provides detailed API documentation for all available tools in the
 ## Table of Contents
 
 ### Phase 1: Core Functionality
+
 1. [Graph Management](#graph-management)
 2. [Core Algorithms](#core-algorithms)
 3. [Advanced Path Analysis](#advanced-path-analysis)
@@ -13,6 +14,7 @@ This document provides detailed API documentation for all available tools in the
 6. [I/O Operations](#io-operations)
 
 ### Phase 2: Advanced Analytics
+
 7. [Advanced Community Detection](#advanced-community-detection)
 8. [Network Flow Analysis](#network-flow-analysis)
 9. [Graph Generation](#graph-generation)
@@ -23,6 +25,7 @@ This document provides detailed API documentation for all available tools in the
 14. [Robustness Analysis](#robustness-analysis)
 
 ### Phase 3: Visualization & Integration
+
 15. [Graph Visualization](#graph-visualization)
 16. [3D Visualization](#3d-visualization)
 17. [Interactive Dashboards](#interactive-dashboards)
@@ -39,6 +42,7 @@ This document provides detailed API documentation for all available tools in the
 Create a new graph with specified type and optional initialization data.
 
 **Parameters:**
+
 - `graph_id` (string, required): Unique identifier for the graph
 - `graph_type` (string, optional): Type of graph - "undirected", "directed", "multi_undirected", "multi_directed" (default: "undirected")
 - `from_data` (object, optional): Initialize graph from data
@@ -48,6 +52,7 @@ Create a new graph with specified type and optional initialization data.
 - `**attributes` (object, optional): Additional graph attributes
 
 **Returns:**
+
 ```json
 {
   "graph_id": "my_graph",
@@ -63,6 +68,7 @@ Create a new graph with specified type and optional initialization data.
 ```
 
 **Example:**
+
 ```python
 await mcp.call_tool("create_graph", {
     "graph_id": "social_network",
@@ -84,12 +90,14 @@ await mcp.call_tool("create_graph", {
 Add nodes to a graph with optional attributes.
 
 **Parameters:**
+
 - `graph_id` (string, required): Graph identifier
 - `nodes` (array, required): List of nodes to add
   - Can be strings/numbers for simple nodes
   - Can be objects with `id` field and additional attributes
 
 **Returns:**
+
 ```json
 {
   "nodes_added": 5,
@@ -100,6 +108,7 @@ Add nodes to a graph with optional attributes.
 ```
 
 **Example:**
+
 ```python
 # Simple nodes
 await mcp.call_tool("add_nodes", {
@@ -122,12 +131,14 @@ await mcp.call_tool("add_nodes", {
 Add edges to a graph with optional attributes.
 
 **Parameters:**
+
 - `graph_id` (string, required): Graph identifier
 - `edges` (array, required): List of edges to add
   - Each edge must have `source` and `target` fields
   - Can include additional attributes like `weight`
 
 **Returns:**
+
 ```json
 {
   "edges_added": 10,
@@ -139,6 +150,7 @@ Add edges to a graph with optional attributes.
 ```
 
 **Example:**
+
 ```python
 await mcp.call_tool("add_edges", {
     "graph_id": "transport_network",
@@ -154,9 +166,11 @@ await mcp.call_tool("add_edges", {
 Get comprehensive information about a graph.
 
 **Parameters:**
+
 - `graph_id` (string, required): Graph identifier
 
 **Returns:**
+
 ```json
 {
   "graph_id": "my_graph",
@@ -187,6 +201,7 @@ Get comprehensive information about a graph.
 Find shortest path(s) between nodes using various algorithms.
 
 **Parameters:**
+
 - `graph_id` (string, required): Graph identifier
 - `source` (string/number, required): Source node
 - `target` (string/number, required): Target node
@@ -195,6 +210,7 @@ Find shortest path(s) between nodes using various algorithms.
 - `k_paths` (integer, optional): Find k shortest paths (default: 1)
 
 **Returns:**
+
 ```json
 {
   "path": ["A", "B", "C", "D"],
@@ -210,6 +226,7 @@ Find shortest path(s) between nodes using various algorithms.
 ```
 
 **Example:**
+
 ```python
 # Unweighted shortest path
 await mcp.call_tool("shortest_path", {
@@ -233,6 +250,7 @@ await mcp.call_tool("shortest_path", {
 Calculate various centrality measures for nodes.
 
 **Parameters:**
+
 - `graph_id` (string, required): Graph identifier
 - `centrality_type` (string/array, required): Type(s) of centrality - "degree", "betweenness", "closeness", "eigenvector", "pagerank"
 - `weight` (string, optional): Edge attribute for weighted centrality
@@ -241,6 +259,7 @@ Calculate various centrality measures for nodes.
 - `include_statistics` (boolean, optional): Include summary statistics
 
 **Returns:**
+
 ```json
 {
   "degree_centrality": {
@@ -266,12 +285,14 @@ Calculate various centrality measures for nodes.
 Analyze clustering coefficients and triangles in the graph.
 
 **Parameters:**
+
 - `graph_id` (string, required): Graph identifier
 - `weight` (string, optional): Edge weight for weighted clustering
 - `nodes` (array, optional): Specific nodes to analyze (default: all)
 - `include_triangles` (boolean, optional): Count triangles (default: false)
 
 **Returns:**
+
 ```json
 {
   "average_clustering": 0.456,
@@ -296,10 +317,12 @@ Analyze clustering coefficients and triangles in the graph.
 Find connected components in the graph.
 
 **Parameters:**
+
 - `graph_id` (string, required): Graph identifier
 - `component_type` (string, optional): "weak" or "strong" for directed graphs (default: "weak")
 
 **Returns:**
+
 ```json
 {
   "num_components": 3,
@@ -322,6 +345,7 @@ Find connected components in the graph.
 Find all simple paths between two nodes up to a specified length.
 
 **Parameters:**
+
 - `graph_id` (string, required): Graph identifier
 - `source` (string/number, required): Source node
 - `target` (string/number, required): Target node
@@ -329,6 +353,7 @@ Find all simple paths between two nodes up to a specified length.
 - `max_paths` (integer, optional): Maximum number of paths to return (default: 100)
 
 **Returns:**
+
 ```json
 {
   "num_paths": 5,
@@ -349,10 +374,12 @@ Find all simple paths between two nodes up to a specified length.
 Comprehensive path analysis for the entire graph.
 
 **Parameters:**
+
 - `graph_id` (string, required): Graph identifier
 - `sample_size` (integer, optional): Number of node pairs to sample (default: 1000)
 
 **Returns:**
+
 ```json
 {
   "average_shortest_path_length": 3.45,
@@ -376,11 +403,13 @@ Comprehensive path analysis for the entire graph.
 Find all cycles in the graph up to a specified length.
 
 **Parameters:**
+
 - `graph_id` (string, required): Graph identifier
 - `max_cycle_length` (integer, optional): Maximum cycle length (default: no limit)
 - `node` (string/number, optional): Find cycles containing specific node
 
 **Returns:**
+
 ```json
 {
   "num_cycles": 8,
@@ -399,6 +428,7 @@ Find all cycles in the graph up to a specified length.
 Analyze flow paths including maximum flow and edge-disjoint paths.
 
 **Parameters:**
+
 - `graph_id` (string, required): Graph identifier
 - `source` (string/number, required): Source node
 - `target` (string/number, required): Target node
@@ -406,6 +436,7 @@ Analyze flow paths including maximum flow and edge-disjoint paths.
 - `flow_type` (string, optional): "maximum", "edge_disjoint", "node_disjoint", "all" (default: "maximum")
 
 **Returns:**
+
 ```json
 {
   "maximum_flow": 25.5,
@@ -431,10 +462,12 @@ Analyze flow paths including maximum flow and edge-disjoint paths.
 Calculate comprehensive graph metrics and statistics.
 
 **Parameters:**
+
 - `graph_id` (string, required): Graph identifier
 - `include_distributions` (boolean, optional): Include degree and other distributions (default: false)
 
 **Returns:**
+
 ```json
 {
   "basic_metrics": {
@@ -481,6 +514,7 @@ Calculate comprehensive graph metrics and statistics.
 Extract subgraphs based on various criteria.
 
 **Parameters:**
+
 - `graph_id` (string, required): Graph identifier
 - `method` (string, required): Extraction method - "k_hop", "induced", "edge", "condition"
 - `nodes` (array, conditional): Nodes for induced/edge subgraph
@@ -491,6 +525,7 @@ Extract subgraphs based on various criteria.
 - `new_graph_id` (string, conditional): ID for new graph if create_new is true
 
 **Returns:**
+
 ```json
 {
   "num_nodes": 45,
@@ -504,6 +539,7 @@ Extract subgraphs based on various criteria.
 ```
 
 **Examples:**
+
 ```python
 # K-hop neighborhood
 await mcp.call_tool("subgraph_extraction", {
@@ -534,6 +570,7 @@ Get comprehensive server performance and operation statistics.
 **Parameters:** None
 
 **Returns:**
+
 ```json
 {
   "performance": {
@@ -616,6 +653,7 @@ While I/O operations are not directly exposed as MCP tools, they can be accessed
 ### Format Auto-detection
 
 The server can automatically detect file formats based on extensions:
+
 - `.json` → JSON
 - `.csv` → CSV
 - `.yaml`, `.yml` → YAML
@@ -630,6 +668,7 @@ The server can automatically detect file formats based on extensions:
 ### Streaming Support
 
 For large graphs, the server supports streaming I/O operations:
+
 - Chunked reading for large files
 - Progressive writing with configurable chunk size
 - Memory-efficient processing
@@ -650,6 +689,7 @@ All tools return structured error responses:
 ```
 
 Common error types:
+
 - `GraphNotFoundError`: Specified graph doesn't exist
 - `NodeNotFoundError`: Specified node doesn't exist
 - `ValidationError`: Invalid input parameters
@@ -686,6 +726,7 @@ Detect communities using advanced algorithms with automatic algorithm selection 
 **Tool:** `advanced_community_detection`
 
 **Parameters:**
+
 - `graph_id` (string, required): Graph identifier
 - `algorithm` (string, optional): Algorithm selection:
   - `"auto"` (default): Automatically selects best algorithm based on graph size
@@ -699,6 +740,7 @@ Detect communities using advanced algorithms with automatic algorithm selection 
 - Additional algorithm-specific parameters
 
 **Returns:**
+
 ```json
 {
   "communities": {
@@ -720,6 +762,7 @@ Detect communities using advanced algorithms with automatic algorithm selection 
 ```
 
 **Example:**
+
 ```python
 # Auto-select best algorithm
 result = await mcp.call_tool("advanced_community_detection", {
@@ -743,6 +786,7 @@ Analyze network flow with multiple algorithms including Ford-Fulkerson, Edmonds-
 **Tool:** `network_flow_analysis`
 
 **Parameters:**
+
 - `graph_id` (string, required): Graph identifier (must be directed)
 - `source` (string/number, required): Source node
 - `sink` (string/number, required): Sink/target node
@@ -758,6 +802,7 @@ Analyze network flow with multiple algorithms including Ford-Fulkerson, Edmonds-
   - `"min_cut"`: Minimum cut analysis
 
 **Returns:**
+
 ```json
 {
   "flow_type": "max_flow",
@@ -780,6 +825,7 @@ Generate synthetic graphs using various theoretical models.
 **Tool:** `generate_graph`
 
 **Parameters:**
+
 - `graph_type` (string, required): Type of graph to generate:
   - `"random"`: Erdős-Rényi random graph
   - `"scale_free"`: Barabási-Albert preferential attachment
@@ -800,6 +846,7 @@ Generate synthetic graphs using various theoretical models.
   - Social: `communities`, `p_in`, `p_out`
 
 **Returns:**
+
 ```json
 {
   "graph_id": "scale_free_network",
@@ -826,6 +873,7 @@ Specialized analysis for bipartite graphs including projections, matching, and c
 **Tool:** `bipartite_analysis`
 
 **Parameters:**
+
 - `graph_id` (string, required): Graph identifier
 - `analysis_type` (string, required): Type of analysis:
   - `"check"`: Check if graph is bipartite
@@ -840,6 +888,7 @@ Specialized analysis for bipartite graphs including projections, matching, and c
 **Returns vary by analysis type:**
 
 For `"matching"`:
+
 ```json
 {
   "analysis_type": "matching",
@@ -859,6 +908,7 @@ Specialized algorithms for directed graphs including DAG analysis, SCCs, and hie
 **Tool:** `directed_graph_analysis`
 
 **Parameters:**
+
 - `graph_id` (string, required): Graph identifier (must be directed)
 - `analysis_type` (string, required): Type of analysis:
   - `"dag_check"`: Check DAG properties and find longest paths
@@ -873,6 +923,7 @@ Specialized algorithms for directed graphs including DAG analysis, SCCs, and hie
 **Returns vary by analysis type:**
 
 For `"bow_tie"`:
+
 ```json
 {
   "analysis_type": "bow_tie",
@@ -895,6 +946,7 @@ Run specialized graph algorithms for optimization and analysis.
 **Tool:** `specialized_algorithms`
 
 **Parameters:**
+
 - `graph_id` (string, required): Graph identifier
 - `algorithm` (string, required): Algorithm to run:
   - `"spanning_tree"`: MST with Kruskal/Prim/Borůvka
@@ -909,6 +961,7 @@ Run specialized graph algorithms for optimization and analysis.
 **Returns vary by algorithm:**
 
 For `"coloring"`:
+
 ```json
 {
   "algorithm": "coloring",
@@ -932,6 +985,7 @@ Machine learning-based graph analysis including embeddings, features, and anomal
 **Tool:** `ml_graph_analysis`
 
 **Parameters:**
+
 - `graph_id` (string, required): Graph identifier
 - `analysis_type` (string, required): Type of ML analysis:
   - `"embeddings"`: Generate node embeddings
@@ -947,6 +1001,7 @@ Machine learning-based graph analysis including embeddings, features, and anomal
 **Returns vary by analysis type:**
 
 For `"embeddings"`:
+
 ```json
 {
   "analysis_type": "embeddings",
@@ -979,6 +1034,7 @@ Analyze network robustness and resilience to failures and attacks.
 **Tool:** `robustness_analysis`
 
 **Parameters:**
+
 - `graph_id` (string, required): Graph identifier
 - `analysis_type` (string, required): Type of robustness analysis:
   - `"attack"`: Simulate node/edge removal attacks
@@ -994,6 +1050,7 @@ Analyze network robustness and resilience to failures and attacks.
 **Returns vary by analysis type:**
 
 For `"attack"`:
+
 ```json
 {
   "analysis_type": "attack",
@@ -1045,6 +1102,7 @@ Phase 2 tools include several optimizations:
 ### Integration Examples
 
 **Complete Network Analysis Pipeline:**
+
 ```python
 # 1. Generate a scale-free network
 await mcp.call_tool("generate_graph", {
@@ -1086,6 +1144,7 @@ Create static or interactive graph visualizations using multiple backend engines
 **Tool:** `visualize_graph`
 
 **Parameters:**
+
 - `graph_id` (string, required): Graph identifier
 - `visualization_type` (string, optional): Type of visualization:
   - `"static"` (default): Static image using Matplotlib
@@ -1109,6 +1168,7 @@ Create static or interactive graph visualizations using multiple backend engines
   - `physics`: Enable physics simulation for interactive (boolean)
 
 **Returns:**
+
 ```json
 {
   "visualization_type": "interactive",
@@ -1123,6 +1183,7 @@ Create static or interactive graph visualizations using multiple backend engines
 ```
 
 **Examples:**
+
 ```python
 # Static visualization with custom styling
 result = await mcp.call_tool("visualize_graph", {
@@ -1162,6 +1223,7 @@ Generate three-dimensional graph visualizations with Plotly.
 **Tool:** `visualize_3d`
 
 **Parameters:**
+
 - `graph_id` (string, required): Graph identifier
 - `layout` (string, optional): 3D layout algorithm:
   - `"spring_3d"` (default): 3D force-directed layout
@@ -1176,6 +1238,7 @@ Generate three-dimensional graph visualizations with Plotly.
 - `animation` (object, optional): Animation settings for temporal networks
 
 **Returns:**
+
 ```json
 {
   "format": "html",
@@ -1194,6 +1257,7 @@ Generate three-dimensional graph visualizations with Plotly.
 ```
 
 **Example:**
+
 ```python
 # 3D molecular network
 result = await mcp.call_tool("visualize_3d", {
@@ -1214,6 +1278,7 @@ Create comprehensive dashboards combining multiple visualizations.
 **Tool:** `create_dashboard`
 
 **Parameters:**
+
 - `graph_id` (string, required): Graph identifier
 - `components` (array, required): List of dashboard components:
   - `type`: Component type ("graph", "metrics", "distribution", "timeline")
@@ -1223,6 +1288,7 @@ Create comprehensive dashboards combining multiple visualizations.
 - `refresh_interval` (integer, optional): Auto-refresh interval in seconds
 
 **Returns:**
+
 ```json
 {
   "dashboard_id": "dashboard_789",
@@ -1240,6 +1306,7 @@ Import graphs from various data sources with intelligent parsing.
 **Tool:** `import_from_source`
 
 **Parameters:**
+
 - `source_type` (string, required): Type of data source:
   - `"csv"`: CSV files with edge lists or adjacency
   - `"json"`: JSON in various formats
@@ -1257,6 +1324,7 @@ Import graphs from various data sources with intelligent parsing.
   - Excel: `sheet_mapping`
 
 **Returns:**
+
 ```json
 {
   "graph_id": "imported_network",
@@ -1277,6 +1345,7 @@ Import graphs from various data sources with intelligent parsing.
 ```
 
 **Examples:**
+
 ```python
 # Import from CSV with type inference
 result = await mcp.call_tool("import_from_source", {
@@ -1326,6 +1395,7 @@ Process multiple graphs in parallel with comprehensive operations.
 **Tool:** `batch_graph_analysis`
 
 **Parameters:**
+
 - `graph_ids` (array, required): List of graph identifiers to process
 - `operations` (array, required): List of operations to perform on each graph:
   - `name`: Operation name for results
@@ -1336,6 +1406,7 @@ Process multiple graphs in parallel with comprehensive operations.
 - `output_format` (string, optional): Results format ("summary", "detailed")
 
 **Returns:**
+
 ```json
 {
   "results": {
@@ -1367,6 +1438,7 @@ Process multiple graphs in parallel with comprehensive operations.
 ```
 
 **Example:**
+
 ```python
 # Batch analysis of multiple networks
 result = await mcp.call_tool("batch_graph_analysis", {
@@ -1400,6 +1472,7 @@ Create and execute complex analysis workflows with caching and conditional logic
 **Tool:** `create_analysis_workflow`
 
 **Parameters:**
+
 - `graph_id` (string, required): Graph identifier
 - `workflow` (array, required): List of workflow steps:
   - `name`: Step name
@@ -1411,6 +1484,7 @@ Create and execute complex analysis workflows with caching and conditional logic
 - `save_results` (boolean, optional): Save workflow results
 
 **Returns:**
+
 ```json
 {
   "workflow_results": {
@@ -1431,6 +1505,7 @@ Create and execute complex analysis workflows with caching and conditional logic
 ```
 
 **Example:**
+
 ```python
 # Complex analysis workflow
 result = await mcp.call_tool("create_analysis_workflow", {
@@ -1475,6 +1550,7 @@ Generate comprehensive PDF or HTML reports with visualizations and analysis resu
 **Tool:** `generate_report`
 
 **Parameters:**
+
 - `graph_id` (string, required): Graph identifier or analysis results ID
 - `format` (string, optional): Output format ("pdf", "html") (default: "pdf")
 - `template` (string, optional): Report template ("default", "academic", "business")
@@ -1489,6 +1565,7 @@ Generate comprehensive PDF or HTML reports with visualizations and analysis resu
 - `metadata` (object, optional): Additional metadata for report
 
 **Returns:**
+
 ```json
 {
   "format": "pdf",
@@ -1502,6 +1579,7 @@ Generate comprehensive PDF or HTML reports with visualizations and analysis resu
 ```
 
 **Example:**
+
 ```python
 # Generate comprehensive PDF report
 result = await mcp.call_tool("generate_report", {
@@ -1532,6 +1610,7 @@ Set up real-time monitoring and alerting for graph metrics.
 **Tool:** `setup_monitoring`
 
 **Parameters:**
+
 - `graph_id` (string, required): Graph identifier to monitor
 - `alert_rules` (array, required): List of alert rules:
   - `name`: Rule name
@@ -1546,6 +1625,7 @@ Set up real-time monitoring and alerting for graph metrics.
 - `notification_webhook` (string, optional): Webhook URL for notifications
 
 **Returns:**
+
 ```json
 {
   "monitoring_id": "monitor_123",
@@ -1564,6 +1644,7 @@ Set up real-time monitoring and alerting for graph metrics.
 ```
 
 **Example:**
+
 ```python
 # Setup comprehensive monitoring
 result = await mcp.call_tool("setup_monitoring", {
@@ -1627,6 +1708,7 @@ Data import pipelines include:
 ### Integration Patterns
 
 **Complete Analysis Pipeline with Visualization:**
+
 ```python
 # 1. Import data from multiple sources
 csv_result = await mcp.call_tool("import_from_source", {

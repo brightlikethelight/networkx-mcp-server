@@ -1,7 +1,6 @@
 {
   "version": "1.0.0",
   "description": "NetworkX MCP Server Quality Configuration",
-  
   "thresholds": {
     "coverage": 95.0,
     "complexity": 10,
@@ -12,7 +11,6 @@
     "test_quality": 85.0,
     "documentation_coverage": 80.0
   },
-  
   "rules": {
     "ruff": {
       "enabled": true,
@@ -29,11 +27,17 @@
         ".venv"
       ],
       "per_file_ignores": {
-        "__init__.py": ["F401", "F403"],
-        "tests/*": ["S101", "PLR2004", "S311"]
+        "__init__.py": [
+          "F401",
+          "F403"
+        ],
+        "tests/*": [
+          "S101",
+          "PLR2004",
+          "S311"
+        ]
       }
     },
-    
     "mypy": {
       "enabled": true,
       "config_file": "pyproject.toml",
@@ -48,13 +52,12 @@
         "dist/"
       ]
     },
-    
     "bandit": {
       "enabled": true,
       "config_file": "pyproject.toml",
       "exclude_dirs": [
         "tests",
-        "scripts", 
+        "scripts",
         "docs",
         "build",
         "dist"
@@ -74,7 +77,6 @@
         "low": 10
       }
     },
-    
     "complexity": {
       "enabled": true,
       "tool": "radon",
@@ -86,7 +88,6 @@
         "__init__.py"
       ]
     },
-    
     "duplication": {
       "enabled": true,
       "tool": "jscpd",
@@ -100,7 +101,6 @@
         "*.pyc"
       ]
     },
-    
     "coverage": {
       "enabled": true,
       "tool": "pytest-cov",
@@ -127,16 +127,17 @@
         "*/__pycache__/*"
       ]
     },
-    
     "security": {
       "enabled": true,
-      "tools": ["bandit", "safety"],
+      "tools": [
+        "bandit",
+        "safety"
+      ],
       "dependency_check": true,
       "ignore_vulnerabilities": [
         "70612"
       ]
     },
-    
     "documentation": {
       "enabled": true,
       "docstring_coverage": 80.0,
@@ -144,13 +145,12 @@
       "readme_quality": true
     }
   },
-  
   "quality_gates": {
     "development": {
       "description": "Quality gate for development branches",
       "required_checks": [
         "ruff",
-        "mypy", 
+        "mypy",
         "coverage"
       ],
       "thresholds": {
@@ -158,13 +158,12 @@
         "complexity": 12
       }
     },
-    
     "staging": {
       "description": "Quality gate for staging/pre-production",
       "required_checks": [
         "ruff",
         "mypy",
-        "bandit", 
+        "bandit",
         "coverage",
         "complexity"
       ],
@@ -174,7 +173,6 @@
         "security_score": 8.0
       }
     },
-    
     "production": {
       "description": "Quality gate for production releases",
       "required_checks": [
@@ -195,49 +193,48 @@
       }
     }
   },
-  
   "reporting": {
-    "formats": ["json", "html", "junit"],
+    "formats": [
+      "json",
+      "html",
+      "junit"
+    ],
     "output_dir": ".quality-reports",
     "include_trends": true,
     "include_details": true,
     "archive_reports": true,
     "max_archived_reports": 50
   },
-  
   "integrations": {
     "github": {
       "status_checks": true,
       "pr_comments": true,
       "commit_status": true
     },
-    
     "sonarqube": {
       "enabled": false,
       "server_url": "",
       "project_key": "networkx-mcp-server"
     },
-    
     "codecov": {
       "enabled": false,
       "token": ""
     }
   },
-  
   "notifications": {
     "slack": {
       "enabled": false,
       "webhook_url": "",
-      "channels": ["#quality-alerts"]
+      "channels": [
+        "#quality-alerts"
+      ]
     },
-    
     "email": {
       "enabled": false,
       "recipients": [],
       "smtp_server": ""
     }
   },
-  
   "exclusions": {
     "files": [
       "*.pyc",
@@ -252,20 +249,17 @@
       ".venv/",
       "venv/"
     ],
-    
     "directories": [
       "migrations/",
       "node_modules/",
       ".asv/"
     ],
-    
     "patterns": [
       "test_*.py",
       "*_test.py",
       "conftest.py"
     ]
   },
-  
   "custom_rules": {
     "naming_conventions": {
       "enabled": true,
@@ -274,14 +268,12 @@
       "variable_naming": "snake_case",
       "constant_naming": "SCREAMING_SNAKE_CASE"
     },
-    
     "import_organization": {
       "enabled": true,
       "group_imports": true,
       "sort_imports": true,
       "separate_from_imports": true
     },
-    
     "code_structure": {
       "max_file_length": 1000,
       "max_function_length": 60,
@@ -289,27 +281,23 @@
       "max_parameters": 8
     }
   },
-  
   "performance": {
     "timeout": 300,
     "parallel_execution": true,
     "cache_results": true,
     "incremental_analysis": true
   },
-  
   "maintenance": {
     "auto_fix": {
       "enabled": true,
       "safe_fixes_only": true,
       "backup_files": true
     },
-    
     "dependency_updates": {
       "enabled": true,
       "security_updates": "auto",
       "feature_updates": "manual"
     },
-    
     "cleanup": {
       "remove_unused_imports": true,
       "remove_dead_code": false,

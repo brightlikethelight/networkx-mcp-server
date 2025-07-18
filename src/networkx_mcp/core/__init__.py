@@ -12,9 +12,10 @@ __all__ = ["GraphAlgorithms", "GraphManager", "get_io_handler"]
 def get_io_handler():
     """
     Lazy load IO handler only when needed.
-    
+
     WARNING: This imports pandas/scipy and adds 50MB memory overhead!
     Only call when you actually need file I/O operations.
     """
     from networkx_mcp.core.io import GraphIOHandler
+
     return GraphIOHandler

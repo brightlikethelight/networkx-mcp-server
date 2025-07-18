@@ -155,8 +155,7 @@ def test_critical_workflows():
 
     # Test 1: Basic graph operations
     try:
-        from networkx_mcp.services.unified_graph_service import \
-            UnifiedGraphService
+        from networkx_mcp.services.unified_graph_service import UnifiedGraphService
 
         service = UnifiedGraphService()
 

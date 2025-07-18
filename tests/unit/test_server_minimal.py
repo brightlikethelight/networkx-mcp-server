@@ -3,7 +3,6 @@
 import networkx as nx
 
 from networkx_mcp.server import NetworkXMCPServer, graphs
-from networkx_mcp.server_minimal import TrulyMinimalServer
 
 
 class TestServerBasics:

@@ -38,38 +38,45 @@ This project and everyone participating in it is governed by our Code of Conduct
 ### Setting Up Your Development Environment
 
 1. **Fork the repository**
+
    ```bash
    # Click "Fork" button on GitHub
    ```
 
 2. **Clone your fork**
+
    ```bash
    git clone https://github.com/YOUR_USERNAME/networkx-mcp-server.git
    cd networkx-mcp-server
    ```
 
 3. **Add upstream remote**
+
    ```bash
    git remote add upstream https://github.com/yourusername/networkx-mcp-server.git
    ```
 
 4. **Create a virtual environment**
+
    ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
 5. **Install development dependencies**
+
    ```bash
    pip install -e ".[dev]"
    ```
 
 6. **Install pre-commit hooks**
+
    ```bash
    pre-commit install
    ```
 
 7. **Run tests to verify setup**
+
    ```bash
    pytest
    ```
@@ -88,6 +95,7 @@ Before creating bug reports, please check existing issues to avoid duplicates. W
 - **Relevant logs or error messages**
 
 **Example:**
+
 ```markdown
 ### Bug: Shortest path fails with weighted edges
 
@@ -125,6 +133,7 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
 ### 1. Branch Naming
 
 Use descriptive branch names:
+
 - `feature/add-graph-embedding` - New features
 - `fix/memory-leak-in-flow` - Bug fixes
 - `docs/update-api-reference` - Documentation
@@ -177,6 +186,7 @@ src/networkx_mcp/
 ```
 
 When adding new features:
+
 - Put algorithms in appropriate category
 - Create new subdirectories for major features
 - Keep files focused and under 500 lines
@@ -337,6 +347,7 @@ git commit -m "add feature"
 ### Before Submitting
 
 1. **Update from upstream main**
+
    ```bash
    git checkout main
    git pull upstream main
@@ -345,6 +356,7 @@ git commit -m "add feature"
    ```
 
 2. **Run all checks**
+
    ```bash
    # Format code
    black src/ tests/
@@ -438,6 +450,7 @@ pytest -v
 ### Test Categories
 
 Mark tests appropriately:
+
 ```python
 @pytest.mark.slow  # Tests taking >1 second
 @pytest.mark.integration  # Tests requiring Redis
@@ -505,23 +518,24 @@ def complex_function(
 
 - 💬 [GitHub Discussions](https://github.com/yourusername/networkx-mcp-server/discussions) - Ask questions
 - 🐛 [Issue Tracker](https://github.com/yourusername/networkx-mcp-server/issues) - Report bugs
-- 📧 Email: support@networkx-mcp.org
+- 📧 Email: <support@networkx-mcp.org>
 
 ### Communication Channels
 
 - **Discussions**: General questions and ideas
 - **Issues**: Bug reports and feature requests
 - **Pull Requests**: Code contributions
-- **Security**: security@networkx-mcp.org for vulnerabilities
+- **Security**: <security@networkx-mcp.org> for vulnerabilities
 
 ### Recognition
 
 Contributors are recognized in:
+
 - [CONTRIBUTORS.md](CONTRIBUTORS.md) file
 - Release notes
 - Project documentation
 
-## 🙏 Thank You!
+## 🙏 Thank You
 
 Your contributions make this project better for everyone. Whether it's fixing a typo, adding a test, or implementing a new feature, every contribution is valued.
 

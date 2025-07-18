@@ -1,4 +1,4 @@
-# 🚀 NetworkX MCP Server v1.0.0 - Now Live on PyPI!
+# 🚀 NetworkX MCP Server v1.0.0 - Now Live on PyPI
 
 **The first NetworkX integration for Model Context Protocol** has officially launched!
 
@@ -23,6 +23,7 @@ pip install networkx-mcp-server
 ## 🎯 What You Can Do
 
 ### Social Network Analysis
+
 ```
 Human: Create a social network and find the most influential people
 
@@ -33,6 +34,7 @@ Most influential: Alice (connected to 75% of the network)
 ```
 
 ### Transportation Planning
+
 ```
 Human: Analyze this city's road network for bottlenecks
 
@@ -43,6 +45,7 @@ Critical intersection: Downtown Hub (handles 60% of traffic flow)
 ```
 
 ### Knowledge Graph Analysis
+
 ```
 Human: Map prerequisite relationships in this curriculum
 
@@ -63,19 +66,22 @@ Path to AI: Math → Programming → Algorithms → Machine Learning
 ## 🛠️ Technical Highlights
 
 ### Core Operations
+
 - `create_graph`, `add_nodes`, `add_edges`, `get_info`, `shortest_path`
 
-### Analysis Operations  
+### Analysis Operations
+
 - `degree_centrality`, `betweenness_centrality`, `pagerank`, `connected_components`, `community_detection`
 
 ### Visualization & I/O
+
 - `visualize_graph` (PNG with spring, circular, kamada_kawai layouts)
 - `import_csv`, `export_json`
 
 ## 📚 Resources
 
-- **PyPI Package**: https://pypi.org/project/networkx-mcp-server/
-- **GitHub Repository**: https://github.com/Bright-L01/networkx-mcp-server
+- **PyPI Package**: <https://pypi.org/project/networkx-mcp-server/>
+- **GitHub Repository**: <https://github.com/Bright-L01/networkx-mcp-server>
 - **Demo Scripts**: [Social networks, transportation, knowledge graphs](demos/)
 - **Documentation**: Complete API reference and examples
 
@@ -99,20 +105,23 @@ Then restart Claude Desktop and start analyzing graphs naturally!
 ## 🤝 Community
 
 This is just the beginning. We have big plans for:
+
 - More graph algorithms (clustering, flow analysis)
 - Additional visualization options
 - Integration with popular graph databases
 - Community-driven examples and use cases
 
 **Join the conversation:**
+
 - ⭐ Star the repository
-- 🐛 Report issues or request features  
+- 🐛 Report issues or request features
 - 🚀 Share your graph analysis workflows
 - 📚 Contribute examples and documentation
 
 ## 🙏 Thank You
 
 Special thanks to:
+
 - The NetworkX team for the amazing graph library
 - Anthropic for creating the Model Context Protocol
 - The MCP community for inspiration and feedback

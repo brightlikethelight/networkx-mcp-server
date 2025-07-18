@@ -21,7 +21,7 @@ This script will:
 
 - ✅ Check prerequisites (Python 3.11+, Git)
 - ✅ Create virtual environment
-- ✅ Install development dependencies  
+- ✅ Install development dependencies
 - ✅ Set up pre-commit hooks
 - ✅ Configure IDE settings (VSCode, PyCharm)
 - ✅ Create development services (Redis)
@@ -48,10 +48,10 @@ If you prefer manual setup or need to customize the process:
     ```bash
     # Create virtual environment
     python -m venv venv
-    
+
     # Activate (Linux/Mac)
     source venv/bin/activate
-    
+
     # Activate (Windows)
     venv\Scripts\activate
     ```
@@ -61,7 +61,7 @@ If you prefer manual setup or need to customize the process:
     ```bash
     # Install development dependencies
     pip install -e ".[dev,all]"
-    
+
     # Verify installation
     python -c "import networkx_mcp; print('✓ Success')"
     ```
@@ -72,7 +72,7 @@ If you prefer manual setup or need to customize the process:
     # Install pre-commit hooks
     pre-commit install
     pre-commit install --hook-type pre-push
-    
+
     # Run hooks on all files
     pre-commit run --all-files
     ```
@@ -135,6 +135,7 @@ RATE_LIMIT_ENABLED=false
 The automated setup creates VSCode configuration:
 
 **.vscode/settings.json**
+
 ```json
 {
   "python.defaultInterpreterPath": "./venv/bin/python",
@@ -147,8 +148,9 @@ The automated setup creates VSCode configuration:
 ```
 
 **Recommended Extensions:**
+
 - Python
-- Black Formatter  
+- Black Formatter
 - Ruff
 - MyPy Type Checker
 - Pytest
@@ -177,7 +179,7 @@ The automated setup creates VSCode configuration:
 },
 {
   "name": "Debug Test",
-  "type": "python", 
+  "type": "python",
   "request": "launch",
   "module": "pytest",
   "args": ["${file}", "-v", "-s"]
@@ -195,7 +197,7 @@ Start Redis for caching during development:
     ```bash
     # Start Redis with UI
     docker-compose -f docker-compose.dev.yml up -d
-    
+
     # Access Redis Commander at http://localhost:8081
     ```
 
@@ -205,11 +207,11 @@ Start Redis for caching during development:
     # macOS
     brew install redis
     brew services start redis
-    
+
     # Ubuntu
     sudo apt-get install redis-server
     sudo systemctl start redis
-    
+
     # Verify
     redis-cli ping  # Should return PONG
     ```
@@ -218,9 +220,9 @@ Start Redis for caching during development:
 
 | Service | URL | Purpose |
 |---------|-----|---------|
-| MCP Server | http://localhost:8765 | Main server |
-| Redis UI | http://localhost:8081 | Redis management |
-| Documentation | http://localhost:8000 | Docs (when running `mkdocs serve`) |
+| MCP Server | <http://localhost:8765> | Main server |
+| Redis UI | <http://localhost:8081> | Redis management |
+| Documentation | <http://localhost:8000> | Docs (when running `mkdocs serve`) |
 
 ## Development Workflow
 
@@ -336,7 +338,7 @@ We use [Conventional Commits](https://conventionalcommits.org/):
 # Feature
 git commit -m "feat: add graph visualization tool"
 
-# Bug fix  
+# Bug fix
 git commit -m "fix: resolve memory leak in graph manager"
 
 # Documentation
@@ -350,6 +352,7 @@ git commit -m "refactor: simplify graph operations interface"
 ```
 
 **Commit Types:**
+
 - `feat`: New features
 - `fix`: Bug fixes
 - `docs`: Documentation
@@ -374,46 +377,46 @@ Hooks run automatically on commit:
 ### Common Issues
 
 !!! question "Import errors after setup?"
-    
+
     **Solution:**
     ```bash
     # Ensure virtual environment is activated
     source venv/bin/activate
-    
+
     # Reinstall in development mode
     pip install -e ".[dev,all]"
     ```
 
 !!! question "Pre-commit hooks failing?"
-    
+
     **Solution:**
     ```bash
     # Update pre-commit
     pre-commit autoupdate
-    
+
     # Clear cache and retry
     pre-commit clean
     pre-commit run --all-files
     ```
 
 !!! question "Tests failing with import errors?"
-    
+
     **Solution:**
     ```bash
     # Add src to Python path
     export PYTHONPATH="${PYTHONPATH}:${PWD}/src"
-    
+
     # Or use pytest with src
     python -m pytest tests/ --rootdir=.
     ```
 
 !!! question "Redis connection errors?"
-    
+
     **Solution:**
     ```bash
     # Start Redis
     docker-compose -f docker-compose.dev.yml up -d redis
-    
+
     # Or disable Redis
     unset REDIS_URL
     ```
@@ -421,6 +424,7 @@ Hooks run automatically on commit:
 ### Debugging Tips
 
 **Print debugging:**
+
 ```python
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -429,17 +433,20 @@ logger.debug("Debug message")
 ```
 
 **Interactive debugging:**
+
 ```python
 import ipdb; ipdb.set_trace()  # Breakpoint
 ```
 
 **Memory profiling:**
+
 ```bash
 mprof run python script.py
 mprof plot
 ```
 
 **CPU profiling:**
+
 ```bash
 py-spy record -o profile.svg -- python script.py
 ```
@@ -542,24 +549,24 @@ Ready to contribute? Check out:
 
 <div class="grid cards" markdown>
 
--   [:material-bug: **Good First Issues**](https://github.com/brightliu/networkx-mcp-server/labels/good%20first%20issue)
-    
+- [:material-bug: **Good First Issues**](https://github.com/brightliu/networkx-mcp-server/labels/good%20first%20issue)
+
     Perfect for new contributors
 
--   [:material-code-braces: **Architecture Guide**](architecture.md)
-    
+- [:material-code-braces: **Architecture Guide**](architecture.md)
+
     Understand the codebase structure
 
--   [:material-test-tube: **Testing Guide**](testing.md)
-    
+- [:material-test-tube: **Testing Guide**](testing.md)
+
     Learn our testing practices
 
--   [:material-source-pull: **Contributing Guide**](contributing.md)
-    
+- [:material-source-pull: **Contributing Guide**](contributing.md)
+
     Full contribution guidelines
 
 </div>
 
 !!! success "You're Ready!"
-    
+
     Your development environment is now configured! Start by exploring the codebase and running some tests. Happy coding! 🚀

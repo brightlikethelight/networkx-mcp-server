@@ -4,17 +4,26 @@ Tests verify that all errors return proper JSON-RPC 2.0 compliant responses
 with correct error codes and meaningful messages.
 """
 
-import json
 import pytest
-import asyncio
-from unittest.mock import patch, Mock
 
 from networkx_mcp.errors import (
-    MCPError, GraphNotFoundError, NodeNotFoundError, EdgeNotFoundError,
-    GraphAlreadyExistsError, InvalidGraphIdError, InvalidNodeIdError,
-    InvalidEdgeError, ValidationError, AlgorithmError, ErrorCodes,
-    handle_error, validate_graph_id, validate_node_id, validate_edge,
-    validate_required_params, validate_centrality_measures
+    AlgorithmError,
+    EdgeNotFoundError,
+    ErrorCodes,
+    GraphAlreadyExistsError,
+    GraphNotFoundError,
+    InvalidEdgeError,
+    InvalidGraphIdError,
+    InvalidNodeIdError,
+    MCPError,
+    NodeNotFoundError,
+    ValidationError,
+    handle_error,
+    validate_centrality_measures,
+    validate_edge,
+    validate_graph_id,
+    validate_node_id,
+    validate_required_params,
 )
 from networkx_mcp.server import NetworkXMCPServer
 
@@ -25,35 +34,32 @@ class TestMCPErrorClasses:
     def test_mcp_error_base_class(self):
         """Test MCPError base class."""
         error = MCPError(ErrorCodes.INTERNAL_ERROR, "Test message", {"test": "data"})
-        
+
         assert error.code == ErrorCodes.INTERNAL_ERROR
         assert error.message == "Test message"
         assert error.data == {"test": "data"}
         assert str(error) == "Test message"
-        
+
         # Test to_dict for JSON-RPC compliance
         error_dict = error.to_dict()
         assert error_dict == {
             "code": ErrorCodes.INTERNAL_ERROR,
             "message": "Test message",
-            "data": {"test": "data"}
+            "data": {"test": "data"},
         }
 
     def test_mcp_error_without_data(self):
         """Test MCPError without data field."""
         error = MCPError(ErrorCodes.INVALID_PARAMS, "No data")
-        
+
         error_dict = error.to_dict()
-        assert error_dict == {
-            "code": ErrorCodes.INVALID_PARAMS,
-            "message": "No data"
-        }
+        assert error_dict == {"code": ErrorCodes.INVALID_PARAMS, "message": "No data"}
         assert "data" not in error_dict
 
     def test_graph_not_found_error(self):
         """Test GraphNotFoundError."""
         error = GraphNotFoundError("test_graph")
-        
+
         assert error.code == ErrorCodes.GRAPH_NOT_FOUND
         assert "test_graph" in error.message
         assert error.graph_id == "test_graph"
@@ -62,7 +68,7 @@ class TestMCPErrorClasses:
     def test_node_not_found_error(self):
         """Test NodeNotFoundError."""
         error = NodeNotFoundError("test_graph", "test_node")
-        
+
         assert error.code == ErrorCodes.NODE_NOT_FOUND
         assert "test_node" in error.message
         assert "test_graph" in error.message
@@ -72,7 +78,7 @@ class TestMCPErrorClasses:
     def test_edge_not_found_error(self):
         """Test EdgeNotFoundError."""
         error = EdgeNotFoundError("test_graph", "source", "target")
-        
+
         assert error.code == ErrorCodes.EDGE_NOT_FOUND
         assert "source" in error.message
         assert "target" in error.message
@@ -83,7 +89,7 @@ class TestMCPErrorClasses:
     def test_graph_already_exists_error(self):
         """Test GraphAlreadyExistsError."""
         error = GraphAlreadyExistsError("test_graph")
-        
+
         assert error.code == ErrorCodes.GRAPH_ALREADY_EXISTS
         assert "test_graph" in error.message
         assert error.graph_id == "test_graph"
@@ -91,7 +97,7 @@ class TestMCPErrorClasses:
     def test_invalid_graph_id_error(self):
         """Test InvalidGraphIdError."""
         error = InvalidGraphIdError("../invalid", "Path traversal")
-        
+
         assert error.code == ErrorCodes.INVALID_GRAPH_ID
         assert "Invalid graph ID" in error.message
         assert "Path traversal" in error.message
@@ -102,7 +108,7 @@ class TestMCPErrorClasses:
     def test_validation_error(self):
         """Test ValidationError."""
         error = ValidationError("param_name", "invalid_value", "Must be string")
-        
+
         assert error.code == ErrorCodes.VALIDATION_ERROR
         assert "param_name" in error.message
         assert "Must be string" in error.message
@@ -112,7 +118,7 @@ class TestMCPErrorClasses:
     def test_algorithm_error(self):
         """Test AlgorithmError."""
         error = AlgorithmError("shortest_path", "test_graph", "No path exists")
-        
+
         assert error.code == ErrorCodes.ALGORITHM_ERROR
         assert "shortest_path" in error.message
         assert "test_graph" in error.message
@@ -126,7 +132,7 @@ class TestErrorHandling:
         """Test handle_error with existing MCP error."""
         original_error = GraphNotFoundError("test_graph")
         result = handle_error(original_error, "test_operation")
-        
+
         assert result == original_error.to_dict()
         assert result["code"] == ErrorCodes.GRAPH_NOT_FOUND
 
@@ -135,9 +141,9 @@ class TestErrorHandling:
         # Mock a NetworkX error
         networkx_error = Exception("NetworkX error")
         networkx_error.__module__ = "networkx.algorithms.shortest_paths"
-        
+
         result = handle_error(networkx_error, "test_operation")
-        
+
         assert result["code"] == ErrorCodes.GRAPH_OPERATION_FAILED
         assert "Graph operation failed" in result["message"]
         assert "NetworkX error" in result["message"]
@@ -146,7 +152,7 @@ class TestErrorHandling:
         """Test handle_error with generic exception."""
         generic_error = ValueError("Generic error")
         result = handle_error(generic_error, "test_operation")
-        
+
         assert result["code"] == ErrorCodes.INTERNAL_ERROR
         assert result["message"] == "Internal server error"
         assert result["data"]["operation"] == "test_operation"
@@ -159,7 +165,7 @@ class TestValidationFunctions:
     def test_validate_graph_id_valid(self):
         """Test validate_graph_id with valid inputs."""
         valid_ids = ["test", "test_graph", "test-graph", "graph123", "a" * 100]
-        
+
         for valid_id in valid_ids:
             result = validate_graph_id(valid_id)
             assert result == valid_id.strip()
@@ -173,12 +179,24 @@ class TestValidationFunctions:
             ("   ", "Graph ID cannot be empty"),
             ("a" * 101, "Graph ID too long"),
             ("test@graph", "can only contain letters, numbers, underscore, and hyphen"),
-            ("../etc/passwd", "can only contain letters, numbers, underscore, and hyphen"),  # Caught by character check first
-            ("test/graph", "can only contain letters, numbers, underscore, and hyphen"),  # Caught by character check first
-            ("test\\graph", "can only contain letters, numbers, underscore, and hyphen"),  # Caught by character check first
-            ("test..graph", "can only contain letters, numbers, underscore, and hyphen"),  # Caught by character check first
+            (
+                "../etc/passwd",
+                "can only contain letters, numbers, underscore, and hyphen",
+            ),  # Caught by character check first
+            (
+                "test/graph",
+                "can only contain letters, numbers, underscore, and hyphen",
+            ),  # Caught by character check first
+            (
+                "test\\graph",
+                "can only contain letters, numbers, underscore, and hyphen",
+            ),  # Caught by character check first
+            (
+                "test..graph",
+                "can only contain letters, numbers, underscore, and hyphen",
+            ),  # Caught by character check first
         ]
-        
+
         for invalid_id, expected_reason in invalid_cases:
             with pytest.raises(InvalidGraphIdError) as excinfo:
                 validate_graph_id(invalid_id)
@@ -187,7 +205,7 @@ class TestValidationFunctions:
     def test_validate_node_id_valid(self):
         """Test validate_node_id with valid inputs."""
         valid_ids = ["node1", "node_2", "node-3", 123, "a" * 100]
-        
+
         for valid_id in valid_ids:
             result = validate_node_id(valid_id)
             assert result == str(valid_id).strip()
@@ -201,7 +219,7 @@ class TestValidationFunctions:
             ("   ", "Node ID cannot be empty"),
             ("a" * 101, "Node ID too long"),
         ]
-        
+
         for invalid_id, expected_reason in invalid_cases:
             with pytest.raises(InvalidNodeIdError) as excinfo:
                 validate_node_id(invalid_id)
@@ -215,7 +233,7 @@ class TestValidationFunctions:
             [1, 2],
             ("node1", "node2"),
         ]
-        
+
         for valid_edge in valid_edges:
             source, target = validate_edge(valid_edge)
             assert source == str(valid_edge[0]).strip()
@@ -232,7 +250,7 @@ class TestValidationFunctions:
             ([None, "target"], "Invalid node in edge"),
             (["source", None], "Invalid node in edge"),
         ]
-        
+
         for invalid_edge, expected_reason in invalid_cases:
             with pytest.raises(InvalidEdgeError) as excinfo:
                 validate_edge(invalid_edge)
@@ -242,7 +260,7 @@ class TestValidationFunctions:
         """Test validate_required_params with valid inputs."""
         params = {"param1": "value1", "param2": "value2"}
         required = ["param1", "param2"]
-        
+
         # Should not raise exception
         validate_required_params(params, required)
 
@@ -252,7 +270,7 @@ class TestValidationFunctions:
         with pytest.raises(ValidationError) as excinfo:
             validate_required_params({}, ["required_param"])
         assert "Required parameter missing" in str(excinfo.value)
-        
+
         # None parameter
         with pytest.raises(ValidationError) as excinfo:
             validate_required_params({"param": None}, ["param"])
@@ -265,7 +283,7 @@ class TestValidationFunctions:
             ["degree", "betweenness"],
             ["degree", "betweenness", "closeness", "eigenvector"],
         ]
-        
+
         for measures in valid_measures:
             result = validate_centrality_measures(measures)
             assert result == measures
@@ -279,7 +297,7 @@ class TestValidationFunctions:
             (["invalid_measure"], "Invalid measure"),
             (["degree", "invalid"], "Invalid measure"),
         ]
-        
+
         for invalid_measures, expected_reason in invalid_cases:
             with pytest.raises(ValidationError) as excinfo:
                 validate_centrality_measures(invalid_measures)
@@ -297,22 +315,19 @@ class TestServerErrorHandling:
     def test_create_error_response(self):
         """Test create_error_response method."""
         response = self.server.create_error_response(123, -32601, "Method not found")
-        
+
         expected = {
             "jsonrpc": "2.0",
             "id": 123,
-            "error": {
-                "code": -32601,
-                "message": "Method not found"
-            }
+            "error": {"code": -32601, "message": "Method not found"},
         }
-        
+
         assert response == expected
 
     def test_create_error_response_no_id(self):
         """Test create_error_response with no ID."""
         response = self.server.create_error_response(None, -32700, "Parse error")
-        
+
         assert response["id"] is None
         assert response["error"]["code"] == -32700
 
@@ -323,17 +338,19 @@ class TestServerErrorHandling:
         with pytest.raises(MCPError) as excinfo:
             await self.server.tool_create_graph({})
         assert excinfo.value.code == ErrorCodes.VALIDATION_ERROR
-        
+
         # Test invalid graph_id
         with pytest.raises(MCPError) as excinfo:
             await self.server.tool_create_graph({"graph_id": "../invalid"})
         assert excinfo.value.code == ErrorCodes.INVALID_GRAPH_ID
-        
+
         # Test invalid directed parameter
         with pytest.raises(MCPError) as excinfo:
-            await self.server.tool_create_graph({"graph_id": "test", "directed": "not_bool"})
+            await self.server.tool_create_graph(
+                {"graph_id": "test", "directed": "not_bool"}
+            )
         assert excinfo.value.code == ErrorCodes.VALIDATION_ERROR
-        
+
         # Test graph already exists
         await self.server.tool_create_graph({"graph_id": "test"})
         with pytest.raises(MCPError) as excinfo:
@@ -347,20 +364,22 @@ class TestServerErrorHandling:
         with pytest.raises(MCPError) as excinfo:
             await self.server.tool_add_nodes({})
         assert excinfo.value.code == ErrorCodes.VALIDATION_ERROR
-        
+
         # Test invalid nodes parameter
         with pytest.raises(MCPError) as excinfo:
             await self.server.tool_add_nodes({"graph_id": "test", "nodes": "not_list"})
         assert excinfo.value.code == ErrorCodes.VALIDATION_ERROR
-        
+
         # Test empty nodes list
         with pytest.raises(MCPError) as excinfo:
             await self.server.tool_add_nodes({"graph_id": "test", "nodes": []})
         assert excinfo.value.code == ErrorCodes.VALIDATION_ERROR
-        
+
         # Test non-existent graph
         with pytest.raises(MCPError) as excinfo:
-            await self.server.tool_add_nodes({"graph_id": "nonexistent", "nodes": ["node1"]})
+            await self.server.tool_add_nodes(
+                {"graph_id": "nonexistent", "nodes": ["node1"]}
+            )
         assert excinfo.value.code == ErrorCodes.GRAPH_NOT_FOUND
 
     @pytest.mark.asyncio
@@ -368,25 +387,27 @@ class TestServerErrorHandling:
         """Test add_edges tool error handling."""
         # Create a test graph first
         await self.server.tool_create_graph({"graph_id": "test"})
-        
+
         # Test missing required parameters
         with pytest.raises(MCPError) as excinfo:
             await self.server.tool_add_edges({})
         assert excinfo.value.code == ErrorCodes.VALIDATION_ERROR
-        
+
         # Test invalid edges parameter
         with pytest.raises(MCPError) as excinfo:
             await self.server.tool_add_edges({"graph_id": "test", "edges": "not_list"})
         assert excinfo.value.code == ErrorCodes.VALIDATION_ERROR
-        
+
         # Test empty edges list
         with pytest.raises(MCPError) as excinfo:
             await self.server.tool_add_edges({"graph_id": "test", "edges": []})
         assert excinfo.value.code == ErrorCodes.VALIDATION_ERROR
-        
+
         # Test invalid edge format
         with pytest.raises(MCPError) as excinfo:
-            await self.server.tool_add_edges({"graph_id": "test", "edges": [["single_element"]]})
+            await self.server.tool_add_edges(
+                {"graph_id": "test", "edges": [["single_element"]]}
+            )
         assert excinfo.value.code == ErrorCodes.VALIDATION_ERROR
 
     @pytest.mark.asyncio
@@ -396,7 +417,7 @@ class TestServerErrorHandling:
         with pytest.raises(MCPError) as excinfo:
             await self.server.tool_get_graph_info({})
         assert excinfo.value.code == ErrorCodes.VALIDATION_ERROR
-        
+
         # Test non-existent graph
         with pytest.raises(MCPError) as excinfo:
             await self.server.tool_get_graph_info({"graph_id": "nonexistent"})
@@ -409,14 +430,12 @@ class TestServerErrorHandling:
         with pytest.raises(MCPError) as excinfo:
             await self.server.tool_shortest_path({})
         assert excinfo.value.code == ErrorCodes.VALIDATION_ERROR
-        
+
         # Test non-existent graph
         with pytest.raises(MCPError) as excinfo:
-            await self.server.tool_shortest_path({
-                "graph_id": "nonexistent",
-                "source": "A",
-                "target": "B"
-            })
+            await self.server.tool_shortest_path(
+                {"graph_id": "nonexistent", "source": "A", "target": "B"}
+            )
         assert excinfo.value.code == ErrorCodes.GRAPH_NOT_FOUND
 
     @pytest.mark.asyncio
@@ -426,21 +445,19 @@ class TestServerErrorHandling:
         with pytest.raises(MCPError) as excinfo:
             await self.server.tool_centrality_measures({})
         assert excinfo.value.code == ErrorCodes.VALIDATION_ERROR
-        
+
         # Test invalid measures
         with pytest.raises(MCPError) as excinfo:
-            await self.server.tool_centrality_measures({
-                "graph_id": "test",
-                "measures": ["invalid_measure"]
-            })
+            await self.server.tool_centrality_measures(
+                {"graph_id": "test", "measures": ["invalid_measure"]}
+            )
         assert excinfo.value.code == ErrorCodes.VALIDATION_ERROR
-        
+
         # Test non-existent graph
         with pytest.raises(MCPError) as excinfo:
-            await self.server.tool_centrality_measures({
-                "graph_id": "nonexistent",
-                "measures": ["degree"]
-            })
+            await self.server.tool_centrality_measures(
+                {"graph_id": "nonexistent", "measures": ["degree"]}
+            )
         assert excinfo.value.code == ErrorCodes.GRAPH_NOT_FOUND
 
     @pytest.mark.asyncio
@@ -450,7 +467,7 @@ class TestServerErrorHandling:
         with pytest.raises(MCPError) as excinfo:
             await self.server.tool_delete_graph({})
         assert excinfo.value.code == ErrorCodes.VALIDATION_ERROR
-        
+
         # Test non-existent graph
         with pytest.raises(MCPError) as excinfo:
             await self.server.tool_delete_graph({"graph_id": "nonexistent"})
@@ -469,7 +486,7 @@ class TestJSONRPCProtocolErrors:
         """Test handling of invalid JSON-RPC version."""
         message = {"jsonrpc": "1.0", "id": 1, "method": "test"}
         response = await self.server.handle_message(message)
-        
+
         assert response["error"]["code"] == -32600
         assert "Invalid Request" in response["error"]["message"]
 
@@ -478,7 +495,7 @@ class TestJSONRPCProtocolErrors:
         """Test handling of missing method."""
         message = {"jsonrpc": "2.0", "id": 1}
         response = await self.server.handle_message(message)
-        
+
         assert response["error"]["code"] == -32600
         assert "Missing method" in response["error"]["message"]
 
@@ -487,7 +504,7 @@ class TestJSONRPCProtocolErrors:
         """Test handling of unknown method."""
         message = {"jsonrpc": "2.0", "id": 1, "method": "unknown_method"}
         response = await self.server.handle_message(message)
-        
+
         assert response["error"]["code"] == -32601
         assert "Method not found" in response["error"]["message"]
 
@@ -496,7 +513,7 @@ class TestJSONRPCProtocolErrors:
         """Test handling when server is not initialized."""
         message = {"jsonrpc": "2.0", "id": 1, "method": "tools/list"}
         response = await self.server.handle_message(message)
-        
+
         assert response["error"]["code"] == -32002
         assert "Server not initialized" in response["error"]["message"]
 
@@ -504,19 +521,16 @@ class TestJSONRPCProtocolErrors:
     async def test_tools_call_error_propagation(self):
         """Test error propagation in tools/call."""
         self.server.initialized = True
-        
+
         # Test with invalid tool
         message = {
             "jsonrpc": "2.0",
             "id": 1,
             "method": "tools/call",
-            "params": {
-                "name": "unknown_tool",
-                "arguments": {}
-            }
+            "params": {"name": "unknown_tool", "arguments": {}},
         }
         response = await self.server.handle_message(message)
-        
+
         assert response["error"]["code"] == -32601
         assert "Unknown tool" in response["error"]["message"]
 
@@ -524,19 +538,16 @@ class TestJSONRPCProtocolErrors:
     async def test_tools_call_mcp_error_handling(self):
         """Test MCP error handling in tools/call."""
         self.server.initialized = True
-        
+
         # Test with invalid graph_id
         message = {
             "jsonrpc": "2.0",
             "id": 1,
             "method": "tools/call",
-            "params": {
-                "name": "create_graph",
-                "arguments": {"graph_id": "../invalid"}
-            }
+            "params": {"name": "create_graph", "arguments": {"graph_id": "../invalid"}},
         }
         response = await self.server.handle_message(message)
-        
+
         assert response["error"]["code"] == ErrorCodes.INVALID_GRAPH_ID
         assert "Invalid graph ID" in response["error"]["message"]
 
@@ -559,43 +570,34 @@ class TestIntegrationErrorHandling:
             "method": "tools/call",
             "params": {
                 "name": "add_nodes",
-                "arguments": {
-                    "graph_id": "nonexistent",
-                    "nodes": ["node1", "node2"]
-                }
-            }
+                "arguments": {"graph_id": "nonexistent", "nodes": ["node1", "node2"]},
+            },
         }
         response = await self.server.handle_message(message)
-        
+
         # Should get graph not found error
         assert response["error"]["code"] == ErrorCodes.GRAPH_NOT_FOUND
         assert "Graph 'nonexistent' not found" in response["error"]["message"]
-        
+
         # 2. Create the graph
         create_message = {
             "jsonrpc": "2.0",
             "id": 2,
             "method": "tools/call",
-            "params": {
-                "name": "create_graph",
-                "arguments": {"graph_id": "test_graph"}
-            }
+            "params": {"name": "create_graph", "arguments": {"graph_id": "test_graph"}},
         }
         response = await self.server.handle_message(create_message)
         assert "result" in response
-        
+
         # 3. Try to create duplicate graph
         duplicate_message = {
             "jsonrpc": "2.0",
             "id": 3,
             "method": "tools/call",
-            "params": {
-                "name": "create_graph",
-                "arguments": {"graph_id": "test_graph"}
-            }
+            "params": {"name": "create_graph", "arguments": {"graph_id": "test_graph"}},
         }
         response = await self.server.handle_message(duplicate_message)
-        
+
         # Should get graph already exists error
         assert response["error"]["code"] == ErrorCodes.GRAPH_ALREADY_EXISTS
         assert "Graph 'test_graph' already exists" in response["error"]["message"]
@@ -611,16 +613,16 @@ class TestIntegrationErrorHandling:
             # Unknown method
             {"jsonrpc": "2.0", "id": 3, "method": "unknown"},
         ]
-        
+
         for message in test_cases:
             response = await self.server.handle_message(message)
-            
+
             # Check JSON-RPC 2.0 compliance
             assert response["jsonrpc"] == "2.0"
             assert response["id"] == message.get("id")
             assert "error" in response
             assert "result" not in response
-            
+
             # Check error object structure
             error = response["error"]
             assert "code" in error

@@ -3,7 +3,7 @@
     "networkx-mcp-server": {
       "command": "python",
       "args": [
-        "-m", 
+        "-m",
         "networkx_mcp"
       ],
       "cwd": "/Users/brightliu/Coding_Projects/networkx-mcp-server",

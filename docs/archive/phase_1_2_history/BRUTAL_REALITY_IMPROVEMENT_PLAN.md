@@ -20,7 +20,8 @@ After deep analysis and research, here's what we're dealing with:
 
 Based on studying successful MCP implementations (FastMCP, official SDK examples):
 
-### What a REAL Minimal MCP Server Looks Like:
+### What a REAL Minimal MCP Server Looks Like
+
 ```python
 from mcp.server.fastmcp import FastMCP
 import networkx as nx
@@ -37,7 +38,8 @@ async def create_graph(name: str, directed: bool = False):
 # That's it. 10 lines, not 900.
 ```
 
-### Industry Best Practices (2024):
+### Industry Best Practices (2024)
+
 - **FastAPI/FastMCP**: Modern async frameworks
 - **Under 200 lines**: For truly minimal servers
 - **Direct implementation**: No unnecessary abstraction
@@ -52,6 +54,7 @@ async def create_graph(name: str, directed: bool = False):
 **Goal**: Build a REAL minimal server in under 200 lines
 
 1. **Create `server_truly_minimal.py`**:
+
    ```python
    # Core functionality only:
    - Create/delete graphs
@@ -78,13 +81,14 @@ async def create_graph(name: str, directed: bool = False):
 **Goal**: 80% coverage with tests that actually run
 
 1. **Create `tests/test_basic_operations.py`**:
+
    ```python
    def test_create_graph():
        # Actually test graph creation
-       
+
    def test_add_nodes():
        # Actually test node addition
-       
+
    def test_algorithms():
        # Actually test algorithms work
    ```
@@ -103,6 +107,7 @@ async def create_graph(name: str, directed: bool = False):
 **Goal**: One-command deployment that actually works
 
 1. **Create working Dockerfile**:
+
    ```dockerfile
    FROM python:3.11-slim
    WORKDIR /app
@@ -114,6 +119,7 @@ async def create_graph(name: str, directed: bool = False):
    ```
 
 2. **Environment configuration**:
+
    ```python
    # Use environment variables:
    PORT = os.getenv("PORT", "8080")
@@ -122,6 +128,7 @@ async def create_graph(name: str, directed: bool = False):
    ```
 
 3. **Docker Compose for local dev**:
+
    ```yaml
    version: "3.8"
    services:
@@ -144,6 +151,7 @@ async def create_graph(name: str, directed: bool = False):
    - Add "ALPHA - NOT PRODUCTION READY" warning
 
 2. **Real benchmarks**:
+
    ```python
    # Measure actual performance:
    - Time to create 1K nodes
@@ -163,6 +171,7 @@ async def create_graph(name: str, directed: bool = False):
 **Goal**: Delete 70% of codebase
 
 **Delete entirely**:
+
 - `/archive` - Old implementations
 - `/htmlcov` - Coverage reports in git?!
 - `visualization/` - Broken, no entry point
@@ -171,6 +180,7 @@ async def create_graph(name: str, directed: bool = False):
 - Abstract base classes with one implementation
 
 **Consolidate**:
+
 - 7 validation modules → 1 simple validator
 - 3 server files → 1 minimal server
 - 5 error handling modules → 1 errors.py
@@ -179,37 +189,43 @@ async def create_graph(name: str, directed: bool = False):
 
 ## 📋 SUCCESS METRICS
 
-### Week 1 Checkpoint:
+### Week 1 Checkpoint
+
 - [ ] Minimal server under 200 lines
 - [ ] 10 working tests that pass
 - [ ] Memory usage under 30MB
 
-### Week 2 Checkpoint:
+### Week 2 Checkpoint
+
 - [ ] Docker image under 100MB
 - [ ] Deploys with one command
 - [ ] Real performance numbers
 
-### Week 3 Checkpoint:
+### Week 3 Checkpoint
+
 - [ ] Codebase under 5K lines
 - [ ] 80% test coverage
 - [ ] Honest documentation
 
 ## 🎮 IMPLEMENTATION STRATEGY
 
-### Start with the Simplest Thing:
+### Start with the Simplest Thing
+
 1. Create new `truly_minimal/` directory
 2. Build minimal server from scratch
 3. Port only essential features
 4. Delete everything else
 
-### Use Modern Tools:
+### Use Modern Tools
+
 - FastMCP or official MCP SDK
 - pytest for actual tests
 - Black for formatting
 - Ruff for linting
 - No more 500-line validator classes
 
-### Be Brutally Honest:
+### Be Brutally Honest
+
 - It's a prototype, say so
 - It has limitations, list them
 - It's not production-ready, warn users
@@ -244,11 +260,13 @@ If the above seems too complex, here's the 1-day solution:
 ## 📊 REALISTIC TIMELINE
 
 **With current codebase**:
+
 - 8-12 weeks to fix everything
 - 95% chance of failure
 - Will still be overengineered
 
 **With fresh start**:
+
 - 2-3 weeks to working prototype
 - 80% chance of success
 - Will actually be minimal

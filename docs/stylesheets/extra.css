@@ -315,11 +315,11 @@
   .hero h1 {
     font-size: 2rem;
   }
-  
+
   .hero p {
     font-size: 1rem;
   }
-  
+
   .metrics-grid {
     grid-template-columns: 1fr;
   }

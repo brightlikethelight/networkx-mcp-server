@@ -20,9 +20,10 @@ After running **real performance benchmarks** with actual subprocess communicati
 ## Detailed Performance Analysis
 
 ### Node Scaling (Real Data)
+
 ```
 ✓ 100 nodes: 0.01s, ~0.2 KB per node
-✓ 500 nodes: 0.06s, ~0.2 KB per node  
+✓ 500 nodes: 0.06s, ~0.2 KB per node
 ✓ 1,000 nodes: 0.13s, ~0.2 KB per node
 ✓ 2,500 nodes: 0.29s, ~0.2 KB per node
 ✓ 5,000 nodes: 0.59s, ~0.2 KB per node
@@ -32,10 +33,11 @@ After running **real performance benchmarks** with actual subprocess communicati
 **Finding**: Linear scaling up to 10K nodes. Memory usage ~0.2KB per node is realistic.
 
 ### Edge Scaling (Real Data)
+
 ```
 ✓ 100 edges: 0.01s, ~492 bytes per edge
 ✓ 500 edges: 0.06s, ~328 bytes per edge
-✓ 1,000 edges: 0.11s, ~66 bytes per edge  
+✓ 1,000 edges: 0.11s, ~66 bytes per edge
 ✓ 2,500 edges: 0.30s, ~131 bytes per edge
 ✓ 5,000 edges: 0.62s, ~234 bytes per edge
 ✓ 10,000 edges: 1.19s, ~234 bytes per edge
@@ -44,16 +46,18 @@ After running **real performance benchmarks** with actual subprocess communicati
 **Finding**: Edge memory usage ~234 bytes aligns with NetworkX research (100+ bytes per edge).
 
 ### Operation Performance (Real Data)
+
 ```
 create_graph: 935.3ms  ← SLOW!
 add_nodes: 11.1ms
-add_edges: 24.5ms  
+add_edges: 24.5ms
 get_graph_info: 11.1ms
 ```
 
 **Finding**: Basic operations are 10-25ms, not <10ms. Graph creation is particularly slow.
 
 ### Algorithm Performance (Real Data)
+
 ```
 shortest_path: 10.5ms  ← Actually fast!
 centrality: 11.1ms     ← Actually fast!
@@ -64,26 +68,30 @@ centrality: 11.1ms     ← Actually fast!
 ## Why Our Claims Were Wrong
 
 ### 1. **No Real Testing**
+
 - Previous claims appear to be estimates or fabricated
 - No actual subprocess communication testing
 - No real memory profiling
 
 ### 2. **Overly Optimistic Estimates**
+
 - Assumed best-case scenarios
 - Ignored NetworkX's known performance limitations
 - Didn't account for Python overhead
 
 ### 3. **Missing Critical Metrics**
+
 - Graph creation time not measured (turns out to be 935ms!)
 - Memory measurements appear to be baseline server memory, not graph data
 
 ## Updated Performance Characteristics
 
 ### Realistic Limits (Based on Actual Testing)
+
 ```
 Tested Successfully:
 - Nodes: 10,000 (linear scaling, ~1.2s)
-- Edges: 10,000 (linear scaling, ~1.2s)  
+- Edges: 10,000 (linear scaling, ~1.2s)
 - Memory: ~0.2KB per node, ~234 bytes per edge
 
 Performance Categories:
@@ -94,6 +102,7 @@ Performance Categories:
 ```
 
 ### Operation Timing (Real Measurements)
+
 ```
 Fast Operations (10-25ms):
 - add_nodes: 11.1ms
@@ -113,10 +122,11 @@ Algorithm Performance (10-15ms):
 Based on real testing, we should add these warnings:
 
 ### 1. Graph Creation Warning
+
 ```python
 async def create_graph(self, graph_id: str, **kwargs):
     """Create a new graph.
-    
+
     ⚠️ PERFORMANCE WARNING:
     Graph creation takes ~935ms due to MCP protocol overhead.
     Consider creating graphs in advance if latency matters.
@@ -124,24 +134,26 @@ async def create_graph(self, graph_id: str, **kwargs):
 ```
 
 ### 2. Scaling Warning
+
 ```python
 async def add_nodes(self, graph_id: str, nodes: List[str]):
     """Add multiple nodes to a graph.
-    
+
     ⚠️ PERFORMANCE WARNING:
     - 1K nodes: ~130ms
-    - 5K nodes: ~590ms  
+    - 5K nodes: ~590ms
     - 10K nodes: ~1.2s
-    
+
     Large batches may cause client timeouts.
     """
 ```
 
 ### 3. Memory Usage Warning
+
 ```python
 class GraphManager:
     """Manage NetworkX graphs in memory.
-    
+
     ⚠️ MEMORY WARNING:
     Estimated memory usage:
     - ~0.2KB per node
@@ -153,12 +165,14 @@ class GraphManager:
 ## Recommendations
 
 ### Immediate Actions
+
 1. **Update README** with realistic performance claims
 2. **Replace ACTUAL_PERFORMANCE_REPORT.md** with real data
 3. **Add performance warnings** to code documentation
 4. **Set proper expectations** about latency
 
 ### Future Testing
+
 1. **Test beyond 10K nodes/edges** to find real limits
 2. **Benchmark on different hardware** for broader applicability
 3. **Test concurrent operations** to understand multi-client impact
@@ -167,16 +181,18 @@ class GraphManager:
 ## Lesson Learned
 
 **Always measure, never estimate.** Our performance claims were optimistic fiction. Real testing reveals a more nuanced picture:
+
 - Operations are slower than claimed but still reasonable
-- Algorithms perform better than expected  
+- Algorithms perform better than expected
 - Graph creation is a significant bottleneck
 - Memory usage is realistic for NetworkX
 
 ## Conclusion
 
 The NetworkX MCP Server v0.1.0 has **decent but not excellent** performance:
+
 - **Good for small-medium graphs** (1K-5K nodes)
-- **Acceptable for large graphs** (5K-10K nodes)  
+- **Acceptable for large graphs** (5K-10K nodes)
 - **Graph creation latency** is a concern
 - **Algorithm performance** is actually quite good
 

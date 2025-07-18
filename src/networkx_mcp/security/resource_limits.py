@@ -4,7 +4,6 @@ import asyncio
 import functools
 import logging
 import os
-import psutil
 import sys
 import threading
 import time
@@ -13,11 +12,18 @@ from dataclasses import dataclass
 from typing import Any, Callable, Optional
 
 import networkx as nx
+import psutil
 
 # Try to import configuration
 try:
-    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+    sys.path.insert(
+        0,
+        os.path.dirname(
+            os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        ),
+    )
     from config import get_settings
+
     _settings = get_settings()
 except (ImportError, Exception):
     _settings = None
@@ -25,18 +31,20 @@ except (ImportError, Exception):
 logger = logging.getLogger(__name__)
 
 
-def _get_limit_value(env_var: str, default: int, config_path: Optional[str] = None) -> int:
+def _get_limit_value(
+    env_var: str, default: int, config_path: Optional[str] = None
+) -> int:
     """Get limit value from config or environment variable."""
     # First try config if available
     if _settings and config_path:
         value = _settings
-        for part in config_path.split('.'):
+        for part in config_path.split("."):
             value = getattr(value, part, None)
             if value is None:
                 break
         if value is not None:
             return int(value)
-    
+
     # Fall back to environment variable
     return int(os.environ.get(env_var, str(default)))
 
@@ -44,25 +52,39 @@ def _get_limit_value(env_var: str, default: int, config_path: Optional[str] = No
 @dataclass
 class ResourceLimits:
     """Configurable resource limits."""
-    
+
     # Memory limits
-    max_memory_mb: int = _get_limit_value("MAX_MEMORY_MB", 1024, "performance.max_memory_mb")
-    max_graph_size_mb: int = _get_limit_value("MAX_GRAPH_SIZE_MB", 100, "storage.max_graph_size_mb")
+    max_memory_mb: int = _get_limit_value(
+        "MAX_MEMORY_MB", 1024, "performance.max_memory_mb"
+    )
+    max_graph_size_mb: int = _get_limit_value(
+        "MAX_GRAPH_SIZE_MB", 100, "storage.max_graph_size_mb"
+    )
     memory_check_threshold: float = 0.8  # Warn at 80% memory usage
-    
+
     # Time limits
-    operation_timeout_seconds: int = _get_limit_value("OPERATION_TIMEOUT", 30, "performance.operation_timeout")
-    
+    operation_timeout_seconds: int = _get_limit_value(
+        "OPERATION_TIMEOUT", 30, "performance.operation_timeout"
+    )
+
     # Concurrency limits
-    max_concurrent_requests: int = _get_limit_value("MAX_CONCURRENT_REQUESTS", 10, "performance.max_concurrent_requests")
-    
+    max_concurrent_requests: int = _get_limit_value(
+        "MAX_CONCURRENT_REQUESTS", 10, "performance.max_concurrent_requests"
+    )
+
     # Graph size limits
-    max_nodes_per_graph: int = _get_limit_value("MAX_NODES_PER_GRAPH", 100000, "performance.max_nodes")
-    max_edges_per_graph: int = _get_limit_value("MAX_EDGES_PER_GRAPH", 1000000, "performance.max_edges")
-    
+    max_nodes_per_graph: int = _get_limit_value(
+        "MAX_NODES_PER_GRAPH", 100000, "performance.max_nodes"
+    )
+    max_edges_per_graph: int = _get_limit_value(
+        "MAX_EDGES_PER_GRAPH", 1000000, "performance.max_edges"
+    )
+
     # Rate limiting
-    requests_per_minute: int = _get_limit_value("REQUESTS_PER_MINUTE", 60, "security.rate_limit_requests")
-    
+    requests_per_minute: int = _get_limit_value(
+        "REQUESTS_PER_MINUTE", 60, "security.rate_limit_requests"
+    )
+
 
 # Global instance
 LIMITS = ResourceLimits()
@@ -79,31 +101,37 @@ _executor = ThreadPoolExecutor(max_workers=LIMITS.max_concurrent_requests)
 
 class ResourceLimitError(Exception):
     """Raised when a resource limit is exceeded."""
+
     pass
 
 
 class MemoryLimitError(ResourceLimitError):
     """Raised when memory limit is exceeded."""
+
     pass
 
 
 class TimeoutError(ResourceLimitError):
     """Raised when operation timeout is exceeded."""
+
     pass
 
 
 class ConcurrencyLimitError(ResourceLimitError):
     """Raised when concurrent request limit is exceeded."""
+
     pass
 
 
 class GraphSizeLimitError(ResourceLimitError):
     """Raised when graph size limit is exceeded."""
+
     pass
 
 
 class RateLimitError(ResourceLimitError):
     """Raised when rate limit is exceeded."""
+
     pass
 
 
@@ -123,17 +151,17 @@ def estimate_graph_size_mb(graph: nx.Graph) -> float:
     # Rough estimation based on nodes and edges
     # Each node: ~100 bytes overhead + attributes
     # Each edge: ~200 bytes overhead + attributes
-    
+
     node_size = 100 * graph.number_of_nodes()
     edge_size = 200 * graph.number_of_edges()
-    
+
     # Add attribute sizes
     for node, attrs in graph.nodes(data=True):
         node_size += sys.getsizeof(attrs)
-    
+
     for u, v, attrs in graph.edges(data=True):
         edge_size += sys.getsizeof(attrs)
-    
+
     total_bytes = node_size + edge_size
     return total_bytes / (1024 * 1024)
 
@@ -141,19 +169,19 @@ def estimate_graph_size_mb(graph: nx.Graph) -> float:
 def check_memory_limit() -> None:
     """Check if memory usage is within limits."""
     current_memory = get_memory_usage_mb()
-    
+
     if current_memory > LIMITS.max_memory_mb:
         raise MemoryLimitError(
             f"Memory usage ({current_memory:.1f}MB) exceeds limit ({LIMITS.max_memory_mb}MB)"
         )
-    
+
     # Check available system memory
     available_memory = get_available_memory_mb()
     if available_memory < 100:  # Less than 100MB available
         raise MemoryLimitError(
             f"System memory critically low ({available_memory:.1f}MB available)"
         )
-    
+
     # Warn if approaching limit
     usage_ratio = current_memory / LIMITS.max_memory_mb
     if usage_ratio > LIMITS.memory_check_threshold:
@@ -170,12 +198,12 @@ def check_graph_size(graph: nx.Graph) -> None:
         raise GraphSizeLimitError(
             f"Graph has too many nodes ({graph.number_of_nodes()} > {LIMITS.max_nodes_per_graph})"
         )
-    
+
     if graph.number_of_edges() > LIMITS.max_edges_per_graph:
         raise GraphSizeLimitError(
             f"Graph has too many edges ({graph.number_of_edges()} > {LIMITS.max_edges_per_graph})"
         )
-    
+
     # Estimate memory size
     estimated_size = estimate_graph_size_mb(graph)
     if estimated_size > LIMITS.max_graph_size_mb:
@@ -188,7 +216,7 @@ def check_operation_feasibility(graph: nx.Graph, operation: str) -> None:
     """Check if an operation is feasible given the graph size."""
     node_count = graph.number_of_nodes()
     edge_count = graph.number_of_edges()
-    
+
     # Define complexity limits for different operations
     complexity_limits = {
         "shortest_path": 10000,  # O(V + E)
@@ -198,9 +226,9 @@ def check_operation_feasibility(graph: nx.Graph, operation: str) -> None:
         "diameter": 1000,  # O(V^3)
         "pagerank": 100000,  # O(V + E)
     }
-    
+
     limit = complexity_limits.get(operation, 10000)
-    
+
     if node_count > limit:
         raise GraphSizeLimitError(
             f"Graph too large for {operation} operation ({node_count} nodes > {limit} limit)"
@@ -210,7 +238,7 @@ def check_operation_feasibility(graph: nx.Graph, operation: str) -> None:
 def check_concurrent_requests() -> None:
     """Check if we can accept more concurrent requests."""
     global _active_requests
-    
+
     with _request_lock:
         if _active_requests >= LIMITS.max_concurrent_requests:
             raise ConcurrencyLimitError(
@@ -222,7 +250,7 @@ def check_concurrent_requests() -> None:
 def release_request_slot() -> None:
     """Release a concurrent request slot."""
     global _active_requests
-    
+
     with _request_lock:
         _active_requests = max(0, _active_requests - 1)
 
@@ -230,20 +258,20 @@ def release_request_slot() -> None:
 def check_rate_limit() -> None:
     """Check if request rate is within limits."""
     global _request_times
-    
+
     current_time = time.time()
     cutoff_time = current_time - 60  # Last minute
-    
+
     with _request_times_lock:
         # Remove old entries
         _request_times = [t for t in _request_times if t > cutoff_time]
-        
+
         # Check rate
         if len(_request_times) >= LIMITS.requests_per_minute:
             raise RateLimitError(
                 f"Rate limit exceeded ({len(_request_times)} requests in last minute)"
             )
-        
+
         # Add current request
         _request_times.append(current_time)
 
@@ -252,56 +280,54 @@ def timeout(seconds: Optional[int] = None):
     """Decorator to add timeout to functions."""
     if seconds is None:
         seconds = LIMITS.operation_timeout_seconds
-    
+
     def decorator(func):
         @functools.wraps(func)
         def sync_wrapper(*args, **kwargs):
             """Wrapper for synchronous functions."""
             result = [None]
             exception = [None]
-            
+
             def target():
                 try:
                     result[0] = func(*args, **kwargs)
                 except Exception as e:
                     exception[0] = e
-            
+
             thread = threading.Thread(target=target)
             thread.daemon = True
             thread.start()
             thread.join(timeout=seconds)
-            
+
             if thread.is_alive():
                 # Thread is still running, timeout exceeded
                 raise TimeoutError(f"Operation timed out after {seconds} seconds")
-            
+
             if exception[0]:
                 raise exception[0]
-            
+
             return result[0]
-        
+
         @functools.wraps(func)
         async def async_wrapper(*args, **kwargs):
             """Wrapper for asynchronous functions."""
             try:
-                return await asyncio.wait_for(
-                    func(*args, **kwargs),
-                    timeout=seconds
-                )
+                return await asyncio.wait_for(func(*args, **kwargs), timeout=seconds)
             except asyncio.TimeoutError:
                 raise TimeoutError(f"Operation timed out after {seconds} seconds")
-        
+
         # Return appropriate wrapper based on function type
         if asyncio.iscoroutinefunction(func):
             return async_wrapper
         else:
             return sync_wrapper
-    
+
     return decorator
 
 
 def with_resource_limits(func: Callable) -> Callable:
     """Decorator to enforce resource limits on a function."""
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         # Check rate limit
@@ -310,30 +336,30 @@ def with_resource_limits(func: Callable) -> Callable:
         except RateLimitError as e:
             logger.warning(f"Rate limit exceeded: {e}")
             return {"error": "Rate limit exceeded. Please try again later."}
-        
+
         # Check concurrent requests
         try:
             check_concurrent_requests()
         except ConcurrencyLimitError as e:
             logger.warning(f"Concurrency limit exceeded: {e}")
             return {"error": "Server busy. Please try again later."}
-        
+
         try:
             # Check memory before operation
             check_memory_limit()
-            
+
             # Execute with timeout
             @timeout()
             def execute():
                 return func(*args, **kwargs)
-            
+
             result = execute()
-            
+
             # Check memory after operation
             check_memory_limit()
-            
+
             return result
-            
+
         except MemoryLimitError as e:
             logger.error(f"Memory limit exceeded: {e}")
             return {"error": "Operation would exceed memory limits"}
@@ -345,19 +371,20 @@ def with_resource_limits(func: Callable) -> Callable:
             raise
         finally:
             release_request_slot()
-    
+
     return wrapper
 
 
 def cleanup_if_needed():
     """Perform cleanup if memory usage is high."""
     usage_ratio = get_memory_usage_mb() / LIMITS.max_memory_mb
-    
+
     if usage_ratio > 0.9:  # Above 90%
         logger.warning("Memory usage critical, forcing garbage collection")
         import gc
+
         gc.collect()
-        
+
         # Log new usage
         new_usage = get_memory_usage_mb()
         logger.info(f"Memory after GC: {new_usage:.1f}MB")
@@ -373,19 +400,19 @@ def resource_monitor():
             if current_memory > LIMITS.max_memory_mb * 0.9:
                 logger.warning(f"Memory usage critical: {current_memory:.1f}MB")
                 cleanup_if_needed()
-            
+
             # Log stats every minute
             with _request_lock:
                 active = _active_requests
-            
+
             logger.debug(
                 f"Resource stats - Memory: {current_memory:.1f}MB, "
                 f"Active requests: {active}"
             )
-            
+
         except Exception as e:
             logger.error(f"Resource monitor error: {e}")
-        
+
         time.sleep(30)  # Check every 30 seconds
 
 
@@ -398,10 +425,10 @@ def get_resource_status() -> dict[str, Any]:
     """Get current resource usage status."""
     with _request_lock:
         active_requests = _active_requests
-    
+
     with _request_times_lock:
         recent_requests = len([t for t in _request_times if t > time.time() - 60])
-    
+
     return {
         "memory": {
             "current_mb": get_memory_usage_mb(),
@@ -419,5 +446,5 @@ def get_resource_status() -> dict[str, Any]:
             "max_nodes_per_graph": LIMITS.max_nodes_per_graph,
             "max_edges_per_graph": LIMITS.max_edges_per_graph,
             "operation_timeout_seconds": LIMITS.operation_timeout_seconds,
-        }
+        },
     }

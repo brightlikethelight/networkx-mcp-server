@@ -14,20 +14,21 @@ __version__ = "1.1.0"
 # Import enterprise components
 try:
     from .auth import (
-        AuthenticationManager,
         APIKeyAuth,
+        AuthenticationManager,
         OAuthManager,
         RBACManager,
     )
     from .config import EnterpriseConfig
-    from .monitoring import MetricsCollector, AuditLogger
+    from .monitoring import AuditLogger, MetricsCollector
     from .rate_limiting import RateLimiter
     from .server import EnterpriseNetworkXServer
-    
+
     ENTERPRISE_AVAILABLE = True
 except ImportError as e:
     ENTERPRISE_AVAILABLE = False
     _missing_deps = str(e)
+
 
 def check_enterprise_deps():
     """Check if enterprise dependencies are available."""
@@ -38,10 +39,11 @@ def check_enterprise_deps():
         )
     return True
 
+
 # Export main components
 __all__ = [
     "AuthenticationManager",
-    "APIKeyAuth", 
+    "APIKeyAuth",
     "OAuthManager",
     "RBACManager",
     "EnterpriseConfig",

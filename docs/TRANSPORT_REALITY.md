@@ -7,6 +7,7 @@ This document provides an honest assessment of transport support in NetworkX MCP
 ### ✅ What Works: Stdio Transport
 
 The server implements **stdio transport only**. This means:
+
 - Communication via standard input/output
 - Line-delimited JSON-RPC 2.0 messages
 - Single client connection at a time
@@ -14,9 +15,10 @@ The server implements **stdio transport only**. This means:
 
 ### ❌ What Doesn't Exist: HTTP Transport
 
-Despite any lingering references, **HTTP transport is NOT implemented**. 
+Despite any lingering references, **HTTP transport is NOT implemented**.
 
 Our reality check (`test_http_reality.py`) confirmed:
+
 - No `--transport` command line flag
 - No HTTP server code
 - No HTTP endpoint handlers
@@ -32,7 +34,9 @@ Our reality check (`test_http_reality.py`) confirmed:
 ## Future Transport Options
 
 ### v0.2.0 - HTTP Transport (Planned)
+
 When we do implement HTTP, we'll need:
+
 - Proper async HTTP server (aiohttp or FastAPI)
 - JSON-RPC over HTTP POST
 - Session management
@@ -41,6 +45,7 @@ When we do implement HTTP, we'll need:
 - Origin validation (security)
 
 ### Alternative Transports (Research Phase)
+
 - **WebSocket** - For bidirectional communication
 - **Server-Sent Events (SSE)** - For server push
 - **gRPC** - For performance-critical applications
@@ -60,6 +65,7 @@ echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | python -m ne
 ## Implementation Honesty
 
 We removed all misleading references to "dual-mode transport" because:
+
 - False advertising hurts trust
 - Broken features are worse than no features
 - Clear limitations help users make informed decisions

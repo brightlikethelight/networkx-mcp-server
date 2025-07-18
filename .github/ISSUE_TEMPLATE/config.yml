@@ -3,11 +3,11 @@ contact_links:
   - name: 💬 General Discussion
     url: https://github.com/username/networkx-mcp-server/discussions
     about: Ask questions and discuss ideas with the community
-  
+
   - name: 📚 Documentation
     url: https://github.com/username/networkx-mcp-server/blob/main/docs/
     about: Read the comprehensive documentation
-  
+
   - name: 🚀 Development Guide
     url: https://github.com/username/networkx-mcp-server/blob/main/docs/DEVELOPMENT_GUIDE.md
     about: Learn how to contribute to the project

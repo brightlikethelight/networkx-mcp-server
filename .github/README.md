@@ -16,7 +16,7 @@ The server follows a clean modular architecture:
 
 ```
 ├── Core Layer          # Basic graph operations and MCP server
-├── Handler Layer       # Function organization and re-exports  
+├── Handler Layer       # Function organization and re-exports
 ├── Advanced Layer      # Specialized algorithms and features
 └── Supporting Layer    # Monitoring, security, and infrastructure
 ```

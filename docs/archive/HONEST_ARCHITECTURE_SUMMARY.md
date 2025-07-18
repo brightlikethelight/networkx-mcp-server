@@ -4,7 +4,7 @@
 
 During Week 3 of development, we discovered our "minimal" NetworkX MCP server was a lie:
 
-- **Claimed**: "Minimal MCP server"  
+- **Claimed**: "Minimal MCP server"
 - **Reality**: 118MB memory usage, 900+ modules loaded
 - **Cause**: Forced loading of pandas/scipy for everyone
 
@@ -36,7 +36,7 @@ During Week 3 of development, we discovered our "minimal" NetworkX MCP server wa
 # What most people need (54MB)
 pip install networkx-mcp
 
-# If you need Excel (89MB)  
+# If you need Excel (89MB)
 pip install networkx-mcp[excel]
 
 # Everything (118MB)
@@ -59,6 +59,7 @@ pip install networkx-mcp[full]
 ## Current State
 
 The NetworkX MCP Server is now:
+
 - ✅ Actually minimal (for a Python/NetworkX server)
 - ✅ Honest about memory usage (54MB, not 20MB)
 - ✅ Modular (pay for what you use)

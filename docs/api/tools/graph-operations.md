@@ -7,13 +7,13 @@ This section documents all MCP tools for basic graph operations including creati
 Graph operations form the foundation of NetworkX MCP Server functionality. These tools allow you to:
 
 - Create and delete graphs
-- Add and remove nodes and edges  
+- Add and remove nodes and edges
 - Manage node and edge attributes
 - Query graph structure and properties
 - Perform basic graph transformations
 
 !!! info "Tool Categories"
-    
+
     - **[Graph Management](#graph-management)**: Create, delete, list graphs
     - **[Node Operations](#node-operations)**: Add, remove, query nodes
     - **[Edge Operations](#edge-operations)**: Add, remove, query edges
@@ -42,7 +42,7 @@ Create a new graph with specified type and properties.
             "description": "Unique identifier for the graph"
           },
           "graph_type": {
-            "type": "string", 
+            "type": "string",
             "enum": ["Graph", "DiGraph", "MultiGraph", "MultiDiGraph"],
             "description": "Type of graph to create"
           },
@@ -101,7 +101,7 @@ Remove a graph and all its data.
 
     ```json
     {
-      "name": "delete_graph", 
+      "name": "delete_graph",
       "description": "Delete an existing graph",
       "parameters": {
         "type": "object",
@@ -128,7 +128,7 @@ Remove a graph and all its data.
     ```json
     {
       "success": true,
-      "graph_id": "old_network", 
+      "graph_id": "old_network",
       "message": "Graph 'old_network' deleted successfully"
     }
     ```
@@ -175,7 +175,7 @@ Get information about all available graphs.
       "graphs": [
         {
           "graph_id": "social_network",
-          "graph_type": "Graph", 
+          "graph_type": "Graph",
           "description": "Social network of friends",
           "created_at": "2024-01-15T10:30:00Z",
           "stats": {
@@ -204,7 +204,7 @@ Add one or more nodes to a graph.
       "name": "add_nodes",
       "description": "Add nodes to a graph with optional attributes",
       "parameters": {
-        "type": "object", 
+        "type": "object",
         "properties": {
           "graph_id": {
             "type": "string",
@@ -238,7 +238,7 @@ Add one or more nodes to a graph.
     ```python
     # Add simple nodes
     add_nodes("social_network", nodes=["Alice", "Bob", "Charlie"])
-    
+
     # Add nodes with attributes
     add_nodes("social_network", nodes=[
         {
@@ -250,7 +250,7 @@ Add one or more nodes to a graph.
             }
         },
         {
-            "id": "Bob", 
+            "id": "Bob",
             "attributes": {
                 "age": 30,
                 "city": "Boston"
@@ -287,7 +287,7 @@ Remove nodes from a graph.
         "type": "object",
         "properties": {
           "graph_id": {
-            "type": "string", 
+            "type": "string",
             "description": "Target graph ID"
           },
           "nodes": {
@@ -313,7 +313,7 @@ Remove nodes from a graph.
     ```json
     {
       "success": true,
-      "graph_id": "social_network", 
+      "graph_id": "social_network",
       "nodes_removed": 2,
       "edges_removed": 3,
       "message": "Removed 2 nodes and 3 connected edges"
@@ -343,7 +343,7 @@ Retrieve nodes and their attributes from a graph.
             "description": "Source graph ID"
           },
           "node_ids": {
-            "type": "array", 
+            "type": "array",
             "items": {"type": ["string", "number"]},
             "description": "Specific nodes to retrieve (optional)"
           },
@@ -367,10 +367,10 @@ Retrieve nodes and their attributes from a graph.
     ```python
     # Get all nodes with attributes
     nodes = get_nodes("social_network", include_attributes=True)
-    
+
     # Get specific nodes
     nodes = get_nodes("social_network", node_ids=["Alice", "Bob"])
-    
+
     # Filter nodes by attributes
     nodes = get_nodes("social_network", filter_by={"city": "New York"})
     ```
@@ -392,7 +392,7 @@ Retrieve nodes and their attributes from a graph.
         {
           "id": "Bob",
           "attributes": {
-            "age": 30, 
+            "age": 30,
             "city": "Boston"
           }
         }
@@ -414,7 +414,7 @@ Add edges between nodes in a graph.
     ```json
     {
       "name": "add_edges",
-      "description": "Add edges to graph with optional attributes", 
+      "description": "Add edges to graph with optional attributes",
       "parameters": {
         "type": "object",
         "properties": {
@@ -437,7 +437,7 @@ Add edges between nodes in a graph.
                   "type": "object",
                   "properties": {
                     "source": {"type": ["string", "number"]},
-                    "target": {"type": ["string", "number"]}, 
+                    "target": {"type": ["string", "number"]},
                     "attributes": {"type": "object"}
                   }
                 }
@@ -459,12 +459,12 @@ Add edges between nodes in a graph.
         ("Bob", "Charlie"),
         ("Alice", "Charlie")
     ])
-    
+
     # Add edges with attributes
     add_edges("social_network", edges=[
         {
             "source": "Alice",
-            "target": "Bob", 
+            "target": "Bob",
             "attributes": {
                 "relationship": "friend",
                 "since": "2020-01-15",
@@ -505,7 +505,7 @@ Remove specific edges from a graph.
             "description": "Target graph ID"
           },
           "edges": {
-            "type": "array", 
+            "type": "array",
             "items": {
               "type": "array",
               "items": {"type": ["string", "number"]},
@@ -551,7 +551,7 @@ Retrieve edges and their attributes from a graph.
 
     ```json
     {
-      "name": "get_edges", 
+      "name": "get_edges",
       "description": "Get edges from graph with optional filtering",
       "parameters": {
         "type": "object",
@@ -565,7 +565,7 @@ Retrieve edges and their attributes from a graph.
             "description": "Specific edges to retrieve (optional)"
           },
           "include_attributes": {
-            "type": "boolean", 
+            "type": "boolean",
             "default": true,
             "description": "Include edge attributes"
           },
@@ -584,10 +584,10 @@ Retrieve edges and their attributes from a graph.
     ```python
     # Get all edges
     edges = get_edges("social_network")
-    
+
     # Get specific edges
     edges = get_edges("social_network", edge_list=[("Alice", "Bob")])
-    
+
     # Filter by attributes
     edges = get_edges("social_network", filter_by={"relationship": "friend"})
     ```
@@ -603,7 +603,7 @@ Retrieve edges and their attributes from a graph.
           "target": "Bob",
           "attributes": {
             "relationship": "friend",
-            "since": "2020-01-15", 
+            "since": "2020-01-15",
             "strength": 0.8
           }
         }
@@ -656,9 +656,9 @@ Set or update attributes for nodes.
         "Alice": {"age": 26, "status": "active"},
         "Bob": {"location": "Boston", "verified": True}
     })
-    
+
     # Replace all attributes (merge=False)
-    set_node_attributes("social_network", 
+    set_node_attributes("social_network",
                        attributes={"Alice": {"age": 26}},
                        merge=False)
     ```
@@ -684,7 +684,7 @@ Set or update attributes for edges.
 
     ```json
     {
-      "name": "set_edge_attributes", 
+      "name": "set_edge_attributes",
       "description": "Set attributes for edges in graph",
       "parameters": {
         "type": "object",
@@ -723,7 +723,7 @@ Set or update attributes for edges.
     ```json
     {
       "success": true,
-      "graph_id": "social_network", 
+      "graph_id": "social_network",
       "edges_updated": 2,
       "message": "Updated attributes for 2 edges"
     }
@@ -789,7 +789,7 @@ Get detailed statistics about a graph.
     ```json
     {
       "name": "graph_statistics",
-      "description": "Calculate comprehensive graph statistics", 
+      "description": "Calculate comprehensive graph statistics",
       "parameters": {
         "type": "object",
         "properties": {
@@ -813,7 +813,7 @@ Get detailed statistics about a graph.
     ```python
     # Get basic statistics
     stats = graph_statistics("social_network")
-    
+
     # Include advanced metrics
     stats = graph_statistics("social_network", include_advanced=True)
     ```
@@ -887,7 +887,7 @@ Get detailed statistics about a graph.
 ## Performance Tips
 
 !!! tip "Optimization Strategies"
-    
+
     - **Batch operations**: Add multiple nodes/edges in single calls
     - **Use appropriate graph types**: Choose the simplest type for your use case
     - **Limit attribute complexity**: Avoid deeply nested attribute objects
@@ -900,9 +900,9 @@ Get detailed statistics about a graph.
 #  Good: Batch operation
 add_nodes("graph", nodes=["A", "B", "C", "D"])
 
-# L Avoid: Multiple individual calls  
+# L Avoid: Multiple individual calls
 add_nodes("graph", nodes=["A"])
-add_nodes("graph", nodes=["B"]) 
+add_nodes("graph", nodes=["B"])
 add_nodes("graph", nodes=["C"])
 add_nodes("graph", nodes=["D"])
 ```
@@ -913,20 +913,20 @@ add_nodes("graph", nodes=["D"])
 
 <div class="grid cards" markdown>
 
--   [:material-math-integral: **Algorithms**](algorithms.md)
-    
+- [:material-math-integral: **Algorithms**](algorithms.md)
+
     Path finding and centrality analysis
 
--   [:material-chart-line: **Analysis**](analysis.md)
-    
+- [:material-chart-line: **Analysis**](analysis.md)
+
     Community detection and clustering
 
--   [:material-palette: **Visualization**](visualization.md)
-    
+- [:material-palette: **Visualization**](visualization.md)
+
     Create interactive graph visualizations
 
--   [:material-database-import: **Import/Export**](import-export.md)
-    
+- [:material-database-import: **Import/Export**](import-export.md)
+
     Load and save graph data
 
 </div>

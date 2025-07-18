@@ -11,12 +11,14 @@ Version 0.1.0-alpha.2 fixes a critical architectural flaw where the "minimal" se
 The biggest breaking change is that `GraphIOHandler` is no longer automatically available.
 
 **Before (v0.1.0-alpha.1)**:
+
 ```python
 from networkx_mcp.core import GraphIOHandler
 handler = GraphIOHandler()  # Always worked, but loaded pandas (+35MB)
 ```
 
 **After (v0.1.0-alpha.2)**:
+
 ```python
 # Option 1: Lazy import (recommended)
 from networkx_mcp.core import get_io_handler
@@ -31,11 +33,13 @@ handler = GraphIOHandler()  # ImportError if pandas not installed
 ### 2. Default Installation No Longer Includes Pandas
 
 **Before**:
+
 ```bash
 pip install networkx-mcp  # Installed everything (118MB)
 ```
 
 **After**:
+
 ```bash
 pip install networkx-mcp          # Minimal only (54MB)
 pip install networkx-mcp[excel]   # If you need Excel/CSV (89MB)
@@ -47,11 +51,13 @@ pip install networkx-mcp[full]    # Everything like before (118MB)
 If your code uses Excel or CSV import/export, it will now fail unless you install the extras.
 
 **Error you'll see**:
+
 ```
 ImportError: Excel import requires pandas. Install with: pip install networkx-mcp[excel]
 ```
 
 **Fix**:
+
 ```bash
 pip install networkx-mcp[excel]
 ```
@@ -71,6 +77,7 @@ Your application's memory usage will change:
 ### Step 1: Check Your Imports
 
 Search your codebase for:
+
 ```bash
 grep -r "GraphIOHandler" .
 grep -r "import.*pandas" .
@@ -80,6 +87,7 @@ grep -r "import.*scipy" .
 ### Step 2: Update Import Statements
 
 If you find `GraphIOHandler` imports:
+
 ```python
 # Old
 from networkx_mcp.core import GraphIOHandler
@@ -101,7 +109,7 @@ Check what features you actually use:
 
 - **Just creating graphs and running algorithms?** → Use minimal install
 - **Need Excel/CSV import?** → Add `[excel]`
-- **Need sparse matrices?** → Add `[scipy]` 
+- **Need sparse matrices?** → Add `[scipy]`
 - **Need everything?** → Use `[full]`
 
 ### Step 4: Test Your Application
@@ -127,7 +135,7 @@ try:
     HAS_EXCEL = True
 except ImportError:
     HAS_EXCEL = False
-    
+
 def load_excel(filepath):
     if not HAS_EXCEL:
         raise ImportError("Excel support not installed. Run: pip install networkx-mcp[excel]")
@@ -139,6 +147,7 @@ def load_excel(filepath):
 ```bash
 pip install networkx-mcp[full]
 ```
+
 No code changes needed, but you're still using 118MB.
 
 ## Benefits of Migrating

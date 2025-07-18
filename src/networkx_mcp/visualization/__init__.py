@@ -17,12 +17,10 @@ Example usage:
 
 # Import existing visualizers
 # Import helper functions
-from networkx_mcp.visualization.base import (calculate_layout,
-                                             prepare_graph_data)
+from networkx_mcp.visualization.base import calculate_layout, prepare_graph_data
 
 try:
-    from networkx_mcp.visualization.matplotlib_visualizer import \
-        MatplotlibVisualizer
+    from networkx_mcp.visualization.matplotlib_visualizer import MatplotlibVisualizer
 except ImportError:
     MatplotlibVisualizer = None
 
@@ -36,14 +34,18 @@ try:
 except ImportError:
     PyvisVisualizer = None
 
-from networkx_mcp.visualization.specialized_viz import \
-    SpecializedVisualizations
+try:
+    from networkx_mcp.visualization.specialized_viz import SpecializedVisualizations
+except ImportError:
+    SpecializedVisualizations = None
 
 __all__ = [
     "calculate_layout",
     "prepare_graph_data",
-    "SpecializedVisualizations",
 ]
+
+if SpecializedVisualizations is not None:
+    __all__.append("SpecializedVisualizations")
 
 # Add available visualizers to __all__
 if MatplotlibVisualizer is not None:

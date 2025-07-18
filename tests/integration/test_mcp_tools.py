@@ -1,7 +1,5 @@
 """Comprehensive tests for all 39 MCP tools in the NetworkX MCP Server."""
 
-import json
-
 import pytest
 import pytest_asyncio
 
@@ -48,9 +46,7 @@ class TestMCPToolsCore:
         create_graph(name="test", graph_type="undirected")
 
         # Test adding nodes
-        result = add_nodes(
-            name="test", nodes=["A", "B", "C"], params={"color": "red"}
-        )
+        result = add_nodes(name="test", nodes=["A", "B", "C"], params={"color": "red"})
 
         assert result["nodes_added"] == 3
         assert result["total_nodes"] == 3
@@ -93,8 +89,7 @@ class TestMCPToolsCore:
     @pytest.mark.asyncio
     async def test_graph_info_tool(self):
         """Test graph_info MCP tool."""
-        from networkx_mcp.server import (add_edges, add_nodes, create_graph,
-                                         graph_info)
+        from networkx_mcp.server import add_edges, add_nodes, create_graph, graph_info
 
         # Create graph with data
         create_graph(name="info_test", graph_type="DiGraph")
@@ -233,8 +228,12 @@ class TestMCPToolsAdvanced:
     @pytest.mark.asyncio
     async def test_bipartite_analysis_tool(self):
         """Test bipartite_analysis MCP tool."""
-        from networkx_mcp.server import (add_edges, add_nodes,
-                                         bipartite_analysis, create_graph)
+        from networkx_mcp.server import (
+            add_edges,
+            add_nodes,
+            bipartite_analysis,
+            create_graph,
+        )
 
         # Create bipartite graph
         create_graph(name="bipartite_test", graph_type="undirected")
@@ -289,8 +288,10 @@ class TestMCPToolsVisualization:
             ],
         )
 
+
 class TestMCPToolsIO:
     """Test import/export MCP tools."""
+
 
 class TestMCPToolsErrorHandling:
     """Test error handling in MCP tools."""
@@ -304,6 +305,7 @@ class TestMCPToolsErrorHandling:
         with pytest.raises(ValueError):  # Should raise appropriate error
             graph_info(name="nonexistent_graph")
 
+
 class TestMCPToolsPerformance:
     """Test performance characteristics of MCP tools."""
 
@@ -312,8 +314,12 @@ class TestMCPToolsPerformance:
         """Test performance with moderately large graphs."""
         import time
 
-        from networkx_mcp.server import (add_edges, add_nodes,
-                                         centrality_measures, create_graph)
+        from networkx_mcp.server import (
+            add_edges,
+            add_nodes,
+            centrality_measures,
+            create_graph,
+        )
 
         # Create large graph
         start_time = time.time()
@@ -398,9 +404,7 @@ async def test_tool_parameter_validation():
         create_graph(name=123, graph_type="undirected")  # Invalid ID type
 
     with pytest.raises((ValueError, TypeError)):
-        create_graph(
-            name="test", graph_type="InvalidType"
-        )  # Invalid graph type
+        create_graph(name="test", graph_type="InvalidType")  # Invalid graph type
 
 
 if __name__ == "__main__":

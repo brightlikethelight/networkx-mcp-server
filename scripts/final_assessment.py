@@ -6,14 +6,14 @@ This script provides an honest assessment of where we started,
 what we fixed, and what the current state is.
 """
 
+import os
 import subprocess
 import sys
-import os
 
 
 def get_current_memory():
     """Get current memory usage of minimal server."""
-    memory_test = '''
+    memory_test = """
 import psutil
 import sys
 import os
@@ -28,15 +28,15 @@ server = TrulyMinimalServer()
 
 after = process.memory_info().rss / 1024 / 1024
 print(f"{after:.1f}")
-'''
-    
+"""
+
     result = subprocess.run(
         [sys.executable, "-c", memory_test],
         capture_output=True,
         text=True,
-        cwd=os.path.dirname(os.path.dirname(__file__))
+        cwd=os.path.dirname(os.path.dirname(__file__)),
     )
-    
+
     if result.stdout.strip():
         return float(result.stdout.strip())
     return 0
@@ -44,7 +44,7 @@ print(f"{after:.1f}")
 
 def check_pandas_loading():
     """Check if pandas loads by default."""
-    pandas_test = '''
+    pandas_test = """
 import sys
 sys.path.insert(0, 'src')
 
@@ -53,15 +53,15 @@ server = TrulyMinimalServer()
 
 pandas_loaded = 'pandas' in sys.modules
 print(f"{pandas_loaded}")
-'''
-    
+"""
+
     result = subprocess.run(
         [sys.executable, "-c", pandas_test],
         capture_output=True,
         text=True,
-        cwd=os.path.dirname(os.path.dirname(__file__))
+        cwd=os.path.dirname(os.path.dirname(__file__)),
     )
-    
+
     return "True" in result.stdout
 
 
@@ -72,23 +72,23 @@ FINAL ARCHITECTURE ASSESSMENT
 ========================================
 
 BEFORE (v0.1.0-alpha.1):
-- Claimed: "Minimal MCP server"  
+- Claimed: "Minimal MCP server"
 - Reality: 118MB monster loading 900+ modules
 - Imports: pandas, scipy, matplotlib (unnecessary)
 - Startup: Loading entire scientific Python stack
 - Honest rating: 2/10 (false advertising)
 
 AFTER (v0.1.0-alpha.2):""")
-    
+
     current_memory = get_current_memory()
     pandas_loads = check_pandas_loading()
-    
-    print(f"- Claimed: \"Truly minimal MCP server\"")
+
+    print('- Claimed: "Truly minimal MCP server"')
     print(f"- Reality: {current_memory:.1f}MB with ~600 modules")
-    print(f"- Imports: Only NetworkX for basic operations")
+    print("- Imports: Only NetworkX for basic operations")
     print(f"- Pandas loads by default: {pandas_loads}")
-    print(f"- Honest rating: 8/10 (actually minimal for this stack)")
-    
+    print("- Honest rating: 8/10 (actually minimal for this stack)")
+
     print(f"""
 MEMORY BREAKDOWN:
 - Python interpreter: ~16MB

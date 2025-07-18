@@ -2,7 +2,7 @@
 
 <div class="grid cards" markdown>
 
--   :material-rocket-launch-outline:{ .lg .middle } __Getting Started__
+- :material-rocket-launch-outline:{ .lg .middle } __Getting Started__
 
     ---
 
@@ -10,7 +10,7 @@
 
     [:octicons-arrow-right-24: Quick Start](quickstart.md)
 
--   :material-api:{ .lg .middle } __API Reference__
+- :material-api:{ .lg .middle } __API Reference__
 
     ---
 
@@ -18,7 +18,7 @@
 
     [:octicons-arrow-right-24: API Reference](api/index.md)
 
--   :material-lightbulb-outline:{ .lg .middle } __Examples__
+- :material-lightbulb-outline:{ .lg .middle } __Examples__
 
     ---
 
@@ -26,7 +26,7 @@
 
     [:octicons-arrow-right-24: Examples](examples/social-networks.md)
 
--   :material-account-group:{ .lg .middle } __Community__
+- :material-account-group:{ .lg .middle } __Community__
 
     ---
 
@@ -38,12 +38,12 @@
 
 ## What is NetworkX MCP Server?
 
-**NetworkX MCP Server** is a production-ready [Model Context Protocol](https://github.com/anthropics/mcp) server that provides comprehensive graph analysis capabilities powered by [NetworkX](https://networkx.org/). It's designed for AI assistants, data scientists, and developers who need sophisticated graph operations at scale.
+__NetworkX MCP Server__ is a production-ready [Model Context Protocol](https://github.com/anthropics/mcp) server that provides comprehensive graph analysis capabilities powered by [NetworkX](https://networkx.org/). It's designed for AI assistants, data scientists, and developers who need sophisticated graph operations at scale.
 
 ### Key Features
 
 !!! tip "Enterprise Ready"
-    
+
     - **🔒 Security**: Enterprise-grade security controls and audit logging
     - **⚡ Performance**: Handles millions of nodes with optimized algorithms
     - **📊 Comprehensive**: 40+ tools covering all aspects of graph analysis
@@ -53,22 +53,22 @@
 
 ```mermaid
 graph TB
-    Client[MCP Client<br/>Claude Desktop, CLI, etc.] 
+    Client[MCP Client<br/>Claude Desktop, CLI, etc.]
     Server[NetworkX MCP Server]
     NetworkX[NetworkX Library]
     Redis[(Redis Cache)]
-    
+
     Client -->|MCP Protocol| Server
     Server --> NetworkX
     Server --> Redis
-    
+
     subgraph "Server Components"
         Tools[MCP Tools]
         Resources[MCP Resources]
         Prompts[MCP Prompts]
         GraphManager[Graph Manager]
     end
-    
+
     Server --> Tools
     Server --> Resources
     Server --> Prompts
@@ -79,28 +79,28 @@ graph TB
 
 <div class="grid cards" markdown>
 
--   **🌐 Social Network Analysis**
-    
+- __🌐 Social Network Analysis__
+
     Analyze relationships, find influencers, detect communities, and understand network dynamics.
 
--   **🚛 Supply Chain Optimization**
-    
+- __🚛 Supply Chain Optimization__
+
     Model logistics networks, find bottlenecks, optimize routes, and analyze flow capacity.
 
--   **🧬 Biological Networks**
-    
+- __🧬 Biological Networks__
+
     Study protein interactions, gene networks, and biological pathways.
 
--   **💰 Financial Networks**
-    
+- __💰 Financial Networks__
+
     Analyze transaction flows, detect fraud patterns, and assess systemic risk.
 
--   **📈 Knowledge Graphs**
-    
+- __📈 Knowledge Graphs__
+
     Build and query knowledge representations with semantic relationships.
 
--   **🏙️ Urban Planning**
-    
+- __🏙️ Urban Planning__
+
     Model transportation networks, optimize infrastructure, and analyze city dynamics.
 
 </div>
@@ -115,7 +115,7 @@ Here's how easy it is to get started:
     # Create a social network
     create_graph("social", graph_type="Graph")
     add_edges("social", [
-        ("Alice", "Bob"), ("Bob", "Charlie"), 
+        ("Alice", "Bob"), ("Bob", "Charlie"),
         ("Alice", "David"), ("Charlie", "Eve")
     ])
     ```
@@ -126,7 +126,7 @@ Here's how easy it is to get started:
     # Get basic statistics
     stats = graph_statistics("social")
     # → {"nodes": 5, "edges": 4, "density": 0.4}
-    
+
     # Find central nodes
     centrality = centrality_measures("social", ["betweenness"])
     # → {"Alice": 0.5, "Bob": 0.5, "Charlie": 0.17, ...}
@@ -138,7 +138,7 @@ Here's how easy it is to get started:
     # Find communities
     communities = community_detection("social", algorithm="louvain")
     # → [["Alice", "Bob", "David"], ["Charlie", "Eve"]]
-    
+
     # Calculate modularity
     modularity = community_modularity("social", communities)
     # → 0.36
@@ -148,7 +148,7 @@ Here's how easy it is to get started:
 
     ```python
     # Create interactive visualization
-    visualize_graph("social", 
+    visualize_graph("social",
                    layout="spring",
                    save_path="network.html",
                    node_color="community")
@@ -170,27 +170,27 @@ NetworkX MCP Server is designed to handle real-world workloads:
 
 <div class="grid cards" markdown>
 
--   [:material-rocket-launch: **Quick Start**](quickstart.md)
-    
+- [:material-rocket-launch: __Quick Start__](quickstart.md)
+
     Get up and running in 5 minutes
 
--   [:material-book-open-page-variant: **User Guide**](user-guide/concepts.md)
-    
+- [:material-book-open-page-variant: __User Guide__](user-guide/concepts.md)
+
     Learn core concepts and workflows
 
--   [:material-code-braces: **API Reference**](api/index.md)
-    
+- [:material-code-braces: __API Reference__](api/index.md)
+
     Detailed documentation of all tools
 
--   [:material-puzzle: **Examples**](examples/social-networks.md)
-    
+- [:material-puzzle: __Examples__](examples/social-networks.md)
+
     Real-world use cases and tutorials
 
 </div>
 
 !!! info "Stay Updated"
-    
+
     - :star: **Star us on GitHub** for updates
-    - :material-forum: **Join Discussions** for community support  
+    - :material-forum: **Join Discussions** for community support
     - :material-twitter: **Follow @NetworkXMCP** for news
     - :material-email: **Subscribe to Newsletter** for releases

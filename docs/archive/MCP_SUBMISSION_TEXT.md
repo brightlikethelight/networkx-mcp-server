@@ -31,8 +31,8 @@ This PR adds the NetworkX MCP Server to the awesome list. Key highlights:
 - 📦 **Live on PyPI**: `pip install networkx-mcp-server`
 - ✅ **Production Ready**: v1.0.0 with comprehensive tests and documentation
 
-**Repository**: https://github.com/Bright-L01/networkx-mcp-server
-**PyPI Package**: https://pypi.org/project/networkx-mcp-server/
+**Repository**: <https://github.com/Bright-L01/networkx-mcp-server>
+**PyPI Package**: <https://pypi.org/project/networkx-mcp-server/>
 **Category**: Data Science Tools / Frameworks (depending on repository structure)
 
 The server enables natural language graph analysis workflows, making NetworkX's powerful graph algorithms accessible through AI conversations.

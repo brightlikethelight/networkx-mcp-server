@@ -17,6 +17,7 @@ NetworkX MCP Server enables Large Language Models (like Claude) to perform sophi
 ### 🎯 Key Features
 
 #### 🔬 Academic Research Tools
+
 - **Citation Network Analysis**: Build citation networks from DOIs using CrossRef API
 - **Author Impact Metrics**: Calculate h-index, total citations, and academic influence
 - **Literature Discovery**: Automated paper recommendations based on citation patterns
@@ -24,6 +25,7 @@ NetworkX MCP Server enables Large Language Models (like Claude) to perform sophi
 - **Research Trend Detection**: Analyze publication and citation trends over time
 
 #### 📊 Core Graph Operations
+
 - **20+ Graph Functions**: From basic operations to advanced algorithms like PageRank
 - **BibTeX Export**: Export citation networks in academic-standard BibTeX format
 - **CrossRef Integration**: Access 156+ million academic papers via DOI resolution
@@ -60,10 +62,10 @@ Add to your `claude_desktop_config.json`:
 }
 ```
 
-
 ## 📊 Available Operations
 
 ### 🔬 Academic Research Functions
+
 - `resolve_doi` - Resolve DOI to publication metadata using CrossRef API
 - `build_citation_network` - Build citation networks from seed DOIs
 - `analyze_author_impact` - Calculate h-index and impact metrics for authors
@@ -73,6 +75,7 @@ Add to your `claude_desktop_config.json`:
 - `export_bibtex` - Export citation networks in BibTeX format
 
 ### 📊 Core Graph Operations
+
 - `create_graph` - Create directed or undirected graphs
 - `add_nodes` - Add nodes to your graph
 - `add_edges` - Connect nodes with edges
@@ -80,6 +83,7 @@ Add to your `claude_desktop_config.json`:
 - `shortest_path` - Find optimal paths between nodes
 
 ### 🔍 Analysis Operations
+
 - `degree_centrality` - Find the most connected nodes
 - `betweenness_centrality` - Identify bridges and key connectors
 - `pagerank` - Google's PageRank algorithm for node importance
@@ -87,6 +91,7 @@ Add to your `claude_desktop_config.json`:
 - `community_detection` - Discover natural groupings
 
 ### 🎨 Visualization & I/O
+
 - `visualize_graph` - Create PNG visualizations with multiple layouts
 - `import_csv` - Load graphs from edge lists
 - `export_json` - Export graphs in standard formats
@@ -112,7 +117,6 @@ Add to your `claude_desktop_config.json`:
   }
 }
 ```
-
 
 ### Academic Research Example
 
@@ -153,30 +157,35 @@ Generated BibTeX file with 847 entries ready for LaTeX integration
 ## 🎓 Academic Use Cases
 
 ### 1. Literature Review & Meta-Analysis
+
 - Automatically expand citation networks from key papers
 - Identify research gaps and emerging trends
 - Calculate field-wide impact metrics
 - Generate comprehensive BibTeX databases
 
 ### 2. Collaboration Network Analysis
+
 - Map research collaborations within and across institutions
 - Identify key researchers and potential collaborators
 - Analyze interdisciplinary connections
 - Study research community evolution
 
 ### 3. Citation Pattern Analysis
+
 - Track knowledge diffusion through citation networks
 - Identify influential papers and breakthrough research
 - Analyze citation bias and self-citation patterns
 - Study geographic and institutional citation patterns
 
 ### 4. Research Trend Detection
+
 - Identify emerging research areas and hot topics
 - Analyze publication volume and citation trends
 - Track research lifecycle from emergence to maturity
 - Predict future research directions
 
 ### 5. Academic Impact Assessment
+
 - Calculate comprehensive author impact metrics
 - Compare researchers across different career stages
 - Analyze journal and conference impact patterns

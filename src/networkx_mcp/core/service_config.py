@@ -8,12 +8,18 @@ and other components.
 import logging
 
 from ..caching.cache_service import CacheService, MemoryCache, RedisCache
-from ..events.graph_events import (GraphEventPublisher, LoggingEventListener,
-                                   MetricsEventListener)
-from ..repositories.graph_repository import (FileStorageBackend,
-                                             GraphRepository,
-                                             RedisStorageBackend)
+from ..events.graph_events import (
+    GraphEventPublisher,
+    LoggingEventListener,
+    MetricsEventListener,
+)
+from ..repositories.graph_repository import (
+    FileStorageBackend,
+    GraphRepository,
+    RedisStorageBackend,
+)
 from ..services.algorithm_service import AlgorithmService
+
 # Import all services and components
 from ..services.graph_service import GraphService
 from ..validators.algorithm_validator import AlgorithmValidator

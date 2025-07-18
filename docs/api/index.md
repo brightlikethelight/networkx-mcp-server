@@ -8,7 +8,7 @@ The NetworkX MCP Server implements the complete [Model Context Protocol](https:/
 
 <div class="grid cards" markdown>
 
--   :material-tools:{ .lg .middle } __MCP Tools__
+- :material-tools:{ .lg .middle } __MCP Tools__
 
     ---
 
@@ -16,7 +16,7 @@ The NetworkX MCP Server implements the complete [Model Context Protocol](https:/
 
     [:octicons-arrow-right-24: Browse Tools](tools/graph-operations.md)
 
--   :material-database:{ .lg .middle } __MCP Resources__
+- :material-database:{ .lg .middle } __MCP Resources__
 
     ---
 
@@ -24,7 +24,7 @@ The NetworkX MCP Server implements the complete [Model Context Protocol](https:/
 
     [:octicons-arrow-right-24: Browse Resources](resources/catalog.md)
 
--   :material-lightbulb:{ .lg .middle } __MCP Prompts__
+- :material-lightbulb:{ .lg .middle } __MCP Prompts__
 
     ---
 
@@ -40,29 +40,29 @@ The NetworkX MCP Server implements the complete [Model Context Protocol](https:/
 
 | Category | Count | Description |
 |----------|-------|-------------|
-| **[Graph Operations](tools/graph-operations.md)** | 12 tools | Create, modify, and manage graphs |
-| **[Algorithms](tools/algorithms.md)** | 15 tools | Path finding, centrality, connectivity |
-| **[Analysis](tools/analysis.md)** | 8 tools | Community detection, clustering, metrics |
-| **[Visualization](tools/visualization.md)** | 6 tools | Interactive and static graph visualizations |
-| **[Import/Export](tools/import-export.md)** | 5 tools | Data import/export in various formats |
-| **[Machine Learning](tools/ml.md)** | 8 tools | Graph embeddings, prediction, classification |
+| __[Graph Operations](tools/graph-operations.md)__ | 12 tools | Create, modify, and manage graphs |
+| __[Algorithms](tools/algorithms.md)__ | 15 tools | Path finding, centrality, connectivity |
+| __[Analysis](tools/analysis.md)__ | 8 tools | Community detection, clustering, metrics |
+| __[Visualization](tools/visualization.md)__ | 6 tools | Interactive and static graph visualizations |
+| __[Import/Export](tools/import-export.md)__ | 5 tools | Data import/export in various formats |
+| __[Machine Learning](tools/ml.md)__ | 8 tools | Graph embeddings, prediction, classification |
 
 ### Resource Types
 
 | Type | Description | Example |
 |------|-------------|---------|
-| **[Graph Catalog](resources/catalog.md)** | List and metadata of all graphs | `catalog://graphs` |
-| **[Graph Data](resources/data.md)** | Node and edge data access | `data://graph/{id}/nodes` |
-| **[Statistics](resources/statistics.md)** | Pre-computed graph metrics | `stats://graph/{id}/centrality` |
-| **[Visualizations](resources/visualizations.md)** | Generated chart and plot data | `viz://graph/{id}/network.json` |
+| __[Graph Catalog](resources/catalog.md)__ | List and metadata of all graphs | `catalog://graphs` |
+| __[Graph Data](resources/data.md)__ | Node and edge data access | `data://graph/{id}/nodes` |
+| __[Statistics](resources/statistics.md)__ | Pre-computed graph metrics | `stats://graph/{id}/centrality` |
+| __[Visualizations](resources/visualizations.md)__ | Generated chart and plot data | `viz://graph/{id}/network.json` |
 
 ### Prompt Templates
 
 | Template | Use Case | Domain |
 |----------|----------|--------|
-| **[Social Analysis](prompts/social-analysis.md)** | Social network analysis workflows | Social Media, Organizations |
-| **[Path Finding](prompts/path-finding.md)** | Route optimization and navigation | Transportation, Logistics |
-| **[ML Workflows](prompts/ml-workflows.md)** | Machine learning pipelines | Data Science, Research |
+| __[Social Analysis](prompts/social-analysis.md)__ | Social network analysis workflows | Social Media, Organizations |
+| __[Path Finding](prompts/path-finding.md)__ | Route optimization and navigation | Transportation, Logistics |
+| __[ML Workflows](prompts/ml-workflows.md)__ | Machine learning pipelines | Data Science, Research |
 
 ## Common Usage Patterns
 
@@ -142,18 +142,18 @@ result = call_tool("create_graph", {
 
 All API calls are subject to rate limiting:
 
-- **Default**: 1000 requests/minute
-- **Authenticated**: 5000 requests/minute  
-- **Enterprise**: Custom limits
+- __Default__: 1000 requests/minute
+- __Authenticated__: 5000 requests/minute
+- __Enterprise__: Custom limits
 
 ### Input Validation
 
 All inputs are validated for:
 
-- **Graph Size**: Maximum nodes/edges limits
-- **Memory Usage**: Prevents resource exhaustion
-- **Input Sanitization**: SQL injection and XSS protection
-- **File Access**: Sandboxed file operations
+- __Graph Size__: Maximum nodes/edges limits
+- __Memory Usage__: Prevents resource exhaustion
+- __Input Sanitization__: SQL injection and XSS protection
+- __File Access__: Sandboxed file operations
 
 ## Error Handling
 
@@ -188,10 +188,10 @@ All inputs are validated for:
 
 | Operation Type | Small Graph | Medium Graph | Large Graph |
 |----------------|-------------|--------------|-------------|
-| **Graph Creation** | <0.1s | <1s | <10s |
-| **Basic Analysis** | <0.5s | <5s | <30s |
-| **Complex Algorithms** | <2s | <30s | <5min |
-| **Visualization** | <1s | <10s | <60s |
+| __Graph Creation__ | <0.1s | <1s | <10s |
+| __Basic Analysis__ | <0.5s | <5s | <30s |
+| __Complex Algorithms__ | <2s | <30s | <5min |
+| __Visualization__ | <1s | <10s | <60s |
 
 ### Memory Usage
 
@@ -204,9 +204,9 @@ All inputs are validated for:
 ### Optimization Tips
 
 !!! tip "Performance Optimization"
-    
+
     - **Use caching**: Enable Redis for repeated operations
-    - **Batch operations**: Group multiple changes together  
+    - **Batch operations**: Group multiple changes together
     - **Subset analysis**: Work with subgraphs when possible
     - **Appropriate algorithms**: Choose algorithms suitable for graph size
     - **Memory management**: Delete unused graphs to free memory
@@ -217,17 +217,17 @@ All inputs are validated for:
 
 The NetworkX MCP Server follows semantic versioning:
 
-- **Major version** (2.x): Breaking API changes
-- **Minor version** (2.1.x): New features, backward compatible
-- **Patch version** (2.1.1): Bug fixes, backward compatible
+- __Major version__ (2.x): Breaking API changes
+- __Minor version__ (2.1.x): New features, backward compatible
+- __Patch version__ (2.1.1): Bug fixes, backward compatible
 
 ### Client Compatibility
 
 | Client | Minimum Version | Recommended |
 |--------|----------------|-------------|
-| **Claude Desktop** | Any MCP support | Latest |
-| **MCP CLI** | 0.1.0+ | 0.2.0+ |
-| **Python MCP SDK** | 0.1.0+ | 0.2.0+ |
+| __Claude Desktop__ | Any MCP support | Latest |
+| __MCP CLI__ | 0.1.0+ | 0.2.0+ |
+| __Python MCP SDK__ | 0.1.0+ | 0.2.0+ |
 
 ## Schema Definitions
 
@@ -235,7 +235,7 @@ The NetworkX MCP Server follows semantic versioning:
 
 ```json
 {
-  "type": "function", 
+  "type": "function",
   "function": {
     "name": "tool_name",
     "description": "Tool description",
@@ -258,7 +258,7 @@ The NetworkX MCP Server follows semantic versioning:
 ```json
 {
   "uri": "resource://type/identifier",
-  "name": "Resource Name", 
+  "name": "Resource Name",
   "description": "Resource description",
   "mimeType": "application/json"
 }
@@ -284,27 +284,27 @@ The NetworkX MCP Server follows semantic versioning:
 
 <div class="grid cards" markdown>
 
--   [:material-tools: **Explore Tools**](tools/graph-operations.md)
-    
+- [:material-tools: __Explore Tools__](tools/graph-operations.md)
+
     Start with graph operations
 
--   [:material-database: **Browse Resources**](resources/catalog.md)
-    
+- [:material-database: __Browse Resources__](resources/catalog.md)
+
     Access graph data
 
--   [:material-lightbulb: **Try Prompts**](prompts/social-analysis.md)
-    
+- [:material-lightbulb: __Try Prompts__](prompts/social-analysis.md)
+
     Use workflow templates
 
--   [:material-code-braces: **Python API**](python/)
-    
+- [:material-code-braces: __Python API__](python/)
+
     Direct library usage
 
 </div>
 
 !!! info "Need Help?"
-    
-    - **=Ö User Guide**: [Core concepts and tutorials](../user-guide/concepts.md)
-    - **=¡ Examples**: [Real-world use cases](../examples/social-networks.md)
-    - **=¬ Community**: [GitHub Discussions](https://github.com/brightliu/networkx-mcp-server/discussions)
+
+    - **=ï¿½ User Guide**: [Core concepts and tutorials](../user-guide/concepts.md)
+    - **=ï¿½ Examples**: [Real-world use cases](../examples/social-networks.md)
+    - **=ï¿½ Community**: [GitHub Discussions](https://github.com/brightliu/networkx-mcp-server/discussions)
     - **= Issues**: [Report bugs](https://github.com/brightliu/networkx-mcp-server/issues)

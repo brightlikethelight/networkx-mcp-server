@@ -66,6 +66,7 @@ CMD ["python", "-m", "networkx_mcp.server_v2"]
 ```
 
 Build and run:
+
 ```bash
 docker build -t networkx-mcp-server:2.0.0 .
 docker run -p 3000:3000 networkx-mcp-server:2.0.0
@@ -74,6 +75,7 @@ docker run -p 3000:3000 networkx-mcp-server:2.0.0
 ### 4. Cloud Deployment
 
 #### AWS Lambda
+
 ```python
 # lambda_handler.py
 from networkx_mcp.server_v2 import NetworkXMCPServer
@@ -85,6 +87,7 @@ def lambda_handler(event, context):
 ```
 
 #### Google Cloud Functions
+
 ```python
 # main.py
 from networkx_mcp.server_v2 import NetworkXMCPServer
@@ -128,6 +131,7 @@ server = NetworkXMCPServer(
 ### With Claude Desktop
 
 1. Add to Claude Desktop configuration:
+
 ```json
 {
   "mcpServers": {
@@ -207,6 +211,7 @@ logging.basicConfig(
 ### Metrics
 
 The server exposes metrics for monitoring:
+
 - Tool invocation counts
 - Response times
 - Error rates
@@ -227,6 +232,7 @@ curl http://localhost:3000/health
 ### Common Issues
 
 1. **Import Errors**
+
    ```bash
    # Ensure all dependencies are installed
    pip install -r requirements.txt
@@ -271,8 +277,8 @@ If upgrading from v1.0.0:
 
 ## Support
 
-- GitHub Issues: https://github.com/Bright-L01/networkx-mcp-server/issues
-- Documentation: https://networkx-mcp-server.readthedocs.io
+- GitHub Issues: <https://github.com/Bright-L01/networkx-mcp-server/issues>
+- Documentation: <https://networkx-mcp-server.readthedocs.io>
 - Examples: See `/examples` directory
 
 ## Next Steps

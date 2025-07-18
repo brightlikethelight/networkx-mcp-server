@@ -1,6 +1,7 @@
 # ADR-001: Remove Heavyweight Dependencies from Core
 
 ## Status
+
 Accepted (2025-01-08)
 
 ## Context
@@ -17,8 +18,9 @@ During a critical investigation of "memory leaks", we discovered our "minimal" M
 This was architectural malpractice. We were forcing every user to load the entire scientific Python stack for basic graph operations that need 10% of that.
 
 ### The Fatal Import Chain
+
 ```python
-server.py 
+server.py
   → from .core.graph_operations import GraphManager
   → triggers core/__init__.py loading
   → from .io import GraphIOHandler  # Line 5 - THE KILLER
@@ -27,6 +29,7 @@ server.py
 ```
 
 ### Evidence of the Problem
+
 - Import trace showed 900+ modules loaded at startup
 - Memory profiling: 118MB for a "minimal" server
 - Startup time: 2+ seconds to load unused libraries
@@ -44,6 +47,7 @@ server.py
 ## Consequences
 
 ### Positive
+
 - Memory reduced from 118MB to 54MB (54% reduction)
 - Module count reduced from 900+ to ~600
 - Startup time improved (though still not instant due to NetworkX)
@@ -51,6 +55,7 @@ server.py
 - Clear separation between core and optional features
 
 ### Negative
+
 - Breaking change: `GraphIOHandler` no longer auto-imported
 - Users must explicitly install extras for Excel/CSV
 - Two server implementations to maintain
@@ -78,12 +83,14 @@ server.py
 ## Implementation Details
 
 ### Before (Broken)
+
 ```python
 # core/__init__.py
 from .io import GraphIOHandler  # Always loads pandas!
 ```
 
 ### After (Fixed)
+
 ```python
 # core/__init__.py
 def get_io_handler():
@@ -93,6 +100,7 @@ def get_io_handler():
 ```
 
 ### Installation Options
+
 ```bash
 # Minimal - what most users need
 pip install networkx-mcp          # 54MB
@@ -107,6 +115,7 @@ pip install networkx-mcp[full]    # 118MB
 ## Verification
 
 Test results confirm the fix:
+
 ```
 ✅ Pandas NOT loaded in minimal mode
 ✅ SciPy NOT loaded in minimal mode

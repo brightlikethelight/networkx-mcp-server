@@ -1,6 +1,5 @@
 """NetworkX MCP Server entry point - stdio transport only."""
 
-import asyncio
 import logging
 import sys
 
@@ -26,7 +25,7 @@ def main():
     parser = argparse.ArgumentParser(
         description="NetworkX MCP Server - Graph operations via Model Context Protocol"
     )
-    
+
     # Logging
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
 
@@ -38,7 +37,7 @@ def main():
     try:
         logger.info("Starting NetworkX MCP Server via stdio transport")
         run_server()
-            
+
     except KeyboardInterrupt:
         logger.info("Server stopped by user")
         sys.exit(0)

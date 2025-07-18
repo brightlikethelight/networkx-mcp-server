@@ -60,13 +60,15 @@ python -m networkx_mcp
 ### Dependencies
 
 #### Required Services
+
 - **Redis**: Caching and session storage
 - **PostgreSQL**: Primary database (optional)
 - **Nginx**: Reverse proxy and load balancing
 
 #### Optional Services
+
 - **Prometheus**: Metrics collection
-- **Grafana**: Metrics visualization  
+- **Grafana**: Metrics visualization
 - **Jaeger**: Distributed tracing
 - **ELK Stack**: Centralized logging
 
@@ -222,13 +224,13 @@ az container create \
 app:
   debug: true
   reload: true
-  
+
 server:
   workers: 1
-  
+
 logging:
   level: DEBUG
-  
+
 features:
   rate_limiting: false
   caching: false
@@ -240,15 +242,15 @@ features:
 app:
   debug: false
   reload: false
-  
+
 server:
   workers: 4
   timeout: 30
-  
+
 logging:
   level: INFO
   format: json
-  
+
 features:
   rate_limiting: true
   caching: true
@@ -456,7 +458,7 @@ curl -f http://localhost:8000/status
 # Database connectivity
 kubectl exec -it postgres-pod -- pg_isready -U networkx
 
-# Redis connectivity  
+# Redis connectivity
 kubectl exec -it redis-pod -- redis-cli ping
 ```
 

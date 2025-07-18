@@ -7,7 +7,9 @@ including GraphOpsHandler, AlgorithmHandler, AnalysisHandler, and VisualizationH
 import pytest
 
 # Skip handler tests until architecture is updated
-pytestmark = pytest.mark.skip(reason="Handler architecture needs updates for current MCP structure")
+pytestmark = pytest.mark.skip(
+    reason="Handler architecture needs updates for current MCP structure"
+)
 
 from unittest.mock import Mock
 
@@ -164,8 +166,7 @@ class TestHandlerIntegration:
         from networkx_mcp.mcp.handlers.algorithms import AlgorithmHandler
         from networkx_mcp.mcp.handlers.analysis import AnalysisHandler
         from networkx_mcp.mcp.handlers.graph_ops import GraphOpsHandler
-        from networkx_mcp.mcp.handlers.visualization import \
-            VisualizationHandler
+        from networkx_mcp.mcp.handlers.visualization import VisualizationHandler
 
         graph_ops = GraphOpsHandler(mock_mcp, graph_manager_with_data)
         algorithms = AlgorithmHandler(mock_mcp, graph_manager_with_data)
@@ -197,8 +198,7 @@ class TestHandlerIntegration:
         centrality = nx.degree_centrality(graph)
 
         if not graph.is_directed():
-            from networkx.algorithms.community import \
-                greedy_modularity_communities
+            from networkx.algorithms.community import greedy_modularity_communities
 
             communities = list(greedy_modularity_communities(graph))
 

@@ -246,7 +246,7 @@ roles = {
         "visualize_graph", "import_csv", "export_json"
     ],
     "READONLY": [
-        "get_info", "shortest_path", "degree_centrality", 
+        "get_info", "shortest_path", "degree_centrality",
         "betweenness_centrality", "pagerank", "connected_components",
         "community_detection", "visualize_graph", "export_json"
     ],
@@ -535,15 +535,17 @@ performance_config = {
 ### Common Issues
 
 1. **Docker Not Available**
+
    ```bash
    # Check Docker status
    docker --version
-   
+
    # Install Docker if needed
    # Security Fortress will gracefully degrade to process isolation
    ```
 
 2. **High Resource Usage**
+
    ```bash
    # Adjust resource limits
    export NETWORKX_MCP_SANDBOX_MAX_CPU_PERCENT=25
@@ -551,6 +553,7 @@ performance_config = {
    ```
 
 3. **Too Many False Positives**
+
    ```bash
    # Lower threat detection sensitivity
    export NETWORKX_MCP_THREAT_CONFIDENCE_THRESHOLD=0.8

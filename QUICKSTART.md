@@ -42,6 +42,7 @@ python test_minimal_server.py
 ## What's Working
 
 The minimal server provides these core features:
+
 - ✅ Create/delete graphs
 - ✅ Add/remove nodes and edges
 - ✅ Basic graph info and statistics
@@ -51,21 +52,26 @@ The minimal server provides these core features:
 ## Troubleshooting
 
 ### Pydantic Conflict
+
 If you see Pydantic version conflicts:
+
 ```bash
 # Use the minimal server
 python -m networkx_mcp --minimal
 ```
 
 ### Import Errors
+
 The compatibility layer handles different MCP versions automatically.
 
 ### Can't Connect
+
 Make sure you're using the correct MCP client configuration for stdio transport.
 
 ## Next Steps
 
 Once the minimal server is running, you can:
+
 1. Add more algorithms
 2. Enable the full feature set
 3. Configure enterprise features

@@ -8,7 +8,7 @@ NetworkX MCP Server supports multiple configuration approaches:
 
 <div class="grid cards" markdown>
 
--   :material-cog:{ .lg .middle } __Environment Variables__
+- :material-cog:{ .lg .middle } __Environment Variables__
 
     ---
 
@@ -16,7 +16,7 @@ NetworkX MCP Server supports multiple configuration approaches:
 
     [:octicons-arrow-right-24: Environment Variables](#environment-variables)
 
--   :material-file-code:{ .lg .middle } __Configuration Files__
+- :material-file-code:{ .lg .middle } __Configuration Files__
 
     ---
 
@@ -24,7 +24,7 @@ NetworkX MCP Server supports multiple configuration approaches:
 
     [:octicons-arrow-right-24: Configuration Files](#configuration-files)
 
--   :material-console:{ .lg .middle } __Command Line Arguments__
+- :material-console:{ .lg .middle } __Command Line Arguments__
 
     ---
 
@@ -32,7 +32,7 @@ NetworkX MCP Server supports multiple configuration approaches:
 
     [:octicons-arrow-right-24: CLI Arguments](#command-line-arguments)
 
--   :material-api:{ .lg .middle } __Runtime Configuration__
+- :material-api:{ .lg .middle } __Runtime Configuration__
 
     ---
 
@@ -127,7 +127,7 @@ server:
   host: "0.0.0.0"
   port: 8765
   workers: 4
-  
+
 logging:
   level: "INFO"
   format: "json"
@@ -142,13 +142,13 @@ performance:
     max_edges: 10000000
     memory_mb: 4096
     timeout_seconds: 300
-  
+
   caching:
     enabled: true
     backend: "redis"  # memory, redis, hybrid
     size_mb: 512
     ttl: 3600
-    
+
   optimization:
     parallel_processing: true
     use_cython: true
@@ -169,20 +169,20 @@ security:
       - name: "admin"
         key: "your-secure-api-key"
         permissions: ["read", "write", "admin"]
-      - name: "readonly"  
+      - name: "readonly"
         key: "readonly-key"
         permissions: ["read"]
-  
+
   rate_limiting:
     enabled: true
     requests_per_minute: 1000
     burst_limit: 100
-    
+
   cors:
     enabled: true
     allowed_origins: ["https://example.com"]
     allowed_methods: ["GET", "POST"]
-    
+
   audit:
     enabled: true
     log_file: "/var/log/networkx-audit.log"
@@ -192,12 +192,12 @@ features:
   machine_learning:
     enabled: true
     gpu_acceleration: false
-    
+
   visualization:
     enabled: true
     max_image_size: "10MB"
     formats: ["png", "svg", "html"]
-    
+
   enterprise:
     monitoring: true
     metrics_endpoint: "/metrics"
@@ -376,7 +376,7 @@ security:
 ### Staging
 
 ```yaml
-# config/staging.yaml  
+# config/staging.yaml
 server:
   host: "0.0.0.0"
   port: 8765
@@ -451,10 +451,10 @@ features:
 
 The server validates configuration on startup:
 
-- **Required fields**: Must be present
-- **Type checking**: Correct data types
-- **Range validation**: Values within acceptable ranges
-- **Dependency checks**: Related settings are compatible
+- __Required fields__: Must be present
+- __Type checking__: Correct data types
+- __Range validation__: Values within acceptable ranges
+- __Dependency checks__: Related settings are compatible
 
 ### Validation Errors
 
@@ -508,14 +508,14 @@ services:
       - ./config.yaml:/app/config.yaml
     depends_on:
       - redis
-      
+
   redis:
     image: redis:alpine
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
-      
+
 volumes:
   redis_data:
 ```
@@ -569,7 +569,7 @@ spec:
 ### Security
 
 !!! warning "Security Recommendations"
-    
+
     - **Always enable authentication** in production
     - **Use strong API keys** with appropriate permissions
     - **Enable audit logging** for compliance
@@ -580,7 +580,7 @@ spec:
 ### Performance
 
 !!! tip "Performance Tips"
-    
+
     - **Use Redis caching** for better performance
     - **Set appropriate memory limits** to prevent OOM
     - **Tune worker count** based on CPU cores
@@ -591,7 +591,7 @@ spec:
 ### Monitoring
 
 !!! info "Monitoring Setup"
-    
+
     - **Enable metrics endpoints** for monitoring
     - **Set up health checks** for load balancers
     - **Configure log aggregation** (ELK, Splunk)
@@ -631,11 +631,11 @@ networkx-mcp-server --test-auth
 
 Settings are applied in this order (later overrides earlier):
 
-1. **Default values** (built into application)
-2. **Configuration file** (YAML/JSON)
-3. **Environment variables**
-4. **Command line arguments**
-5. **Runtime updates** (via API)
+1. __Default values__ (built into application)
+2. __Configuration file__ (YAML/JSON)
+3. __Environment variables__
+4. __Command line arguments__
+5. __Runtime updates__ (via API)
 
 ---
 
@@ -643,20 +643,20 @@ Settings are applied in this order (later overrides earlier):
 
 <div class="grid cards" markdown>
 
--   [:material-docker: **Deployment**](enterprise/deployment.md)
-    
+- [:material-docker: __Deployment__](enterprise/deployment.md)
+
     Deploy to production environments
 
--   [:material-shield-check: **Security**](enterprise/security.md)
-    
+- [:material-shield-check: __Security__](enterprise/security.md)
+
     Implement security best practices
 
--   [:material-chart-line: **Monitoring**](enterprise/monitoring.md)
-    
+- [:material-chart-line: __Monitoring__](enterprise/monitoring.md)
+
     Set up monitoring and alerting
 
--   [:material-cog-box: **Optimization**](enterprise/performance.md)
-    
+- [:material-cog-box: __Optimization__](enterprise/performance.md)
+
     Optimize for your workload
 
 </div>

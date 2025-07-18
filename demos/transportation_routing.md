@@ -3,7 +3,9 @@
 This demo shows how to analyze a transportation network for optimal routing and network resilience.
 
 ## Scenario
+
 You're analyzing a city's transportation network to:
+
 - Find shortest routes between locations
 - Identify critical intersections
 - Analyze network resilience
@@ -18,7 +20,7 @@ Create a directed graph called "city_transport"
 Add these nodes to city_transport: ["Airport", "Downtown", "University", "Hospital", "Mall", "Suburb1", "Suburb2", "Industrial", "Port", "Station"]
 
 Add these edges to city_transport:
-[["Airport", "Downtown"], ["Downtown", "Airport"], 
+[["Airport", "Downtown"], ["Downtown", "Airport"],
  ["Downtown", "University"], ["University", "Downtown"],
  ["Downtown", "Hospital"], ["Hospital", "Downtown"],
  ["Downtown", "Mall"], ["Mall", "Downtown"],
@@ -63,6 +65,7 @@ Visualize city_transport with circular layout
 The circular layout often works well for transportation networks.
 
 ## Real-World Applications
+
 - Urban Planning: Identifying traffic bottlenecks
 - Emergency Services: Finding fastest routes to hospitals
 - Public Transit: Optimizing bus/train routes
@@ -70,6 +73,7 @@ The circular layout often works well for transportation networks.
 - Infrastructure: Identifying critical nodes for maintenance priority
 
 ## Extension Ideas
+
 - Add weights to edges representing travel time
 - Model traffic congestion at different times
 - Plan alternative routes when main roads are blocked

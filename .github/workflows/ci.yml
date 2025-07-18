@@ -1,38 +1,76 @@
 name: CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: ['3.11', '3.12']
-    
+
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-python@v4
+
+    - uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-    
+
+    - name: Install uv (fast Python package manager)
+      run: |
+        pip install uv
+
     - name: Install dependencies
       run: |
-        pip install -e ".[dev]"
-    
+        uv pip install --system -e ".[dev]"
+
+    - name: Run linting
+      run: |
+        ruff check . --output-format=github
+        ruff format --check .
+
+    - name: Run type checking
+      run: |
+        mypy src/networkx_mcp/ --strict --ignore-missing-imports
+
+    - name: Run security checks
+      run: |
+        bandit -r src/networkx_mcp/ -ll
+
     - name: Run tests
       run: |
-        pytest tests/ -v --cov=src/networkx_mcp --cov-report=xml
-    
-    - name: Check code quality
-      run: |
-        ruff check .
-        black --check .
-        mypy src/networkx_mcp/
-    
+        pytest tests/working/ tests/unit/ tests/integration/ -v \
+          --cov=src/networkx_mcp \
+          --cov-report=xml \
+          --cov-report=term-missing \
+          --cov-fail-under=85
+
     - name: Upload coverage
-      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
-      uses: codecov/codecov-action@v3
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+      uses: codecov/codecov-action@v4
       with:
         file: ./coverage.xml
-        fail_ci_if_error: true
+        fail_ci_if_error: false
+        token: ${{ secrets.CODECOV_TOKEN }}
+
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install pre-commit
+      run: pip install pre-commit
+    - name: Run pre-commit
+      run: pre-commit run --all-files

@@ -11,17 +11,19 @@ This was not a feature. This was **architectural dishonesty**.
 We've performed emergency architectural surgery:
 
 - **Minimal version**: 54.6MB (NetworkX only)
-- **Full version**: 118MB (with pandas/scipy) 
+- **Full version**: 118MB (with pandas/scipy)
 - **User choice**: You decide what you need
 
 ## The Technical Details
 
 **The problem**: One innocent line in `core/__init__.py` loaded the entire scientific Python stack:
+
 ```python
 from .io import GraphIOHandler  # This loaded pandas for everyone
 ```
 
 **The fix**: Made I/O handlers lazy-loaded and optional:
+
 ```python
 def get_io_handler():  # Only loads pandas when called
     from .io import GraphIOHandler
@@ -66,6 +68,7 @@ We apologize for shipping a "minimal" server that was anything but minimal. The 
 ## Current Status
 
 **v0.1.0-alpha.2** is actually minimal:
+
 - **54.6MB** for basic operations (honest number)
 - **Lazy loading** for heavy dependencies
 - **Modular** - pay only for what you use
@@ -74,7 +77,7 @@ We apologize for shipping a "minimal" server that was anything but minimal. The 
 ## What's Next
 
 - Monitor real-world memory usage
-- Fix remaining CI/CD issues  
+- Fix remaining CI/CD issues
 - Explore further optimizations
 - Consider "nano" version if there's demand
 

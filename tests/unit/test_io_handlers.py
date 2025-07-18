@@ -2,7 +2,7 @@
 
 import pytest
 
-# Skip IO handler tests until modules are fully implemented  
+# Skip IO handler tests until modules are fully implemented
 pytestmark = pytest.mark.skip(reason="IO handler modules need implementation updates")
 
 import csv

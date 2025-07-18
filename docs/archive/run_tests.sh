@@ -9,7 +9,7 @@ export PYTHONPATH="$PWD/src:$PYTHONPATH"
 echo "📊 Running unit tests with coverage..."
 pytest tests/unit/ -v --cov=src/networkx_mcp --cov-report=html --cov-report=term --timeout=30
 
-# Integration tests  
+# Integration tests
 echo "🔄 Running integration tests..."
 pytest tests/integration/ -v --timeout=60
 

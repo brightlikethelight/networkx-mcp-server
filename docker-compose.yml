@@ -3,7 +3,7 @@ version: '3.8'
 
 services:
   mcp-server:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile
     image: networkx-mcp:0.1.0

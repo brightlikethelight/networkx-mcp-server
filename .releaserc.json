@@ -56,45 +56,129 @@
             "label": "Helm Chart"
           }
         ],
-        "assignees": ["@maintainers"],
+        "assignees": [
+          "@maintainers"
+        ],
         "addReleases": "bottom"
       }
     ]
   ],
   "preset": "conventionalcommits",
   "parserOpts": {
-    "noteKeywords": ["BREAKING CHANGE", "BREAKING CHANGES", "BREAKING"]
+    "noteKeywords": [
+      "BREAKING CHANGE",
+      "BREAKING CHANGES",
+      "BREAKING"
+    ]
   },
   "writerOpts": {
-    "commitsSort": ["subject", "scope"]
+    "commitsSort": [
+      "subject",
+      "scope"
+    ]
   },
   "releaseRules": [
-    {"type": "feat", "release": "minor"},
-    {"type": "fix", "release": "patch"},
-    {"type": "perf", "release": "patch"},
-    {"type": "revert", "release": "patch"},
-    {"type": "docs", "release": false},
-    {"type": "style", "release": false},
-    {"type": "chore", "release": false},
-    {"type": "refactor", "release": "patch"},
-    {"type": "test", "release": false},
-    {"type": "build", "release": false},
-    {"type": "ci", "release": false},
-    {"scope": "BREAKING", "release": "major"}
+    {
+      "type": "feat",
+      "release": "minor"
+    },
+    {
+      "type": "fix",
+      "release": "patch"
+    },
+    {
+      "type": "perf",
+      "release": "patch"
+    },
+    {
+      "type": "revert",
+      "release": "patch"
+    },
+    {
+      "type": "docs",
+      "release": false
+    },
+    {
+      "type": "style",
+      "release": false
+    },
+    {
+      "type": "chore",
+      "release": false
+    },
+    {
+      "type": "refactor",
+      "release": "patch"
+    },
+    {
+      "type": "test",
+      "release": false
+    },
+    {
+      "type": "build",
+      "release": false
+    },
+    {
+      "type": "ci",
+      "release": false
+    },
+    {
+      "scope": "BREAKING",
+      "release": "major"
+    }
   ],
   "presetConfig": {
     "types": [
-      {"type": "feat", "section": "✨ Features"},
-      {"type": "fix", "section": "🐛 Bug Fixes"},
-      {"type": "perf", "section": "⚡ Performance Improvements"},
-      {"type": "revert", "section": "⏪ Reverts"},
-      {"type": "docs", "section": "📚 Documentation", "hidden": false},
-      {"type": "style", "section": "🎨 Styles", "hidden": true},
-      {"type": "chore", "section": "🔧 Chores", "hidden": true},
-      {"type": "refactor", "section": "♻️ Code Refactoring"},
-      {"type": "test", "section": "🧪 Tests", "hidden": true},
-      {"type": "build", "section": "🏗️ Build System", "hidden": true},
-      {"type": "ci", "section": "👷 Continuous Integration", "hidden": true}
+      {
+        "type": "feat",
+        "section": "\u2728 Features"
+      },
+      {
+        "type": "fix",
+        "section": "\ud83d\udc1b Bug Fixes"
+      },
+      {
+        "type": "perf",
+        "section": "\u26a1 Performance Improvements"
+      },
+      {
+        "type": "revert",
+        "section": "\u23ea Reverts"
+      },
+      {
+        "type": "docs",
+        "section": "\ud83d\udcda Documentation",
+        "hidden": false
+      },
+      {
+        "type": "style",
+        "section": "\ud83c\udfa8 Styles",
+        "hidden": true
+      },
+      {
+        "type": "chore",
+        "section": "\ud83d\udd27 Chores",
+        "hidden": true
+      },
+      {
+        "type": "refactor",
+        "section": "\u267b\ufe0f Code Refactoring"
+      },
+      {
+        "type": "test",
+        "section": "\ud83e\uddea Tests",
+        "hidden": true
+      },
+      {
+        "type": "build",
+        "section": "\ud83c\udfd7\ufe0f Build System",
+        "hidden": true
+      },
+      {
+        "type": "ci",
+        "section": "\ud83d\udc77 Continuous Integration",
+        "hidden": true
+      }
     ]
   }
 }

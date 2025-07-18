@@ -25,15 +25,15 @@ class GraphValidator:
         # None is not valid
         if node_id is None:
             return False
-            
+
         # Empty strings are not valid
         if isinstance(node_id, str) and not node_id:
             return False
-            
+
         # Lists and dicts are not valid node IDs
         if isinstance(node_id, (list, dict)):
             return False
-            
+
         # Node IDs can be non-empty strings, integers, or tuples
         return isinstance(node_id, (str, int, tuple))
 
@@ -207,9 +207,11 @@ class GraphValidator:
         return measure in valid_measures
 
     @staticmethod
-    def validate_file_format(file_format: str | Any, operation: str | list = "export") -> bool | tuple[bool, str | None]:
+    def validate_file_format(
+        file_format: str | Any, operation: str | list = "export"
+    ) -> bool | tuple[bool, str | None]:
         """Validate file format for import/export.
-        
+
         This method supports two signatures for backward compatibility:
         1. validate_file_format(format_str, operation="export") -> bool
         2. validate_file_format(filepath, [formats]) -> tuple[bool, str | None]
@@ -219,7 +221,7 @@ class GraphValidator:
             filepath = file_format
             expected_formats = operation
             return GraphValidator.validate_file_path_format(filepath, expected_formats)
-        
+
         # Original implementation
         if operation == "export":
             valid_formats = {
@@ -337,10 +339,35 @@ class GraphValidator:
 
         # Reserved names (including Windows reserved names)
         reserved_names = {
-            "graph", "graphs", "list", "all", "none", "null", "undefined",
-            "con", "prn", "aux", "nul", "com1", "com2", "com3", "com4",
-            "com5", "com6", "com7", "com8", "com9", "lpt1", "lpt2", "lpt3",
-            "lpt4", "lpt5", "lpt6", "lpt7", "lpt8", "lpt9"
+            "graph",
+            "graphs",
+            "list",
+            "all",
+            "none",
+            "null",
+            "undefined",
+            "con",
+            "prn",
+            "aux",
+            "nul",
+            "com1",
+            "com2",
+            "com3",
+            "com4",
+            "com5",
+            "com6",
+            "com7",
+            "com8",
+            "com9",
+            "lpt1",
+            "lpt2",
+            "lpt3",
+            "lpt4",
+            "lpt5",
+            "lpt6",
+            "lpt7",
+            "lpt8",
+            "lpt9",
         }
         if graph_id.lower() in reserved_names:
             return False, f"Graph ID '{graph_id}' is reserved"
@@ -363,19 +390,21 @@ class GraphValidator:
         # Handle None and empty string cases
         if filepath is None:
             return False, "File path cannot be None"
-        
+
         if isinstance(filepath, str) and not filepath.strip():
             return False, "File path cannot be empty"
-            
+
         try:
             path = Path(filepath)
-            
+
             # Security checks for path traversal
             if ".." in str(filepath):
                 return False, "Path traversal attempts are not allowed"
-            
+
             # Check for URL-like paths
-            if isinstance(filepath, str) and ("://" in filepath or filepath.startswith("file:")):
+            if isinstance(filepath, str) and (
+                "://" in filepath or filepath.startswith("file:")
+            ):
                 return False, "URL paths are not allowed"
 
             # Check file exists
@@ -465,7 +494,9 @@ class GraphValidator:
                         if "id" not in node:
                             errors.append(f"Node at index {i} missing 'id' field")
                         elif not GraphValidator.validate_node_id(node.get("id")):
-                            errors.append(f"Invalid node ID at index {i}: {node.get('id')}")
+                            errors.append(
+                                f"Invalid node ID at index {i}: {node.get('id')}"
+                            )
                     elif not GraphValidator.validate_node_id(node):
                         errors.append(f"Invalid node ID at index {i}: {node}")
 

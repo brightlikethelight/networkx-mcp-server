@@ -45,7 +45,7 @@ class TestGraphValidationErrors:
             {"nodes": "not_a_list"},
             {"edges": 123},
             {"nodes": [{"id": None}]},
-            {"edges": [[1, 2, 3, 4, 5]]}
+            {"edges": [[1, 2, 3, 4, 5]]},
         ]
         for data in malformed_data:
             valid, errors = GraphValidator.validate_graph_data(data)
@@ -206,6 +206,7 @@ class TestAlgorithmErrors:
         """Setup test graphs."""
         # Import the global graph_manager from the server
         from networkx_mcp.server import graph_manager
+
         self.manager = graph_manager
 
         # Clean up any existing test graphs
@@ -252,6 +253,7 @@ class TestAlgorithmErrors:
         result = shortest_path(graph_name="empty", source="A", target="B")
         assert "error" in result
 
+
 class TestIOErrors:
     """Test I/O operation error handling."""
 
@@ -294,8 +296,9 @@ class TestVisualizationErrors:
     @patch("matplotlib.pyplot.savefig")
     def test_matplotlib_save_error(self, mock_savefig):
         """Test handling of matplotlib save errors."""
-        from networkx_mcp.visualization.matplotlib_visualizer import \
-            MatplotlibVisualizer
+        from networkx_mcp.visualization.matplotlib_visualizer import (
+            MatplotlibVisualizer,
+        )
 
         # Mock savefig to raise an error
         mock_savefig.side_effect = OSError("Cannot save figure")

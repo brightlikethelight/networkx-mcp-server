@@ -42,6 +42,7 @@ Response time: Minimal is faster (direct NetworkX vs abstraction layers)
 ## Installation & Usage
 
 ### Basic Installation
+
 ```bash
 pip install networkx
 git clone https://github.com/your-repo/networkx-mcp-server
@@ -50,6 +51,7 @@ pip install -e .
 ```
 
 ### Docker Usage
+
 ```bash
 # Minimal implementation (recommended)
 docker build -f Dockerfile.working -t networkx-mcp .
@@ -60,6 +62,7 @@ docker run -e USE_MINIMAL_SERVER=false -it networkx-mcp
 ```
 
 ### Running Tests
+
 ```bash
 # Tests that actually work
 pytest tests/working/ -v
@@ -76,6 +79,7 @@ pytest tests/working/ -v
 ## What Changed?
 
 ### ✅ What We Fixed
+
 1. **Tests actually run** - 13 comprehensive tests with 100% pass rate
 2. **Honest documentation** - No more claims about "minimal" 900-line servers
 3. **Working deployment** - Docker images that build and run
@@ -83,6 +87,7 @@ pytest tests/working/ -v
 5. **Clear error messages** - "Graph 'test' not found. Available: ['graph1']"
 
 ### 🗑️ What We Removed
+
 1. **htmlcov/** - 70+ HTML files committed to git (seriously?)
 2. **archive/** - Old implementations rotting in the repo
 3. **Fabricated reports** - Performance claims with negative memory usage
@@ -90,6 +95,7 @@ pytest tests/working/ -v
 5. **Broken features** - Visualization that never worked, Redis that wasn't tested
 
 ### 🏗️ Architecture Now
+
 ```
 Before (Chaos):                After (Clarity):
 src/                           src/
@@ -108,13 +114,16 @@ src/                           src/
 ## For Developers
 
 ### Contributing to Minimal Implementation
+
 The minimal implementation is in `src/networkx_mcp/server_minimal.py`. It's intentionally simple:
+
 - Direct NetworkX calls
 - No unnecessary abstraction
 - Clear error handling
 - Comprehensive tests
 
 ### Working on Legacy (Not Recommended)
+
 The legacy implementation is in `src/networkx_mcp/server_legacy.py`. It's a 900-line monument to overthinking. We recommend migrating to minimal instead of fixing legacy.
 
 ## Lessons Learned

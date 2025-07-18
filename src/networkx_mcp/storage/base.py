@@ -37,6 +37,7 @@ class StorageBackend(ABC):
         """Context manager for atomic operations."""
         # This is an abstract method, implementations should yield a Transaction
         raise NotImplementedError("Subclasses must implement transaction()")
+
     # yield  # type: ignore[unreachable]  # Removed unreachable code
 
     @abstractmethod

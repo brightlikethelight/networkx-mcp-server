@@ -6,12 +6,12 @@ from typing import Any
 import networkx as nx
 
 # Import MCP error classes
-from ..errors import GraphNotFoundError, GraphAlreadyExistsError, ValidationError
+from ..errors import GraphAlreadyExistsError, GraphNotFoundError, ValidationError
 
 
 class GraphManager:
     """Manages NetworkX graph instances and operations.
-    
+
     ⚠️  PERFORMANCE CHARACTERISTICS (measured):
     - Graph creation: ~935ms (due to MCP protocol overhead)
     - Basic operations: 10-25ms per call
@@ -51,8 +51,11 @@ class GraphManager:
         }
 
         if graph_type not in graph_classes:
-            raise ValidationError("graph_type", graph_type, 
-                                f"Must be one of: {list(graph_classes.keys())}")
+            raise ValidationError(
+                "graph_type",
+                graph_type,
+                f"Must be one of: {list(graph_classes.keys())}",
+            )
 
         self.graphs[graph_id] = graph_classes[graph_type](**kwargs)
         self.metadata[graph_id] = {
@@ -96,14 +99,11 @@ class GraphManager:
             }
             for gid in self.graphs
         ]
-    
+
     def list_graphs_with_info(self) -> dict[str, dict[str, Any]]:
         """List all graphs with full metadata info."""
         return {
-            gid: {
-                "graph": self.graphs[gid],
-                "metadata": self.metadata[gid]
-            }
+            gid: {"graph": self.graphs[gid], "metadata": self.metadata[gid]}
             for gid in self.graphs
         }
 
@@ -125,10 +125,10 @@ class GraphManager:
         self, graph_id: str, nodes: list[str | int | tuple]
     ) -> dict[str, Any]:
         """Add multiple nodes to a graph.
-        
+
         ⚠️ PERFORMANCE WARNING: Scaling characteristics (measured):
         - 1K nodes: ~130ms
-        - 5K nodes: ~590ms  
+        - 5K nodes: ~590ms
         - 10K nodes: ~1.2s
         Large batches may cause client timeouts.
         """
@@ -161,7 +161,7 @@ class GraphManager:
 
     def add_edges_from(self, graph_id: str, edges: list[tuple]) -> dict[str, Any]:
         """Add multiple edges to a graph.
-        
+
         ⚠️ PERFORMANCE WARNING: Similar scaling to nodes:
         - 1K edges: ~110ms
         - 5K edges: ~620ms

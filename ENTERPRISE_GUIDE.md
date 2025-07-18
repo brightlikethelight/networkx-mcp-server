@@ -96,6 +96,7 @@ networkx-mcp-enterprise
 ```
 
 Clients must include the API key in headers:
+
 ```
 X-API-Key: your-secure-api-key-here
 ```
@@ -149,7 +150,7 @@ Protect against abuse with configurable rate limits:
     "requests_per_minute": 60,    // Token bucket with burst handling
     "requests_per_hour": 1000,    // Sliding window limit
     "burst_size": 10,             // Burst capacity
-    
+
     // Operation-specific limits
     "visualize_graph": 10,        // Heavy operations get lower limits
     "pagerank": 20,
@@ -194,6 +195,7 @@ curl http://localhost:8090/metrics
 ```
 
 Key metrics:
+
 - `networkx_mcp_requests_total` - Request count by operation and status
 - `networkx_mcp_request_duration_seconds` - Request latency
 - `networkx_mcp_auth_attempts_total` - Authentication attempts
@@ -391,27 +393,27 @@ NETWORKX_MCP_SERVER_PORT=8080
 {
   "enterprise_mode": true,
   "development_mode": false,
-  
+
   "security": {
     "api_key_enabled": true,
     "api_keys": ["secure-key-1", "secure-key-2"],
     "api_key_header": "X-API-Key",
-    
+
     "oauth_enabled": false,
     "oauth_client_id": "",
     "oauth_client_secret": "",
     "oauth_auth_url": "",
     "oauth_token_url": "",
     "oauth_scopes": ["graph:read", "graph:write"],
-    
+
     "jwt_secret": "auto-generated-if-empty",
     "jwt_algorithm": "HS256",
     "jwt_expiry_hours": 24,
-    
+
     "rbac_enabled": true,
     "admin_users": []
   },
-  
+
   "rate_limit": {
     "enabled": true,
     "requests_per_minute": 60,
@@ -421,21 +423,21 @@ NETWORKX_MCP_SERVER_PORT=8080
     "max_memory_mb": 512,
     "max_execution_time": 30
   },
-  
+
   "monitoring": {
     "metrics_enabled": true,
     "metrics_port": 8090,
     "metrics_path": "/metrics",
-    
+
     "log_level": "INFO",
     "log_format": "json",
     "audit_enabled": true,
     "audit_log_file": null,
-    
+
     "health_check_enabled": true,
     "health_check_port": 8091
   },
-  
+
   "server": {
     "host": "localhost",
     "port": 8080,
@@ -484,6 +486,7 @@ export NETWORKX_MCP_SECURITY_API_KEYS="$(cat /etc/secrets/networkx-api-keys)"
 ### 4. Monitoring & Alerting
 
 Set up alerts for:
+
 - High error rates (`networkx_mcp_errors_total`)
 - Authentication failures (`networkx_mcp_auth_attempts_total{result="failure"}`)
 - Rate limit violations (`networkx_mcp_rate_limit_hits_total`)
@@ -570,6 +573,7 @@ class GraphSizeRateLimiter:
 ### Common Issues
 
 **Authentication Failures**
+
 ```bash
 # Check API key configuration
 echo $NETWORKX_MCP_SECURITY_API_KEYS
@@ -579,6 +583,7 @@ curl -H "X-API-Key: your-key" http://localhost:8080/user/info
 ```
 
 **Rate Limiting**
+
 ```bash
 # Check current limits
 curl -H "X-API-Key: your-key" http://localhost:8080/user/limits
@@ -588,6 +593,7 @@ curl -X POST -H "X-API-Key: admin-key" http://localhost:8080/admin/reset-limits/
 ```
 
 **Performance Issues**
+
 ```bash
 # Check metrics
 curl http://localhost:8090/metrics | grep networkx_mcp_memory
@@ -622,8 +628,8 @@ curl http://localhost:8091/health/detailed
 
 - **Documentation**: [GitHub Wiki](https://github.com/Bright-L01/networkx-mcp-server/wiki)
 - **Issues**: [GitHub Issues](https://github.com/Bright-L01/networkx-mcp-server/issues)
-- **Security**: Report security issues to security@networkx-mcp.com
-- **Enterprise Support**: Contact enterprise@networkx-mcp.com
+- **Security**: Report security issues to <security@networkx-mcp.com>
+- **Enterprise Support**: Contact <enterprise@networkx-mcp.com>
 
 ---
 

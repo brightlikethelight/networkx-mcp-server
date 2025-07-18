@@ -5,6 +5,7 @@
 <!-- Provide a clear and concise summary of your changes -->
 
 **Type of Change:**
+
 - [ ] 🐛 Bug fix (non-breaking change that fixes an issue)
 - [ ] ✨ New feature (non-breaking change that adds functionality)
 - [ ] 💥 Breaking change (fix or feature that would cause existing functionality to not work as expected)
@@ -26,18 +27,22 @@ Relates to #(issue number)
 <!-- Describe the changes made in detail -->
 
 ### Added
+
 - New feature X that allows users to...
 - New MCP tool `tool_name` for...
 
 ### Changed
+
 - Modified algorithm Y to improve performance by...
 - Updated API endpoint Z to...
 
 ### Fixed
+
 - Resolved issue where...
 - Fixed memory leak in...
 
 ### Removed
+
 - Deprecated function A because...
 - Removed unused dependency B...
 
@@ -46,6 +51,7 @@ Relates to #(issue number)
 <!-- Describe how you tested your changes -->
 
 ### Test Coverage
+
 - [ ] Unit tests added/updated
 - [ ] Integration tests added/updated
 - [ ] Property-based tests added/updated
@@ -53,12 +59,14 @@ Relates to #(issue number)
 - [ ] Performance tests added/updated
 
 ### Manual Testing
+
 - [ ] Tested on local development environment
 - [ ] Tested with different MCP clients
 - [ ] Tested with various graph sizes
 - [ ] Verified backward compatibility
 
 ### Test Results
+
 ```bash
 # Include relevant test results
 pytest tests/ --cov=src/networkx_mcp --cov-report=term-missing
@@ -71,12 +79,14 @@ pytest tests/ --cov=src/networkx_mcp --cov-report=term-missing
 <!-- If applicable, describe performance implications -->
 
 ### Benchmarks
+
 - [ ] No performance impact
 - [ ] Performance improvement: X% faster
 - [ ] Minor performance impact: X% slower (justified because...)
 - [ ] Benchmarks added/updated
 
 ### Memory Usage
+
 - [ ] No memory impact
 - [ ] Reduced memory usage
 - [ ] Increased memory usage (justified because...)
@@ -86,16 +96,18 @@ pytest tests/ --cov=src/networkx_mcp --cov-report=term-missing
 <!-- List any breaking changes and migration instructions -->
 
 **Breaking Changes:**
+
 - None ✅
 - Changed API endpoint X (migration: ...)
 - Modified function signature Y (migration: ...)
 
 **Migration Guide:**
+
 ```python
 # Before
 old_function(param1, param2)
 
-# After  
+# After
 new_function(param1, param2, new_param3)
 ```
 
@@ -115,6 +127,7 @@ new_function(param1, param2, new_param3)
 <!-- Ensure all items are checked before submitting -->
 
 ### Code Quality
+
 - [ ] Code follows project style guidelines
 - [ ] Self-review completed
 - [ ] No TODO comments left in production code
@@ -122,6 +135,7 @@ new_function(param1, param2, new_param3)
 - [ ] Logging added where appropriate
 
 ### Testing & Validation
+
 - [ ] All tests pass locally
 - [ ] New tests added for new functionality
 - [ ] Test coverage maintained/improved
@@ -129,12 +143,14 @@ new_function(param1, param2, new_param3)
 - [ ] No regressions introduced
 
 ### Dependencies & Security
+
 - [ ] No new dependencies added (or justified in description)
 - [ ] Security implications considered
 - [ ] No sensitive data exposed
 - [ ] Input validation implemented where needed
 
 ### Git & Process
+
 - [ ] Commits follow [Conventional Commits](https://conventionalcommits.org/) format
 - [ ] Branch is up to date with main
 - [ ] Clean commit history (squashed if needed)
@@ -178,11 +194,13 @@ new_function(param1, param2, new_param3)
 <!-- Thank contributors and reviewers -->
 
 **Contributors:**
+
 - @username (implementation)
 - @username (testing)
 - @username (review)
 
 **Reviewers Requested:**
+
 - @maintainer1
 - @domain-expert
 
@@ -191,16 +209,19 @@ new_function(param1, param2, new_param3)
 <!-- Any additional context or notes -->
 
 ### Implementation Details
+
 - Chose approach X over Y because...
 - Algorithm complexity is O(n) which is acceptable because...
 - Used library Z for...
 
 ### Future Work
+
 - Follow-up issue needed for...
 - Could be extended to support...
 - Performance could be further improved by...
 
 ### Questions for Reviewers
+
 - Should we consider alternative approach X?
 - Is the performance impact acceptable?
 - Any concerns about the API design?
@@ -208,10 +229,12 @@ new_function(param1, param2, new_param3)
 ---
 
 **Ready for Review:** <!-- Check when ready -->
+
 - [ ] This PR is ready for review
 - [ ] This is a draft PR (work in progress)
 
 **Post-merge Tasks:** <!-- If applicable -->
+
 - [ ] Update documentation website
 - [ ] Announce feature in discussions
 - [ ] Create follow-up issues

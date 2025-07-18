@@ -7,6 +7,7 @@ from collections import deque
 from dataclasses import dataclass
 
 from ..core.base import Component
+
 # Monitoring module removed - using simple logging instead
 
 logger = logging.getLogger(__name__)
@@ -195,7 +196,8 @@ class RateLimiter(Component):
 
     # @with_logging_context removed - monitoring module deleted
     async def check_multiple_limits(
-        self, checks: list[tuple[str, str]]  # [(identifier, limit_type), ...]
+        self,
+        checks: list[tuple[str, str]],  # [(identifier, limit_type), ...]
     ) -> RateLimitResult:
         """Check multiple rate limits and return most restrictive result."""
         results = []

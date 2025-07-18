@@ -5,15 +5,18 @@ We're transitioning from a complex 16,000-line implementation to a simple 150-li
 ## For Current Users
 
 ### Immediate Action Required: None
+
 Your existing usage will continue to work. However, we strongly recommend migrating to the new implementation.
 
 ### To Use the New Implementation
+
 ```bash
 export USE_MINIMAL_SERVER=true
 # Then run as normal
 ```
 
 ### Benefits of Migrating
+
 - **22% less memory usage** (37MB vs 47.7MB)
 - **Better error messages** ("Graph 'test' not found. Available: ['graph1']")
 - **Actually tested** (13 tests vs 0 working tests)
@@ -28,14 +31,18 @@ export USE_MINIMAL_SERVER=true
 ## What Changed?
 
 ### The Problem We Discovered
+
 Our "minimal" server was:
+
 - 909 lines (not minimal)
 - 0% test coverage (claims of "comprehensive testing" were false)
 - Couldn't be deployed (Docker builds failed)
 - Used fake performance benchmarks (negative memory usage?)
 
 ### The Solution We Built
+
 A **actually minimal** server that:
+
 - 150 lines total
 - 100% test coverage (13 tests, all pass)
 - Deploys in Docker

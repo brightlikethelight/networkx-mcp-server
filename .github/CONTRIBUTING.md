@@ -28,22 +28,26 @@ Thank you for your interest in contributing to the NetworkX MCP Server! This doc
 
 1. **Fork the repository** and clone your fork
 2. **Create a virtual environment**:
+
    ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
 3. **Install development dependencies**:
+
    ```bash
    pip install -e ".[dev]"
    ```
 
 4. **Install pre-commit hooks**:
+
    ```bash
    pre-commit install
    ```
 
 5. **Verify setup**:
+
    ```bash
    pytest tests/unit/test_server_minimal.py -v
    ```
@@ -53,18 +57,21 @@ Thank you for your interest in contributing to the NetworkX MCP Server! This doc
 We maintain high code quality standards:
 
 **Formatting and Linting**:
+
 - Code formatted with `black` and `ruff`
 - Imports sorted with `isort`
 - Type hints required for all functions
 - Docstrings required (Google style)
 
 **Testing**:
+
 - All new code must include tests
 - Maintain 80%+ test coverage
 - Tests should be fast (unit tests < 1s each)
 - Follow existing test patterns
 
 **Architecture**:
+
 - Follow modular architecture principles
 - Single responsibility per module
 - Clear interfaces between components
@@ -73,6 +80,7 @@ We maintain high code quality standards:
 #### Pull Request Process
 
 1. **Create a feature branch**:
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
@@ -84,6 +92,7 @@ We maintain high code quality standards:
    - Ensure all tests pass
 
 3. **Commit with semantic messages**:
+
    ```bash
    git commit -m "feat: add new graph algorithm for community detection"
    ```
@@ -112,6 +121,7 @@ We use [Conventional Commits](https://www.conventionalcommits.org/):
 ```
 
 **Types**:
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
@@ -121,6 +131,7 @@ We use [Conventional Commits](https://www.conventionalcommits.org/):
 - `chore`: Maintenance tasks
 
 **Scopes**:
+
 - `core`: Core functionality
 - `algorithms`: Graph algorithms
 - `handlers`: MCP handlers
@@ -130,6 +141,7 @@ We use [Conventional Commits](https://www.conventionalcommits.org/):
 - `ci`: CI/CD pipeline
 
 **Examples**:
+
 ```bash
 feat(algorithms): add betweenness centrality calculation
 fix(core): resolve memory leak in graph storage
@@ -163,19 +175,19 @@ src/networkx_mcp/
 # Choose appropriate module (e.g., advanced/community/)
 class CommunityDetection:
     """Community detection algorithms."""
-    
+
     @staticmethod
     def new_algorithm(graph: nx.Graph, **params) -> Dict[str, Any]:
         """
         New algorithm description.
-        
+
         Parameters:
         -----------
         graph : nx.Graph
             Input graph
         **params : dict
             Algorithm parameters
-            
+
         Returns:
         --------
         Dict[str, Any]
@@ -191,15 +203,15 @@ class CommunityDetection:
 # tests/unit/test_community.py
 class TestCommunityDetection:
     """Test community detection algorithms."""
-    
+
     def test_new_algorithm(self):
         """Test new algorithm."""
         # Create test graph
         G = nx.karate_club_graph()
-        
+
         # Run algorithm
         result = CommunityDetection.new_algorithm(G)
-        
+
         # Assertions
         assert result["status"] == "success"
         assert "result" in result
@@ -208,12 +220,14 @@ class TestCommunityDetection:
 ### Documentation
 
 Update documentation when:
+
 - Adding new features
 - Changing existing APIs
 - Improving architecture
 - Adding examples
 
 Documentation files:
+
 - `ARCHITECTURE.md` - System architecture
 - `docs/MODULE_STRUCTURE.md` - Module organization
 - `docs/DEVELOPMENT_GUIDE.md` - Development guide
@@ -288,6 +302,7 @@ pytest tests/unit/test_server_minimal.py::TestServerBasics::test_import
 ### Version Numbering
 
 We use [Semantic Versioning](https://semver.org/):
+
 - `MAJOR.MINOR.PATCH`
 - `MAJOR`: Breaking changes
 - `MINOR`: New features (backward compatible)
@@ -325,6 +340,7 @@ We follow the [Contributor Covenant Code of Conduct](https://www.contributor-cov
 ## 🏆 Recognition
 
 Contributors are recognized in:
+
 - Release notes for their contributions
 - The project's contributors page
 - Special recognition for significant contributions

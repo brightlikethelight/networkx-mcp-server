@@ -5,9 +5,11 @@ This directory contains example code for using the NetworkX MCP Server.
 ## Examples
 
 ### docker_client.py
+
 A Python client that demonstrates how to communicate with the MCP server running in a Docker container.
 
 **Features:**
+
 - Starts the server in a Docker container
 - Sends JSON-RPC requests via stdin/stdout
 - Demonstrates all major operations:
@@ -18,6 +20,7 @@ A Python client that demonstrates how to communicate with the MCP server running
   - Getting graph information
 
 **Usage:**
+
 ```bash
 # Make sure Docker is running and the image is built
 docker build -t networkx-mcp:0.1.0 ..
@@ -31,17 +34,20 @@ python docker_client.py
 To create your own MCP client:
 
 1. **Start the container** with stdin enabled:
+
    ```python
    subprocess.Popen(['docker', 'run', '-i', '--rm', 'networkx-mcp:0.1.0'], ...)
    ```
 
 2. **Send JSON-RPC messages** as line-delimited JSON:
+
    ```python
    request = {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {...}}
    stdin.write(json.dumps(request) + '\n')
    ```
 
 3. **Read responses** from stdout:
+
    ```python
    response = json.loads(stdout.readline())
    ```

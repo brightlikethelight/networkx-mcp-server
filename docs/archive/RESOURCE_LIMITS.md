@@ -1,22 +1,26 @@
 # Resource Limits and DoS Prevention
 
 ## Overview
+
 This document describes the resource limits implemented in the NetworkX MCP Server to prevent Denial of Service (DoS) attacks and ensure server stability.
 
 ## 1. Memory Limits
 
 ### Configuration
+
 - **Max Memory**: 1GB (default, configurable via `MAX_MEMORY_MB` env var)
 - **Max Graph Size**: 100MB per graph (configurable via `MAX_GRAPH_SIZE_MB`)
 - **Memory Check Threshold**: Warnings at 80% usage
 
 ### Features
+
 - Real-time memory monitoring every 30 seconds
 - Automatic garbage collection when memory > 90%
 - Memory usage estimation for graphs before operations
 - Process memory tracking with psutil
 
 ### Example
+
 ```python
 # Memory is checked before and after operations
 create_graph("test", "undirected", {
@@ -28,17 +32,20 @@ create_graph("test", "undirected", {
 ## 2. Operation Timeouts
 
 ### Configuration
+
 - **Default Timeout**: 30 seconds (configurable via `OPERATION_TIMEOUT`)
 - Applied to all graph operations automatically
 - Prevents long-running operations from blocking the server
 
 ### Protected Operations
+
 - Graph creation and modification
 - Shortest path algorithms
 - Graph analysis operations
 - All MCP tool functions
 
 ### Example
+
 ```python
 # Operations that take too long are terminated
 @timeout(seconds=30)
@@ -49,16 +56,19 @@ def shortest_path(...):
 ## 3. Concurrent Request Limits
 
 ### Configuration
+
 - **Max Concurrent Requests**: 10 (configurable via `MAX_CONCURRENT_REQUESTS`)
 - Thread-safe request counting
 - Automatic slot release after operation
 
 ### Features
+
 - Prevents resource exhaustion from parallel requests
 - Returns "Server busy" error when limit reached
 - Fair queuing with automatic cleanup
 
 ### Example
+
 ```python
 # When 10 requests are active, new ones are rejected
 for i in range(20):
@@ -68,18 +78,22 @@ for i in range(20):
 ## 4. Graph Size Validation
 
 ### Limits
+
 - **Max Nodes**: 100,000 per graph
 - **Max Edges**: 1,000,000 per graph
 - **Max Graph Memory**: 100MB estimated size
 
 ### Operation Feasibility
+
 Different operations have different complexity limits:
+
 - `shortest_path`: Max 10,000 nodes (O(V + E))
 - `all_pairs_shortest_path`: Max 1,000 nodes (O(V³))
 - `betweenness_centrality`: Max 5,000 nodes (O(VE))
 - `diameter`: Max 1,000 nodes (O(V³))
 
 ### Example
+
 ```python
 # Large graphs are rejected
 create_graph("huge", "undirected", {
@@ -92,11 +106,13 @@ create_graph("huge", "undirected", {
 ## 5. Rate Limiting
 
 ### Configuration
+
 - **Requests per minute**: 60 (configurable via `REQUESTS_PER_MINUTE`)
 - Sliding window rate limiting
 - Per-process (not per-user)
 
 ### Features
+
 - Prevents request flooding
 - Automatic cleanup of old request timestamps
 - Returns rate limit error when exceeded
@@ -127,6 +143,7 @@ export REQUESTS_PER_MINUTE=120      # 120 requests/minute
 ## 7. Resource Monitoring
 
 ### Status Endpoint
+
 Use the `resource_status()` tool to check current usage:
 
 ```json
@@ -152,6 +169,7 @@ Use the `resource_status()` tool to check current usage:
 ```
 
 ### Background Monitoring
+
 - Automatic memory monitoring every 30 seconds
 - Warning logs when approaching limits
 - Automatic garbage collection when needed
@@ -159,6 +177,7 @@ Use the `resource_status()` tool to check current usage:
 ## 8. Error Messages
 
 Safe error messages that don't expose internals:
+
 - `"Graph would exceed memory limits"`
 - `"Operation timed out"`
 - `"Server busy. Please try again later."`
@@ -168,16 +187,19 @@ Safe error messages that don't expose internals:
 ## 9. Testing Resource Limits
 
 ### Unit Tests
+
 ```bash
 python -m pytest tests/security/test_resource_limits.py -v
 ```
 
 ### Demo Script
+
 ```bash
 python tests/security/test_dos_prevention_demo.py
 ```
 
 ### Attack Scenarios Tested
+
 1. **Large Graph Creation**: Attempting to create graphs with millions of nodes
 2. **Memory Exhaustion**: Creating many graphs to exhaust memory
 3. **Concurrent Flooding**: Sending many parallel requests
@@ -187,18 +209,21 @@ python tests/security/test_dos_prevention_demo.py
 ## 10. Best Practices
 
 ### For Server Operators
+
 1. Monitor resource usage regularly via `resource_status()`
 2. Adjust limits based on available hardware
 3. Set up alerts for high memory usage
 4. Review logs for repeated limit violations (potential attacks)
 
 ### For Developers
+
 1. Always use `@with_resource_limits` decorator on new operations
 2. Check operation feasibility before expensive algorithms
 3. Estimate memory usage for large data structures
 4. Handle ResourceLimitError appropriately
 
 ### For Users
+
 1. Keep graphs under 100,000 nodes for best performance
 2. Batch operations when possible
 3. Use pagination for large result sets

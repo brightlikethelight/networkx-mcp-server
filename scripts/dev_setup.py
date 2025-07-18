@@ -306,9 +306,7 @@ For PyCharm users:
 3. Select: {venv_python}
 4. Enable pytest as test runner
 5. Configure code style to use Black formatter
-        """.format(
-            venv_python=self.venv_path / "bin" / "python"
-        )
+        """.format(venv_python=self.venv_path / "bin" / "python")
 
         with open(self.project_root / "PYCHARM_SETUP.md", "w") as f:
             f.write(pycharm_hint)
@@ -328,7 +326,7 @@ services:
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
-    
+
   redis-commander:
     image: rediscommander/redis-commander:latest
     environment:
@@ -337,7 +335,7 @@ services:
       - "8081:8081"
     depends_on:
       - redis
-      
+
 volumes:
   redis_data:
 """
@@ -422,9 +420,9 @@ from pathlib import Path
 def run_tests(args):
     '''Run tests with various options.'''
     project_root = Path(__file__).parent.parent
-    
+
     cmd = [sys.executable, "-m", "pytest"]
-    
+
     if args.unit:
         cmd.append("tests/unit/")
     elif args.integration:
@@ -437,23 +435,23 @@ def run_tests(args):
         cmd.append("tests/performance/")
     else:
         cmd.append("tests/")
-    
+
     if args.coverage:
         cmd.extend([
             "--cov=src/networkx_mcp",
             "--cov-report=term-missing",
             "--cov-report=html:htmlcov"
         ])
-    
+
     if args.verbose:
         cmd.append("-v")
-    
+
     if args.parallel:
         cmd.extend(["-n", "auto"])
-    
+
     if args.fast:
         cmd.extend(["-x", "--tb=short"])
-    
+
     subprocess.run(cmd, cwd=project_root)
 
 if __name__ == "__main__":
@@ -467,7 +465,7 @@ if __name__ == "__main__":
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     parser.add_argument("--parallel", "-n", action="store_true", help="Run tests in parallel")
     parser.add_argument("--fast", "-x", action="store_true", help="Stop on first failure")
-    
+
     args = parser.parse_args()
     run_tests(args)
 """

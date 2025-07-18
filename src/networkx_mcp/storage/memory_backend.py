@@ -5,7 +5,6 @@ from collections import defaultdict
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from typing import Any
-import copy
 
 import networkx as nx
 
@@ -96,10 +95,10 @@ class MemoryBackend(StorageBackend):
         async with self._lock:
             # Estimate graph size (rough approximation)
             estimated_size = (
-                graph.number_of_nodes() * 100 +  # Assume 100 bytes per node
-                graph.number_of_edges() * 200     # Assume 200 bytes per edge
+                graph.number_of_nodes() * 100  # Assume 100 bytes per node
+                + graph.number_of_edges() * 200  # Assume 200 bytes per edge
             )
-            
+
             if estimated_size > self.max_size_bytes:
                 raise StorageQuotaExceededError(
                     f"Graph size ({estimated_size} bytes) exceeds limit ({self.max_size_bytes} bytes)"
@@ -107,22 +106,26 @@ class MemoryBackend(StorageBackend):
 
             # Deep copy to prevent external modifications
             graph_copy = graph.copy()
-            
+
             # Prepare metadata
             if metadata is None:
                 metadata = {}
-            
-            metadata.update({
-                "created_at": metadata.get("created_at", datetime.now(UTC).isoformat()),
-                "updated_at": datetime.now(UTC).isoformat(),
-                "num_nodes": graph.number_of_nodes(),
-                "num_edges": graph.number_of_edges(),
-            })
+
+            metadata.update(
+                {
+                    "created_at": metadata.get(
+                        "created_at", datetime.now(UTC).isoformat()
+                    ),
+                    "updated_at": datetime.now(UTC).isoformat(),
+                    "num_nodes": graph.number_of_nodes(),
+                    "num_edges": graph.number_of_edges(),
+                }
+            )
 
             # Store the graph
             self._storage[user_id][graph_id] = {
                 "graph": graph_copy,
-                "metadata": metadata.copy()
+                "metadata": metadata.copy(),
             }
 
             return True
@@ -137,10 +140,10 @@ class MemoryBackend(StorageBackend):
         async with self._lock:
             user_data = self._storage.get(user_id, {})
             graph_data = user_data.get(graph_id)
-            
+
             if graph_data is None:
                 return None
-            
+
             # Return a copy to prevent external modifications
             return graph_data["graph"].copy()
 
@@ -171,19 +174,19 @@ class MemoryBackend(StorageBackend):
 
         async with self._lock:
             user_data = self._storage.get(user_id, {})
-            
+
             # Get all graphs sorted by updated_at
             graphs = []
             for graph_id, data in user_data.items():
                 metadata = data["metadata"].copy()
                 metadata["graph_id"] = graph_id
                 graphs.append(metadata)
-            
+
             # Sort by updated_at descending
             graphs.sort(key=lambda x: x.get("updated_at", ""), reverse=True)
-            
+
             # Apply pagination
-            return graphs[offset:offset + limit]
+            return graphs[offset : offset + limit]
 
     async def get_graph_metadata(
         self, user_id: str, graph_id: str, tx: Transaction | None = None
@@ -195,10 +198,10 @@ class MemoryBackend(StorageBackend):
         async with self._lock:
             user_data = self._storage.get(user_id, {})
             graph_data = user_data.get(graph_id)
-            
+
             if graph_data is None:
                 return None
-            
+
             metadata = graph_data["metadata"].copy()
             metadata["graph_id"] = graph_id
             return metadata
@@ -217,14 +220,14 @@ class MemoryBackend(StorageBackend):
         async with self._lock:
             user_data = self._storage.get(user_id, {})
             graph_data = user_data.get(graph_id)
-            
+
             if graph_data is None:
                 raise GraphNotFoundError(f"Graph {graph_id} not found")
-            
+
             # Update metadata
             graph_data["metadata"].update(metadata)
             graph_data["metadata"]["updated_at"] = datetime.now(UTC).isoformat()
-            
+
             return True
 
     async def get_storage_stats(self, user_id: str) -> dict[str, Any]:
@@ -234,19 +237,19 @@ class MemoryBackend(StorageBackend):
 
         async with self._lock:
             user_data = self._storage.get(user_id, {})
-            
+
             total_nodes = 0
             total_edges = 0
             total_graphs = len(user_data)
-            
+
             for graph_data in user_data.values():
                 graph = graph_data["graph"]
                 total_nodes += graph.number_of_nodes()
                 total_edges += graph.number_of_edges()
-            
+
             # Estimate storage usage
             estimated_bytes = total_nodes * 100 + total_edges * 200
-            
+
             return {
                 "total_graphs": total_graphs,
                 "total_nodes": total_nodes,

@@ -1,41 +1,82 @@
 {
-    "version": 1,
-    "project": "networkx-mcp-server",
-    "project_url": "https://github.com/brightliu/networkx-mcp-server",
-    "repo": ".",
-    "repo_subdir": "",
-    "install_command": ["python", "-m", "pip", "install", "{wheel_file}"],
-    "uninstall_command": ["return-code=any", "python", "-m", "pip", "uninstall", "-y", "{project}"],
-    "build_command": [
-        "python", "-m", "pip", "wheel", "--no-build-isolation", "-w", "{build_cache_dir}", "{build_dir}"
+  "version": 1,
+  "project": "networkx-mcp-server",
+  "project_url": "https://github.com/brightliu/networkx-mcp-server",
+  "repo": ".",
+  "repo_subdir": "",
+  "install_command": [
+    "python",
+    "-m",
+    "pip",
+    "install",
+    "{wheel_file}"
+  ],
+  "uninstall_command": [
+    "return-code=any",
+    "python",
+    "-m",
+    "pip",
+    "uninstall",
+    "-y",
+    "{project}"
+  ],
+  "build_command": [
+    "python",
+    "-m",
+    "pip",
+    "wheel",
+    "--no-build-isolation",
+    "-w",
+    "{build_cache_dir}",
+    "{build_dir}"
+  ],
+  "branches": [
+    "main"
+  ],
+  "environment_type": "virtualenv",
+  "show_commit_url": "https://github.com/brightliu/networkx-mcp-server/commit/",
+  "pythons": [
+    "3.11",
+    "3.12"
+  ],
+  "matrix": {
+    "networkx": [
+      "3.4"
     ],
-    "branches": ["main"],
-    "environment_type": "virtualenv",
-    "show_commit_url": "https://github.com/brightliu/networkx-mcp-server/commit/",
-    "pythons": ["3.11", "3.12"],
-    "matrix": {
-        "networkx": ["3.4"],
-        "numpy": ["2.0"],
-        "scipy": ["1.14"]
-    },
-    "exclude": [
-        {"python": "3.11", "networkx": "3.3"}
+    "numpy": [
+      "2.0"
     ],
-    "include": [
-        {"python": "3.11", "networkx": "3.4", "numpy": "2.0"}
-    ],
-    "benchmark_dir": "benchmarks",
-    "env_dir": ".asv/env",
-    "results_dir": ".asv/results",
-    "html_dir": ".asv/html",
-    "dvcs": "git",
-    "regressions_first_commits": {},
-    "regressions_thresholds": {
-        "cpu": 1.5,
-        "memory": 1.5
-    },
-    "hash_length": 8,
-    "plugins": ["asv_runner.benchmarks.track"],
-    "default_benchmark_timeout": 60.0,
-    "benchmark_timeout": 300.0
+    "scipy": [
+      "1.14"
+    ]
+  },
+  "exclude": [
+    {
+      "python": "3.11",
+      "networkx": "3.3"
+    }
+  ],
+  "include": [
+    {
+      "python": "3.11",
+      "networkx": "3.4",
+      "numpy": "2.0"
+    }
+  ],
+  "benchmark_dir": "benchmarks",
+  "env_dir": ".asv/env",
+  "results_dir": ".asv/results",
+  "html_dir": ".asv/html",
+  "dvcs": "git",
+  "regressions_first_commits": {},
+  "regressions_thresholds": {
+    "cpu": 1.5,
+    "memory": 1.5
+  },
+  "hash_length": 8,
+  "plugins": [
+    "asv_runner.benchmarks.track"
+  ],
+  "default_benchmark_timeout": 60.0,
+  "benchmark_timeout": 300.0
 }

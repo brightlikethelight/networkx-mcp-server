@@ -32,48 +32,48 @@ error() {
 # Check prerequisites
 check_prerequisites() {
     log "Checking prerequisites..."
-    
+
     command -v kubectl >/dev/null 2>&1 || error "kubectl is required but not installed"
     command -v helm >/dev/null 2>&1 || error "helm is required but not installed"
-    
+
     # Check if we can connect to cluster
     kubectl cluster-info >/dev/null 2>&1 || error "Cannot connect to Kubernetes cluster"
-    
+
     log "Prerequisites check passed"
 }
 
 # Create namespace
 create_namespace() {
     log "Creating monitoring namespace..."
-    
+
     kubectl create namespace "$NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
-    
+
     log "Namespace $NAMESPACE ready"
 }
 
 # Deploy Prometheus
 deploy_prometheus() {
     log "Deploying Prometheus..."
-    
+
     # Add Prometheus Helm repo
     helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
     helm repo update
-    
+
     # Create Prometheus configuration
     cat > /tmp/prometheus-values.yaml << EOF
 server:
   persistentVolume:
     size: 20Gi
   retention: "30d"
-  
+
   global:
     scrape_interval: 30s
     evaluation_interval: 30s
-    
+
   extraFlags:
     - web.enable-lifecycle
     - web.enable-admin-api
-    
+
 serverFiles:
   alerting_rules.yml:
 $(cat monitoring/prometheus/alerts.yaml | sed 's/^/    /')
@@ -82,13 +82,13 @@ alertmanager:
   enabled: true
   config:
 $(cat monitoring/prometheus/alertmanager.yaml | sed 's/^/    /')
-  
+
 pushgateway:
   enabled: false
-  
+
 nodeExporter:
   enabled: true
-  
+
 kubeStateMetrics:
   enabled: true
 EOF
@@ -98,20 +98,20 @@ EOF
         --namespace "$NAMESPACE" \
         --values /tmp/prometheus-values.yaml \
         --wait
-    
+
     log "Prometheus deployed successfully"
 }
 
 # Deploy Grafana Dashboard
 deploy_grafana_dashboard() {
     log "Deploying Grafana dashboard..."
-    
+
     # Create dashboard ConfigMap
     kubectl create configmap mcp-dashboard \
         --from-file=monitoring/grafana/dashboard.json \
         --namespace="$NAMESPACE" \
         --dry-run=client -o yaml | kubectl apply -f -
-    
+
     # Create dashboard provisioning config
     cat > /tmp/dashboard-provider.yaml << EOF
 apiVersion: v1
@@ -134,14 +134,14 @@ data:
 EOF
 
     kubectl apply -f /tmp/dashboard-provider.yaml
-    
+
     log "Grafana dashboard configuration deployed"
 }
 
 # Setup ServiceMonitor for MCP Server
 setup_service_monitor() {
     log "Setting up ServiceMonitor for MCP Server..."
-    
+
     cat > /tmp/mcp-service-monitor.yaml << EOF
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -166,19 +166,19 @@ spec:
 EOF
 
     kubectl apply -f /tmp/mcp-service-monitor.yaml
-    
+
     log "ServiceMonitor configured"
 }
 
 # Setup PrometheusRule for MCP alerts
 setup_prometheus_rules() {
     log "Setting up Prometheus alerting rules..."
-    
+
     kubectl create configmap mcp-alerts \
         --from-file=monitoring/prometheus/alerts.yaml \
         --namespace="$NAMESPACE" \
         --dry-run=client -o yaml | kubectl apply -f -
-    
+
     # Apply the rules to Prometheus
     cat > /tmp/mcp-prometheus-rule.yaml << EOF
 apiVersion: monitoring.coreos.com/v1
@@ -194,43 +194,43 @@ $(cat monitoring/prometheus/alerts.yaml | sed 's/^/  /')
 EOF
 
     kubectl apply -f /tmp/mcp-prometheus-rule.yaml
-    
+
     log "Prometheus alerting rules configured"
 }
 
 # Verify deployment
 verify_deployment() {
     log "Verifying monitoring deployment..."
-    
+
     # Check if Prometheus is running
     kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=prometheus \
         --namespace="$NAMESPACE" --timeout=300s
-    
+
     # Check if Grafana is running
     kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=grafana \
         --namespace="$NAMESPACE" --timeout=300s
-    
+
     # Check if AlertManager is running
     kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=alertmanager \
         --namespace="$NAMESPACE" --timeout=300s
-    
+
     log "All monitoring components are ready"
 }
 
 # Get access information
 get_access_info() {
     log "Getting access information..."
-    
+
     echo ""
     echo "=== Monitoring Access Information ==="
     echo ""
-    
+
     # Prometheus
     echo "🔥 Prometheus:"
     echo "   Port-forward: kubectl port-forward -n $NAMESPACE svc/prometheus-kube-prometheus-prometheus 9090:9090"
     echo "   URL: http://localhost:9090"
     echo ""
-    
+
     # Grafana
     echo "📊 Grafana:"
     echo "   Port-forward: kubectl port-forward -n $NAMESPACE svc/prometheus-grafana 3000:80"
@@ -238,18 +238,18 @@ get_access_info() {
     echo "   Username: admin"
     echo "   Password: $(kubectl get secret -n $NAMESPACE prometheus-grafana -o jsonpath='{.data.admin-password}' | base64 -d)"
     echo ""
-    
+
     # AlertManager
     echo "🚨 AlertManager:"
     echo "   Port-forward: kubectl port-forward -n $NAMESPACE svc/prometheus-kube-prometheus-alertmanager 9093:9093"
     echo "   URL: http://localhost:9093"
     echo ""
-    
+
     echo "📋 Dashboard:"
     echo "   Import the NetworkX MCP dashboard from monitoring/grafana/dashboard.json"
     echo "   Or use the auto-provisioned dashboard in the 'MCP' folder"
     echo ""
-    
+
     echo "✅ Monitoring setup complete!"
     echo ""
     echo "📖 Next steps:"
@@ -271,7 +271,7 @@ cleanup() {
 # Main execution
 main() {
     log "Starting NetworkX MCP Server monitoring setup..."
-    
+
     check_prerequisites
     create_namespace
     deploy_prometheus
@@ -281,7 +281,7 @@ main() {
     verify_deployment
     get_access_info
     cleanup
-    
+
     log "Monitoring setup completed successfully!"
 }
 

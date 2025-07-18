@@ -3,7 +3,9 @@
 This demo shows how to analyze a social network to find influencers, communities, and key connections.
 
 ## Scenario
+
 You're analyzing a small social network to understand:
+
 - Who are the most influential people (high centrality)
 - What communities exist
 - Who are the bridges between communities
@@ -36,6 +38,7 @@ Calculate betweenness centrality for social_network
 ```
 
 **Expected Insights:**
+
 - Degree centrality shows who has the most connections
 - Betweenness centrality reveals who are the "bridges" between groups
 
@@ -65,6 +68,7 @@ Calculate PageRank for social_network
 PageRank (Google's algorithm) shows overall importance in the network.
 
 ## Real-World Applications
+
 - LinkedIn: Finding key connectors in professional networks
 - Marketing: Identifying influencers for campaigns
 - Organization: Understanding informal communication patterns

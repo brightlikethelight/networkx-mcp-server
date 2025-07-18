@@ -381,7 +381,6 @@ class SecurityError(Exception):
     """Base security exception."""
 
 
-
 class RateLimitError(SecurityError):
     """Rate limit exceeded exception."""
 
@@ -394,10 +393,8 @@ class AuthenticationError(SecurityError):
     """Authentication failed exception."""
 
 
-
 class AuthorizationError(SecurityError):
     """Authorization failed exception."""
-
 
 
 def require_permissions(*required_permissions: str):

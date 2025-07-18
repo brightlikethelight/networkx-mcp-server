@@ -2,9 +2,11 @@
 
 import json
 
-from networkx_mcp.security.validation import (RequestValidator,
-                                              SecurityValidator,
-                                              ValidationResult)
+from networkx_mcp.security.validation import (
+    RequestValidator,
+    SecurityValidator,
+    ValidationResult,
+)
 
 
 class TestValidationResult:

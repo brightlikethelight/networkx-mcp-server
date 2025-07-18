@@ -15,21 +15,25 @@ We built a "minimal" server that used 118MB of memory while claiming to be minim
 ## Root Causes
 
 ### 1. **Import Hygiene Failure**
+
 - Nobody checked what got imported at startup
 - One line (`from .io import GraphIOHandler`) loaded entire scientific stack
 - 900+ modules for basic graph operations
 
 ### 2. **Feature Creep in Core**
+
 - Added I/O handlers to core without thinking about dependencies
 - Assumed "just in case" features were acceptable
 - No boundary between core and optional features
 
 ### 3. **No Memory Budget**
+
 - Never defined what "minimal" meant in concrete terms
 - No CI checks for memory usage
 - No profiling during development
 
 ### 4. **Copy-Paste Architecture**
+
 - Copied patterns from data science applications
 - Didn't consider that MCP servers need different trade-offs
 - Assumed all users need Excel import
@@ -51,15 +55,17 @@ from networkx_mcp.core.io import GraphIOHandler  # ← THE KILLER
 ```
 
 This imported `io_handlers.py` which contained:
+
 ```python
 import pandas as pd     # +35MB
-import scipy.sparse     # +15MB  
+import scipy.sparse     # +15MB
 import matplotlib       # +8MB
 ```
 
 ## Fixes Applied
 
 ### 1. **Broke Import Chain**
+
 ```python
 # Before (broken):
 from networkx_mcp.core.io import GraphIOHandler
@@ -71,6 +77,7 @@ def get_io_handler():
 ```
 
 ### 2. **Made Dependencies Optional**
+
 ```toml
 # pyproject.toml
 [project.optional-dependencies]
@@ -80,6 +87,7 @@ full = ["pandas", "scipy"]      # Everything
 ```
 
 ### 3. **Created Honest Documentation**
+
 - Admitted the 118MB mistake
 - Documented real memory usage (54.6MB)
 - Provided clear migration path
@@ -87,12 +95,14 @@ full = ["pandas", "scipy"]      # Everything
 ## Impact
 
 ### Before (Broken)
+
 - Memory: 118MB
 - Modules: 900+
 - Startup: Slow (loading pandas)
 - Claims: "Minimal" (false)
 
 ### After (Fixed)
+
 - Memory: 54.6MB (54% reduction)
 - Modules: ~600 (33% reduction)
 - Startup: Faster (no pandas)
@@ -101,21 +111,25 @@ full = ["pandas", "scipy"]      # Everything
 ## Lessons for Next Time
 
 ### 1. **Define "Minimal" Upfront**
+
 - Set memory budget: "< 60MB for Python + NetworkX"
 - Document what's included vs excluded
 - Test against budget in CI
 
 ### 2. **Profile Early and Often**
+
 - Memory profiling in development
 - Import tracing in CI
 - Dependency analysis before release
 
 ### 3. **Lazy Load Heavy Dependencies**
+
 - Never import pandas/scipy in core
 - Use lazy loading for optional features
 - Make users explicitly opt-in to heavy features
 
 ### 4. **Test Import Hygiene**
+
 ```python
 # Add to CI:
 def test_no_pandas_in_minimal():
@@ -124,6 +138,7 @@ def test_no_pandas_in_minimal():
 ```
 
 ### 5. **Be Architecturally Honest**
+
 - Don't claim "minimal" while loading 900+ modules
 - Document real memory usage
 - Admit mistakes and fix them
@@ -131,6 +146,7 @@ def test_no_pandas_in_minimal():
 ## Technical Details
 
 ### Memory Breakdown (Fixed)
+
 ```
 Component               Memory    Justification
 Python interpreter      16MB      Interpreter overhead
@@ -141,12 +157,13 @@ Total                   54.6MB    Realistic minimum
 ```
 
 ### Import Chain (Fixed)
+
 ```
 server_minimal.py
   → networkx (required)
   → asyncio (required)
   → json (stdlib)
-  
+
 # I/O handlers NOT imported unless explicitly requested
 ```
 

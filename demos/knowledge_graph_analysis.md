@@ -3,7 +3,9 @@
 This demo shows how to build and analyze a knowledge graph to understand concept relationships and learning paths.
 
 ## Scenario
+
 You're building a knowledge graph for a Computer Science curriculum to:
+
 - Understand prerequisite relationships
 - Find learning paths
 - Identify foundational concepts
@@ -78,6 +80,7 @@ Detect communities in cs_knowledge
 This might reveal natural groupings like "Systems", "AI/ML", "Web Technologies".
 
 ## Real-World Applications
+
 - Education: Curriculum planning and prerequisite mapping
 - Research: Understanding citation networks and influence
 - Enterprise: Mapping organizational knowledge and expertise
@@ -85,6 +88,7 @@ This might reveal natural groupings like "Systems", "AI/ML", "Web Technologies".
 - Skills Development: Creating personalized learning paths
 
 ## Extension Ideas
+
 - Add weights representing difficulty or time to learn
 - Identify knowledge gaps in curriculum
 - Recommend next topics to learn based on current knowledge

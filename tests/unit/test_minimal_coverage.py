@@ -130,9 +130,11 @@ def test_logging():
 # Test health checks
 def test_health_checks():
     """Test health check basics."""
-    from networkx_mcp.monitoring.health_checks import (HealthCheck,
-                                                       HealthCheckResult,
-                                                       HealthStatus)
+    from networkx_mcp.monitoring.health_checks import (
+        HealthCheck,
+        HealthCheckResult,
+        HealthStatus,
+    )
 
     # Test health status
     assert HealthStatus.HEALTHY.value == "healthy"

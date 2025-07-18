@@ -14,23 +14,27 @@ We provide security updates for the following versions:
 NetworkX MCP Server includes several built-in security features:
 
 ### Input Validation
+
 - All graph IDs validated against safe patterns
 - File paths restricted to safe directories
 - Format whitelisting for imports
 - Parameter validation for all MCP tools
 
 ### Memory Protection
+
 - 1GB memory limit to prevent DoS attacks
 - Automatic cleanup of large operations
 - Resource monitoring and limits
 
 ### File Security
+
 - Sandboxed file operations
 - No directory traversal allowed
 - Disabled dangerous formats (pickle)
 - Safe temporary file handling
 
 ### Network Security
+
 - Rate limiting support
 - Secure error messages (no stack traces)
 - No code execution (eval/exec disabled)
@@ -42,10 +46,13 @@ NetworkX MCP Server includes several built-in security features:
 Instead, please report security issues responsibly:
 
 ### 📧 Email
-Send security reports to: **security@networkx-mcp.org**
+
+Send security reports to: **<security@networkx-mcp.org>**
 
 ### 🔐 Encrypted Communication
+
 For sensitive reports, use our PGP key:
+
 ```
 Key ID: [TO BE ADDED]
 Fingerprint: [TO BE ADDED]
@@ -86,17 +93,21 @@ When you report a vulnerability:
 We believe in recognizing security researchers who help keep our users safe:
 
 ### Hall of Fame
+
 Contributors who responsibly disclose security issues will be:
+
 - Listed in our security hall of fame (with permission)
 - Credited in release notes
 - Thanked publicly (if desired)
 
 ### Bug Bounty
+
 While we don't currently offer monetary rewards, we're considering a bug bounty program for the future.
 
 ## 🛠️ Security Best Practices for Users
 
 ### For Developers
+
 - Always validate input from untrusted sources
 - Use the latest version of NetworkX MCP Server
 - Enable Redis authentication if using persistence
@@ -104,6 +115,7 @@ While we don't currently offer monetary rewards, we're considering a bug bounty 
 - Run the server with minimal required privileges
 
 ### For Deployment
+
 - Use Docker containers for isolation
 - Set up proper network security (firewalls, VPNs)
 - Enable logging and monitoring
@@ -111,6 +123,7 @@ While we don't currently offer monetary rewards, we're considering a bug bounty 
 - Backup and recovery procedures
 
 ### For Data
+
 - Don't process sensitive data without encryption
 - Be careful with graph data containing personal information
 - Use secure channels for data transmission
@@ -119,22 +132,26 @@ While we don't currently offer monetary rewards, we're considering a bug bounty 
 ## 📚 Security Resources
 
 ### Documentation
+
 - [Security Best Practices](docs/security-best-practices.md)
 - [Deployment Security Guide](docs/deployment-security.md)
 - [API Security Reference](docs/api-security.md)
 
 ### Tools
+
 - Security scanning is included in our CI/CD pipeline
 - Use `bandit` for additional security analysis
 - Run `safety` to check for vulnerable dependencies
 
 ### Community
+
 - Join our [Security Discussions](https://github.com/brightliu/networkx-mcp-server/discussions/categories/security)
 - Follow [@NetworkXMCP](https://twitter.com/NetworkXMCP) for security announcements
 
 ## 📝 Security Changelog
 
 ### Version 1.0.0
+
 - Initial security hardening implementation
 - Input validation and sanitization
 - Memory limits and resource protection
@@ -147,7 +164,7 @@ While we don't currently offer monetary rewards, we're considering a bug bounty 
 
 We appreciate the security research community's efforts to responsibly disclose vulnerabilities. Your work helps keep NetworkX MCP Server secure for everyone.
 
-**Contact**: security@networkx-mcp.org
+**Contact**: <security@networkx-mcp.org>
 **PGP Key**: [TO BE ADDED]
 
 ---

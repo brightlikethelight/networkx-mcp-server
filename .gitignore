@@ -4,6 +4,15 @@ __pycache__/
 *$py.class
 *.so
 .Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# Distribution / packaging
+.Python
 build/
 develop-eggs/
 dist/
@@ -16,26 +25,11 @@ parts/
 sdist/
 var/
 wheels/
-share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
 MANIFEST
-
-# Virtual environments
-venv/
-ENV/
-env/
-.venv
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.project
-.pydevproject
+pip-wheel-metadata/
 
 # Testing
 .tox/
@@ -44,48 +38,78 @@ env/
 .coverage.*
 .cache
 .pytest_cache/
-.mypy_cache/
-cover/
-*.cover
-*.py,cover
-.hypothesis/
 htmlcov/
+.hypothesis/
+*.cover
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.ruff_cache/
 
-# Documentation
-docs/_build/
-docs/_static/
-docs/_templates/
-
-# Logs
+# Development
 *.log
-logs/
-
-# OS
+*.pot
+*.mo
+*.swp
+*~
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
 
-# Project specific
-cache/
-*.db
-*.sqlite
-*.redis
-temp/
-tmp/
+# Jupyter Notebook
+.ipynb_checkpoints
 
-# Security
+# pyenv
+.python-version
+
+# Environments
 .env
 .env.local
 .env.*.local
-*.pem
-*.key
-*.crt
+
+# mkdocs documentation
+/site
+
+# Quality reports
+.quality-reports/
+quality-report.json
+
+# Benchmarks
+.benchmarks/
+benchmark_results/
 
 # Temporary files
-UNUSED_FUNCTIONS.md
-code_cleanup_analysis.md
-fix-env/
+tmp/
+temp/
+*.tmp
+*.bak
+*.orig
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+.directory
+
+# Editor backups
+*~
+\#*\#
+.\#*
+
+# Archive/backup
+archive/
+backup/
+*.backup
+*.old
+
+# Generated files
+*.generated.*

@@ -23,7 +23,11 @@ if USE_MINIMAL:
     # Use the minimal implementation (recommended)
     try:
         from .server_minimal import *
-        print("✅ Using minimal NetworkX MCP Server (150 lines, actually works)", file=sys.stderr)
+
+        print(
+            "✅ Using minimal NetworkX MCP Server (150 lines, actually works)",
+            file=sys.stderr,
+        )
     except ImportError as e:
         print(f"❌ Failed to import minimal server: {e}", file=sys.stderr)
         print("🔄 Falling back to legacy server", file=sys.stderr)
@@ -36,14 +40,21 @@ if not USE_MINIMAL:
         "This is deprecated and will be removed in v0.3.0. "
         "Set USE_MINIMAL_SERVER=true to use the working implementation.",
         DeprecationWarning,
-        stacklevel=2
+        stacklevel=2,
     )
     try:
         from .server_legacy import *
-        print("⚠️  Using legacy NetworkX MCP Server (900+ lines, may not work)", file=sys.stderr)
+
+        print(
+            "⚠️  Using legacy NetworkX MCP Server (900+ lines, may not work)",
+            file=sys.stderr,
+        )
     except ImportError as e:
-        print(f"💥 Both servers failed to import. This is a configuration problem.", file=sys.stderr)
-        print(f"Minimal server error: see above", file=sys.stderr)
+        print(
+            "💥 Both servers failed to import. This is a configuration problem.",
+            file=sys.stderr,
+        )
+        print("Minimal server error: see above", file=sys.stderr)
         print(f"Legacy server error: {e}", file=sys.stderr)
         sys.exit(1)
 
@@ -52,8 +63,11 @@ __version__ = "0.1.3-strangler-fig"
 __implementation__ = "minimal" if USE_MINIMAL else "legacy"
 
 if __name__ == "__main__":
-    print(f"NetworkX MCP Server v{__version__} ({__implementation__} implementation)", file=sys.stderr)
-    if hasattr(sys.modules[__name__], 'main'):
+    print(
+        f"NetworkX MCP Server v{__version__} ({__implementation__} implementation)",
+        file=sys.stderr,
+    )
+    if hasattr(sys.modules[__name__], "main"):
         main()
     else:
         print("❌ No main() function found in selected implementation", file=sys.stderr)

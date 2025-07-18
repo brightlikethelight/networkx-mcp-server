@@ -31,22 +31,27 @@ networkx-mcp-server/
 ## Core Components
 
 ### 1. Server Layer (`server.py`)
+
 - **Purpose**: Main MCP server implementation with core graph operations
 - **Key Functions**: `create_graph`, `add_nodes`, `add_edges`, `graph_info`, `list_graphs`, `delete_graph`, `shortest_path`, `node_degree`
 - **Architecture**: Simple, focused server with re-exports through handlers for modularity
 
 ### 2. Handlers Layer (`handlers/`)
+
 - **Purpose**: Modular function handlers that organize server capabilities
 - **Structure**:
+
   ```
   handlers/
   ├── __init__.py
   ├── graph_ops.py        # Basic graph operations
   └── algorithms.py       # Graph algorithms
   ```
+
 - **Pattern**: Re-export pattern for backward compatibility while enabling modular organization
 
 ### 3. Core Layer (`core/`)
+
 - **Purpose**: Fundamental graph operations and utilities
 - **Key Modules**:
   - `graph_operations.py`: Graph management and basic operations
@@ -60,8 +65,10 @@ networkx-mcp-server/
     - `base_handler.py`: Base I/O interface
 
 ### 4. Advanced Layer (`advanced/`)
+
 - **Purpose**: Specialized algorithms and enterprise features
 - **Modular Structure**:
+
   ```
   advanced/
   ├── directed/               # Directed graph analysis
@@ -103,18 +110,21 @@ networkx-mcp-server/
 ### 5. Supporting Layers
 
 #### Monitoring (`monitoring/`)
+
 - Health checks and system monitoring
 - Performance metrics collection
 - Distributed tracing support
 - Logging and observability
 
 #### Security (`security/`)
+
 - Input validation and sanitization
 - Access control and authentication
 - Security auditing and compliance
 - Rate limiting and DDoS protection
 
 #### Integration (`integration/`)
+
 - External system integrations
 - Data pipeline connectors
 - API gateways and protocols
@@ -122,25 +132,30 @@ networkx-mcp-server/
 ## Design Patterns
 
 ### 1. Handler Pattern
+
 - **Usage**: Server function organization
 - **Benefits**: Modular organization, easier testing, separation of concerns
 - **Implementation**: Re-export pattern maintains backward compatibility
 
 ### 2. Strategy Pattern
+
 - **Usage**: Algorithm selection (e.g., different centrality measures)
 - **Benefits**: Extensible algorithm support, runtime algorithm selection
 
 ### 3. Factory Pattern
+
 - **Usage**: Graph generators, I/O handler creation
 - **Benefits**: Consistent object creation, easy extension
 
 ### 4. Observer Pattern
+
 - **Usage**: Event monitoring, performance tracking
 - **Benefits**: Loose coupling, extensible monitoring
 
 ## Data Flow
 
 ### Graph Operations Flow
+
 1. **Request** → MCP Server (`server.py`)
 2. **Validation** → Security layer validates input
 3. **Processing** → Core operations or advanced algorithms
@@ -148,6 +163,7 @@ networkx-mcp-server/
 5. **Response** → Formatted response back to client
 
 ### Modular Import Flow
+
 1. **Client Code** → Imports from handlers (`from handlers.graph_ops import create_graph`)
 2. **Handler** → Re-exports from server (`from ..server import create_graph`)
 3. **Server** → Actual implementation
@@ -178,6 +194,7 @@ networkx-mcp-server/
 ## Testing Architecture
 
 ### Test Organization
+
 ```
 tests/
 ├── unit/                   # Fast, isolated tests
@@ -195,6 +212,7 @@ tests/
 ```
 
 ### Testing Principles
+
 - **Fast Feedback**: Unit tests run quickly for rapid development
 - **Comprehensive Coverage**: 80%+ test coverage target achieved
 - **Focused Tests**: Each test file targets specific functionality
@@ -203,11 +221,13 @@ tests/
 ## Configuration and Environment
 
 ### Environment Variables
+
 - `NETWORKX_MCP_LOG_LEVEL`: Logging level configuration
 - `NETWORKX_MCP_MAX_GRAPHS`: Maximum number of graphs in memory
 - `NETWORKX_MCP_ENABLE_METRICS`: Enable performance metrics collection
 
 ### Configuration Files
+
 - `pyproject.toml`: Project configuration and dependencies
 - `pytest.ini`: Test configuration
 - `.pre-commit-config.yaml`: Code quality hooks
@@ -215,16 +235,19 @@ tests/
 ## Performance Considerations
 
 ### Memory Management
+
 - In-memory graph storage with configurable limits
 - Lazy loading for large graph operations
 - Memory cleanup for deleted graphs
 
 ### Algorithm Optimization
+
 - Efficient algorithms for large graphs
 - Configurable thresholds for complex operations
 - Performance monitoring and alerting
 
 ### Scalability
+
 - Modular architecture supports horizontal scaling
 - Stateless design enables load balancing
 - Monitoring supports capacity planning
@@ -232,16 +255,19 @@ tests/
 ## Security Architecture
 
 ### Input Validation
+
 - Comprehensive input sanitization
 - Graph ID and parameter validation
 - File path security checks
 
 ### Access Control
+
 - Authentication and authorization layers
 - Rate limiting for API endpoints
 - Audit logging for security events
 
 ### Data Protection
+
 - Secure handling of graph data
 - No credential logging or exposure
 - Encrypted data transmission support
@@ -249,18 +275,21 @@ tests/
 ## Extension Points
 
 ### Adding New Algorithms
+
 1. Create module in appropriate `advanced/` subdirectory
 2. Implement algorithm following existing patterns
 3. Add to handler exports if needed
 4. Write comprehensive tests
 
 ### Adding New I/O Formats
+
 1. Create handler in `core/io/`
 2. Implement base handler interface
 3. Add to I/O module exports
 4. Test with various graph types
 
 ### Adding New Features
+
 1. Identify appropriate layer (core, advanced, supporting)
 2. Create focused module following naming conventions
 3. Update package `__init__.py` exports
@@ -269,6 +298,7 @@ tests/
 ## Migration Guide
 
 ### From Monolithic to Modular
+
 The architecture transformation maintains backward compatibility:
 
 - **Old imports still work**: `from networkx_mcp.server import create_graph`
@@ -277,6 +307,7 @@ The architecture transformation maintains backward compatibility:
 - **Tests pass unchanged**: Existing test suites continue to work
 
 ### Code Quality Improvements
+
 - **Unused imports removed**: Automated cleanup with autoflake
 - **Dead code eliminated**: Vulture analysis and fixes applied
 - **Consistent formatting**: Applied ruff, black, and isort
@@ -285,16 +316,19 @@ The architecture transformation maintains backward compatibility:
 ## Future Roadmap
 
 ### Phase 1: Stabilization
+
 - Complete module implementations (currently placeholders)
 - Full test coverage for all modules
 - Performance optimization
 
 ### Phase 2: Enhanced Features
+
 - Advanced visualization capabilities
 - Machine learning integration
 - Enterprise security features
 
 ### Phase 3: Ecosystem Integration
+
 - Plugin architecture for extensions
 - External database persistence
 - Cloud deployment support

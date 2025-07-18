@@ -11,6 +11,7 @@ After deep analysis and building a working minimal implementation in 2 hours, he
 ## The Three Paths Forward
 
 ### Path 1: Nuclear Option (STRONGLY RECOMMENDED)
+
 **Time**: 1 week
 **Success Rate**: 95%
 
@@ -21,7 +22,8 @@ After deep analysis and building a working minimal implementation in 2 hours, he
 5. **Ship it**
 
 ### Path 2: Salvage Operation
-**Time**: 8-12 weeks  
+
+**Time**: 8-12 weeks
 **Success Rate**: 30%
 
 1. **Week 1-2**: Delete 80% of code
@@ -31,6 +33,7 @@ After deep analysis and building a working minimal implementation in 2 hours, he
 5. **Week 9-12**: Fix all the things you broke
 
 ### Path 3: Status Quo
+
 **Time**: ∞
 **Success Rate**: 0%
 
@@ -39,6 +42,7 @@ Continue pretending that 900-line "minimal" servers and negative memory benchmar
 ## Immediate Actions (Do Today)
 
 ### 1. Run the Minimal Implementation
+
 ```bash
 # See it work in 30 seconds
 python server_truly_minimal.py
@@ -46,11 +50,13 @@ python test_minimal_server.py
 ```
 
 ### 2. Compare Honestly
+
 - Current `server.py`: 909 lines, can't deploy
 - Minimal server: 158 lines, works perfectly
 - Ask: Why are we maintaining 16,000 lines?
 
 ### 3. Make the Decision
+
 Either commit to simplicity or complexity. There's no middle ground.
 
 ## If You Choose Simplicity (Path 1)
@@ -58,26 +64,31 @@ Either commit to simplicity or complexity. There's no middle ground.
 ### Week 1 Sprint
 
 **Monday**:
+
 - [ ] Create new repo or branch `minimal-rewrite`
 - [ ] Copy minimal implementation as foundation
 - [ ] Define strict complexity budget (<1000 lines total)
 
 **Tuesday-Wednesday**:
+
 - [ ] Implement core MCP tools (10-15 total)
 - [ ] Keep each under 20 lines
 - [ ] No abstraction without immediate need
 
 **Thursday**:
+
 - [ ] Write tests for every tool
 - [ ] Achieve 90%+ coverage
 - [ ] Tests must run in <10 seconds
 
 **Friday**:
+
 - [ ] Create simple Docker deployment
 - [ ] Write honest README
 - [ ] Tag v0.2.0-minimal
 
 ### Success Metrics
+
 - Total lines: <1000
 - Test coverage: >90%
 - Docker image: <100MB
@@ -87,6 +98,7 @@ Either commit to simplicity or complexity. There's no middle ground.
 ## If You Choose Complexity (Path 2)
 
 ### Month 1: The Purge
+
 - Delete `/htmlcov` (70+ files)
 - Delete `/archive`
 - Delete visualization (broken)
@@ -94,12 +106,14 @@ Either commit to simplicity or complexity. There's no middle ground.
 - Consolidate 3 servers into 1
 
 ### Month 2: The Rebuild
+
 - Rewrite server.py (<300 lines)
 - Create working test suite
 - Remove all hardcoded values
 - Build minimal Docker image
 
 ### Month 3: The Reality Check
+
 - Realize you've spent 3 months getting to where the minimal version was on day 1
 - Question life choices
 - Ship it anyway
@@ -117,18 +131,21 @@ The minimal implementation built in 2 hours proves that:
 ## Final Recommendations
 
 ### For the Brave
+
 1. `git checkout -b minimal-rewrite`
 2. `cp server_truly_minimal.py src/server.py`
 3. Delete everything else
 4. Ship in a week
 
 ### For the Conservative
+
 1. Add minimal server as `server_simple.py`
 2. Deprecate complex version
 3. Migrate users gradually
 4. Delete old code in 6 months
 
 ### For the Honest
+
 Admit this is a prototype, not production code. Set expectations accordingly.
 
 ## The One-Page Summary for Management

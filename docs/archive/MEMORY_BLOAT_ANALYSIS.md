@@ -1,6 +1,7 @@
 # Memory Bloat Analysis: NetworkX MCP Server
 
 ## Executive Summary
+
 The NetworkX MCP Server uses **118MB of memory** at startup - 6x more than necessary. Investigation reveals it loads the entire scientific Python stack (pandas, scipy, matplotlib) for basic graph operations.
 
 ## Memory Breakdown
@@ -51,6 +52,7 @@ server.py
 ## The Real Problem
 
 This is NOT a minimal server. It's a heavyweight data science application that:
+
 - Loads pandas for basic graph operations that need 100 lines of code
 - Imports scipy for features that are never called
 - Brings in matplotlib even when no visualization is needed

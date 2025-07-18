@@ -45,7 +45,7 @@ Conventional commit format:
 
 Types:
 - feat: A new feature
-- fix: A bug fix  
+- fix: A bug fix
 - docs: Documentation only changes
 - style: Changes that do not affect the meaning of the code
 - refactor: A code change that neither fixes a bug nor adds a feature
@@ -180,7 +180,7 @@ if command -v python >/dev/null 2>&1; then
     pip install commitizen cz-conventional-commits || {
         echo -e "${YELLOW}⚠️  Could not install commitizen, skipping...${NC}"
     }
-    
+
     # Configure commitizen
     cat > .cz.yaml << 'EOF'
 commitizen:
@@ -206,7 +206,7 @@ pip install conventional-pre-commit || {
 # Configure GitHub CLI if available
 if command -v gh >/dev/null 2>&1; then
     echo -e "${YELLOW}🐙 Configuring GitHub CLI...${NC}"
-    
+
     # Set default PR template
     mkdir -p .github/pull_request_template
     cat > .github/pull_request_template/default.md << 'EOF'

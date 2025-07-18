@@ -1,19 +1,22 @@
 # Security Improvements Summary
 
 ## Overview
+
 This document summarizes the security hardening applied to the NetworkX MCP Server to prevent immediate exploits and injection attacks.
 
 ## 1. Input Validation Implementation
 
 ### Validation Rules
+
 - **ID Validation**: Graph IDs, node IDs, and edge attribute names must match the pattern `^[a-zA-Z0-9_-]{1,100}$`
-- **Size Limits**: 
+- **Size Limits**:
   - Maximum 1000 nodes per request
   - Maximum 10000 edges per request
   - Maximum ID length: 100 characters
   - Maximum string attribute length: 1000 characters
 
 ### Security Features
+
 1. **Regex Pattern Matching**: Only alphanumeric characters, underscores, and hyphens allowed
 2. **Dangerous Pattern Detection**: Blocks inputs containing:
    - Path traversal attempts (`..`, `/etc/`, `/proc/`)
@@ -29,11 +32,13 @@ This document summarizes the security hardening applied to the NetworkX MCP Serv
 ## 2. Files Modified
 
 ### `/src/networkx_mcp/security/input_validation.py` (NEW)
+
 - Comprehensive input validation module
 - Protects against common web vulnerabilities
 - Provides reusable validation functions
 
 ### `/src/networkx_mcp/server.py`
+
 - Updated all tool functions to use input validation
 - Added try-except blocks with safe error messages
 - Validates all user inputs before processing
@@ -41,6 +46,7 @@ This document summarizes the security hardening applied to the NetworkX MCP Serv
 ## 3. Security Tests
 
 ### Malicious Inputs Blocked
+
 ✅ Path traversal: `../../../etc/passwd`
 ✅ SQL injection: `'; DROP TABLE graphs;--`
 ✅ Command injection: `graph; rm -rf /`
@@ -50,6 +56,7 @@ This document summarizes the security hardening applied to the NetworkX MCP Serv
 ✅ Buffer overflow: Strings exceeding maximum length
 
 ### Valid Inputs Accepted
+
 ✅ Alphanumeric: `graph1`, `node_123`
 ✅ With hyphens: `edge-456`
 ✅ With underscores: `Valid_ID_789`
@@ -74,11 +81,13 @@ This document summarizes the security hardening applied to the NetworkX MCP Serv
 ## 5. Testing Security
 
 Run the security validation tests:
+
 ```bash
 python -m pytest tests/security/test_input_validation.py -v
 ```
 
 Run the demo to see validation in action:
+
 ```bash
 python tests/security/test_malicious_demo.py
 ```
