@@ -6,7 +6,7 @@ These tests actually run and verify that the core functionality works.
 
 import pytest
 
-from networkx_mcp.server_minimal import (
+from networkx_mcp.server import (
     add_edges,
     add_nodes,
     create_graph,

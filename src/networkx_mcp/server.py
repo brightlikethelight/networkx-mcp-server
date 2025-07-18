@@ -9,16 +9,7 @@ import json
 import sys
 from typing import Any, Dict, List, Optional
 
-import matplotlib
-import matplotlib.pyplot as plt
 import networkx as nx
-
-matplotlib.use("Agg")  # Use non-interactive backend
-import base64
-import csv
-import io
-
-import networkx.algorithms.community as nx_comm
 
 # Import academic functions from plugin
 from .academic import (
@@ -31,240 +22,67 @@ from .academic import (
     resolve_doi,
 )
 
+# Import basic operations
+from .core.basic_operations import (
+    add_edges as _add_edges,
+    add_nodes as _add_nodes,
+    betweenness_centrality as _betweenness_centrality,
+    community_detection as _community_detection,
+    connected_components as _connected_components,
+    create_graph as _create_graph,
+    degree_centrality as _degree_centrality,
+    export_json as _export_json,
+    get_graph_info as _get_graph_info,
+    import_csv as _import_csv,
+    pagerank as _pagerank,
+    shortest_path as _shortest_path,
+    visualize_graph as _visualize_graph,
+)
+
 # Global state - simple and effective
 graphs: Dict[str, nx.Graph] = {}
 
-
-# Compatibility exports for tests
+# Re-export functions with graphs parameter bound
 def create_graph(name: str, directed: bool = False):
-    """Create a graph - compatibility function."""
-    graphs[name] = nx.DiGraph() if directed else nx.Graph()
-    return {"created": name, "type": "directed" if directed else "undirected"}
-
+    return _create_graph(name, directed, graphs)
 
 def add_nodes(graph_name: str, nodes: List):
-    """Add nodes - compatibility function."""
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    graph = graphs[graph_name]
-    graph.add_nodes_from(nodes)
-    return {"added": len(nodes), "total": graph.number_of_nodes()}
-
+    return _add_nodes(graph_name, nodes, graphs)
 
 def add_edges(graph_name: str, edges: List):
-    """Add edges - compatibility function."""
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    graph = graphs[graph_name]
-    edge_tuples = [tuple(e) for e in edges]
-    graph.add_edges_from(edge_tuples)
-    return {"added": len(edge_tuples), "total": graph.number_of_edges()}
-
+    return _add_edges(graph_name, edges, graphs)
 
 def get_graph_info(graph_name: str):
-    """Get graph info - compatibility function."""
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    graph = graphs[graph_name]
-    return {
-        "nodes": graph.number_of_nodes(),
-        "edges": graph.number_of_edges(),
-        "directed": graph.is_directed(),
-    }
-
+    return _get_graph_info(graph_name, graphs)
 
 def shortest_path(graph_name: str, source, target):
-    """Find shortest path - compatibility function."""
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    graph = graphs[graph_name]
-    path = nx.shortest_path(graph, source, target)
-    return {"path": path, "length": len(path) - 1}
-
+    return _shortest_path(graph_name, source, target, graphs)
 
 def degree_centrality(graph_name: str):
-    """Calculate degree centrality - compatibility function."""
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    graph = graphs[graph_name]
-    centrality = nx.degree_centrality(graph)
-    # Convert to serializable format and sort by centrality
-    sorted_nodes = sorted(centrality.items(), key=lambda x: x[1], reverse=True)
-    return {
-        "centrality": dict(sorted_nodes[:10]),  # Top 10 nodes
-        "most_central": sorted_nodes[0] if sorted_nodes else None,
-    }
-
+    return _degree_centrality(graph_name, graphs)
 
 def betweenness_centrality(graph_name: str):
-    """Calculate betweenness centrality - compatibility function."""
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    graph = graphs[graph_name]
-    centrality = nx.betweenness_centrality(graph)
-    sorted_nodes = sorted(centrality.items(), key=lambda x: x[1], reverse=True)
-    return {
-        "centrality": dict(sorted_nodes[:10]),  # Top 10 nodes
-        "most_central": sorted_nodes[0] if sorted_nodes else None,
-    }
-
+    return _betweenness_centrality(graph_name, graphs)
 
 def connected_components(graph_name: str):
-    """Find connected components - compatibility function."""
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    graph = graphs[graph_name]
-    if graph.is_directed():
-        components = list(nx.weakly_connected_components(graph))
-    else:
-        components = list(nx.connected_components(graph))
-
-    # Convert sets to lists for JSON serialization
-    components_list = [list(comp) for comp in components]
-    components_list.sort(key=len, reverse=True)  # Largest first
-
-    return {
-        "num_components": len(components_list),
-        "component_sizes": [len(comp) for comp in components_list],
-        "largest_component": components_list[0] if components_list else [],
-    }
-
+    return _connected_components(graph_name, graphs)
 
 def pagerank(graph_name: str):
-    """Calculate PageRank - compatibility function."""
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    graph = graphs[graph_name]
-    pr = nx.pagerank(graph)
-    sorted_nodes = sorted(pr.items(), key=lambda x: x[1], reverse=True)
-    return {
-        "pagerank": dict(sorted_nodes[:10]),  # Top 10 nodes
-        "highest_rank": sorted_nodes[0] if sorted_nodes else None,
-    }
-
+    return _pagerank(graph_name, graphs)
 
 def visualize_graph(graph_name: str, layout: str = "spring"):
-    """Visualize graph and return as base64 image - compatibility function."""
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    graph = graphs[graph_name]
-
-    plt.figure(figsize=(10, 8))
-
-    # Choose layout
-    if layout == "spring":
-        pos = nx.spring_layout(graph)
-    elif layout == "circular":
-        pos = nx.circular_layout(graph)
-    elif layout == "kamada_kawai":
-        pos = nx.kamada_kawai_layout(graph)
-    else:
-        pos = nx.spring_layout(graph)
-
-    # Draw the graph
-    nx.draw(
-        graph,
-        pos,
-        with_labels=True,
-        node_color="lightblue",
-        node_size=500,
-        font_size=10,
-        font_weight="bold",
-        edge_color="gray",
-        arrows=True,
-    )
-
-    # Save to buffer
-    buffer = io.BytesIO()
-    plt.savefig(buffer, format="png", bbox_inches="tight", dpi=150)
-    plt.close()
-
-    # Convert to base64
-    buffer.seek(0)
-    image_base64 = base64.b64encode(buffer.read()).decode("utf-8")
-
-    return {
-        "image": f"data:image/png;base64,{image_base64}",
-        "format": "png",
-        "layout": layout,
-    }
-
+    return _visualize_graph(graph_name, layout, graphs)
 
 def import_csv(graph_name: str, csv_data: str, directed: bool = False):
-    """Import graph from CSV edge list - compatibility function."""
-    # Parse CSV data
-    reader = csv.reader(io.StringIO(csv_data))
-    edges = []
-
-    for row in reader:
-        if len(row) >= 2:
-            # Handle both numeric and string nodes
-            try:
-                source = int(row[0])
-            except:
-                source = row[0].strip()
-            try:
-                target = int(row[1])
-            except:
-                target = row[1].strip()
-
-            edges.append((source, target))
-
-    # Create graph
-    graph = nx.DiGraph() if directed else nx.Graph()
-    graph.add_edges_from(edges)
-    graphs[graph_name] = graph
-
-    return {
-        "imported": graph_name,
-        "type": "directed" if directed else "undirected",
-        "nodes": graph.number_of_nodes(),
-        "edges": graph.number_of_edges(),
-    }
-
+    return _import_csv(graph_name, csv_data, directed, graphs)
 
 def export_json(graph_name: str):
-    """Export graph as JSON - compatibility function."""
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    graph = graphs[graph_name]
-
-    # Convert to node-link format
-    data = nx.node_link_data(graph)
-
-    return {
-        "graph_data": data,
-        "format": "node-link",
-        "nodes": len(data["nodes"]),
-        "edges": len(data["links"]),
-    }
-
+    return _export_json(graph_name, graphs)
 
 def community_detection(graph_name: str):
-    """Detect communities in the graph - compatibility function."""
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    graph = graphs[graph_name]
+    return _community_detection(graph_name, graphs)
 
-    # Use Louvain method for community detection
-    communities = nx_comm.louvain_communities(graph)
 
-    # Convert to list format
-    communities_list = [list(comm) for comm in communities]
-    communities_list.sort(key=len, reverse=True)  # Largest first
-
-    # Create node to community mapping
-    node_community = {}
-    for i, comm in enumerate(communities_list):
-        for node in comm:
-            node_community[node] = i
-
-    return {
-        "num_communities": len(communities_list),
-        "community_sizes": [len(comm) for comm in communities_list],
-        "largest_community": communities_list[0] if communities_list else [],
-        "node_community_map": dict(list(node_community.items())[:20]),  # First 20 nodes
-    }
 
 
 

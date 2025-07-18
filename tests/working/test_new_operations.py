@@ -6,7 +6,7 @@ These tests verify the enhanced functionality works correctly.
 
 import pytest
 
-from networkx_mcp.server_minimal import (
+from networkx_mcp.server import (
     add_edges,
     add_nodes,
     betweenness_centrality,
