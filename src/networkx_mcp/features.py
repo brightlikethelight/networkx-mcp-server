@@ -1,5 +1,7 @@
 """Feature flags - honest assessment of what actually works."""
 
+from typing import Any
+
 # Feature flags based on actual testing and verification
 FEATURE_FLAGS = {
     # ✅ WORKING - Tested and verified
@@ -53,7 +55,7 @@ def get_disabled_features() -> list[str]:
     return [name for name, enabled in FEATURE_FLAGS.items() if not enabled]
 
 
-def get_feature_summary() -> dict[str, any]:
+def get_feature_summary() -> dict[str, Any]:
     """Get summary of feature status."""
     enabled = get_enabled_features()
     disabled = get_disabled_features()

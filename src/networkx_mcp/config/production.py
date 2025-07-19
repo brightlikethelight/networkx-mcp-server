@@ -9,6 +9,7 @@ Based on actual performance testing results:
 
 import os
 from dataclasses import dataclass
+from typing import Any
 
 
 @dataclass
@@ -82,7 +83,7 @@ class ProductionConfig:
         return os.getenv("ENVIRONMENT", "development").lower() == "production"
 
     @property
-    def redis_config(self) -> dict:
+    def redis_config(self) -> dict[str, Any]:
         """Redis configuration for storage backend."""
         return {
             "url": self.REDIS_URL,
@@ -93,7 +94,7 @@ class ProductionConfig:
         }
 
     @property
-    def memory_limits(self) -> dict:
+    def memory_limits(self) -> dict[str, Any]:
         """Memory management configuration."""
         return {
             "max_memory_mb": self.MAX_MEMORY_MB,
@@ -103,7 +104,7 @@ class ProductionConfig:
         }
 
     @property
-    def algorithm_limits(self) -> dict:
+    def algorithm_limits(self) -> dict[str, Any]:
         """Algorithm-specific performance limits."""
         return {
             "centrality_measures": {

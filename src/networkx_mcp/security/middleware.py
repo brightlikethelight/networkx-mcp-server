@@ -62,7 +62,7 @@ class RateLimiter:
         self.max_requests = max_requests
         self.window_seconds = window_seconds
         self.burst_size = burst_size
-        self.buckets: dict[str, deque] = defaultdict(deque)
+        self.buckets: dict[str, deque[float]] = defaultdict(deque)
         self.tokens: dict[str, int] = defaultdict(lambda: burst_size)
         self.last_refill: dict[str, float] = defaultdict(time.time)
 
@@ -120,7 +120,7 @@ class AuthenticationMiddleware:
     def __init__(self, config: SecurityConfig):
         self.config = config
         self.valid_tokens: dict[str, dict[str, Any]] = {}
-        self.revoked_tokens: set = set()
+        self.revoked_tokens: set[str] = set()
 
     def add_token(
         self,
@@ -128,7 +128,7 @@ class AuthenticationMiddleware:
         user_id: str,
         permissions: list[str],
         expires_at: float | None = None,
-    ):
+    ) -> None:
         """Add a valid authentication token."""
         self.valid_tokens[token] = {
             "user_id": user_id,
@@ -137,7 +137,7 @@ class AuthenticationMiddleware:
             "created_at": time.time(),
         }
 
-    def revoke_token(self, token: str):
+    def revoke_token(self, token: str) -> None:
         """Revoke an authentication token."""
         if token in self.valid_tokens:
             del self.valid_tokens[token]
@@ -317,7 +317,9 @@ class SecurityMiddleware:
 
         return response_data
 
-    def log_request(self, context: RequestContext, request_data: dict[str, Any]):
+    def log_request(
+        self, context: RequestContext, request_data: dict[str, Any]
+    ) -> None:
         """Log request for security monitoring."""
         log_entry = {
             "request_id": context.request_id,
@@ -343,7 +345,7 @@ class SecurityMiddleware:
 
         logger.info(f"Request logged: {log_entry}")
 
-    def log_response(self, context: RequestContext, response_data: Any):
+    def log_response(self, context: RequestContext, response_data: Any) -> None:
         """Log response for security monitoring."""
         log_entry = {
             "request_id": context.request_id,
@@ -397,12 +399,14 @@ class AuthorizationError(SecurityError):
     """Authorization failed exception."""
 
 
-def require_permissions(*required_permissions: str):
+def require_permissions(
+    *required_permissions: str,
+) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """Decorator to require specific permissions for a function."""
 
-    def decorator(func: Callable):
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         @wraps(func)
-        async def wrapper(*args, **kwargs):
+        async def wrapper(*args: Any, **kwargs: Any) -> Any:
             # Extract context from kwargs
             context = kwargs.get("context")
             if not context or not isinstance(context, RequestContext):
@@ -428,9 +432,9 @@ class CORSMiddleware:
 
     def __init__(
         self,
-        allowed_origins: list[str] = None,
-        allowed_methods: list[str] = None,
-        allowed_headers: list[str] = None,
+        allowed_origins: list[str] | None = None,
+        allowed_methods: list[str] | None = None,
+        allowed_headers: list[str] | None = None,
     ):
         self.allowed_origins = allowed_origins or ["*"]
         self.allowed_methods = allowed_methods or [

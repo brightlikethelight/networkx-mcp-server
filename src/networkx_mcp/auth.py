@@ -7,7 +7,7 @@ import json
 import secrets
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set
 
 
 class APIKeyManager:
@@ -19,20 +19,21 @@ class APIKeyManager:
             storage_path or Path.home() / ".networkx-mcp" / "api_keys.json"
         )
         self.storage_path.parent.mkdir(parents=True, exist_ok=True)
-        self.keys: Dict[str, Dict[str, any]] = self._load_keys()
+        self.keys: Dict[str, Dict[str, Any]] = self._load_keys()
         self.rate_limits: Dict[str, List[datetime]] = {}  # Track requests per key
 
-    def _load_keys(self) -> Dict[str, Dict[str, any]]:
+    def _load_keys(self) -> Dict[str, Dict[str, Any]]:
         """Load API keys from storage."""
         if self.storage_path.exists():
             try:
                 with open(self.storage_path, "r") as f:
-                    return json.load(f)
+                    loaded_data = json.load(f)
+                    return loaded_data if isinstance(loaded_data, dict) else {}
             except Exception:
                 return {}
         return {}
 
-    def _save_keys(self):
+    def _save_keys(self) -> None:
         """Save API keys to storage."""
         with open(self.storage_path, "w") as f:
             json.dump(self.keys, f, indent=2, default=str)
@@ -58,7 +59,7 @@ class APIKeyManager:
         self._save_keys()
         return key
 
-    def validate_key(self, api_key: str) -> Optional[Dict[str, any]]:
+    def validate_key(self, api_key: str) -> Optional[Dict[str, Any]]:
         """Validate an API key and return its metadata."""
         if not api_key or not api_key.startswith("nxmcp_"):
             return None
@@ -112,7 +113,7 @@ class APIKeyManager:
             return True
         return False
 
-    def list_keys(self) -> List[Dict[str, any]]:
+    def list_keys(self) -> List[Dict[str, Any]]:
         """List all API keys (without exposing the actual keys)."""
         return [
             {
@@ -135,7 +136,7 @@ class AuthMiddleware:
         self.key_manager = key_manager
         self.required = required
 
-    def authenticate(self, request: dict) -> Optional[Dict[str, any]]:
+    def authenticate(self, request: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Authenticate a request."""
         # Extract API key from request
         # Could be in params, headers, or a special auth field
@@ -160,14 +161,14 @@ class AuthMiddleware:
 
         return key_data
 
-    def check_permission(self, auth_data: Dict[str, any], permission: str) -> bool:
+    def check_permission(self, auth_data: Dict[str, Any], permission: str) -> bool:
         """Check if authenticated user has permission."""
         permissions = auth_data.get("permissions", [])
         return permission in permissions or "admin" in permissions
 
 
 # CLI for managing API keys
-def main():
+def main() -> None:
     """CLI for managing API keys."""
     import argparse
 
@@ -185,7 +186,7 @@ def main():
     )
 
     # List keys command
-    list_parser = subparsers.add_parser("list", help="List all API keys")
+    subparsers.add_parser("list", help="List all API keys")
 
     # Revoke key command
     revoke_parser = subparsers.add_parser("revoke", help="Revoke an API key")
@@ -208,10 +209,15 @@ def main():
         else:
             print(f"{'Name':<20} {'Created':<20} {'Active':<10} {'Requests':<10}")
             print("-" * 60)
-            for key in keys:
-                created = key["created"][:19] if key["created"] else "N/A"
+            for key_data in keys:
+                created_str = key_data.get("created")
+                created = (
+                    created_str[:19]
+                    if created_str and isinstance(created_str, str)
+                    else "N/A"
+                )
                 print(
-                    f"{key['name']:<20} {created:<20} {str(key['active']):<10} {key['request_count']:<10}"
+                    f"{key_data['name']:<20} {created:<20} {str(key_data['active']):<10} {key_data['request_count']:<10}"
                 )
 
     elif args.command == "revoke":

@@ -11,18 +11,18 @@ class NodeOperations:
     def __init__(self, graph: nx.Graph):
         self.graph = graph
 
-    def add_node_with_validation(self, node_id: str | int, **attrs) -> bool:
+    def add_node_with_validation(self, node_id: str | int, **attrs: Any) -> bool:
         """Add node with validation."""
         if node_id in self.graph:
             return False
         self.graph.add_node(node_id, **attrs)
         return True
 
-    def bulk_add_nodes(self, nodes: list[str | int | tuple]) -> int:
+    def bulk_add_nodes(self, nodes: list[str | int | tuple[Any, ...]]) -> int:
         """Efficiently add multiple nodes."""
         initial_count = self.graph.number_of_nodes()
         self.graph.add_nodes_from(nodes)
-        return self.graph.number_of_nodes() - initial_count
+        return int(self.graph.number_of_nodes()) - int(initial_count)
 
     def get_node_summary(self, node_id: str | int) -> dict[str, Any]:
         """Get comprehensive node information."""

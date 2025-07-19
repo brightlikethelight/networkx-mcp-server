@@ -17,14 +17,14 @@ class PerformanceMonitor:
             max_history: Maximum number of operations to keep in history
         """
         self.max_history = max_history
-        self.operations: dict[str, deque] = defaultdict(
+        self.operations: dict[str, deque[dict[str, Any]]] = defaultdict(
             lambda: deque(maxlen=max_history)
         )
         self.start_time = time.time()
 
     def record_operation(
-        self, operation: str, duration: float, metadata: dict | None = None
-    ):
+        self, operation: str, duration: float, metadata: dict[str, Any] | None = None
+    ) -> None:
         """Record an operation's performance metrics.
 
         Args:
@@ -107,7 +107,7 @@ class PerformanceMonitor:
 
         return sorted(slow_ops, key=lambda x: x["duration_ms"], reverse=True)
 
-    def clear_history(self, operation: str | None = None):
+    def clear_history(self, operation: str | None = None) -> None:
         """Clear performance history.
 
         Args:
@@ -123,7 +123,7 @@ class PerformanceMonitor:
 class OperationCounter:
     """Count operations and track usage patterns."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize operation counter."""
         self.counts: dict[str, int] = defaultdict(int)
         self.hourly_counts: dict[str, dict[int, int]] = defaultdict(
@@ -132,7 +132,7 @@ class OperationCounter:
         self.start_time = datetime.now(UTC).replace(tzinfo=None)
         self.errors: dict[str, int] = defaultdict(int)
 
-    def increment(self, operation: str, count: int = 1):
+    def increment(self, operation: str, count: int = 1) -> None:
         """Increment operation count.
 
         Args:
@@ -143,7 +143,7 @@ class OperationCounter:
         current_hour = datetime.now(UTC).replace(tzinfo=None).hour
         self.hourly_counts[operation][current_hour] += count
 
-    def increment_error(self, operation: str, error_type: str):
+    def increment_error(self, operation: str, error_type: str) -> None:
         """Increment error count for an operation.
 
         Args:
@@ -177,7 +177,7 @@ class OperationCounter:
             hourly_patterns[op] = dict(hours)
 
         # Error rate by operation
-        error_rates = {}
+        error_rates: dict[str, dict[str, Any]] = {}
         for error_key, count in self.errors.items():
             operation = error_key.split(":")[0]
             if operation not in error_rates:
@@ -191,7 +191,7 @@ class OperationCounter:
             if data["total"] > 0:
                 data["error_rate"] = round((data["errors"] / data["total"]) * 100, 2)
             else:
-                data["error_rate"] = 0
+                data["error_rate"] = 0.0
 
         return {
             "total_operations": total_operations,
@@ -213,14 +213,14 @@ class OperationCounter:
             )[:10],
         }
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset all counters."""
         self.counts.clear()
         self.hourly_counts.clear()
         self.errors.clear()
         self.start_time = datetime.now(UTC).replace(tzinfo=None)
 
-    def export_stats(self, filepath: str):
+    def export_stats(self, filepath: str) -> None:
         """Export statistics to a JSON file.
 
         Args:
@@ -237,7 +237,7 @@ class MemoryMonitor:
     """Monitor memory usage of graphs."""
 
     @staticmethod
-    def estimate_graph_memory(graph) -> dict[str, Any]:
+    def estimate_graph_memory(graph: Any) -> dict[str, Any]:
         """Estimate memory usage of a graph.
 
         Args:

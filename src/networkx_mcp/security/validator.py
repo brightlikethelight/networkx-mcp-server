@@ -51,7 +51,7 @@ class SecurityValidator:
         # Remove any potentially dangerous keys
         dangerous_keys = ["__", "eval", "exec", "compile", "globals", "locals"]
 
-        sanitized = {}
+        sanitized: dict[str, Any] = {}
         for key, value in attributes.items():
             # Check key
             if not isinstance(key, str):

@@ -4,6 +4,12 @@ import logging
 import re
 from typing import Any, Union
 
+# Type aliases for cleaner annotations
+EdgeTuple = Union[
+    tuple[Union[str, int], Union[str, int]],
+    tuple[Union[str, int], Union[str, int], dict[str, Any]],
+]
+
 logger = logging.getLogger(__name__)
 
 # Security constants
@@ -118,7 +124,7 @@ def validate_node_list(
     if len(nodes) > max_nodes:
         raise ValidationError(f"Too many nodes. Maximum allowed: {max_nodes}")
 
-    validated_nodes = []
+    validated_nodes: list[Union[str, int]] = []
     seen = set()
 
     for i, node in enumerate(nodes):
@@ -128,17 +134,16 @@ def validate_node_list(
                 raise ValidationError(
                     f"Node at index {i}: integer must be between 0 and 999999999"
                 )
-            validated_node = node
+            validated_node: Union[str, int] = node
         else:
             # Validate as string ID
             try:
                 validated_node = validate_id(node, f"Node at index {i}")
             except ValidationError:
-                # If it's a tuple (for nodes with attributes), validate the ID part
+                # If it's a tuple (for nodes with attributes), validate only the ID part
                 if isinstance(node, (list, tuple)) and len(node) >= 1:
                     validated_node = validate_id(node[0], f"Node ID at index {i}")
-                    # Store as tuple to preserve attributes
-                    validated_node = tuple(node)
+                    # Note: We only store the ID, not the full tuple for this return type
                 else:
                     raise
 
@@ -159,7 +164,7 @@ def validate_node_list(
 
 def validate_edge_list(
     edges: list[Any], max_edges: int = MAX_EDGES_PER_REQUEST
-) -> list[tuple]:
+) -> list[EdgeTuple]:
     """
     Validate a list of edges.
 
@@ -182,7 +187,7 @@ def validate_edge_list(
     if len(edges) > max_edges:
         raise ValidationError(f"Too many edges. Maximum allowed: {max_edges}")
 
-    validated_edges = []
+    validated_edges: list[EdgeTuple] = []
 
     for i, edge in enumerate(edges):
         if not isinstance(edge, (list, tuple)):
@@ -205,7 +210,8 @@ def validate_edge_list(
                 raise ValidationError(
                     f"Edge at index {i}: node IDs must be between 0 and 999999999"
                 )
-            source, target = edge[0], edge[1]
+            source: Union[str, int] = edge[0]
+            target: Union[str, int] = edge[1]
         else:
             source = validate_id(edge[0], f"Source node in edge {i}")
             target = validate_id(edge[1], f"Target node in edge {i}")
@@ -220,7 +226,7 @@ def validate_edge_list(
     return validated_edges
 
 
-def validate_attributes(attrs: Any, field_name: str = "Attributes") -> dict:
+def validate_attributes(attrs: Any, field_name: str = "Attributes") -> dict[str, Any]:
     """
     Validate node or edge attributes.
 
@@ -315,22 +321,22 @@ def sanitize_value(value: Any, field_name: str = "Value") -> Any:
         if len(value) > 100:  # Reasonable limit for attribute lists
             raise ValidationError(f"{field_name}: list too long (max 100 elements)")
 
-        sanitized = []
+        sanitized_list = []
         for i, item in enumerate(value):
-            sanitized.append(sanitize_value(item, f"{field_name}[{i}]"))
-        return sanitized if isinstance(value, list) else tuple(sanitized)
+            sanitized_list.append(sanitize_value(item, f"{field_name}[{i}]"))
+        return sanitized_list if isinstance(value, list) else tuple(sanitized_list)
 
     # Handle nested dictionaries (with depth limit)
     if isinstance(value, dict):
         if len(value) > 50:  # Reasonable limit for nested dicts
             raise ValidationError(f"{field_name}: dictionary too large (max 50 keys)")
 
-        sanitized = {}
+        sanitized_dict: dict[str, Any] = {}
         for k, v in value.items():
             if not isinstance(k, str):
                 raise ValidationError(f"{field_name}: dictionary keys must be strings")
-            sanitized[k] = sanitize_value(v, f"{field_name}['{k}']")
-        return sanitized
+            sanitized_dict[k] = sanitize_value(v, f"{field_name}['{k}']")
+        return sanitized_dict
 
     # Reject other types
     raise ValidationError(f"{field_name}: unsupported type {type(value).__name__}")

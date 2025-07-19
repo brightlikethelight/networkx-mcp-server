@@ -17,15 +17,17 @@ except ImportError:
 class PerformanceMonitor:
     """Monitor and optimize performance."""
 
-    def __init__(self):
-        self.metrics = {}
+    def __init__(self) -> None:
+        self.metrics: dict[str, Any] = {}
 
-    def time_operation(self, operation_name: str):
+    def time_operation(
+        self, operation_name: str
+    ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
         """Decorator to time operations."""
 
-        def decorator(func: Callable) -> Callable:
+        def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
             @wraps(func)
-            def wrapper(*args, **kwargs):
+            def wrapper(*args: Any, **kwargs: Any) -> Any:
                 start_time = time.time()
                 result = func(*args, **kwargs)
                 duration = time.time() - start_time

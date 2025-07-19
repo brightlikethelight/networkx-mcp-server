@@ -1,6 +1,7 @@
 """GraphML format I/O operations."""
 
 from pathlib import Path
+from typing import Any
 
 import networkx as nx
 
@@ -10,10 +11,10 @@ from networkx_mcp.io.base import GraphReader, GraphWriter, validate_file_path
 class GraphMLReader(GraphReader):
     """Read graphs from GraphML format."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("graphml", [".graphml", ".xml"])
 
-    async def read(self, filepath: str | Path, **options) -> nx.Graph:
+    async def read(self, filepath: str | Path, **options: Any) -> nx.Graph:
         """Read GraphML file."""
         path = validate_file_path(filepath, must_exist=True)
 
@@ -35,10 +36,12 @@ class GraphMLReader(GraphReader):
 class GraphMLWriter(GraphWriter):
     """Write graphs to GraphML format."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("graphml", ".graphml")
 
-    async def write(self, graph: nx.Graph, filepath: str | Path, **options) -> bool:
+    async def write(
+        self, graph: nx.Graph, filepath: str | Path, **options: Any
+    ) -> bool:
         """Write graph to GraphML file."""
         path = validate_file_path(filepath, must_exist=False)
 

@@ -305,7 +305,7 @@ def validate_graph_id(graph_id: Any) -> str:
     if ".." in graph_id or "/" in graph_id or "\\" in graph_id:
         raise InvalidGraphIdError(graph_id, "Graph ID cannot contain path elements")
 
-    return graph_id
+    return str(graph_id)
 
 
 def validate_node_id(node_id: Any) -> str:

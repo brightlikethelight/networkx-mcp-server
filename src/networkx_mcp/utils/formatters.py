@@ -39,7 +39,7 @@ class GraphFormatter:
 
     @staticmethod
     def format_visualization_data(
-        graph, layout: dict[str, Any], options: dict[str, Any] | None = None
+        graph: Any, layout: dict[str, Any], options: dict[str, Any] | None = None
     ) -> dict[str, Any]:
         """Format visualization data."""
         nodes = []
@@ -64,7 +64,7 @@ class GraphFormatter:
         }
 
 
-def format_graph_summary(graph) -> dict[str, Any]:
+def format_graph_summary(graph: Any) -> dict[str, Any]:
     """Format graph summary information."""
     return {
         "nodes": graph.number_of_nodes(),

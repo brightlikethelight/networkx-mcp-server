@@ -6,7 +6,7 @@ for graph operations and user data.
 
 import logging
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -18,11 +18,7 @@ class ValidationResult:
 
     is_valid: bool
     sanitized_data: Any | None = None
-    errors: list[str] = None
-
-    def __post_init__(self):
-        if self.errors is None:
-            self.errors = []
+    errors: list[str] = field(default_factory=list)
 
 
 class RequestValidator:
@@ -119,7 +115,7 @@ class RequestValidator:
         return ValidationResult(True, clean_data)
 
     @staticmethod
-    def validate_edge_data(edge: list | tuple) -> ValidationResult:
+    def validate_edge_data(edge: list[Any] | tuple[Any, ...]) -> ValidationResult:
         """Validate edge format."""
         if not isinstance(edge, (list, tuple)):
             return ValidationResult(False, None, ["Edge must be a list or tuple"])
@@ -264,7 +260,7 @@ class SecurityValidator:
         return ValidationResult(True, file_path.strip())
 
     @staticmethod
-    def validate_resource_limits(operation: str, **limits) -> ValidationResult:
+    def validate_resource_limits(operation: str, **limits: Any) -> ValidationResult:
         """Validate resource usage limits."""
         errors = []
 

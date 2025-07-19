@@ -6,7 +6,7 @@ These are compatibility functions for existing code.
 import base64
 import csv
 import io
-from typing import Dict, List
+from typing import Any, Dict, List, Optional, Union
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -16,7 +16,9 @@ import networkx.algorithms.community as nx_comm
 matplotlib.use("Agg")  # Use non-interactive backend
 
 
-def create_graph(name: str, directed: bool = False, graphs: Dict[str, nx.Graph] = None):
+def create_graph(
+    name: str, directed: bool = False, graphs: Optional[Dict[str, Any]] = None
+) -> Dict[str, str]:
     """Create a graph - compatibility function."""
     if graphs is None:
         graphs = {}
@@ -24,7 +26,11 @@ def create_graph(name: str, directed: bool = False, graphs: Dict[str, nx.Graph] 
     return {"created": name, "type": "directed" if directed else "undirected"}
 
 
-def add_nodes(graph_name: str, nodes: List, graphs: Dict[str, nx.Graph] = None):
+def add_nodes(
+    graph_name: str,
+    nodes: List[Union[str, int]],
+    graphs: Optional[Dict[str, Any]] = None,
+) -> Dict[str, int]:
     """Add nodes - compatibility function."""
     if graphs is None:
         graphs = {}
@@ -35,19 +41,25 @@ def add_nodes(graph_name: str, nodes: List, graphs: Dict[str, nx.Graph] = None):
     return {"added": len(nodes), "total": graph.number_of_nodes()}
 
 
-def add_edges(graph_name: str, edges: List, graphs: Dict[str, nx.Graph] = None):
+def add_edges(
+    graph_name: str,
+    edges: List[List[Union[str, int]]],
+    graphs: Optional[Dict[str, Any]] = None,
+) -> Dict[str, int]:
     """Add edges - compatibility function."""
     if graphs is None:
         graphs = {}
     if graph_name not in graphs:
         raise ValueError(f"Graph '{graph_name}' not found")
     graph = graphs[graph_name]
-    edge_tuples = [tuple(e) for e in edges]
+    edge_tuples = [(e[0], e[1]) for e in edges if len(e) >= 2]
     graph.add_edges_from(edge_tuples)
     return {"added": len(edge_tuples), "total": graph.number_of_edges()}
 
 
-def get_graph_info(graph_name: str, graphs: Dict[str, nx.Graph] = None):
+def get_graph_info(
+    graph_name: str, graphs: Optional[Dict[str, Any]] = None
+) -> Dict[str, Union[int, bool]]:
     """Get graph info - compatibility function."""
     if graphs is None:
         graphs = {}
@@ -61,7 +73,12 @@ def get_graph_info(graph_name: str, graphs: Dict[str, nx.Graph] = None):
     }
 
 
-def shortest_path(graph_name: str, source, target, graphs: Dict[str, nx.Graph] = None):
+def shortest_path(
+    graph_name: str,
+    source: Union[str, int],
+    target: Union[str, int],
+    graphs: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Union[List[Union[str, int]], int]]:
     """Find shortest path - compatibility function."""
     if graphs is None:
         graphs = {}
@@ -72,7 +89,9 @@ def shortest_path(graph_name: str, source, target, graphs: Dict[str, nx.Graph] =
     return {"path": path, "length": len(path) - 1}
 
 
-def degree_centrality(graph_name: str, graphs: Dict[str, nx.Graph] = None):
+def degree_centrality(
+    graph_name: str, graphs: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
     """Calculate degree centrality - compatibility function."""
     if graphs is None:
         graphs = {}
@@ -88,7 +107,9 @@ def degree_centrality(graph_name: str, graphs: Dict[str, nx.Graph] = None):
     }
 
 
-def betweenness_centrality(graph_name: str, graphs: Dict[str, nx.Graph] = None):
+def betweenness_centrality(
+    graph_name: str, graphs: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
     """Calculate betweenness centrality - compatibility function."""
     if graphs is None:
         graphs = {}
@@ -103,7 +124,9 @@ def betweenness_centrality(graph_name: str, graphs: Dict[str, nx.Graph] = None):
     }
 
 
-def connected_components(graph_name: str, graphs: Dict[str, nx.Graph] = None):
+def connected_components(
+    graph_name: str, graphs: Optional[Dict[str, Any]] = None
+) -> Dict[str, Union[int, List[int], List[List[Union[str, int]]]]]:
     """Find connected components - compatibility function."""
     if graphs is None:
         graphs = {}
@@ -126,7 +149,9 @@ def connected_components(graph_name: str, graphs: Dict[str, nx.Graph] = None):
     }
 
 
-def pagerank(graph_name: str, graphs: Dict[str, nx.Graph] = None):
+def pagerank(
+    graph_name: str, graphs: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
     """Calculate PageRank - compatibility function."""
     if graphs is None:
         graphs = {}
@@ -142,8 +167,8 @@ def pagerank(graph_name: str, graphs: Dict[str, nx.Graph] = None):
 
 
 def visualize_graph(
-    graph_name: str, layout: str = "spring", graphs: Dict[str, nx.Graph] = None
-):
+    graph_name: str, layout: str = "spring", graphs: Optional[Dict[str, Any]] = None
+) -> Dict[str, str]:
     """Visualize graph and return as base64 image - compatibility function."""
     if graphs is None:
         graphs = {}
@@ -194,8 +219,8 @@ def import_csv(
     graph_name: str,
     csv_data: str,
     directed: bool = False,
-    graphs: Dict[str, nx.Graph] = None,
-):
+    graphs: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Union[str, int]]:
     """Import graph from CSV edge list - compatibility function."""
     if graphs is None:
         graphs = {}
@@ -218,7 +243,7 @@ def import_csv(
             edges.append((row[0].strip(), row[1].strip()))
 
     # Create graph
-    graph = nx.DiGraph() if directed else nx.Graph()
+    graph: Any = nx.DiGraph() if directed else nx.Graph()
     graph.add_edges_from(edges)
     graphs[graph_name] = graph
 
@@ -230,7 +255,9 @@ def import_csv(
     }
 
 
-def export_json(graph_name: str, graphs: Dict[str, nx.Graph] = None):
+def export_json(
+    graph_name: str, graphs: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
     """Export graph as JSON - compatibility function."""
     if graphs is None:
         graphs = {}
@@ -249,7 +276,9 @@ def export_json(graph_name: str, graphs: Dict[str, nx.Graph] = None):
     }
 
 
-def community_detection(graph_name: str, graphs: Dict[str, nx.Graph] = None):
+def community_detection(
+    graph_name: str, graphs: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
     """Detect communities in the graph - compatibility function."""
     if graphs is None:
         graphs = {}
