@@ -375,9 +375,9 @@ async def test_batch_operations():
 
     assert batch_response is not None, "No batch response received"
     assert isinstance(batch_response, list), "Batch response should be an array"
-    assert len(batch_response) == 4, (
-        "Should have 4 responses (no response for notification)"
-    )
+    assert (
+        len(batch_response) == 4
+    ), "Should have 4 responses (no response for notification)"
 
     # Check each response
     for response in batch_response:

@@ -53,7 +53,7 @@ jobs:
           --cov=src/networkx_mcp \
           --cov-report=xml \
           --cov-report=term-missing
-    
+
     - name: Run reality check tests
       run: |
         python tests/development_archive/simple_reality_test.py

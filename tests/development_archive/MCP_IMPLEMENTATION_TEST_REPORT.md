@@ -7,18 +7,21 @@ The NetworkX MCP Server **DOES work with real MCP clients**. The implementation 
 ## Test Results
 
 ### 1. MCP Tools Installed
+
 - ✅ `mcp` CLI version 1.11.0 installed
 - ✅ `networkx-mcp-server` version 3.0.0 installed
 
 ### 2. Server Implementation Status
 
 #### Current Manual Implementation (`server.py`)
+
 - ✅ **Fully functional** with stdio transport
 - ✅ Implements MCP protocol correctly
 - ✅ Handles JSON-RPC messages properly
 - ✅ All core operations work
 
 #### Test Results with Python Client
+
 ```python
 # All these operations succeeded:
 1. Initialize handshake: SUCCESS
@@ -32,6 +35,7 @@ The NetworkX MCP Server **DOES work with real MCP clients**. The implementation 
 ### 3. Configuration
 
 The server can be configured for Claude Desktop using:
+
 ```json
 {
   "mcpServers": {
@@ -50,17 +54,21 @@ The server can be configured for Claude Desktop using:
 ### 4. Running the Server
 
 #### Direct Execution
+
 ```bash
 python -m networkx_mcp
 ```
+
 This starts the server on stdio and waits for MCP protocol messages.
 
 #### With MCP Dev Inspector
+
 The MCP dev tool works with manual MCP implementations that follow the protocol specification correctly.
 
 ### 5. Implementation Details
 
 The manual implementation in `server.py`:
+
 - Uses async/await for non-blocking I/O
 - Reads from stdin, writes to stdout
 - Implements all required MCP methods:

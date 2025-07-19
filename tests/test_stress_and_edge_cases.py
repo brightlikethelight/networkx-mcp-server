@@ -381,9 +381,7 @@ class StressAndEdgeTester:
             if result is None:
                 self.log_success("malformed_doi", "Correctly returned None")
             else:
-                self.log_issue(
-                    "warning", "malformed_doi", "Returned unexpected result"
-                )
+                self.log_issue("warning", "malformed_doi", "Returned unexpected result")
         except Exception as e:
             self.log_issue("warning", "malformed_doi", f"Raised exception: {str(e)}")
 
