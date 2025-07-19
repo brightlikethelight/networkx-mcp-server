@@ -198,7 +198,7 @@ async def test_social_network_analysis():
             communities = result.get("communities", [])
             print(f"   ✅ Found {len(communities)} communities")
             for i, community in enumerate(communities):
-                print(f"      Community {i+1}: {', '.join(community)}")
+                print(f"      Community {i + 1}: {', '.join(community)}")
     except:
         print("   ⚠️  Community detection not available")
 
@@ -375,9 +375,9 @@ async def test_batch_operations():
 
     assert batch_response is not None, "No batch response received"
     assert isinstance(batch_response, list), "Batch response should be an array"
-    assert (
-        len(batch_response) == 4
-    ), "Should have 4 responses (no response for notification)"
+    assert len(batch_response) == 4, (
+        "Should have 4 responses (no response for notification)"
+    )
 
     # Check each response
     for response in batch_response:
@@ -462,7 +462,7 @@ async def test_performance_under_load():
     successful = sum(1 for r in results if isinstance(r, dict) and r.get("success"))
 
     print(f"   ✅ Completed {successful}/10 analyses in {analysis_time:.2f}s")
-    print(f"   Average: {analysis_time/10:.3f}s per analysis")
+    print(f"   Average: {analysis_time / 10:.3f}s per analysis")
 
     # Get resource status
     result = await client.call_tool("resource_status", {})
@@ -470,7 +470,7 @@ async def test_performance_under_load():
         stats = result.get("lock_stats", {})
         print("\n4. Resource utilization:")
         print(f"   Lock acquisitions: {stats.get('total_acquisitions', 0)}")
-        print(f"   Contention rate: {stats.get('contention_rate', 0)*100:.1f}%")
+        print(f"   Contention rate: {stats.get('contention_rate', 0) * 100:.1f}%")
 
     print("\n✅ Performance test completed!")
 

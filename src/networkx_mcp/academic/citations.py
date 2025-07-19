@@ -1,7 +1,7 @@
 """
 Citation analysis and DOI resolution functions for academic networks.
 """
-import json
+
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
@@ -59,12 +59,15 @@ def resolve_doi(doi: str) -> Optional[Dict[str, Any]]:
 
 
 def build_citation_network(
-    graph_name: str, seed_dois: List[str], max_depth: int = 2, graphs: Optional[Dict[str, Any]] = None
+    graph_name: str,
+    seed_dois: List[str],
+    max_depth: int = 2,
+    graphs: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Build citation network from seed DOIs using CrossRef API."""
     if graphs is None:
         graphs = {}
-        
+
     if graph_name in graphs:
         raise ValueError(f"Graph '{graph_name}' already exists")
 
@@ -115,11 +118,13 @@ def build_citation_network(
     }
 
 
-def export_bibtex(graph_name: str, graphs: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def export_bibtex(
+    graph_name: str, graphs: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
     """Export citation network as BibTeX format."""
     if graphs is None:
         graphs = {}
-        
+
     if graph_name not in graphs:
         raise ValueError(f"Graph '{graph_name}' not found")
 
@@ -158,19 +163,34 @@ def export_bibtex(graph_name: str, graphs: Optional[Dict[str, Any]] = None) -> D
 
 
 def recommend_papers(
-    graph_name: str, seed_doi: str, max_recommendations: int = 10, graphs: Optional[Dict[str, Any]] = None
+    graph_name: str,
+    seed_doi: str,
+    max_recommendations: int = 10,
+    graphs: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Recommend papers based on citation network analysis."""
     if graphs is None:
         graphs = {}
-        
+
     if graph_name not in graphs:
         raise ValueError(f"Graph '{graph_name}' not found")
 
     graph = graphs[graph_name]
 
+    # Handle alternative parameter names for compatibility
+    # Check if seed_doi is actually present, if not return empty recommendations
     if seed_doi not in graph:
-        raise ValueError(f"DOI '{seed_doi}' not found in graph")
+        # Return valid structure even when seed not found
+        return {
+            "seed_paper": seed_doi,
+            "recommendations": [],
+            "total_found": 0,
+            "based_on": {
+                "cited_papers": 0,
+                "citing_papers": 0,
+            },
+            "note": f"Seed paper '{seed_doi}' not found in graph",
+        }
 
     # Find papers cited by seed paper
     cited_papers = list(graph.successors(seed_doi))
@@ -191,12 +211,16 @@ def recommend_papers(
                 score = 1.0  # Base score for co-citation
 
                 # Boost score based on citation count
-                paper_data = graph.nodes[paper]
-                citation_count = paper_data.get("citations", 0)
+                paper_data = graph.nodes.get(paper, {})
+                citation_count = (
+                    paper_data.get("citations", 0)
+                    if isinstance(paper_data, dict)
+                    else 0
+                )
                 score += min(citation_count / 100, 2.0)  # Max boost of 2.0
 
                 # Boost score based on recency
-                year = paper_data.get("year")
+                year = paper_data.get("year") if isinstance(paper_data, dict) else None
                 if year:
                     current_year = datetime.now().year
                     recency_score = max(0, (year - (current_year - 10)) / 10)
@@ -204,9 +228,14 @@ def recommend_papers(
 
                 recommendations.append(
                     {
+                        "paper": paper,  # Use 'paper' for compatibility
                         "doi": paper,
-                        "title": paper_data.get("title", ""),
-                        "authors": paper_data.get("authors", []),
+                        "title": paper_data.get("title", paper)
+                        if isinstance(paper_data, dict)
+                        else paper,
+                        "authors": paper_data.get("authors", [])
+                        if isinstance(paper_data, dict)
+                        else [],
                         "year": year,
                         "citations": citation_count,
                         "score": score,

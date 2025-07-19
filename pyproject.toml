@@ -31,7 +31,6 @@ dependencies = [
     "networkx>=3.0",
     "numpy>=1.21.0",  # Required for NetworkX and core algorithms
     "matplotlib>=3.5.0",  # Required for graph visualization
-    "fastmcp>=2.0.0",  # FastMCP framework for simplified MCP server development
     "requests>=2.28.0",  # For API calls to CrossRef, ORCID, etc.
     "python-dateutil>=2.8.0",  # For date parsing in academic data
     "bibtexparser>=1.4.0",  # For BibTeX parsing and generation

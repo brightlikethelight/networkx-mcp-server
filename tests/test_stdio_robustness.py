@@ -161,7 +161,7 @@ def test_rapid_requests():
 
         elapsed = time.time() - start_time
         print(f"  ✓ Handled {request_count} requests in {elapsed:.2f}s")
-        print(f"  ✓ {request_count/elapsed:.1f} requests/second")
+        print(f"  ✓ {request_count / elapsed:.1f} requests/second")
 
     finally:
         server.stop()
@@ -209,7 +209,7 @@ def test_large_payloads():
         print("  ✓ Handled 1000-node payload")
 
         # Add many edges
-        edges = [[f"node_{i}", f"node_{i+1}"] for i in range(500)]
+        edges = [[f"node_{i}", f"node_{i + 1}"] for i in range(500)]
         response = server.send_request(
             "tools/call",
             {
@@ -342,7 +342,7 @@ def test_connection_lifecycle():
                 request_id=i + 1,
             )
             assert "result" in response
-            print(f"  ✓ Lifecycle {i+1} successful")
+            print(f"  ✓ Lifecycle {i + 1} successful")
         finally:
             server.stop()
 

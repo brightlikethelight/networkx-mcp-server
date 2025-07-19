@@ -480,7 +480,7 @@ class TestMCPWorkflows:
                     },
                 )
 
-                edges = [[f"node_{j}", f"node_{(j+1) % 100}"] for j in range(100)]
+                edges = [[f"node_{j}", f"node_{(j + 1) % 100}"] for j in range(100)]
                 await server.send_mcp_request(
                     "tools/call",
                     {

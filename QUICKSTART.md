@@ -22,11 +22,11 @@ pip install -e .
 python -m networkx_mcp
 ```
 
-### Option 3: With FastMCP (if you have Pydantic v2)
+### Option 3: With Optional Features
 
 ```bash
-# Install with FastMCP support
-pip install -e ".[fastmcp]"
+# Install with additional features (Excel support, etc.)
+pip install -e ".[full]"
 
 # Run the server
 python -m networkx_mcp

@@ -53,9 +53,9 @@ class TestSQLInjectionPrevention:
         for injection in sql_injections:
             result = RequestValidator.validate_node_id(injection)
             # Node IDs allow more characters, but should still be validated
-            assert (
-                result.is_valid
-            ), f"Node ID validation unexpectedly failed for {injection}"
+            assert result.is_valid, (
+                f"Node ID validation unexpectedly failed for {injection}"
+            )
 
     def test_sql_injection_in_queries(self):
         """Test SQL injection in algorithm parameters."""
@@ -74,9 +74,9 @@ class TestSQLInjectionPrevention:
             result = shortest_path(
                 graph_name="test_graph", source=injection, target="C"
             )
-            assert (
-                "error" in result
-            ), f"SQL injection {injection} should return error response"
+            assert "error" in result, (
+                f"SQL injection {injection} should return error response"
+            )
             assert (
                 "invalid" in result["error"].lower()
                 or "validation" in result["error"].lower()
@@ -105,9 +105,9 @@ class TestNoSQLInjectionPrevention:
             # but in a real application, these should be caught by business logic
             if result.is_valid:
                 # Check that MongoDB operators are preserved (shows they passed through)
-                assert "$" in str(
-                    injection
-                ), "MongoDB operator test data should contain $ operators"
+                assert "$" in str(injection), (
+                    "MongoDB operator test data should contain $ operators"
+                )
             else:
                 # If rejected, ensure it's for a good reason
                 assert "not safe" in " ".join(result.errors)
@@ -148,9 +148,9 @@ class TestCommandInjectionPrevention:
 
         for injection in command_injections:
             result = SecurityValidator.validate_file_path(injection)
-            assert (
-                not result.is_valid
-            ), f"Command injection {injection} should be rejected"
+            assert not result.is_valid, (
+                f"Command injection {injection} should be rejected"
+            )
             assert "File path cannot contain" in " ".join(
                 result.errors
             ) or "File extension not allowed" in " ".join(result.errors)
@@ -170,9 +170,9 @@ class TestCommandInjectionPrevention:
 
         for injection in command_injections:
             result = SecurityValidator.validate_file_path(injection)
-            assert (
-                not result.is_valid
-            ), f"Command injection {injection} should be rejected"
+            assert not result.is_valid, (
+                f"Command injection {injection} should be rejected"
+            )
 
 
 class TestPathTraversalPrevention:
@@ -222,9 +222,9 @@ class TestResourceExhaustionPrevention:
         create_graph(name="huge_graph")
         result = add_nodes(graph_name="huge_graph", nodes=nodes)
         # Should return an error response rather than raising exception
-        assert (
-            "error" in result
-        ), "Large node creation should be rejected by resource limits"
+        assert "error" in result, (
+            "Large node creation should be rejected by resource limits"
+        )
         assert (
             "exceeds" in result["error"].lower()
             or "limit" in result["error"].lower()
@@ -259,9 +259,9 @@ class TestResourceExhaustionPrevention:
             # If allowed, verify resource tracking is working
             assert "nodes_added" in result, "Should track nodes added"
             assert "estimated_size_mb" in result, "Should track estimated memory usage"
-            assert (
-                result["estimated_size_mb"] > 0
-            ), "Should report non-zero memory usage"
+            assert result["estimated_size_mb"] > 0, (
+                "Should report non-zero memory usage"
+            )
 
     def test_cpu_exhaustion_prevention(self):
         """Test prevention of CPU exhaustion attacks."""
@@ -295,12 +295,12 @@ class TestResourceExhaustionPrevention:
             # If allowed, verify resource tracking and reasonable limits
             assert "edges_added" in result, "Should track edges added"
             assert "estimated_size_mb" in result, "Should track estimated memory usage"
-            assert (
-                result["edges_added"] <= 5000
-            ), "Should not allow unreasonably large edge counts"
-            assert (
-                result["estimated_size_mb"] > 0
-            ), "Should report non-zero memory usage"
+            assert result["edges_added"] <= 5000, (
+                "Should not allow unreasonably large edge counts"
+            )
+            assert result["estimated_size_mb"] > 0, (
+                "Should report non-zero memory usage"
+            )
 
 
 class TestAuthenticationBypassPrevention:
@@ -340,15 +340,15 @@ class TestAuthenticationBypassPrevention:
             result = manage_feature_flags(action="list", admin_token=token)
             # Currently the feature flag system doesn't strictly enforce auth for list operations
             # but should return valid data structure
-            assert isinstance(
-                result, dict
-            ), "Feature flags should return dict structure"
+            assert isinstance(result, dict), (
+                "Feature flags should return dict structure"
+            )
             # Check if it has either error response OR valid feature flags structure
             if "error" not in result:
                 # If no error, should have expected feature flags structure
-                assert (
-                    "by_category" in result or "total_flags" in result
-                ), "Should have valid feature flags structure"
+                assert "by_category" in result or "total_flags" in result, (
+                    "Should have valid feature flags structure"
+                )
 
 
 class TestInputSanitization:
@@ -364,9 +364,9 @@ class TestInputSanitization:
 
         for attack in null_byte_attacks:
             result = RequestValidator.validate_graph_id(attack)
-            assert (
-                not result.is_valid
-            ), f"Null byte injection {attack} should be rejected"
+            assert not result.is_valid, (
+                f"Null byte injection {attack} should be rejected"
+            )
             assert (
                 "can only contain letters, numbers, underscores, and hyphens"
                 in " ".join(result.errors)
@@ -436,9 +436,9 @@ class TestSecurityEdgeCases:
         # Current validator allows nested dictionaries if they contain safe types
         if result.is_valid:
             # Ensure the nested structure was preserved (indicating it passed through)
-            assert "$where" in str(
-                nested_attack
-            ), "Nested MongoDB operator should be preserved"
+            assert "$where" in str(nested_attack), (
+                "Nested MongoDB operator should be preserved"
+            )
         else:
             # If rejected, ensure it's for a valid reason
             assert "not safe" in " ".join(result.errors)

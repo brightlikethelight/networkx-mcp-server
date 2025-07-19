@@ -6,8 +6,9 @@ Core server functionality with plugin-based architecture.
 
 import asyncio
 import json
+import os
 import sys
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import networkx as nx
 
@@ -25,75 +26,140 @@ from .academic import (
 # Import basic operations
 from .core.basic_operations import (
     add_edges as _add_edges,
+)
+from .core.basic_operations import (
     add_nodes as _add_nodes,
+)
+from .core.basic_operations import (
     betweenness_centrality as _betweenness_centrality,
+)
+from .core.basic_operations import (
     community_detection as _community_detection,
+)
+from .core.basic_operations import (
     connected_components as _connected_components,
+)
+from .core.basic_operations import (
     create_graph as _create_graph,
+)
+from .core.basic_operations import (
     degree_centrality as _degree_centrality,
+)
+from .core.basic_operations import (
     export_json as _export_json,
+)
+from .core.basic_operations import (
     get_graph_info as _get_graph_info,
+)
+from .core.basic_operations import (
     import_csv as _import_csv,
+)
+from .core.basic_operations import (
     pagerank as _pagerank,
+)
+from .core.basic_operations import (
     shortest_path as _shortest_path,
+)
+from .core.basic_operations import (
     visualize_graph as _visualize_graph,
 )
 
 # Global state - simple and effective
 graphs: Dict[str, nx.Graph] = {}
 
+# Optional authentication
+try:
+    from .auth import APIKeyManager, AuthMiddleware
+
+    HAS_AUTH = True
+except ImportError:
+    HAS_AUTH = False
+
+# Optional monitoring
+try:
+    from .monitoring import HealthMonitor, create_health_endpoint
+
+    HAS_MONITORING = True
+except ImportError:
+    HAS_MONITORING = False
+
+
 # Re-export functions with graphs parameter bound
 def create_graph(name: str, directed: bool = False):
     return _create_graph(name, directed, graphs)
 
+
 def add_nodes(graph_name: str, nodes: List):
     return _add_nodes(graph_name, nodes, graphs)
+
 
 def add_edges(graph_name: str, edges: List):
     return _add_edges(graph_name, edges, graphs)
 
+
 def get_graph_info(graph_name: str):
     return _get_graph_info(graph_name, graphs)
+
 
 def shortest_path(graph_name: str, source, target):
     return _shortest_path(graph_name, source, target, graphs)
 
+
 def degree_centrality(graph_name: str):
     return _degree_centrality(graph_name, graphs)
+
 
 def betweenness_centrality(graph_name: str):
     return _betweenness_centrality(graph_name, graphs)
 
+
 def connected_components(graph_name: str):
     return _connected_components(graph_name, graphs)
+
 
 def pagerank(graph_name: str):
     return _pagerank(graph_name, graphs)
 
+
 def visualize_graph(graph_name: str, layout: str = "spring"):
     return _visualize_graph(graph_name, layout, graphs)
+
 
 def import_csv(graph_name: str, csv_data: str, directed: bool = False):
     return _import_csv(graph_name, csv_data, directed, graphs)
 
+
 def export_json(graph_name: str):
     return _export_json(graph_name, graphs)
+
 
 def community_detection(graph_name: str):
     return _community_detection(graph_name, graphs)
 
 
-
-
-
-
 class NetworkXMCPServer:
     """Minimal MCP server - no unnecessary abstraction."""
 
-    def __init__(self):
+    def __init__(self, auth_required: bool = False, enable_monitoring: bool = False):
         self.running = True
         self.mcp = self  # For test compatibility
         self.graphs = graphs  # Reference to global graphs
+
+        # Set up authentication if enabled
+        self.auth_required = auth_required and HAS_AUTH
+        if self.auth_required:
+            self.key_manager = APIKeyManager()
+            self.auth = AuthMiddleware(self.key_manager, required=auth_required)
+        else:
+            self.auth = None
+
+        # Set up monitoring if enabled
+        self.monitoring_enabled = enable_monitoring and HAS_MONITORING
+        if self.monitoring_enabled:
+            self.monitor = HealthMonitor()
+            self.monitor.graphs = graphs  # Give monitor access to graphs
+        else:
+            self.monitor = None
 
     def tool(self, func):
         """Mock tool decorator for test compatibility."""
@@ -105,17 +171,63 @@ class NetworkXMCPServer:
         params = request.get("params", {})
         req_id = request.get("id")
 
+        # Handle authentication if required
+        auth_data = None
+        if self.auth and method not in ["initialize", "initialized"]:
+            try:
+                auth_data = self.auth.authenticate(request)
+                # Remove API key from params to avoid exposing it
+                if "api_key" in params:
+                    del params["api_key"]
+                if "apiKey" in params:
+                    del params["apiKey"]
+            except ValueError as e:
+                return {
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "error": {"code": -32603, "message": str(e)},
+                }
+
+        # Record request for monitoring
+        if self.monitor:
+            self.monitor.record_request(method)
+
         # Route to appropriate handler
         if method == "initialize":
             result = {
                 "protocolVersion": "2024-11-05",
+                "capabilities": {"tools": {}},
                 "serverInfo": {"name": "networkx-minimal"},
             }
         elif method == "initialized":
+            # This is a notification, no response needed
+            if req_id is None:
+                return None
             result = {}  # Just acknowledge
         elif method == "tools/list":
             result = {"tools": self._get_tools()}
         elif method == "tools/call":
+            # Check permissions for write operations
+            if auth_data and self.auth:
+                tool_name = params.get("name", "")
+                write_tools = [
+                    "create_graph",
+                    "add_nodes",
+                    "add_edges",
+                    "import_csv",
+                    "build_citation_network",
+                ]
+                if tool_name in write_tools and not self.auth.check_permission(
+                    auth_data, "write"
+                ):
+                    return {
+                        "jsonrpc": "2.0",
+                        "id": req_id,
+                        "error": {
+                            "code": -32603,
+                            "message": "Permission denied: write access required",
+                        },
+                    }
             result = await self._call_tool(params)
         else:
             return {
@@ -128,7 +240,7 @@ class NetworkXMCPServer:
 
     def _get_tools(self) -> List[Dict[str, Any]]:
         """List available tools."""
-        return [
+        tools = [
             {
                 "name": "create_graph",
                 "description": "Create a new graph",
@@ -358,6 +470,22 @@ class NetworkXMCPServer:
             },
         ]
 
+        # Add health endpoint if monitoring is enabled
+        if self.monitoring_enabled and self.monitor:
+            tools.append(
+                {
+                    "name": "health_status",
+                    "description": "Get server health and performance metrics",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {},
+                        "required": [],
+                    },
+                }
+            )
+
+        return tools
+
     async def _call_tool(self, params: dict) -> dict:
         """Execute a tool."""
         tool_name = params.get("name")
@@ -434,7 +562,13 @@ class NetworkXMCPServer:
 
             elif tool_name == "visualize_graph":
                 layout = args.get("layout", "spring")
-                result = visualize_graph(args["graph"], layout)
+                viz_result = visualize_graph(args["graph"], layout)
+                # Rename 'image' key to 'visualization' for backward compatibility
+                result = {
+                    "visualization": viz_result["image"],
+                    "format": viz_result["format"],
+                    "layout": viz_result["layout"],
+                }
 
             elif tool_name == "import_csv":
                 result = import_csv(
@@ -450,7 +584,9 @@ class NetworkXMCPServer:
                 )
 
             elif tool_name == "analyze_author_impact":
-                result = analyze_author_impact(args["graph"], args["author_name"], graphs)
+                result = analyze_author_impact(
+                    args["graph"], args["author_name"], graphs
+                )
 
             elif tool_name == "find_collaboration_patterns":
                 result = find_collaboration_patterns(args["graph"], graphs)
@@ -464,14 +600,27 @@ class NetworkXMCPServer:
                 result = export_bibtex(args["graph"], graphs)
 
             elif tool_name == "recommend_papers":
-                result = recommend_papers(
-                    args["graph"], args["seed_doi"], args.get("max_recommendations", 10), graphs
-                )
+                # Handle alternative parameter names for backward compatibility
+                seed = args.get("seed_doi") or args.get("seed_paper")
+                max_recs = args.get("max_recommendations") or args.get("top_n", 10)
+
+                if not seed:
+                    raise ValueError(
+                        "Missing required parameter: seed_doi or seed_paper"
+                    )
+
+                result = recommend_papers(args["graph"], seed, max_recs, graphs)
 
             elif tool_name == "resolve_doi":
                 result = resolve_doi(args["doi"])
                 if result is None:
                     raise ValueError(f"Could not resolve DOI: {args['doi']}")
+
+            elif tool_name == "health_status":
+                if self.monitor:
+                    result = self.monitor.get_health_status()
+                else:
+                    result = {"status": "monitoring_disabled"}
 
             else:
                 raise ValueError(f"Unknown tool: {tool_name}")
@@ -496,7 +645,8 @@ class NetworkXMCPServer:
 
                 request = json.loads(line.strip())
                 response = await self.handle_request(request)
-                print(json.dumps(response), flush=True)
+                if response is not None:
+                    print(json.dumps(response), flush=True)
 
             except Exception as e:
                 print(json.dumps({"error": str(e)}), file=sys.stderr, flush=True)
@@ -508,7 +658,30 @@ mcp = NetworkXMCPServer()
 
 def main():
     """Main entry point for the NetworkX MCP Server."""
-    server = NetworkXMCPServer()
+    # Check environment variables
+    auth_required = os.environ.get("NETWORKX_MCP_AUTH", "false").lower() == "true"
+    enable_monitoring = (
+        os.environ.get("NETWORKX_MCP_MONITORING", "false").lower() == "true"
+    )
+
+    if auth_required or enable_monitoring:
+        import logging
+
+        logging.basicConfig(level=logging.INFO)
+
+        if auth_required:
+            logging.info("Starting NetworkX MCP Server with authentication enabled")
+            logging.info(
+                "Use 'python -m networkx_mcp.auth generate <name>' to create API keys"
+            )
+
+        if enable_monitoring:
+            logging.info("Starting NetworkX MCP Server with monitoring enabled")
+            logging.info("Health status available via 'health_status' tool")
+
+    server = NetworkXMCPServer(
+        auth_required=auth_required, enable_monitoring=enable_monitoring
+    )
     asyncio.run(server.run())
 
 

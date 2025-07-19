@@ -623,7 +623,7 @@ class ProductionReadiness:
             print(f"     {detail}")
 
         # Production readiness assessment
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print("🚨 PRODUCTION DEPLOYMENT RECOMMENDATION")
         print("=" * 60)
 

@@ -21,9 +21,9 @@ def measure_server(server_type="minimal"):
     else:
         module_name = "networkx_mcp.server"
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"Testing {server_type.upper()} server")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
     # Measure import time and memory
     import_test = f"""
@@ -146,11 +146,11 @@ def main():
         results.append(full)
 
     # Summary
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print("SUMMARY COMPARISON")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print(f"{'Version':<15} {'Memory (MB)':<12} {'Startup (s)':<12} {'Status':<10}")
-    print(f"{'-'*15} {'-'*12} {'-'*12} {'-'*10}")
+    print(f"{'-' * 15} {'-' * 12} {'-' * 12} {'-' * 10}")
 
     for r in results:
         status = "✅ Works" if r["functional"] else "❌ Broken"
@@ -163,19 +163,19 @@ def main():
         mem_saved = results[1]["memory"] - results[0]["memory"]
         time_saved = results[1]["startup_time"] - results[0]["startup_time"]
 
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print("SAVINGS")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
         print(
-            f"Memory saved: {mem_saved:.1f}MB ({mem_saved/results[1]['memory']*100:.0f}% reduction)"
+            f"Memory saved: {mem_saved:.1f}MB ({mem_saved / results[1]['memory'] * 100:.0f}% reduction)"
         )
         print(
-            f"Startup time saved: {time_saved:.2f}s ({time_saved/results[1]['startup_time']*100:.0f}% faster)"
+            f"Startup time saved: {time_saved:.2f}s ({time_saved / results[1]['startup_time'] * 100:.0f}% faster)"
         )
 
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print("VERDICT")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
         if mem_saved > 50:
             print("✅ Architectural fix successful!")

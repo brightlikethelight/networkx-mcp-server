@@ -106,7 +106,7 @@ def test_minimal_memory():
     print(f"Minimal server:  {minimal_memory:.1f}MB")
     print(f"Full server:     {full_memory:.1f}MB")
     print(
-        f"Memory saved:    {full_memory - minimal_memory:.1f}MB ({(full_memory - minimal_memory)/full_memory*100:.0f}% reduction)"
+        f"Memory saved:    {full_memory - minimal_memory:.1f}MB ({(full_memory - minimal_memory) / full_memory * 100:.0f}% reduction)"
     )
 
     print("\n" + "=" * 70)

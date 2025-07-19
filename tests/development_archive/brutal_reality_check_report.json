@@ -1,0 +1,32 @@
+{
+  "total_tests": 5,
+  "passed": 4,
+  "warnings": [],
+  "failed": 1,
+  "success_rate": 80.0,
+  "errors": [
+    "visualize_layouts: maximum recursion depth exceeded"
+  ],
+  "performance_data": {
+    "large_graph_centrality": {
+      "duration": 0.0002880096435546875,
+      "memory_delta": 0.03125,
+      "success": true
+    },
+    "large_graph_components": {
+      "duration": 0.0002048015594482422,
+      "memory_delta": 0.03125,
+      "success": true
+    },
+    "large_graph_pagerank": {
+      "duration": 0.0020160675048828125,
+      "memory_delta": 0.28125,
+      "success": true
+    },
+    "large_graph_export": {
+      "duration": 0.0005469322204589844,
+      "memory_delta": 0.34375,
+      "success": true
+    }
+  }
+}

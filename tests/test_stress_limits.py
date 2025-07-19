@@ -278,7 +278,7 @@ class TestStressLimits:
         edges = []
         # Path edges
         for i in range(99):
-            edges.append([f"alg_node_{i}", f"alg_node_{i+1}"])
+            edges.append([f"alg_node_{i}", f"alg_node_{i + 1}"])
         # Random connections
         for i in range(0, 100, 10):
             for j in range(i + 5, min(i + 15, 100)):

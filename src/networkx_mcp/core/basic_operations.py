@@ -2,10 +2,11 @@
 Basic graph operations extracted from server.py.
 These are compatibility functions for existing code.
 """
+
 import base64
 import csv
 import io
-from typing import Any, Dict, List
+from typing import Dict, List
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -140,7 +141,9 @@ def pagerank(graph_name: str, graphs: Dict[str, nx.Graph] = None):
     }
 
 
-def visualize_graph(graph_name: str, layout: str = "spring", graphs: Dict[str, nx.Graph] = None):
+def visualize_graph(
+    graph_name: str, layout: str = "spring", graphs: Dict[str, nx.Graph] = None
+):
     """Visualize graph and return as base64 image - compatibility function."""
     if graphs is None:
         graphs = {}
@@ -187,13 +190,28 @@ def visualize_graph(graph_name: str, layout: str = "spring", graphs: Dict[str, n
     }
 
 
-def import_csv(graph_name: str, csv_data: str, directed: bool = False, graphs: Dict[str, nx.Graph] = None):
+def import_csv(
+    graph_name: str,
+    csv_data: str,
+    directed: bool = False,
+    graphs: Dict[str, nx.Graph] = None,
+):
     """Import graph from CSV edge list - compatibility function."""
     if graphs is None:
         graphs = {}
     # Parse CSV data
     reader = csv.reader(io.StringIO(csv_data))
     edges = []
+
+    # Skip header if it looks like one
+    first_row = next(reader, None)
+    if first_row and not (
+        first_row[0].lower() in ["source", "from"]
+        and first_row[1].lower() in ["target", "to"]
+    ):
+        # Not a header, add it as an edge
+        if len(first_row) >= 2:
+            edges.append((first_row[0].strip(), first_row[1].strip()))
 
     for row in reader:
         if len(row) >= 2:
@@ -253,7 +271,9 @@ def community_detection(graph_name: str, graphs: Dict[str, nx.Graph] = None):
             node_community[node] = i
 
     return {
+        "communities": communities_list,
         "num_communities": len(communities_list),
+        "method": "louvain",
         "community_sizes": [len(comm) for comm in communities_list],
         "largest_community": communities_list[0] if communities_list else [],
         "node_community_map": dict(list(node_community.items())[:20]),  # First 20 nodes

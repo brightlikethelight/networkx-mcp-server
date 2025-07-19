@@ -220,14 +220,14 @@ class GracefulShutdownHandler:
         for i, callback in enumerate(self.shutdown_callbacks):
             try:
                 logger.debug(
-                    f"Running shutdown callback {i+1}/{len(self.shutdown_callbacks)}"
+                    f"Running shutdown callback {i + 1}/{len(self.shutdown_callbacks)}"
                 )
                 if asyncio.iscoroutinefunction(callback):
                     await callback()
                 else:
                     callback()
             except Exception as e:
-                logger.error(f"Shutdown callback {i+1} failed: {e}", exc_info=True)
+                logger.error(f"Shutdown callback {i + 1} failed: {e}", exc_info=True)
                 # Continue with other callbacks
 
     async def _cleanup_resources(self):

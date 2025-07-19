@@ -263,7 +263,7 @@ nav:
 
 #### 8.3 Ecosystem Integration
 
-- FastMCP migration (when stable)
+- MCP protocol optimizations
 - Jupyter notebook integration
 - VSCode extension
 - Example repositories
@@ -316,7 +316,7 @@ nav:
 
 1. **Build plugin ecosystem**
 2. **Academic conference presentation**
-3. **FastMCP migration** (when stable)
+3. **MCP protocol enhancements**
 4. **Enterprise features** as paid plugins
 5. **SaaS offering** for hosted MCP servers
 

@@ -250,7 +250,7 @@ class TestBrutallyHonestTools:
         print(f"✅ WORKING TOOLS ({len(working_tools)}): {working_tools}")
         print(f"❌ BROKEN TOOLS ({len(broken_tools)}): {broken_tools}")
         print(
-            f"📈 SUCCESS RATE: {len(working_tools)}/{len(working_tools) + len(broken_tools)} = {len(working_tools)/(len(working_tools) + len(broken_tools))*100:.1f}%"
+            f"📈 SUCCESS RATE: {len(working_tools)}/{len(working_tools) + len(broken_tools)} = {len(working_tools) / (len(working_tools) + len(broken_tools)) * 100:.1f}%"
         )
 
 

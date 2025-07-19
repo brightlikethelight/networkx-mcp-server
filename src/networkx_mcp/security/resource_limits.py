@@ -187,7 +187,7 @@ def check_memory_limit() -> None:
     if usage_ratio > LIMITS.memory_check_threshold:
         logger.warning(
             f"Memory usage high: {current_memory:.1f}MB / {LIMITS.max_memory_mb}MB "
-            f"({usage_ratio*100:.1f}%)"
+            f"({usage_ratio * 100:.1f}%)"
         )
 
 

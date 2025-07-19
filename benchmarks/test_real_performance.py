@@ -270,7 +270,7 @@ class RealBenchmark:
 
                     if "error" in result["response"]:
                         self.results["errors"].append(
-                            f"Failed to add edges {i}-{i+len(batch_edges)}: {result['response']['error']}"
+                            f"Failed to add edges {i}-{i + len(batch_edges)}: {result['response']['error']}"
                         )
                         break
 
@@ -318,7 +318,7 @@ class RealBenchmark:
         await self.call_tool("add_nodes", {"graph_id": "algo_test", "nodes": nodes}, 2)
 
         # Create a connected graph (ring topology)
-        edges = [[f"node_{i}", f"node_{(i+1) % 100}"] for i in range(100)]
+        edges = [[f"node_{i}", f"node_{(i + 1) % 100}"] for i in range(100)]
         await self.call_tool("add_edges", {"graph_id": "algo_test", "edges": edges}, 3)
 
         # Test shortest path
