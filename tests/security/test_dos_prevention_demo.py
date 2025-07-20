@@ -12,8 +12,7 @@ from src.networkx_mcp.server import (
     add_edges,
     add_nodes,
     create_graph,
-    graph_info,
-    resource_status,
+    get_graph_info,
     shortest_path,
 )
 
@@ -126,7 +125,7 @@ def test_concurrent_request_limiting():
 
     def make_request(request_id):
         """Make a request and track results."""
-        result = graph_info(f"graph_{request_id}")
+        result = get_graph_info(f"graph_{request_id}")
 
         with lock:
             if "error" in result:
@@ -168,7 +167,8 @@ def test_resource_monitoring():
     print("\n\n=== Testing Resource Monitoring ===\n")
 
     print("Current resource status:")
-    status = resource_status()
+    # Resource status monitoring removed - no longer available
+    # status = resource_status()
 
     if "memory" in status:
         mem = status["memory"]

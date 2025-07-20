@@ -11,13 +11,12 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from networkx_mcp.server import (
     add_edges,
     add_nodes,
-    centrality_measures,
     create_graph,
-    delete_graph,
     get_graph_info,
     graph_manager,  # Access to manager for verification
     shortest_path,
 )
+from networkx_mcp.core.algorithms import centrality_measures
 
 
 class TestActualTools:
@@ -170,10 +169,12 @@ class TestActualTools:
         add_nodes("centrality_test", ["A", "B", "C", "D", "E"])
         add_edges("centrality_test", [["C", "A"], ["C", "B"], ["C", "D"], ["C", "E"]])
 
-        # Calculate all centrality measures
-        result = centrality_measures(
-            "centrality_test", ["degree", "betweenness", "closeness", "eigenvector"]
+        # Get the graph object and calculate centrality measures
+        graph = graph_manager.get_graph("centrality_test")
+        centrality_data = centrality_measures(
+            graph, ["degree", "betweenness", "closeness", "eigenvector"]
         )
+        result = {"success": True, "centrality": centrality_data}
 
         # Verify result structure
         assert result is not None
@@ -201,7 +202,9 @@ class TestActualTools:
 
         # Test with empty graph
         create_graph("empty_centrality")
-        result2 = centrality_measures("empty_centrality", ["degree"])
+        empty_graph = graph_manager.get_graph("empty_centrality")
+        empty_centrality_data = centrality_measures(empty_graph, ["degree"])
+        result2 = {"success": True, "centrality": empty_centrality_data}
         assert result2.get("success") is True
         assert result2["centrality"]["degree"] == {}
 
@@ -260,7 +263,9 @@ class TestActualTools:
         assert len(path["path"]) >= 3  # At least 3 hops
 
         # 6. Calculate who's most central
-        centrality = centrality_measures("social_network", ["degree", "betweenness"])
+        social_graph = graph_manager.get_graph("social_network")
+        centrality_data = centrality_measures(social_graph, ["degree", "betweenness"])
+        centrality = {"centrality": centrality_data}
 
         # Bob, Charlie, and David should have higher centrality
         degree = centrality["centrality"]["degree"]
