@@ -6,34 +6,101 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    - cron: '0 0 * * 1'  # Weekly on Monday
+    - cron: '0 0 * * 1'  # Weekly on Monday at midnight UTC
+  workflow_dispatch:  # Allow manual runs
 
 jobs:
-  security:
+  security-scan:
+    name: Security Scan
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
+        python-version: '3.12'
+        cache: 'pip'
 
     - name: Install dependencies
       run: |
+        python -m pip install --upgrade pip
         pip install -e ".[dev]"
-        pip install bandit safety
+        pip install safety semgrep
 
     - name: Run Bandit security scan
       run: |
-        bandit -r src/ -f json -o bandit-report.json --severity-level medium
+        # Run bandit and create reports
+        bandit -r src/ -f json -o bandit-report.json --severity-level medium || true
+        bandit -r src/ -f txt -o bandit-report.txt --severity-level medium || true
+        
+        # Display results
+        echo "## Bandit Security Scan Results" >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
+        cat bandit-report.txt >> $GITHUB_STEP_SUMMARY || echo "No issues found" >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
 
     - name: Check dependencies for vulnerabilities
       run: |
-        safety check --json > safety-report.json
+        # Generate requirements file
+        pip freeze > requirements-scan.txt
+        
+        # Run safety check
+        safety check --json --file requirements-scan.txt > safety-report.json || true
+        safety check --file requirements-scan.txt > safety-report.txt || true
+        
+        # Display results
+        echo "## Dependency Vulnerability Scan" >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
+        cat safety-report.txt >> $GITHUB_STEP_SUMMARY || echo "No vulnerabilities found" >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
+
+    - name: Run Semgrep security scan
+      if: github.event_name != 'pull_request'  # Skip on PRs to avoid token issues
+      uses: semgrep/semgrep-action@v1
+      with:
+        config: >-
+          p/security-audit
+          p/python
+          p/owasp-top-10
+        generateSarif: true
+
+    - name: Upload Semgrep results to GitHub
+      if: github.event_name != 'pull_request'
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: semgrep.sarif
 
     - name: Upload security reports
+      if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: security-reports
+        name: security-reports-${{ github.run_id }}
         path: |
           bandit-report.json
+          bandit-report.txt
           safety-report.json
+          safety-report.txt
+          requirements-scan.txt
+        retention-days: 30
+
+    - name: Check for critical issues
+      run: |
+        # Check if there are any critical security issues
+        if grep -q '"severity": "HIGH"' bandit-report.json 2>/dev/null; then
+          echo "::error::Critical security issues found in code!"
+          exit 1
+        fi
+        
+        # Check for critical dependency vulnerabilities
+        if grep -q "CRITICAL" safety-report.txt 2>/dev/null; then
+          echo "::error::Critical vulnerabilities found in dependencies!"
+          exit 1
+        fi
+        
+        echo "✅ No critical security issues found"

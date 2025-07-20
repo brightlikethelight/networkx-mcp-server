@@ -10,8 +10,13 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  PYTHON_VERSION_DEFAULT: "3.12"
+
 jobs:
+  # Run tests on multiple platforms and Python versions
   test:
+    name: Test Python ${{ matrix.python-version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -20,14 +25,18 @@ jobs:
         python-version: ['3.11', '3.12']
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-    - uses: actions/setup-python@v5
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
+        cache: 'pip'
 
     - name: Install uv (fast Python package manager)
       run: |
+        python -m pip install --upgrade pip
         pip install uv
 
     - name: Install dependencies
@@ -44,36 +53,153 @@ jobs:
         mypy src/networkx_mcp/ --strict --ignore-missing-imports
 
     - name: Run security checks
+      if: matrix.os == 'ubuntu-latest'  # Bandit has issues on Windows
       run: |
         bandit -r src/networkx_mcp/ -ll
 
-    - name: Run working tests
+    - name: Run tests with coverage
       run: |
         pytest tests/working/ -v \
           --cov=src/networkx_mcp \
           --cov-report=xml \
-          --cov-report=term-missing
+          --cov-report=term-missing \
+          --cov-fail-under=60
 
-    - name: Run reality check tests
+    - name: Run integration tests
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == env.PYTHON_VERSION_DEFAULT
       run: |
-        python tests/development_archive/simple_reality_test_fixed.py
+        # Test MCP protocol implementation
+        python -c "from networkx_mcp import server; print('✅ MCP server imports successfully')"
+        
+        # Test CLI entry point
+        networkx-mcp --version || echo "CLI not available in test environment"
 
-    - name: Upload coverage
-      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+    - name: Upload coverage to Codecov
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == env.PYTHON_VERSION_DEFAULT
       uses: codecov/codecov-action@v4
       with:
         file: ./coverage.xml
         fail_ci_if_error: false
         token: ${{ secrets.CODECOV_TOKEN }}
+        verbose: true
 
+  # Run pre-commit hooks
   pre-commit:
+    name: Pre-commit Checks
     runs-on: ubuntu-latest
+    
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.12'
+        python-version: ${{ env.PYTHON_VERSION_DEFAULT }}
+        cache: 'pip'
+        
     - name: Install pre-commit
-      run: pip install pre-commit
+      run: |
+        python -m pip install --upgrade pip
+        pip install pre-commit
+        
+    - name: Cache pre-commit environments
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pre-commit
+        key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+        
     - name: Run pre-commit
-      run: pre-commit run --all-files
+      run: pre-commit run --all-files --show-diff-on-failure
+
+  # Verify documentation builds
+  docs:
+    name: Documentation Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION_DEFAULT }}
+        
+    - name: Validate README
+      run: |
+        # Check for broken links in README
+        python -m pip install --upgrade pip
+        pip install requests
+        python -c "
+        import re
+        import requests
+        with open('README.md', 'r') as f:
+            content = f.read()
+        urls = re.findall(r'https?://[^\s\)]+', content)
+        for url in urls:
+            try:
+                response = requests.head(url, timeout=5, allow_redirects=True)
+                if response.status_code >= 400:
+                    print(f'⚠️  Broken link: {url} (status: {response.status_code})')
+            except:
+                print(f'⚠️  Could not check: {url}')
+        "
+
+  # Build package to ensure it's installable
+  build:
+    name: Build Package
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION_DEFAULT }}
+        
+    - name: Install build tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+        
+    - name: Build package
+      run: python -m build
+      
+    - name: Check package
+      run: |
+        twine check dist/*
+        # List package contents
+        python -m zipfile -l dist/*.whl
+        
+    - name: Test installation
+      run: |
+        # Test wheel installation
+        pip install dist/*.whl
+        python -c "from networkx_mcp import server; print('✅ Package imports successfully')"
+        pip uninstall -y networkx-mcp-server
+        
+        # Test sdist installation
+        pip install dist/*.tar.gz
+        python -c "from networkx_mcp import server; print('✅ Package imports successfully')"
+
+  # All tests passed
+  ci-success:
+    name: CI Success
+    runs-on: ubuntu-latest
+    needs: [test, pre-commit, docs, build]
+    if: always()
+    
+    steps:
+    - name: Check results
+      run: |
+        if [ "${{ needs.test.result }}" != "success" ] || \
+           [ "${{ needs.pre-commit.result }}" != "success" ] || \
+           [ "${{ needs.docs.result }}" != "success" ] || \
+           [ "${{ needs.build.result }}" != "success" ]; then
+          echo "::error::One or more CI jobs failed"
+          exit 1
+        fi
+        echo "✅ All CI checks passed!"

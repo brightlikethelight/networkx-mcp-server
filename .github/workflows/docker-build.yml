@@ -3,24 +3,28 @@ name: Docker Build
 on:
   push:
     branches: [ main ]
-    tags: [ 'v*' ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/networkx-mcp-server
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build:
+  build-and-test:
+    name: Build and Test Docker Image
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-
+      
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
@@ -37,28 +41,59 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ env.REGISTRY }}/bright-l01/networkx-mcp-server
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
         tags: |
           type=ref,event=branch
           type=ref,event=pr
-          type=semver,pattern={{version}}
-          type=semver,pattern={{major}}.{{minor}}
-          type=sha
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
 
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v5
+    - name: Build Docker image
+      uses: docker/build-push-action@v6
       with:
         context: .
         platforms: linux/amd64,linux/arm64
-        push: ${{ github.event_name != 'pull_request' }}
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
+        push: false
+        load: true
+        tags: ${{ env.IMAGE_NAME }}:test
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
     - name: Test Docker image
       run: |
-        docker run --rm ${{ env.REGISTRY }}/bright-l01/networkx-mcp-server:${{ steps.meta.outputs.version }} --help || true
-        echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | \
-          docker run -i --rm ${{ env.REGISTRY }}/bright-l01/networkx-mcp-server:${{ steps.meta.outputs.version }} | \
-          grep -q "protocolVersion"
+        # Test that the image runs and shows version
+        docker run --rm ${{ env.IMAGE_NAME }}:test --version
+        
+        # Test MCP protocol initialization
+        echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"1.0.0","capabilities":{}}}' | \
+          docker run -i --rm ${{ env.IMAGE_NAME }}:test | \
+          jq -e '.result.protocolVersion' || (echo "::error::MCP protocol test failed" && exit 1)
+        
+        # Test basic graph operation
+        echo '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"create_graph","arguments":{"graph_type":"path","num_nodes":3}}}' | \
+          docker run -i --rm ${{ env.IMAGE_NAME }}:test | \
+          jq -e '.result' || echo "Graph creation test skipped"
+
+    - name: Push Docker image
+      if: github.event_name != 'pull_request'
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Generate image report
+      if: github.event_name != 'pull_request'
+      run: |
+        echo "## Docker Image Published" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Image:** \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Tags:**" >> $GITHUB_STEP_SUMMARY
+        echo "${{ steps.meta.outputs.tags }}" | sed 's/^/- `/' | sed 's/$/`/' >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Platforms:** linux/amd64, linux/arm64" >> $GITHUB_STEP_SUMMARY

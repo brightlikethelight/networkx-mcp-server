@@ -4,35 +4,309 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+# Prevent multiple releases from running simultaneously
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PYTHON_VERSION: "3.12"
+  NODE_VERSION: "20"
 
 jobs:
-  release:
+  # Validate the release before proceeding
+  validate:
+    name: Validate Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
+    - name: Checkout code
+      uses: actions/checkout@v4
       with:
-        python-version: '3.12'
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
 
     - name: Install dependencies
       run: |
+        python -m pip install --upgrade pip
+        pip install uv
+        uv pip install --system -e ".[dev]"
+
+    - name: Run linting
+      run: |
+        ruff check . --output-format=github
+        ruff format --check .
+
+    - name: Run type checking
+      run: |
+        mypy src/networkx_mcp/ --strict --ignore-missing-imports
+
+    - name: Run security checks
+      run: |
+        bandit -r src/networkx_mcp/ -ll
+
+    - name: Run tests
+      run: |
+        pytest tests/working/ -v --tb=short \
+          --cov=src/networkx_mcp \
+          --cov-report=xml \
+          --cov-report=term-missing
+
+    - name: Validate version tag
+      run: |
+        # Extract version from tag
+        VERSION=${GITHUB_REF#refs/tags/v}
+        echo "Release version: $VERSION"
+        
+        # Check if version in pyproject.toml matches tag
+        PYPROJECT_VERSION=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+        if [ "$VERSION" != "$PYPROJECT_VERSION" ]; then
+          echo "::error::Version mismatch! Tag: v$VERSION, pyproject.toml: $PYPROJECT_VERSION"
+          exit 1
+        fi
+
+  # Build Python package
+  build-python:
+    name: Build Python Package
+    runs-on: ubuntu-latest
+    needs: validate
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
         pip install build twine
 
     - name: Build package
-      run: |
-        python -m build
+      run: python -m build
 
-    - name: Create GitHub Release
-      uses: softprops/action-gh-release@v1
+    - name: Check package
+      run: |
+        twine check dist/*
+        # Verify package can be installed
+        pip install dist/*.whl
+        # Test import
+        python -c "from networkx_mcp import server; print('✅ Package imports successfully')"
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
       with:
-        files: dist/*
-        generate_release_notes: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        name: python-package
+        path: dist/
+        retention-days: 7
+
+  # Build Docker image
+  build-docker:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: validate
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ghcr.io/${{ github.repository }}
+        tags: |
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=semver,pattern={{major}}
+          type=sha,prefix={{version}}-
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        build-args: |
+          VERSION=${{ github.ref_name }}
+
+    - name: Test Docker image
+      run: |
+        # Test that the image runs
+        docker run --rm ghcr.io/${{ github.repository }}:${{ steps.meta.outputs.version }} --version
+        
+        # Test MCP protocol response
+        echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"1.0.0","capabilities":{}}}' | \
+          docker run -i --rm ghcr.io/${{ github.repository }}:${{ steps.meta.outputs.version }} | \
+          jq -e '.result.protocolVersion' || (echo "::error::MCP protocol test failed" && exit 1)
+
+  # Publish to PyPI
+  publish-pypi:
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+    needs: [build-python, build-docker]
+    if: startsWith(github.ref, 'refs/tags/v')
+    environment: pypi
+    permissions:
+      id-token: write  # Required for trusted publishing
+    
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: python-package
+        path: dist/
 
     - name: Publish to PyPI
-      env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        # Uses trusted publishing, no token needed
+        verify-metadata: true
+        skip-existing: false
+        verbose: true
+
+  # Create GitHub Release
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [build-python, build-docker, publish-pypi]
+    permissions:
+      contents: write
+      discussions: write
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: python-package
+        path: dist/
+
+    - name: Generate release notes
+      id: release_notes
       run: |
-        twine upload dist/*
+        # Extract version
+        VERSION=${GITHUB_REF#refs/tags/v}
+        
+        # Generate changelog from commits
+        echo "## What's Changed" > release_notes.md
+        echo "" >> release_notes.md
+        
+        # Get commits since last tag
+        LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+        if [ -n "$LAST_TAG" ]; then
+          git log --pretty=format:"* %s by @%an" $LAST_TAG..HEAD >> release_notes.md
+        else
+          git log --pretty=format:"* %s by @%an" >> release_notes.md
+        fi
+        
+        echo "" >> release_notes.md
+        echo "" >> release_notes.md
+        echo "## Installation" >> release_notes.md
+        echo "" >> release_notes.md
+        echo "### PyPI" >> release_notes.md
+        echo '```bash' >> release_notes.md
+        echo "pip install networkx-mcp-server==$VERSION" >> release_notes.md
+        echo '```' >> release_notes.md
+        echo "" >> release_notes.md
+        echo "### Docker" >> release_notes.md
+        echo '```bash' >> release_notes.md
+        echo "docker pull ghcr.io/${{ github.repository }}:$VERSION" >> release_notes.md
+        echo '```' >> release_notes.md
+        echo "" >> release_notes.md
+        echo "### MCP Configuration" >> release_notes.md
+        echo '```json' >> release_notes.md
+        echo '{' >> release_notes.md
+        echo '  "mcpServers": {' >> release_notes.md
+        echo '    "networkx": {' >> release_notes.md
+        echo '      "command": "uvx",' >> release_notes.md
+        echo '      "args": ["networkx-mcp-server"]' >> release_notes.md
+        echo '    }' >> release_notes.md
+        echo '  }' >> release_notes.md
+        echo '}' >> release_notes.md
+        echo '```' >> release_notes.md
+        
+        # Output for GitHub Action
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        name: v${{ steps.release_notes.outputs.VERSION }}
+        body_path: release_notes.md
+        files: dist/*
+        draft: false
+        prerelease: ${{ contains(github.ref, '-rc') || contains(github.ref, '-beta') || contains(github.ref, '-alpha') }}
+        generate_release_notes: false
+        make_latest: true
+
+  # Send notifications
+  notify:
+    name: Release Notification
+    runs-on: ubuntu-latest
+    needs: [publish-pypi, create-release]
+    if: always()
+    
+    steps:
+    - name: Check release status
+      run: |
+        if [ "${{ needs.publish-pypi.result }}" == "success" ] && [ "${{ needs.create-release.result }}" == "success" ]; then
+          echo "# ✅ Release Successful!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📦 Packages Published" >> $GITHUB_STEP_SUMMARY
+          echo "- [PyPI](https://pypi.org/project/networkx-mcp-server/)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Docker](https://github.com/${{ github.repository }}/pkgs/container/networkx-mcp-server)" >> $GITHUB_STEP_SUMMARY
+          echo "- [GitHub Release](https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }})" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "# ❌ Release Failed!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Please check the workflow logs for details." >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
