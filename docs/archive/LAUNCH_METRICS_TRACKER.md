@@ -132,7 +132,7 @@ pypistats overall networkx-mcp-server
 ### Day 1 (July 16, 2025)
 
 - **Time**: ___
-- **GitHub**: ___stars,___ forks, ___ watchers
+- **GitHub**: _**stars,**_ forks, ___ watchers
 - **PyPI**: ___ downloads
 - **Actions**: ___
 - **Notes**: ___
@@ -140,7 +140,7 @@ pypistats overall networkx-mcp-server
 ### Day 2 (July 17, 2025)
 
 - **Time**: ___
-- **GitHub**: ___stars,___ forks, ___ watchers
+- **GitHub**: _**stars,**_ forks, ___ watchers
 - **PyPI**: ___ downloads
 - **Actions**: ___
 - **Notes**: ___
@@ -165,4 +165,4 @@ pypistats overall networkx-mcp-server
 
 ---
 
-*Update this tracker daily. First-mover advantage window: 7 days*
+_Update this tracker daily. First-mover advantage window: 7 days_

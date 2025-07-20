@@ -9,15 +9,20 @@ __pycache__/
 venv/
 env/
 .venv
+.tox/
+.nox/
 
 # Testing
 .pytest_cache/
 .coverage
 .coverage.*
 coverage.xml
+coverage.json
 *.cover
 .hypothesis/
 tests/
+*_test.py
+test_*.py
 
 # IDE
 .vscode/
@@ -25,38 +30,86 @@ tests/
 *.swp
 *.swo
 *~
+.project
+.pydevproject
 
 # Git
 .git/
 .gitignore
+.gitattributes
 
-# Documentation
+# Documentation (keep README.md for build)
 docs/
-*.md
-README.md
+# README.md is needed for the build
 
 # Build artifacts
 build/
 dist/
 *.whl
+*.egg
 
 # Development files
 *.log
 .env
 .env.*
+.envrc
 
 # Docker
-Dockerfile
+Dockerfile*
 docker-compose*.yml
 .dockerignore
 
 # CI/CD
 .github/
 .gitlab-ci.yml
+.travis.yml
+.circleci/
 
-# Other
+# Pre-commit
+.pre-commit-config.yaml
+
+# OS
 .DS_Store
 Thumbs.db
-node_modules/
-*.tmp
 *.bak
+*.tmp
+*.temp
+
+# Node (if any frontend)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+TECHNICAL_DEBT_ROADMAP.md
+VERIFICATION_REPORT.md
+academic_test.py
+performance_test.py
+security_test.py
+verification_test.py
+mcp_client_test.py
+
+# Archives
+*.tar
+*.tar.gz
+*.zip
+*.7z
+
+# Jupyter
+*.ipynb_checkpoints
+.ipynb_checkpoints/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre
+.pyre/
+
+# pytype
+.pytype/
+
+# Cython
+cython_debug/

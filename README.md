@@ -2,6 +2,11 @@
 
 **Academic-focused graph analysis in your AI conversations** - The first and only NetworkX MCP server specialized for academic research and citation analysis.
 
+[![CI](https://github.com/Bright-L01/networkx-mcp-server/actions/workflows/ci.yml/badge.svg)](https://github.com/Bright-L01/networkx-mcp-server/actions/workflows/ci.yml)
+[![Release](https://github.com/Bright-L01/networkx-mcp-server/actions/workflows/release.yml/badge.svg)](https://github.com/Bright-L01/networkx-mcp-server/actions/workflows/release.yml)
+[![Security](https://github.com/Bright-L01/networkx-mcp-server/actions/workflows/security.yml/badge.svg)](https://github.com/Bright-L01/networkx-mcp-server/actions/workflows/security.yml)
+[![Docker](https://github.com/Bright-L01/networkx-mcp-server/actions/workflows/docker-build.yml/badge.svg)](https://github.com/Bright-L01/networkx-mcp-server/actions/workflows/docker-build.yml)
+[![PyPI](https://img.shields.io/pypi/v/networkx-mcp-server.svg)](https://pypi.org/project/networkx-mcp-server/)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 [![NetworkX](https://img.shields.io/badge/NetworkX-3.0%2B-orange.svg)](https://networkx.org/)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-green.svg)](https://modelcontextprotocol.io/)
