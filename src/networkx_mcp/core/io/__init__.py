@@ -23,20 +23,35 @@ except ImportError:
             raise NotImplementedError("GraphIOHandler.export_to_file not implemented")
 
 
-# Import all handlers
-from .base_handler import *
-from .csv_handler import *
-from .excel_handler import *
-from .gml_handler import *
-from .graphml_handler import *
-from .json_handler import *
+# Import all handlers explicitly
+# Note: These have duplicate "Handler" in their names (e.g., GraphmlHandlerHandler)
+# This should be fixed in a future refactoring
+from .base_handler import BaseHandlerHandler
+from .csv_handler import CsvHandlerHandler
+from .excel_handler import ExcelHandlerHandler
+from .gml_handler import GmlHandlerHandler
+from .graphml_handler import GraphmlHandlerHandler
+from .json_handler import JsonHandlerHandler
 
-# For backward compatibility
+# For backward compatibility, alias them to expected names
+JsonHandler = JsonHandlerHandler
+GmlHandler = GmlHandlerHandler
+GraphmlHandler = GraphmlHandlerHandler
+CsvHandler = CsvHandlerHandler
+ExcelHandler = ExcelHandlerHandler
+
+# Export all
 __all__ = [
     "GraphIOHandler",
+    "BaseHandlerHandler",
+    "JsonHandlerHandler",
     "JsonHandler",
+    "GmlHandlerHandler",
     "GmlHandler",
+    "GraphmlHandlerHandler",
     "GraphmlHandler",
+    "CsvHandlerHandler",
     "CsvHandler",
+    "ExcelHandlerHandler",
     "ExcelHandler",
 ]
