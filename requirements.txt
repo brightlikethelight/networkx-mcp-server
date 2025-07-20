@@ -1,4 +1,14 @@
-# Core functionality only
+# Core functionality
 networkx>=3.0
 numpy>=1.21.0  # Required for NetworkX and core algorithms
 mcp[cli]>=1.0.0  # Official MCP SDK with CLI support
+
+# Required for academic features
+matplotlib>=3.5.0  # Graph visualization
+requests>=2.28.0  # DOI resolution and API calls
+python-dateutil>=2.8.0  # Date parsing in academic data
+bibtexparser>=1.4.0  # BibTeX parsing and generation
+
+# System monitoring and configuration
+psutil>=5.9.0  # System monitoring
+PyYAML>=6.0  # Configuration file parsing
