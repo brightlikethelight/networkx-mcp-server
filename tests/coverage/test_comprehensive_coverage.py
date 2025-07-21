@@ -82,25 +82,20 @@ class TestCoverageExplosion:
         graph_types = ["undirected", "directed", "multi_undirected", "multi_directed"]
 
         for graph_type in graph_types:
-            result = await handler._register_tools.__wrapped__(handler)
+            await handler._register_tools.__wrapped__(handler)
             # Access the registered create_graph function
             tools = mock_mcp.tool.call_args_list
-            create_graph = [call for call in tools if "create_graph" in str(call)]
+            [call for call in tools if "create_graph" in str(call)]
 
             # Test graph creation
             test_id = f"test_{graph_type}"
-            create_result = {
-                "status": "created",
-                "graph_id": test_id,
-                "type": graph_type,
-            }
 
             assert test_id not in graph_manager.graphs  # Pre-condition
 
     @pytest.mark.asyncio
     async def test_graph_ops_error_conditions(self, mock_mcp, graph_manager):
         """Test all error conditions in graph operations."""
-        handler = GraphOpsHandler(mock_mcp, graph_manager)
+        GraphOpsHandler(mock_mcp, graph_manager)
 
         # Test duplicate graph creation
         graph_manager.add_graph("existing", nx.Graph())
@@ -129,29 +124,13 @@ class TestCoverageExplosion:
     @pytest.mark.asyncio
     async def test_graph_ops_edge_cases(self, mock_mcp, sample_graphs):
         """Test edge cases and boundary conditions."""
-        handler = GraphOpsHandler(mock_mcp, sample_graphs)
+        GraphOpsHandler(mock_mcp, sample_graphs)
 
         # Test adding nodes with various attribute types
-        node_attributes = {
-            "node1": {"type": "string", "value": "test"},
-            "node2": {"type": "number", "value": 42},
-            "node3": {"type": "boolean", "value": True},
-            "node4": {"type": "list", "value": [1, 2, 3]},
-            "node5": {"type": "dict", "value": {"nested": "data"}},
-        }
 
         # Test edge attributes
-        edge_attributes = {
-            ("node1", "node2"): {"weight": 1.5, "type": "connection"},
-            ("node2", "node3"): {"weight": 2.0, "color": "red"},
-        }
 
         # Test subgraph extraction with various parameters
-        subgraph_params = [
-            {"nodes": ["node1", "node2"]},
-            {"k_hop": 1, "center_node": "node1"},
-            {"k_hop": 2, "center_node": "node2", "new_graph_id": "sub1"},
-        ]
 
     # ======================================================================
     # ALGORITHM HANDLER COVERAGE
@@ -160,7 +139,7 @@ class TestCoverageExplosion:
     @pytest.mark.asyncio
     async def test_algorithm_handler_all_paths(self, mock_mcp, sample_graphs):
         """Test all pathfinding algorithms and edge cases."""
-        handler = AlgorithmHandler(mock_mcp, sample_graphs)
+        AlgorithmHandler(mock_mcp, sample_graphs)
 
         # Test all shortest path methods
         methods = ["dijkstra", "bellman-ford", "astar", "auto"]
@@ -189,14 +168,9 @@ class TestCoverageExplosion:
     @pytest.mark.asyncio
     async def test_algorithm_handler_error_scenarios(self, mock_mcp, sample_graphs):
         """Test error handling in algorithm calculations."""
-        handler = AlgorithmHandler(mock_mcp, sample_graphs)
+        AlgorithmHandler(mock_mcp, sample_graphs)
 
         # Test path finding errors
-        path_error_cases = [
-            ("nonexistent1", "nonexistent2"),  # Both nodes don't exist
-            ("1", "nonexistent"),  # Target doesn't exist
-            ("disconnected1", "disconnected2"),  # No path exists
-        ]
 
         # Test centrality calculation failures
         # Test MST on directed graphs (should fail)
@@ -206,7 +180,7 @@ class TestCoverageExplosion:
     @pytest.mark.asyncio
     async def test_algorithm_handler_performance_cases(self, mock_mcp, sample_graphs):
         """Test algorithm performance and scalability."""
-        handler = AlgorithmHandler(mock_mcp, sample_graphs)
+        AlgorithmHandler(mock_mcp, sample_graphs)
 
         # Test algorithms on large graphs
         # Test timeout scenarios
@@ -220,7 +194,7 @@ class TestCoverageExplosion:
     @pytest.mark.asyncio
     async def test_analysis_handler_comprehensive(self, mock_mcp, sample_graphs):
         """Test comprehensive analysis coverage."""
-        handler = AnalysisHandler(mock_mcp, sample_graphs)
+        AnalysisHandler(mock_mcp, sample_graphs)
 
         # Test all community detection methods
         community_methods = [
@@ -237,24 +211,15 @@ class TestCoverageExplosion:
             pass
 
         # Test bipartite analysis on various graph types
-        bipartite_test_cases = [
-            "bipartite_graph",  # Valid bipartite
-            "small",  # Not bipartite
-            "empty",  # Empty graph
-        ]
 
         # Test degree distribution analysis
-        distribution_cases = [
-            {"log_scale": True},
-            {"log_scale": False},
-        ]
 
     @pytest.mark.asyncio
     async def test_analysis_handler_statistical_edge_cases(
         self, mock_mcp, sample_graphs
     ):
         """Test statistical analysis edge cases."""
-        handler = AnalysisHandler(mock_mcp, sample_graphs)
+        AnalysisHandler(mock_mcp, sample_graphs)
 
         # Test power law detection with various distributions
         # Test clustering calculations on boundary cases
@@ -268,28 +233,20 @@ class TestCoverageExplosion:
     @pytest.mark.asyncio
     async def test_visualization_handler_all_backends(self, mock_mcp, sample_graphs):
         """Test all visualization backends and options."""
-        handler = VisualizationHandler(mock_mcp, sample_graphs)
+        VisualizationHandler(mock_mcp, sample_graphs)
 
         # Test all backends
-        backends = ["matplotlib", "plotly", "pyvis"]
 
         # Test all layout algorithms
-        layouts = ["spring", "circular", "kamada_kawai", "random", "shell"]
 
         # Test visualization customization options
-        customization_options = [
-            {"node_color": "red", "edge_color": "blue"},
-            {"node_color": "degree", "node_size": "centrality"},
-            {"node_color": "community", "edge_color": "weight"},
-        ]
 
         # Test export formats
-        export_formats = ["json", "d3", "graphml"]
 
     @pytest.mark.asyncio
     async def test_visualization_handler_import_failures(self, mock_mcp, sample_graphs):
         """Test behavior when visualization dependencies are missing."""
-        handler = VisualizationHandler(mock_mcp, sample_graphs)
+        VisualizationHandler(mock_mcp, sample_graphs)
 
         # Mock import failures for different backends
         with patch(
@@ -309,15 +266,6 @@ class TestCoverageExplosion:
         """Test comprehensive error handling across all handlers."""
 
         # Test malformed input data
-        malformed_inputs = [
-            None,
-            "",
-            [],
-            {},
-            {"invalid": "structure"},
-            "string_instead_of_dict",
-            123,  # number instead of expected type
-        ]
 
         # Test network errors (for remote operations)
         # Test file system errors (for I/O operations)

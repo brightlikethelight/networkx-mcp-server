@@ -5,9 +5,7 @@ from typing import Any
 import networkx as nx
 
 
-def calculate_layout(
-    graph: nx.Graph, layout: str, **params: Any
-) -> dict[Any, tuple[float, float]]:
+def calculate_layout(graph: nx.Graph, layout: str, **params: Any) -> dict[Any, tuple[float, float]]:
     """Calculate node positions for given layout algorithm."""
     layout_funcs = {
         "spring": lambda g, **p: nx.spring_layout(g, **p),
@@ -32,9 +30,7 @@ def calculate_layout(
         return fallback_result
 
 
-def prepare_graph_data(
-    graph: nx.Graph, pos: dict[Any, tuple[float, float]]
-) -> dict[str, Any]:
+def prepare_graph_data(graph: nx.Graph, pos: dict[Any, tuple[float: Any, float]]) -> dict[str, Any]:
     """Prepare graph data for visualization."""
     nodes = []
     for node in graph.nodes():

@@ -43,9 +43,9 @@ class SecurityValidator:
         return graph_id
 
     @staticmethod
-    def sanitize_attributes(attributes: dict[str, Any]) -> dict[str, Any]:
+    def sanitize_attributes(attributes: Any) -> dict[str, Any]:
         """Sanitize user-provided attributes."""
-        if not isinstance(attributes, dict):
+        if not isinstance(attributes, dict[str, Any]):
             return {}
 
         # Remove any potentially dangerous keys
@@ -68,19 +68,19 @@ class SecurityValidator:
             # Sanitize value (basic type checking)
             if isinstance(value, (str, int, float, bool, type(None))):
                 sanitized[key] = value
-            elif isinstance(value, (list, tuple)):
+            elif isinstance(value, (list[Any], tuple[Any, ...])):
                 # Only allow simple lists
                 if all(
                     isinstance(item, (str, int, float, bool, type(None)))
                     for item in value[:100]
                 ):
-                    # Create a list from the first 100 items
-                    limited_list = list(value[:100])
+                    # Create a list[Any] from the first 100 items
+                    limited_list = list[Any](value[:100])
                     sanitized[key] = limited_list
-            elif isinstance(value, dict):
+            elif isinstance(value, dict[str, Any]):
                 # Recursively sanitize nested dicts (with depth limit)
                 if len(str(value)) < 10000:  # Limit total size
-                    # Recursively sanitize nested dict
+                    # Recursively sanitize nested dict[str, Any]
                     nested_sanitized = SecurityValidator.sanitize_attributes(value)
                     sanitized[key] = nested_sanitized
 

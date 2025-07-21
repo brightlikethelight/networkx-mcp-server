@@ -16,7 +16,7 @@ import psutil
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from networkx_mcp.core.basic_operations import *
+from networkx_mcp.core.basic_operations import add_edges, add_nodes, create_graph
 from networkx_mcp.server import NetworkXMCPServer
 
 
@@ -74,7 +74,7 @@ class StressAndEdgeTester:
 
             # Test operations on massive graph
             start_time = time.time()
-            centrality_result = degree_centrality("massive", graphs)
+            degree_centrality("massive", graphs)
             centrality_time = time.time() - start_time
 
             if centrality_time > 60:  # More than 1 minute
@@ -217,7 +217,7 @@ class StressAndEdgeTester:
 
             # Test operations that might loop
             start_time = time.time()
-            result = shortest_path("self_loop", 1, 2, graphs)
+            shortest_path("self_loop", 1, 2, graphs)
             duration = time.time() - start_time
 
             if duration > 5:  # More than 5 seconds

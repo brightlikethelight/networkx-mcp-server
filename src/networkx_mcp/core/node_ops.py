@@ -8,7 +8,7 @@ import networkx as nx
 class NodeOperations:
     """Handle all node-related operations efficiently."""
 
-    def __init__(self, graph: nx.Graph):
+    def __init__(self, graph: nx.Graph) -> None:
         self.graph = graph
 
     def add_node_with_validation(self, node_id: str | int, **attrs: Any) -> bool:
@@ -32,7 +32,7 @@ class NodeOperations:
 
         return {
             "id": node_id,
-            "attributes": dict(self.graph.nodes[node_id]),
+            "attributes": dict[str, Any](self.graph.nodes[node_id]),
             "degree": self.graph.degree(node_id),
-            "neighbors": list(self.graph.neighbors(node_id)),
+            "neighbors": list[Any](self.graph.neighbors(node_id)),
         }

@@ -10,12 +10,12 @@ import sys
 import threading
 import time
 from dataclasses import dataclass
-from typing import Callable, Optional, Set
+from typing import Any, Callable, Optional, Set
 
 from ..config.production import production_config
 from ..logging import get_logger
 
-logger = get_logger(__name__)
+logger = get_logger(__name__, Any)
 
 
 @dataclass
@@ -28,15 +28,15 @@ class ShutdownState:
     shutdown_started: bool = False
     shutdown_complete: bool = False
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.active_connections is None:
-            self.active_connections = set()
+            self.active_connections = set[Any]()
 
 
 class GracefulShutdownHandler:
     """Handles graceful shutdown for the MCP server."""
 
-    def __init__(self, graph_manager=None, storage_backend=None):
+    def __init__(self, graph_manager: Any = None, storage_backend: Any = None) -> None:
         self.graph_manager = graph_manager
         self.storage_backend = storage_backend
         self.state = ShutdownState()
@@ -47,10 +47,10 @@ class GracefulShutdownHandler:
         # Setup signal handlers
         self._setup_signal_handlers()
 
-    def _setup_signal_handlers(self):
+    def _setup_signal_handlers(self) -> None:
         """Setup signal handlers for graceful shutdown."""
 
-        def signal_handler(signum, frame):
+        def signal_handler(signum: Any, frame: Any) -> None:
             logger.info(f"Received signal {signum}, initiating graceful shutdown")
             asyncio.create_task(self.shutdown())
 
@@ -60,11 +60,11 @@ class GracefulShutdownHandler:
         # Handle SIGINT (Ctrl+C)
         signal.signal(signal.SIGINT, signal_handler)
 
-    def register_shutdown_callback(self, callback: Callable):
+    def register_shutdown_callback(self, callback: Callable) -> None:
         """Register a callback to be called during shutdown."""
         self.shutdown_callbacks.append(callback)
 
-    def track_request_start(self, request_id: str):
+    def track_request_start(self, request_id: str) -> None:
         """Track when a request starts."""
         with self._lock:
             self.state.active_requests += 1
@@ -72,7 +72,7 @@ class GracefulShutdownHandler:
                 f"Request started: {request_id}, active: {self.state.active_requests}"
             )
 
-    def track_request_end(self, request_id: str):
+    def track_request_end(self, request_id: str) -> None:
         """Track when a request ends."""
         with self._lock:
             self.state.active_requests = max(0, self.state.active_requests - 1)
@@ -80,7 +80,7 @@ class GracefulShutdownHandler:
                 f"Request ended: {request_id}, active: {self.state.active_requests}"
             )
 
-    def track_connection_start(self, connection_id: str):
+    def track_connection_start(self, connection_id: str) -> None:
         """Track when a connection starts."""
         with self._lock:
             self.state.active_connections.add(connection_id)
@@ -88,7 +88,7 @@ class GracefulShutdownHandler:
                 f"Connection started: {connection_id}, total: {len(self.state.active_connections)}"
             )
 
-    def track_connection_end(self, connection_id: str):
+    def track_connection_end(self, connection_id: str) -> None:
         """Track when a connection ends."""
         with self._lock:
             self.state.active_connections.discard(connection_id)
@@ -108,7 +108,7 @@ class GracefulShutdownHandler:
         """Get current number of active connections."""
         return len(self.state.active_connections)
 
-    async def shutdown(self):
+    async def shutdown(self) -> None:
         """Perform graceful shutdown sequence."""
         if self.state.shutdown_started:
             logger.warning("Shutdown already in progress")
@@ -159,7 +159,7 @@ class GracefulShutdownHandler:
             )
             raise
 
-    async def _wait_for_requests_completion(self):
+    async def _wait_for_requests_completion(self) -> None:
         """Wait for active requests to complete."""
         wait_time = 0
         check_interval = 0.1
@@ -178,7 +178,7 @@ class GracefulShutdownHandler:
         else:
             logger.info("All requests completed successfully")
 
-    async def _close_connections(self):
+    async def _close_connections(self) -> None:
         """Close active connections gracefully."""
         if not self.state.active_connections:
             return
@@ -198,7 +198,7 @@ class GracefulShutdownHandler:
             # In a real implementation, you'd force-close connections here
             self.state.active_connections.clear()
 
-    async def _save_application_state(self):
+    async def _save_application_state(self) -> None:
         """Save application state to persistent storage."""
         try:
             if self.storage_backend and hasattr(self.storage_backend, "save_all"):
@@ -215,7 +215,7 @@ class GracefulShutdownHandler:
             logger.error(f"Failed to save application state: {e}", exc_info=True)
             # Don't re-raise - continue with shutdown
 
-    async def _run_shutdown_callbacks(self):
+    async def _run_shutdown_callbacks(self) -> None:
         """Run registered shutdown callbacks."""
         for i, callback in enumerate(self.shutdown_callbacks):
             try:
@@ -230,7 +230,7 @@ class GracefulShutdownHandler:
                 logger.error(f"Shutdown callback {i + 1} failed: {e}", exc_info=True)
                 # Continue with other callbacks
 
-    async def _cleanup_resources(self):
+    async def _cleanup_resources(self) -> None:
         """Clean up system resources."""
         try:
             # Close storage connections
@@ -246,7 +246,7 @@ class GracefulShutdownHandler:
         except Exception as e:
             logger.error(f"Error during resource cleanup: {e}", exc_info=True)
 
-    def force_shutdown(self):
+    def force_shutdown(self) -> None:
         """Force immediate shutdown (emergency only)."""
         logger.warning("FORCE SHUTDOWN - This may cause data loss!")
         self.state.shutdown_complete = True
@@ -256,18 +256,18 @@ class GracefulShutdownHandler:
 class ShutdownContextManager:
     """Context manager for tracking operations during shutdown."""
 
-    def __init__(self, shutdown_handler: GracefulShutdownHandler, operation_id: str):
+    def __init__(self, shutdown_handler: GracefulShutdownHandler, operation_id: str) -> None:
         self.shutdown_handler = shutdown_handler
         self.operation_id = operation_id
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> Any:
         if not self.shutdown_handler.is_accepting_connections():
             raise RuntimeError("Server is shutting down - not accepting new requests")
 
         self.shutdown_handler.track_request_start(self.operation_id)
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         self.shutdown_handler.track_request_end(self.operation_id)
 
 
@@ -283,16 +283,14 @@ def get_shutdown_handler() -> GracefulShutdownHandler:
     return _shutdown_handler
 
 
-def initialize_shutdown_handler(
-    graph_manager=None, storage_backend=None
-) -> GracefulShutdownHandler:
+def initialize_shutdown_handler(graph_manager: Any = None, storage_backend: Any = None) -> GracefulShutdownHandler:
     """Initialize the shutdown handler with components."""
     global _shutdown_handler
     _shutdown_handler = GracefulShutdownHandler(graph_manager, storage_backend)
     return _shutdown_handler
 
 
-async def shutdown_context(operation_id: str):
+async def shutdown_context(operation_id: str) -> Any:
     """Create a shutdown-aware context for operations."""
     handler = get_shutdown_handler()
     return ShutdownContextManager(handler, operation_id)

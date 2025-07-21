@@ -10,7 +10,7 @@ import networkx as nx
 class GraphReader(ABC):
     """Base class for graph file readers."""
 
-    def __init__(self, format_name: str, file_extensions: list[str]):
+    def __init__(self, format_name: str, file_extensions: list[str]) -> None:
         self.format_name = format_name
         self.file_extensions = file_extensions
 
@@ -27,7 +27,7 @@ class GraphReader(ABC):
 class GraphWriter(ABC):
     """Base class for graph file writers."""
 
-    def __init__(self, format_name: str, file_extension: str):
+    def __init__(self, format_name: str, file_extension: str) -> None:
         self.format_name = format_name
         self.file_extension = file_extension
 

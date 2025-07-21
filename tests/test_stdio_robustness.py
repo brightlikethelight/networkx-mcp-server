@@ -47,7 +47,7 @@ class StdioServerTester:
                     except json.JSONDecodeError:
                         # Not JSON, ignore
                         pass
-            except:
+            except Exception:
                 break
 
     def send_request(self, method, params=None, request_id=None):

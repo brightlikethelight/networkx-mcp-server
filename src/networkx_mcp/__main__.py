@@ -10,7 +10,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def run_server():
+def run_server() -> None:
     """Run the NetworkX MCP server."""
     logger.info("Starting NetworkX MCP Server")
     from .server import main
@@ -18,7 +18,7 @@ def run_server():
     main()
 
 
-def main():
+def main() -> None:
     """Main entry point for NetworkX MCP Server."""
     import argparse
 

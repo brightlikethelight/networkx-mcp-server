@@ -8,15 +8,16 @@ import pytest
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
+from networkx_mcp.core.algorithms import GraphAlgorithms
 from networkx_mcp.server import (
     add_edges,
     add_nodes,
     create_graph,
+    delete_graph,
     get_graph_info,
     graph_manager,  # Access to manager for verification
     shortest_path,
 )
-from networkx_mcp.core.algorithms import centrality_measures
 
 
 class TestActualTools:
@@ -151,10 +152,10 @@ class TestActualTools:
         assert result.get("success") is True
         assert result.get("path") == ["A", "E"]  # Direct path
 
-        # Find longer path
+        # Find path to D (NetworkX finds shortest: A -> E -> D)
         result2 = shortest_path("path_test", "A", "D")
         assert result2.get("success") is True
-        assert result2.get("path") == ["A", "B", "C", "D"]
+        assert result2.get("path") == ["A", "E", "D"]  # Shortest path via E
 
         # Test no path exists
         add_nodes("path_test", ["Z"])  # Isolated node
@@ -171,7 +172,7 @@ class TestActualTools:
 
         # Get the graph object and calculate centrality measures
         graph = graph_manager.get_graph("centrality_test")
-        centrality_data = centrality_measures(
+        centrality_data = GraphAlgorithms.centrality_measures(
             graph, ["degree", "betweenness", "closeness", "eigenvector"]
         )
         result = {"success": True, "centrality": centrality_data}
@@ -184,29 +185,29 @@ class TestActualTools:
         centrality = result["centrality"]
 
         # Verify degree centrality (C should be highest)
-        assert "degree" in centrality
-        degree = centrality["degree"]
+        assert "degree_centrality" in centrality
+        degree = centrality["degree_centrality"]
         assert degree["C"] > degree["A"]
         assert degree["C"] > degree["B"]
 
         # Verify betweenness centrality (C should be highest)
-        assert "betweenness" in centrality
-        betweenness = centrality["betweenness"]
+        assert "betweenness_centrality" in centrality
+        betweenness = centrality["betweenness_centrality"]
         assert betweenness["C"] > betweenness["A"]
 
         # Verify closeness centrality exists
-        assert "closeness" in centrality
+        assert "closeness_centrality" in centrality
 
         # Verify eigenvector centrality exists
-        assert "eigenvector" in centrality
+        assert "eigenvector_centrality" in centrality
 
         # Test with empty graph
         create_graph("empty_centrality")
         empty_graph = graph_manager.get_graph("empty_centrality")
-        empty_centrality_data = centrality_measures(empty_graph, ["degree"])
+        empty_centrality_data = GraphAlgorithms.centrality_measures(empty_graph, ["degree"])
         result2 = {"success": True, "centrality": empty_centrality_data}
         assert result2.get("success") is True
-        assert result2["centrality"]["degree"] == {}
+        assert result2["centrality"]["degree_centrality"] == {}
 
     def test_delete_graph_actually_works(self):
         """Test delete_graph removes real graphs."""
@@ -264,11 +265,11 @@ class TestActualTools:
 
         # 6. Calculate who's most central
         social_graph = graph_manager.get_graph("social_network")
-        centrality_data = centrality_measures(social_graph, ["degree", "betweenness"])
+        centrality_data = GraphAlgorithms.centrality_measures(social_graph, ["degree", "betweenness"])
         centrality = {"centrality": centrality_data}
 
         # Bob, Charlie, and David should have higher centrality
-        degree = centrality["centrality"]["degree"]
+        degree = centrality["centrality"]["degree_centrality"]
         assert degree["Bob"] >= degree["Alice"]
         assert degree["Bob"] >= degree["Eve"]
 

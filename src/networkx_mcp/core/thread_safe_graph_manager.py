@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class ThreadSafeGraphManager:
     """Thread-safe wrapper for NetworkX graph operations."""
 
-    def __init__(self, max_graphs: int = 1000):
+    def __init__(self, max_graphs: int = 1000) -> None:
         """Initialize thread-safe graph manager.
 
         Args:
@@ -28,9 +28,7 @@ class ThreadSafeGraphManager:
         self.max_graphs = max_graphs
         self.lock_manager = GraphLockManager(enable_stats=True)
 
-    async def create_graph(
-        self, name: str, graph_type: str = "undirected", **attrs
-    ) -> Dict[str, Any]:
+    async def create_graph(self, name: str, graph_type: str = "undirected", **attrs) -> Dict[str, Any]:
         """Create a new graph (thread-safe).
 
         Args:
@@ -86,9 +84,7 @@ class ThreadSafeGraphManager:
         else:
             return nx.Graph(**attrs)
 
-    async def add_nodes(
-        self, graph_name: str, nodes: List[Union[str, int]], **attrs
-    ) -> Dict[str, Any]:
+    async def add_nodes(self, graph_name: str, nodes: List[Union[str, int]], **attrs) -> Dict[str, Any]:
         """Add nodes to a graph (thread-safe).
 
         Args:
@@ -125,9 +121,7 @@ class ThreadSafeGraphManager:
 
         return graph.number_of_nodes() - initial_count
 
-    async def add_edges(
-        self, graph_name: str, edges: List[tuple], **attrs
-    ) -> Dict[str, Any]:
+    async def add_edges(self, graph_name: str, edges: List[tuple[Any, ...]], **attrs) -> Dict[str, Any]:
         """Add edges to a graph (thread-safe).
 
         Args:
@@ -155,7 +149,7 @@ class ThreadSafeGraphManager:
                 "total_edges": graph.number_of_edges(),
             }
 
-    def _add_edges_sync(self, graph: nx.Graph, edges: List[tuple], **attrs) -> int:
+    def _add_edges_sync(self, graph: nx.Graph, edges: List[tuple[Any, ...]], **attrs) -> int:
         """Synchronous edge addition (runs in thread pool)."""
         initial_count = graph.number_of_edges()
 
@@ -165,13 +159,7 @@ class ThreadSafeGraphManager:
 
         return graph.number_of_edges() - initial_count
 
-    async def get_shortest_path(
-        self,
-        graph_name: str,
-        source: Union[str, int],
-        target: Union[str, int],
-        weight: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    async def get_shortest_path(self, graph_name: str, source: Union[str, int], target: Union[str, int], weight: Optional[str] = None) -> Dict[str, Any]:
         """Find shortest path between nodes (thread-safe).
 
         Args:
@@ -257,10 +245,10 @@ class ThreadSafeGraphManager:
             offset: Number of graphs to skip
 
         Returns:
-            Dictionary with graph list
+            Dictionary with graph list[Any]
         """
         async with self.lock_manager.read_lock("_manager"):
-            graph_names = list(self.graphs.keys())
+            graph_names = list[Any](self.graphs.keys())
 
         # Get info for each graph
         graphs_info = []
@@ -307,9 +295,7 @@ class ThreadSafeGraphManager:
                 "final_edges": final_edges,
             }
 
-    async def centrality_measures(
-        self, graph_name: str, measures: List[str] = None, normalized: bool = True
-    ) -> Dict[str, Any]:
+    async def centrality_measures(self, graph_name: str, measures: List[str] = None, normalized: bool = True) -> Dict[str, Any]:
         """Calculate centrality measures (thread-safe).
 
         Args:
@@ -336,36 +322,32 @@ class ThreadSafeGraphManager:
 
             return results
 
-    def _calculate_centrality_sync(
-        self, graph: nx.Graph, measures: List[str], normalized: bool
-    ) -> Dict[str, Any]:
+    def _calculate_centrality_sync(self, graph: nx.Graph, measures: List[str], normalized: bool) -> Dict[str, Any]:
         """Synchronous centrality calculation (runs in thread pool)."""
         results = {"success": True}
 
         for measure in measures:
             if measure == "degree":
-                results["degree_centrality"] = dict(nx.degree_centrality(graph))
+                results["degree_centrality"] = dict[str, Any](nx.degree_centrality(graph))
             elif measure == "betweenness":
-                results["betweenness_centrality"] = dict(
+                results["betweenness_centrality"] = dict[str, Any](
                     nx.betweenness_centrality(graph, normalized=normalized)
                 )
             elif measure == "closeness":
-                results["closeness_centrality"] = dict(nx.closeness_centrality(graph))
+                results["closeness_centrality"] = dict[str, Any](nx.closeness_centrality(graph))
             elif measure == "eigenvector":
                 try:
-                    results["eigenvector_centrality"] = dict(
+                    results["eigenvector_centrality"] = dict[str, Any](
                         nx.eigenvector_centrality(graph, max_iter=1000)
                     )
-                except:
+                except Exception:
                     results["eigenvector_centrality"] = "Failed to converge"
             elif measure == "pagerank":
-                results["pagerank"] = dict(nx.pagerank(graph))
+                results["pagerank"] = dict[str, Any](nx.pagerank(graph))
 
         return results
 
-    async def multi_graph_operation(
-        self, operation: str, graph_names: List[str], **params
-    ) -> Dict[str, Any]:
+    async def multi_graph_operation(self, operation: str, graph_names: List[str], **params) -> Dict[str, Any]:
         """Perform operation on multiple graphs atomically.
 
         Args:
@@ -406,7 +388,7 @@ class ThreadSafeGraphManager:
         """
         return self.lock_manager.get_stats()
 
-    async def cleanup(self):
+    async def cleanup(self) -> None:
         """Cleanup resources."""
         await self.lock_manager.cleanup()
         self.graphs.clear()

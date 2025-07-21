@@ -72,7 +72,7 @@ class TestGraphOperations:
 
         assert result["nodes"] == 3
         assert result["edges"] == 2
-        assert result["directed"] == False
+        assert not result["directed"]
 
     def test_shortest_path(self):
         """Test shortest path calculation."""
@@ -143,9 +143,9 @@ class TestComplexScenarios:
         assert info2["nodes"] == 3
         assert info3["nodes"] == 3
 
-        assert info1["directed"] == False
-        assert info2["directed"] == True
-        assert info3["directed"] == False
+        assert not info1["directed"]
+        assert info2["directed"]
+        assert not info3["directed"]
 
     def test_large_graph(self):
         """Test with a reasonably large graph."""

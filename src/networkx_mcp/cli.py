@@ -3,6 +3,7 @@
 import argparse
 import asyncio
 from pathlib import Path
+from typing import Any
 
 from rich.console import Console
 from rich.panel import Panel
@@ -19,31 +20,31 @@ console = Console()
 class NetworkXCLI:
     """Interactive CLI for NetworkX MCP server."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.graph_manager = GraphManager()
         self.performance_monitor = PerformanceMonitor()
         self.operation_counter = OperationCounter()
         self.current_graph = None
 
-    def print_banner(self):
+    def print_banner(self) -> None:
         """Print CLI banner."""
         banner = """
 ╔═══════════════════════════════════════════════════════════╗
 ║          NetworkX MCP Server - Interactive CLI            ║
 ║                                                           ║
-║  Commands: help, create, list, info, add, analyze, exit  ║
+║  Commands: help, create, list[Any], info, add, analyze, exit  ║
 ╚═══════════════════════════════════════════════════════════╝
         """
         console.print(banner, style="bold blue")
 
-    def print_help(self):
+    def print_help(self) -> None:
         """Print help information."""
         help_text = """
 [bold]Available Commands:[/bold]
 
 [green]Graph Management:[/green]
   create <graph_id> [type]     - Create a new graph
-  list                         - List all graphs
+  list[Any]                         - List all graphs
   info [graph_id]              - Show graph information
   delete <graph_id>            - Delete a graph
   select <graph_id>            - Select active graph
@@ -71,7 +72,7 @@ class NetworkXCLI:
         """
         console.print(help_text)
 
-    async def create_graph(self, args: list):
+    async def create_graph(self, args: list[Any]) -> Any:
         """Create a new graph."""
         if len(args) < 1:
             console.print("[red]Usage: create <graph_id> [type][/red]")
@@ -89,7 +90,7 @@ class NetworkXCLI:
         except Exception as e:
             console.print(f"[red]✗ Error: {e}[/red]")
 
-    def list_graphs(self):
+    def list_graphs(self) -> None:
         """List all graphs."""
         graphs = self.graph_manager.list_graphs()
 
@@ -118,7 +119,7 @@ class NetworkXCLI:
         if self.current_graph:
             console.print(f"\n[bold]Current graph: {self.current_graph}[/bold]")
 
-    def show_graph_info(self, graph_id: str | None = None):
+    def show_graph_info(self, graph_id: str | None = None) -> None:
         """Show detailed graph information."""
         if not graph_id:
             graph_id = self.current_graph
@@ -155,7 +156,7 @@ Degree Stats:
         except Exception as e:
             console.print(f"[red]✗ Error: {e}[/red]")
 
-    async def add_nodes(self, args: list):
+    async def add_nodes(self, args: list[Any]) -> None:
         """Add nodes to current graph."""
         if not self.current_graph:
             console.print("[red]No graph selected. Use 'select <graph_id>'[/red]")
@@ -171,7 +172,7 @@ Degree Stats:
         except Exception as e:
             console.print(f"[red]✗ Error: {e}[/red]")
 
-    async def add_edge(self, args: list):
+    async def add_edge(self, args: list[Any]) -> None:
         """Add edge to current graph."""
         if not self.current_graph:
             console.print("[red]No graph selected. Use 'select <graph_id>'[/red]")
@@ -190,7 +191,7 @@ Degree Stats:
         except Exception as e:
             console.print(f"[red]✗ Error: {e}[/red]")
 
-    async def analyze(self, args: list):
+    async def analyze(self, args: list[Any]) -> None:
         """Run various analyses."""
         if not args:
             console.print("[red]Usage: analyze <type> [options][/red]")
@@ -288,7 +289,7 @@ Radius: {stats["radius"]}
         except Exception as e:
             console.print(f"[red]✗ Error: {e}[/red]")
 
-    def show_monitor_stats(self):
+    def show_monitor_stats(self) -> None:
         """Show performance monitoring statistics."""
         perf_stats = self.performance_monitor.get_statistics()
         op_counts = self.operation_counter.get_counts()
@@ -317,7 +318,7 @@ Radius: {stats["radius"]}
         console.print(f"[bold]Error Rate:[/bold] {op_counts['error_rate']:.2f}%")
         console.print(f"[bold]Uptime:[/bold] {op_counts['uptime']}")
 
-    async def run_benchmark(self, size: int = 100):
+    async def run_benchmark(self, size: int = 100) -> None:
         """Run performance benchmark."""
         console.print(f"[yellow]Running benchmark with {size} nodes...[/yellow]")
 
@@ -329,7 +330,7 @@ Radius: {stats["radius"]}
         import time
 
         start = time.time()
-        nodes = list(range(size))
+        nodes = list[Any](range(size))
         self.graph_manager.add_nodes_from(test_id, nodes)
         node_time = time.time() - start
 
@@ -370,7 +371,7 @@ Total: {(node_time + edge_time + centrality_time + component_time) * 1000:.2f} m
         """
         console.print(Panel(results, title="Benchmark Complete"))
 
-    async def run_demo(self, demo_type: str):
+    async def run_demo(self, demo_type: str) -> None:
         """Run demonstration."""
         console.print(f"[yellow]Running {demo_type} demonstration...[/yellow]")
 
@@ -422,7 +423,7 @@ Total: {(node_time + edge_time + centrality_time + component_time) * 1000:.2f} m
         else:
             console.print(f"[red]Unknown demo: {demo_type}[/red]")
 
-    async def interactive_mode(self):
+    async def interactive_mode(self) -> None:
         """Run interactive CLI mode."""
         self.print_banner()
 
@@ -453,7 +454,7 @@ Total: {(node_time + edge_time + centrality_time + component_time) * 1000:.2f} m
                 elif cmd == "create":
                     await self.create_graph(args)
 
-                elif cmd == "list":
+                elif cmd == "list[Any]":
                     self.list_graphs()
 
                 elif cmd == "info":

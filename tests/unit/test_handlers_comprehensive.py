@@ -72,7 +72,7 @@ class TestGraphOpsHandler:
         """Test graph creation functionality."""
         from networkx_mcp.mcp.handlers.graph_ops import GraphOpsHandler
 
-        handler = GraphOpsHandler(mock_mcp, graph_manager_with_data)
+        GraphOpsHandler(mock_mcp, graph_manager_with_data)
 
         # Access the registered create_graph function
         # Since we're mocking, we need to simulate the tool registration
@@ -237,7 +237,7 @@ class TestPerformanceConsiderations:
         # Initialize handlers
         from networkx_mcp.mcp.handlers.algorithms import AlgorithmHandler
 
-        handler = AlgorithmHandler(mock_mcp, manager)
+        AlgorithmHandler(mock_mcp, manager)
 
         final_memory = process.memory_info().rss
         memory_increase = final_memory - initial_memory

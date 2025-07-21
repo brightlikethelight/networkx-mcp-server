@@ -32,7 +32,6 @@ logger = logging.getLogger(__name__)
 
 def configure_core_services(container: Container) -> None:
     """Configure core services in the DI container."""
-
     # Configuration
     def config_factory(c: Container) -> AppConfig:
         return get_config()
@@ -289,7 +288,7 @@ async def shutdown_services(container: Container) -> None:
 class ServiceManager:
     """Manager for the service lifecycle."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.container: Container | None = None
         self._initialized = False
 
@@ -326,7 +325,7 @@ class ServiceManager:
             logger.error(f"Failed to stop service manager: {e}")
             raise
 
-    async def health_check(self) -> dict:
+    async def health_check(self) -> dict[str, Any]:
         """Perform health check on all services."""
         if not self._initialized or not self.container:
             return {"healthy": False, "error": "Services not initialized"}

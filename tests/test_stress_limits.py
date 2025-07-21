@@ -135,7 +135,7 @@ class TestStressLimits:
 
                     # Parse response
                     content = response["result"]["content"][0]["text"]
-                    result_data = json.loads(content)
+                    json.loads(content)
 
                     batch_count = batch + 1
                     current_nodes = batch_count * batch_size
@@ -293,7 +293,7 @@ class TestStressLimits:
         # Test shortest path performance
         print("  Testing shortest path...")
         start_time = time.time()
-        path_response = await self.call_tool(
+        await self.call_tool(
             mcp_server,
             "shortest_path",
             {
@@ -310,7 +310,7 @@ class TestStressLimits:
         # Test centrality calculation performance
         print("  Testing centrality measures...")
         start_time = time.time()
-        centrality_response = await self.call_tool(
+        await self.call_tool(
             mcp_server,
             "centrality_measures",
             {

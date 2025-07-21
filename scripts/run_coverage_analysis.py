@@ -52,12 +52,12 @@ def run_coverage_analysis():
                         if part == "passed":
                             try:
                                 overall_passed += int(parts[i - 1])
-                            except:
+                            except Exception:
                                 pass
                         elif part == "failed":
                             try:
                                 overall_failed += int(parts[i - 1])
-                            except:
+                            except Exception:
                                 pass
 
             # Show abbreviated output

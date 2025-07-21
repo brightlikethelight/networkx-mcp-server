@@ -1,3 +1,5 @@
+from typing import Any
+
 """Graph I/O operations.
 
 This package provides readers and writers for various graph formats:
@@ -36,7 +38,7 @@ __all__ = [
 
 
 # Factory functions
-def get_reader(format_name: str):
+def get_reader(format_name: str) -> Any:
     """Get reader for specified format."""
     readers = {"graphml": GraphMLReader}
 
@@ -47,7 +49,7 @@ def get_reader(format_name: str):
     return readers[format_name]()
 
 
-def get_writer(format_name: str):
+def get_writer(format_name: str) -> Any:
     """Get writer for specified format."""
     writers = {"graphml": GraphMLWriter}
 

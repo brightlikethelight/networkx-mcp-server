@@ -160,7 +160,7 @@ class TestCommandInjectionPrevention:
         # Test file path validation directly since export_graph is a class method
         from networkx_mcp.core.io_handlers import GraphIOHandler
 
-        handler = GraphIOHandler()
+        GraphIOHandler()
 
         command_injections = [
             "/tmp/file.json; rm -rf /tmp/*",

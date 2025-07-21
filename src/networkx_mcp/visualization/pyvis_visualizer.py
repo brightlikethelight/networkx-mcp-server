@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 class PyvisVisualizer:
     """Create interactive graph visualizations using PyVis with physics simulation."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize PyvisVisualizer."""
         if not HAS_PYVIS:
             raise ImportError(
@@ -56,16 +56,7 @@ class PyvisVisualizer:
     }
 
     @staticmethod
-    def create_interactive_network(
-        graph: nx.Graph | nx.DiGraph,
-        height: str = "750px",
-        width: str = "100%",
-        bgcolor: str = "#ffffff",
-        font_color: str = "#000000",
-        physics: bool | str | dict = "barnes_hut",
-        hierarchical: bool = False,
-        **kwargs,
-    ) -> dict[str, Any]:
+    def create_interactive_network(graph: nx.Graph | nx.DiGraph, height: str = "750px", width: str = "100%", bgcolor: str = "#ffffff", font_color: str = "#000000", physics: bool | str | dict[str, Any] = "barnes_hut", hierarchical: bool = False, **kwargs) -> dict[str, Any]:
         """
         Create an interactive network visualization with physics simulation.
 
@@ -81,7 +72,7 @@ class PyvisVisualizer:
             Background color
         font_color : str
             Default font color
-        physics : bool, str, or dict
+        physics : bool, str, or dict[str, Any]
             Physics configuration ('barnes_hut', 'force_atlas', 'repulsion', or custom)
         hierarchical : bool
             Use hierarchical layout
@@ -103,7 +94,7 @@ class PyvisVisualizer:
         # Configure physics
         if isinstance(physics, str) and physics in PyvisVisualizer.PHYSICS_CONFIGS:
             physics_config = PyvisVisualizer.PHYSICS_CONFIGS[physics]
-        elif isinstance(physics, dict):
+        elif isinstance(physics, dict[str, Any]):
             physics_config = physics
         else:
             physics_config = physics
@@ -165,13 +156,7 @@ class PyvisVisualizer:
         }
 
     @staticmethod
-    def create_community_visualization(
-        graph: nx.Graph | nx.DiGraph,
-        communities: dict[int, list],
-        height: str = "750px",
-        width: str = "100%",
-        physics: str = "force_atlas",
-    ) -> dict[str, Any]:
+    def create_community_visualization(graph: nx.Graph | nx.DiGraph, communities: dict[int, list[Any]], height: str = "750px", width: str = "100%", physics: str = "force_atlas") -> dict[str, Any]:
         """
         Visualize graph with community coloring.
 
@@ -179,7 +164,7 @@ class PyvisVisualizer:
         -----------
         graph : nx.Graph or nx.DiGraph
             The graph to visualize
-        communities : dict
+        communities : dict[str, Any]
             Community assignments {community_id: [node_list]}
 
         Returns:
@@ -275,12 +260,7 @@ class PyvisVisualizer:
         }
 
     @staticmethod
-    def create_hierarchical_tree(
-        tree: nx.DiGraph,
-        root: Any | None = None,
-        height: str = "750px",
-        width: str = "100%",
-    ) -> dict[str, Any]:
+    def create_hierarchical_tree(tree: nx.DiGraph, root: Any | None = None, height: str = "750px", width: str = "100%") -> dict[str, Any]:
         """Create hierarchical visualization for tree structures."""
         if not nx.is_tree(tree):
             msg = "Graph must be a tree"
@@ -368,14 +348,7 @@ class PyvisVisualizer:
         }
 
     @staticmethod
-    def _add_nodes(
-        net: Network,
-        graph: nx.Graph,
-        node_size_attr: str | None = None,
-        node_color_attr: str | None = None,
-        node_shape: str = "dot",
-        **kwargs,
-    ):
+    def _add_nodes(net: Network, graph: nx.Graph, node_size_attr: str | None = None, node_color_attr: str | None = None, node_shape: str = "dot", **kwargs):
         """Add nodes to PyVis network with attributes."""
         # Default sizes and colors
         default_size = 25
@@ -419,13 +392,7 @@ class PyvisVisualizer:
             )
 
     @staticmethod
-    def _add_edges(
-        net: Network,
-        graph: nx.Graph,
-        edge_width_attr: str | None = None,
-        edge_color_attr: str | None = None,
-        **kwargs,
-    ):
+    def _add_edges(net: Network, graph: nx.Graph, edge_width_attr: str | None = None, edge_color_attr: str | None = None, **kwargs):
         """Add edges to PyVis network with attributes."""
         default_width = 1
         default_color = "#848484"

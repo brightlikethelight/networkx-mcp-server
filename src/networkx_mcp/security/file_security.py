@@ -20,7 +20,7 @@ class FileSecurityError(SecurityError):
 class SecureFileHandler:
     """Secure file operations with strict validation."""
 
-    def __init__(self, allowed_dirs: list[str] | None = None):
+    def __init__(self, allowed_dirs: list[str] | None = None) -> None:
         """Initialize with allowed directories."""
         if allowed_dirs is None:
             # Default to temp directory only for safety
@@ -44,7 +44,7 @@ class SecureFileHandler:
             self.allowed_dirs.append(self.temp_dir)
 
         # Track created files for cleanup
-        self._created_files = set()
+        self._created_files = set[Any]()
 
     def validate_path(self, filepath: str | Path) -> Path:
         """Validate and resolve file path securely."""
@@ -187,9 +187,7 @@ class SecureFileHandler:
             msg = f"Failed to read graph: {safe_error}"
             raise FileSecurityError(msg) from e
 
-    def safe_write_graph(
-        self, graph: nx.Graph, filepath: str | Path, file_format: str
-    ) -> Path:
+    def safe_write_graph(self, graph: nx.Graph, filepath: str | Path, file_format: str) -> Path:
         """Safely write graph to file."""
         # Validate inputs
         secure_path = self.validate_path(filepath)
@@ -247,7 +245,7 @@ class SecureFileHandler:
             raise FileSecurityError(msg) from e
 
         # Validate structure
-        if not isinstance(data, dict):
+        if not isinstance(data, dict[str, Any]):
             msg = "JSON must be object at root"
             raise FileSecurityError(msg)
 
@@ -267,14 +265,14 @@ class SecureFileHandler:
         # Sanitize all attributes
         if "nodes" in data:
             for node in data["nodes"]:
-                if isinstance(node, dict) and "attributes" in node:
+                if isinstance(node, dict[str, Any]) and "attributes" in node:
                     node["attributes"] = SecurityValidator.sanitize_attributes(
                         node["attributes"]
                     )
 
         if "edges" in data:
             for edge in data["edges"]:
-                if isinstance(edge, dict) and "attributes" in edge:
+                if isinstance(edge, dict[str, Any]) and "attributes" in edge:
                     edge["attributes"] = SecurityValidator.sanitize_attributes(
                         edge["attributes"]
                     )
@@ -290,7 +288,7 @@ class SecureFileHandler:
             data = yaml.safe_load(f)
 
         # Validate and convert
-        if not isinstance(data, dict):
+        if not isinstance(data, dict[str, Any]):
             msg = "YAML must be mapping at root"
             raise FileSecurityError(msg)
 
@@ -343,7 +341,7 @@ class SecureFileHandler:
         # Add nodes with validation
         if "nodes" in data:
             for node_data in data["nodes"]:
-                if isinstance(node_data, dict) and "id" in node_data:
+                if isinstance(node_data, dict[str, Any]) and "id" in node_data:
                     node_id = SecurityValidator.validate_node_id(node_data["id"])
                     attrs = SecurityValidator.sanitize_attributes(
                         node_data.get("attributes", {})
@@ -353,7 +351,7 @@ class SecureFileHandler:
         # Add edges with validation
         if "edges" in data:
             for edge_data in data["edges"]:
-                if isinstance(edge_data, dict):
+                if isinstance(edge_data, dict[str, Any]):
                     if "source" in edge_data and "target" in edge_data:
                         source = SecurityValidator.validate_node_id(edge_data["source"])
                         target = SecurityValidator.validate_node_id(edge_data["target"])
@@ -400,11 +398,11 @@ class SecureFileHandler:
         except Exception:
             pass
 
-    def __enter__(self):
+    def __enter__(self) -> Any:
         """Context manager entry."""
         return self
 
-    def __exit__(self, exc_type, _exc_val, _exc_tb):
+    def __exit__(self, exc_type: Any, _exc_val: Any, _exc_tb: Any) -> Any:
         """Context manager exit with cleanup."""
         self.cleanup()
         return False

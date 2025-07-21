@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 class MatplotlibVisualizer:
     """Create high-quality static graph visualizations using matplotlib."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize MatplotlibVisualizer."""
         if not HAS_MATPLOTLIB:
             raise ImportError(
@@ -55,19 +55,7 @@ class MatplotlibVisualizer:
     }
 
     @staticmethod
-    def create_static_plot(
-        graph: nx.Graph | nx.DiGraph,
-        layout: str = "spring",
-        node_size: int | dict | str = 300,
-        node_color: str | dict | str = "lightblue",
-        node_shape: str | dict = "circle",
-        edge_width: float | dict | str = 1.0,
-        edge_color: str | dict | str = "gray",
-        edge_style: str | dict = "solid",
-        show_labels: bool = True,
-        label_font_size: int = 10,
-        title: str | None = None,
-        figsize: tuple[int, int] = (12, 8),
+    def create_static_plot(graph: nx.Graph | nx.DiGraph, layout: str = "spring", node_size: int | dict[str, Any] | str = 300, node_color: str | dict[str, Any] | str = "lightblue", node_shape: str | dict[str, Any] = "circle", edge_width: float | dict[str, Any] | str = 1.0, edge_color: str | dict[str, Any] | str = "gray", edge_style: str | dict[str, Any] = "solid", show_labels: bool = True, label_font_size: int = 10, title: str | None = None, figsize: tuple[int, int] = (12, 8),
         dpi: int = 100,
         **kwargs,
     ) -> dict[str, Any]:
@@ -80,17 +68,17 @@ class MatplotlibVisualizer:
             The graph to visualize
         layout : str
             Layout algorithm to use
-        node_size : int, dict, or attribute name
+        node_size : int, dict[str, Any], or attribute name
             Node sizes (can vary by node)
-        node_color : str, dict, or attribute name
+        node_color : str, dict[str, Any], or attribute name
             Node colors (can vary by node)
-        node_shape : str or dict
+        node_shape : str or dict[str, Any]
             Node shapes (can vary by node)
-        edge_width : float, dict, or attribute name
+        edge_width : float, dict[str, Any], or attribute name
             Edge widths (can vary by edge)
-        edge_color : str, dict, or attribute name
+        edge_color : str, dict[str, Any], or attribute name
             Edge colors (can vary by edge)
-        edge_style : str or dict
+        edge_style : str or dict[str, Any]
             Edge styles ('solid', 'dashed', 'dotted')
         show_labels : bool
             Whether to show node labels
@@ -98,7 +86,7 @@ class MatplotlibVisualizer:
             Font size for labels
         title : str
             Plot title
-        figsize : tuple
+        figsize : tuple[Any, ...]
             Figure size (width, height)
         dpi : int
             Dots per inch for resolution
@@ -168,7 +156,7 @@ class MatplotlibVisualizer:
                 )
 
         # Draw nodes by shape groups
-        if isinstance(node_shape, dict):
+        if isinstance(node_shape, dict[str, Any]):
             shape_groups = {}
             for node in graph.nodes():
                 shape = node_shape.get(node, "circle")
@@ -260,7 +248,7 @@ class MatplotlibVisualizer:
         """Create hierarchical layout for tree-like structures."""
         if nx.is_directed_acyclic_graph(graph):
             # Use topological generations for DAGs
-            generations = list(nx.topological_generations(graph))
+            generations = list[Any](nx.topological_generations(graph))
             pos = {}
 
             for i, generation in enumerate(generations):
@@ -275,11 +263,9 @@ class MatplotlibVisualizer:
             return nx.spring_layout(graph)
 
     @staticmethod
-    def _get_node_attributes(
-        graph: nx.Graph, attr: int | float | str | dict, default: Any
-    ) -> list[Any]:
-        """Get node attributes as a list."""
-        if isinstance(attr, dict):
+    def _get_node_attributes(graph: nx.Graph, attr: int | float | str | dict[str, Any], default: Any) -> list[Any]:
+        """Get node attributes as a list[Any]."""
+        if isinstance(attr, dict[str, Any]):
             return [attr.get(node, default) for node in graph.nodes()]
         elif isinstance(attr, str):
             # Attribute name
@@ -289,11 +275,9 @@ class MatplotlibVisualizer:
             return [attr] * graph.number_of_nodes()
 
     @staticmethod
-    def _get_edge_attributes(
-        graph: nx.Graph, attr: int | float | str | dict, default: Any
-    ) -> list[Any]:
-        """Get edge attributes as a list."""
-        if isinstance(attr, dict):
+    def _get_edge_attributes(graph: nx.Graph, attr: int | float | str | dict[str, Any], default: Any) -> list[Any]:
+        """Get edge attributes as a list[Any]."""
+        if isinstance(attr, dict[str, Any]):
             return [attr.get(edge, default) for edge in graph.edges()]
         elif isinstance(attr, str):
             # Attribute name
@@ -303,13 +287,11 @@ class MatplotlibVisualizer:
             return [attr] * graph.number_of_edges()
 
     @staticmethod
-    def _smart_label_placement(
-        graph: nx.Graph, pos: dict[Any, tuple[float, float]], font_size: int
-    ) -> dict[Any, str]:
+    def _smart_label_placement(graph: nx.Graph, pos: dict[Any, tuple[float: Any, float]], font_size: int) -> dict[Any, str]:
         """Smart label placement to avoid overlap."""
         # For now, show labels only for high-degree nodes
-        degrees = dict(graph.degree())
-        threshold = np.percentile(list(degrees.values()), 75)
+        degrees = dict[str, Any](graph.degree())
+        threshold = np.percentile(list[Any](degrees.values()), 75)
 
         labels = {}
         for node, degree in degrees.items():
@@ -323,10 +305,10 @@ class MatplotlibVisualizer:
         return labels
 
     @staticmethod
-    def _add_color_legend(graph: nx.Graph, color_attr: str):
+    def _add_color_legend(graph: nx.Graph, color_attr: str) -> None:
         """Add color legend for attribute-based coloring."""
         # Get unique values
-        values = set()
+        values = set[Any]()
         for node in graph.nodes():
             val = graph.nodes[node].get(color_attr)
             if val is not None:
@@ -344,10 +326,7 @@ class MatplotlibVisualizer:
         plt.legend(handles=patches, title=color_attr, loc="best")
 
     @staticmethod
-    def create_subplot_layout(
-        graph: nx.Graph,
-        views: list[dict[str, Any]],
-        figsize: tuple[int, int] = (16, 8),
+    def create_subplot_layout(graph: nx.Graph, views: list[dict[str, Any]], figsize: tuple[int, int] = (16, 8),
         dpi: int = 100,
     ) -> dict[str, Any]:
         """Create multiple graph views in subplots."""

@@ -34,7 +34,7 @@ class TestNodeOperations:
 
     def test_remove_node(self, sample_graph):
         """Test removing a node."""
-        ops = NodeOperations(sample_graph)
+        NodeOperations(sample_graph)
         initial_nodes = sample_graph.number_of_nodes()
         initial_edges = sample_graph.number_of_edges()
 
@@ -47,7 +47,7 @@ class TestNodeOperations:
 
     def test_remove_nonexistent_node(self, sample_graph):
         """Test removing a node that doesn't exist."""
-        ops = NodeOperations(sample_graph)
+        NodeOperations(sample_graph)
 
         with pytest.raises(nx.NetworkXError):
             sample_graph.remove_node(99)
@@ -90,7 +90,7 @@ class TestEdgeOperations:
 
     def test_remove_edge(self, sample_graph):
         """Test removing an edge."""
-        ops = EdgeOperations(sample_graph)
+        EdgeOperations(sample_graph)
         initial_edges = sample_graph.number_of_edges()
 
         sample_graph.remove_edge(1, 2)
@@ -100,7 +100,7 @@ class TestEdgeOperations:
 
     def test_remove_nonexistent_edge(self, sample_graph):
         """Test removing an edge that doesn't exist."""
-        ops = EdgeOperations(sample_graph)
+        EdgeOperations(sample_graph)
 
         with pytest.raises(nx.NetworkXError):
             sample_graph.remove_edge(1, 5)
@@ -125,7 +125,7 @@ class TestGraphAlgorithms:
 
         # Use a node that doesn't exist
         with pytest.raises(ValueError):
-            result = GraphAlgorithms.shortest_path(sample_graph, 1, 99)
+            GraphAlgorithms.shortest_path(sample_graph, 1, 99)
 
     def test_centrality_measures(self, sample_graph):
         """Test centrality calculations."""

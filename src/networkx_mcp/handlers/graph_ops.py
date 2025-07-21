@@ -21,7 +21,7 @@ from ..server import (
 class GraphOpsHandler:
     """Handler for graph operations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.graphs = graphs
         self.mcp = mcp
 

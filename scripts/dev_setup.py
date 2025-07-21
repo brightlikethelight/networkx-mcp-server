@@ -96,7 +96,7 @@ class DevEnvironmentSetup:
 
         # Check Git
         try:
-            result = run_command(["git", "--version"])
+            run_command(["git", "--version"])
             print_success("Git available ✓")
         except (subprocess.CalledProcessError, FileNotFoundError):
             print_error("Git not found. Please install Git.")

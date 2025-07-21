@@ -1,10 +1,12 @@
 """NetworkX MCP Server - A Model Context Protocol server for NetworkX graphs."""
 
+from typing import Any
+
 from networkx_mcp.__version__ import __version__
 
 
 # Lazy imports to avoid import errors during build
-def _get_graph_algorithms():
+def _get_graph_algorithms() -> Any:
     """Lazy import of GraphAlgorithms to avoid build-time dependency issues."""
     try:
         from networkx_mcp.core.algorithms import GraphAlgorithms
@@ -14,7 +16,7 @@ def _get_graph_algorithms():
         return None
 
 
-def _get_graph_manager():
+def _get_graph_manager() -> Any:
     """Lazy import of GraphManager to avoid build-time dependency issues."""
     try:
         from networkx_mcp.core.graph_operations import GraphManager

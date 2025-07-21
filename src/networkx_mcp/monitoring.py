@@ -13,7 +13,7 @@ import psutil
 class HealthMonitor:
     """Monitor server health and performance."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize health monitor."""
         self.start_time = time.time()
         self.request_count = 0
@@ -21,7 +21,7 @@ class HealthMonitor:
         self.tool_usage = {}
         self.process = psutil.Process(os.getpid())
 
-    def record_request(self, method: str, success: bool = True):
+    def record_request(self, method: str, success: bool = True) -> None:
         """Record a request."""
         self.request_count += 1
         if not success:
@@ -93,14 +93,14 @@ class HealthMonitor:
 
 
 # Optional HTTP health endpoint
-def create_health_endpoint(monitor: HealthMonitor, port: int = 8080):
+def create_health_endpoint(monitor: HealthMonitor, port: int = 8080) -> None:
     """Create a simple HTTP health endpoint."""
     import json
     import threading
     from http.server import BaseHTTPRequestHandler, HTTPServer
 
     class HealthHandler(BaseHTTPRequestHandler):
-        def do_GET(self):
+        def do_GET(self) -> None:
             if self.path == "/health":
                 self.send_response(200)
                 self.send_header("Content-Type", "application/json")
@@ -112,7 +112,7 @@ def create_health_endpoint(monitor: HealthMonitor, port: int = 8080):
                 self.send_response(404)
                 self.end_headers()
 
-        def log_message(self, format, *args):
+        def log_message(self, format: str, *args: Any) -> None:
             pass  # Suppress logging
 
     server = HTTPServer(("", port), HealthHandler)

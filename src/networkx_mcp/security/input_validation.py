@@ -99,33 +99,31 @@ def validate_id(value: Any, field_name: str = "ID") -> str:
     return str_value
 
 
-def validate_node_list(
-    nodes: list[Any], max_nodes: int = MAX_NODES_PER_REQUEST
-) -> list[Union[str, int]]:
+def validate_node_list(nodes: list[Any], max_nodes: int = MAX_NODES_PER_REQUEST) -> list[Union[str, int]]:
     """
-    Validate a list of nodes.
+    Validate a list[Any] of nodes.
 
     Args:
         nodes: List of node IDs
         max_nodes: Maximum allowed nodes
 
     Returns:
-        Validated list of nodes
+        Validated list[Any] of nodes
 
     Raises:
         ValidationError: If validation fails
     """
-    if not isinstance(nodes, list):
-        raise ValidationError("Nodes must be provided as a list")
+    if not isinstance(nodes, list[Any]):
+        raise ValidationError("Nodes must be provided as a list[Any]")
 
     if len(nodes) == 0:
-        raise ValidationError("Node list cannot be empty")
+        raise ValidationError("Node list[Any] cannot be empty")
 
     if len(nodes) > max_nodes:
         raise ValidationError(f"Too many nodes. Maximum allowed: {max_nodes}")
 
     validated_nodes: list[Union[str, int]] = []
-    seen = set()
+    seen = set[Any]()
 
     for i, node in enumerate(nodes):
         # Allow integers directly
@@ -140,17 +138,17 @@ def validate_node_list(
             try:
                 validated_node = validate_id(node, f"Node at index {i}")
             except ValidationError:
-                # If it's a tuple (for nodes with attributes), validate only the ID part
-                if isinstance(node, (list, tuple)) and len(node) >= 1:
+                # If it's a tuple[Any, ...] (for nodes with attributes), validate only the ID part
+                if isinstance(node, (list[Any], tuple[Any, ...])) and len(node) >= 1:
                     validated_node = validate_id(node[0], f"Node ID at index {i}")
-                    # Note: We only store the ID, not the full tuple for this return type
+                    # Note: We only store the ID, not the full tuple[Any, ...] for this return type
                 else:
                     raise
 
         # Check for duplicates
         node_key = (
             validated_node
-            if not isinstance(validated_node, tuple)
+            if not isinstance(validated_node, tuple[Any, ...])
             else validated_node[0]
         )
         if node_key in seen:
@@ -162,27 +160,25 @@ def validate_node_list(
     return validated_nodes
 
 
-def validate_edge_list(
-    edges: list[Any], max_edges: int = MAX_EDGES_PER_REQUEST
-) -> list[EdgeTuple]:
+def validate_edge_list(edges: list[Any], max_edges: int = MAX_EDGES_PER_REQUEST) -> list[EdgeTuple]:
     """
-    Validate a list of edges.
+    Validate a list[Any] of edges.
 
     Args:
-        edges: List of edges (each edge is a tuple/list of 2-3 elements)
+        edges: List of edges (each edge is a tuple[Any, ...]/list[Any] of 2-3 elements)
         max_edges: Maximum allowed edges
 
     Returns:
-        Validated list of edge tuples
+        Validated list[Any] of edge tuples
 
     Raises:
         ValidationError: If validation fails
     """
-    if not isinstance(edges, list):
-        raise ValidationError("Edges must be provided as a list")
+    if not isinstance(edges, list[Any]):
+        raise ValidationError("Edges must be provided as a list[Any]")
 
     if len(edges) == 0:
-        raise ValidationError("Edge list cannot be empty")
+        raise ValidationError("Edge list[Any] cannot be empty")
 
     if len(edges) > max_edges:
         raise ValidationError(f"Too many edges. Maximum allowed: {max_edges}")
@@ -190,8 +186,8 @@ def validate_edge_list(
     validated_edges: list[EdgeTuple] = []
 
     for i, edge in enumerate(edges):
-        if not isinstance(edge, (list, tuple)):
-            raise ValidationError(f"Edge at index {i} must be a list or tuple")
+        if not isinstance(edge, (list[Any], tuple[Any, ...])):
+            raise ValidationError(f"Edge at index {i} must be a list[Any] or tuple[Any, ...]")
 
         if len(edge) < 2:
             raise ValidationError(
@@ -243,7 +239,7 @@ def validate_attributes(attrs: Any, field_name: str = "Attributes") -> dict[str,
     if attrs is None:
         return {}
 
-    if not isinstance(attrs, dict):
+    if not isinstance(attrs, dict[str, Any]):
         raise ValidationError(f"{field_name} must be a dictionary")
 
     # Check size
@@ -317,17 +313,17 @@ def sanitize_value(value: Any, field_name: str = "Value") -> Any:
         return value
 
     # Handle lists and tuples
-    if isinstance(value, (list, tuple)):
+    if isinstance(value, (list[Any], tuple[Any, ...])):
         if len(value) > 100:  # Reasonable limit for attribute lists
-            raise ValidationError(f"{field_name}: list too long (max 100 elements)")
+            raise ValidationError(f"{field_name}: list[Any] too long (max 100 elements)")
 
         sanitized_list = []
         for i, item in enumerate(value):
             sanitized_list.append(sanitize_value(item, f"{field_name}[{i}]"))
-        return sanitized_list if isinstance(value, list) else tuple(sanitized_list)
+        return sanitized_list if isinstance(value, list[Any]) else tuple[Any, ...](sanitized_list)
 
     # Handle nested dictionaries (with depth limit)
-    if isinstance(value, dict):
+    if isinstance(value, dict[str, Any]):
         if len(value) > 50:  # Reasonable limit for nested dicts
             raise ValidationError(f"{field_name}: dictionary too large (max 50 keys)")
 

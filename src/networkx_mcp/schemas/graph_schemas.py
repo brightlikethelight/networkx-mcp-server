@@ -11,7 +11,7 @@ class NodeSchema(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     id: str | int
-    attributes: dict[str, Any] = Field(default_factory=dict)
+    attributes: dict[str, Any] = Field(default_factory=dict[str, Any])
 
 
 class EdgeSchema(BaseModel):
@@ -21,7 +21,7 @@ class EdgeSchema(BaseModel):
 
     source: str | int
     target: str | int
-    attributes: dict[str, Any] = Field(default_factory=dict)
+    attributes: dict[str, Any] = Field(default_factory=dict[str, Any])
 
 
 class GraphSchema(BaseModel):
@@ -29,9 +29,9 @@ class GraphSchema(BaseModel):
 
     directed: bool = False
     multigraph: bool = False
-    graph_attributes: dict[str, Any] = Field(default_factory=dict)
-    nodes: list[NodeSchema] = Field(default_factory=list)
-    edges: list[EdgeSchema] = Field(default_factory=list)
+    graph_attributes: dict[str, Any] = Field(default_factory=dict[str, Any])
+    nodes: list[NodeSchema] = Field(default_factory=list[Any])
+    edges: list[EdgeSchema] = Field(default_factory=list[Any])
 
 
 class CreateGraphRequest(BaseModel):
@@ -39,7 +39,7 @@ class CreateGraphRequest(BaseModel):
 
     graph_id: str
     graph_type: Literal["Graph", "DiGraph", "MultiGraph", "MultiDiGraph"] = "Graph"
-    attributes: dict[str, Any] = Field(default_factory=dict)
+    attributes: dict[str, Any] = Field(default_factory=dict[str, Any])
 
 
 class AddNodeRequest(BaseModel):
@@ -47,7 +47,7 @@ class AddNodeRequest(BaseModel):
 
     graph_id: str
     node_id: str | int
-    attributes: dict[str, Any] = Field(default_factory=dict)
+    attributes: dict[str, Any] = Field(default_factory=dict[str, Any])
 
 
 class AddNodesRequest(BaseModel):
@@ -63,7 +63,7 @@ class AddEdgeRequest(BaseModel):
     graph_id: str
     source: str | int
     target: str | int
-    attributes: dict[str, Any] = Field(default_factory=dict)
+    attributes: dict[str, Any] = Field(default_factory=dict[str, Any])
 
 
 class AddEdgesRequest(BaseModel):
@@ -108,7 +108,7 @@ class ExportGraphRequest(BaseModel):
         "json", "graphml", "gexf", "edgelist", "adjacency", "pickle", "dot", "pajek"
     ]
     path: str | None = None
-    options: dict[str, Any] = Field(default_factory=dict)
+    options: dict[str, Any] = Field(default_factory=dict[str, Any])
 
 
 class ImportGraphRequest(BaseModel):
@@ -120,11 +120,11 @@ class ImportGraphRequest(BaseModel):
     path: str | None = None
     data: dict[str, Any] | None = None
     graph_id: str | None = None
-    options: dict[str, Any] = Field(default_factory=dict)
+    options: dict[str, Any] = Field(default_factory=dict[str, Any])
 
     @field_validator("data")
     @classmethod
-    def validate_data_or_path(cls, v, info):
+    def validate_data_or_path(cls: Any, v: Any, info: Any) -> bool:
         """Ensure either data or path is provided."""
         if v is None and info.data.get("path") is None:
             msg = "Either 'data' or 'path' must be provided"
@@ -139,7 +139,7 @@ class LayoutRequest(BaseModel):
     algorithm: Literal[
         "spring", "circular", "random", "shell", "spectral", "kamada_kawai", "planar"
     ] = "spring"
-    options: dict[str, Any] = Field(default_factory=dict)
+    options: dict[str, Any] = Field(default_factory=dict[str, Any])
 
 
 class SubgraphRequest(BaseModel):
@@ -189,4 +189,4 @@ class VisualizationData(BaseModel):
     nodes: list[dict[str, Any]]
     edges: list[dict[str, Any]]
     layout: dict[str, list[float]] | None = None
-    options: dict[str, Any] = Field(default_factory=dict)
+    options: dict[str, Any] = Field(default_factory=dict[str, Any])

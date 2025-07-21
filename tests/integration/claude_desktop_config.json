@@ -1,0 +1,13 @@
+{
+  "networkx-mcp": {
+    "command": "/Users/brightliu/miniconda3/bin/python",
+    "args": [
+      "-m",
+      "networkx_mcp",
+      "--jsonrpc"
+    ],
+    "env": {
+      "PYTHONPATH": "/Users/brightliu/Coding_Projects/networkx-mcp-server/src"
+    }
+  }
+}

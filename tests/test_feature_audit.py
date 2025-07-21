@@ -14,7 +14,7 @@ def test_feature_import(module_path: str, class_name: str) -> tuple[bool, str]:
     """Test if a feature can be imported and instantiated."""
     try:
         # Import the module
-        parts = module_path.split(".")
+        module_path.split(".")
         module = __import__(f"networkx_mcp.{module_path}", fromlist=[class_name])
         cls = getattr(module, class_name)
 
@@ -22,7 +22,7 @@ def test_feature_import(module_path: str, class_name: str) -> tuple[bool, str]:
         if hasattr(cls, "__init__"):
             # Try basic instantiation
             try:
-                instance = cls()
+                cls()
                 return True, "✅ Works - Can import and instantiate"
             except TypeError:
                 # May need arguments, but import works

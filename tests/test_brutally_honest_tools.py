@@ -168,7 +168,7 @@ class TestBrutallyHonestTools:
             # Test individual measures
             degree = dict(nx.degree_centrality(graph))
             betweenness = dict(nx.betweenness_centrality(graph))
-            closeness = dict(nx.closeness_centrality(graph))
+            dict(nx.closeness_centrality(graph))
 
             # A should have highest centrality
             assert degree["A"] > degree["B"]

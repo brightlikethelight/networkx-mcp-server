@@ -1,3 +1,5 @@
+from typing import Any
+
 """Rate limiting and throttling services."""
 
 import asyncio
@@ -21,7 +23,7 @@ class RateLimit:
     window: int  # Time window in seconds
     burst: int | None = None  # Burst capacity (defaults to requests)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.burst is None:
             self.burst = self.requests
 
@@ -39,7 +41,7 @@ class RateLimitResult:
 class TokenBucket:
     """Token bucket algorithm implementation."""
 
-    def __init__(self, rate_limit: RateLimit):
+    def __init__(self, rate_limit: RateLimit) -> None:
         self.rate_limit = rate_limit
         self.tokens = float(rate_limit.burst)
         self.last_update = time.time()
@@ -81,7 +83,7 @@ class TokenBucket:
 class SlidingWindow:
     """Sliding window rate limiter implementation."""
 
-    def __init__(self, rate_limit: RateLimit):
+    def __init__(self, rate_limit: RateLimit) -> None:
         self.rate_limit = rate_limit
         self.requests = deque()
 
@@ -113,7 +115,7 @@ class SlidingWindow:
 class RateLimiter(Component):
     """Service for API rate limiting and throttling."""
 
-    def __init__(self, algorithm: str = "token_bucket"):
+    def __init__(self, algorithm: str = "token_bucket") -> None:
         super().__init__("rate_limiter")
         self.algorithm = algorithm
         self.limiters: dict[str, object] = {}
@@ -126,7 +128,7 @@ class RateLimiter(Component):
             "ip": RateLimit(requests=30, window=60),  # 30 req/min per IP
         }
 
-    def configure_rate_limit(self, key: str, rate_limit: RateLimit):
+    def configure_rate_limit(self, key: str, rate_limit: RateLimit) -> None:
         """Configure rate limit for a specific key pattern."""
         self.rate_limits[key] = rate_limit
         logger.info(
@@ -146,9 +148,7 @@ class RateLimiter(Component):
         return self.limiters[identifier]
 
     # @with_logging_context removed - monitoring module deleted
-    async def check_rate_limit(
-        self, identifier: str, limit_type: str = "user", tokens: int = 1
-    ) -> RateLimitResult:
+    async def check_rate_limit(self, identifier: str, limit_type: str = "user", tokens: int = 1) -> RateLimitResult:
         """Check if request is within rate limits."""
 
         # Get rate limit configuration
@@ -195,9 +195,7 @@ class RateLimiter(Component):
         return result
 
     # @with_logging_context removed - monitoring module deleted
-    async def check_multiple_limits(
-        self,
-        checks: list[tuple[str, str]],  # [(identifier, limit_type), ...]
+    async def check_multiple_limits(self, checks: list[tuple[str, str]], # [(identifier: Any, limit_type: Any), ...]
     ) -> RateLimitResult:
         """Check multiple rate limits and return most restrictive result."""
         results = []
@@ -244,7 +242,7 @@ class RateLimiter(Component):
 
         return len(expired_keys)
 
-    async def get_rate_limit_status(self, identifier: str, limit_type: str) -> dict:
+    async def get_rate_limit_status(self, identifier: str, limit_type: str) -> dict[str, Any]:
         """Get current rate limit status for an identifier."""
         rate_limit = self.rate_limits.get(
             limit_type, self.default_limits.get(limit_type)
@@ -291,7 +289,7 @@ class RateLimiter(Component):
 
         logger.info(f"Rate limiter initialized with {self.algorithm} algorithm")
 
-    async def _cleanup_loop(self):
+    async def _cleanup_loop(self) -> None:
         """Background task to clean up expired limiters."""
         while self.status.is_running():
             try:
@@ -307,10 +305,10 @@ class RateLimiter(Component):
 class RateLimitMiddleware:
     """Middleware for applying rate limits to requests."""
 
-    def __init__(self, rate_limiter: RateLimiter):
+    def __init__(self, rate_limiter: RateLimiter) -> None:
         self.rate_limiter = rate_limiter
 
-    async def __call__(self, request, handler):
+    async def __call__(self, request: Any, handler: Any) -> Any:
         """Apply rate limiting to incoming requests."""
         # Extract identifiers
         user_id = (
@@ -335,7 +333,7 @@ class RateLimitMiddleware:
         result = await self.rate_limiter.check_multiple_limits(checks)
 
         # Add rate limit headers to response
-        def add_rate_limit_headers(response):
+        def add_rate_limit_headers(response: Any) -> Any:
             response.headers["X-RateLimit-Remaining"] = str(result.remaining)
             response.headers["X-RateLimit-Reset"] = str(int(result.reset_time))
 
@@ -363,7 +361,7 @@ class RateLimitMiddleware:
         response = await handler(request)
         return add_rate_limit_headers(response)
 
-    def _get_client_ip(self, request) -> str | None:
+    def _get_client_ip(self, request: Any) -> str | None:
         """Extract client IP address from request."""
         # Check for forwarded headers first
         forwarded_for = request.headers.get("X-Forwarded-For")

@@ -12,7 +12,7 @@ from ..server import graphs, mcp, node_degree, shortest_path
 class AlgorithmsHandler:
     """Handler for graph algorithms."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.graphs = graphs
         self.mcp = mcp
 

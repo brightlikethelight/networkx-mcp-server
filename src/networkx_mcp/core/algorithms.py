@@ -25,13 +25,7 @@ class GraphAlgorithms:
     """Implements various graph algorithms using NetworkX."""
 
     @staticmethod
-    def shortest_path(
-        graph: nx.Graph,
-        source: str | int,
-        target: str | int | None = None,
-        weight: str | None = None,
-        method: str = "dijkstra",
-    ) -> dict[str, Any]:
+    def shortest_path(graph: nx.Graph, source: str | int, target: str | int | None = None, weight: str | None = None, method: str = "dijkstra") -> dict[str, Any]:
         """Find shortest path(s) in a graph."""
         if source not in graph:
             msg = f"Source node '{source}' not in graph"
@@ -59,8 +53,8 @@ class GraphAlgorithms:
                     graph, source, weight=weight
                 )
                 result = {
-                    "paths": dict(paths),
-                    "lengths": dict(lengths),
+                    "paths": dict[str, Any](paths),
+                    "lengths": dict[str, Any](lengths),
                     "source": source,
                 }
         elif method == "bellman-ford":
@@ -78,8 +72,8 @@ class GraphAlgorithms:
             else:
                 pred, dist = nx.single_source_bellman_ford(graph, source, weight=weight)
                 result = {
-                    "predecessors": dict(pred),
-                    "distances": dict(dist),
+                    "predecessors": dict[str, Any](pred),
+                    "distances": dict[str, Any](dist),
                     "source": source,
                 }
         else:
@@ -89,16 +83,14 @@ class GraphAlgorithms:
         return result
 
     @staticmethod
-    def all_pairs_shortest_path(
-        graph: nx.Graph, weight: str | None = None
-    ) -> dict[str, Any]:
+    def all_pairs_shortest_path(graph: nx.Graph, weight: str | None = None) -> dict[str, Any]:
         """Compute shortest paths between all pairs of nodes."""
         if weight:
-            lengths = dict(nx.all_pairs_dijkstra_path_length(graph, weight=weight))
-            paths = dict(nx.all_pairs_dijkstra_path(graph, weight=weight))
+            lengths = dict[str, Any](nx.all_pairs_dijkstra_path_length(graph, weight=weight))
+            paths = dict[str, Any](nx.all_pairs_dijkstra_path(graph, weight=weight))
         else:
-            lengths = dict(nx.all_pairs_shortest_path_length(graph))
-            paths = dict(nx.all_pairs_shortest_path(graph))
+            lengths = dict[str, Any](nx.all_pairs_shortest_path_length(graph))
+            paths = dict[str, Any](nx.all_pairs_shortest_path(graph))
 
         # Convert to serializable format
         lengths_dict = {
@@ -130,13 +122,13 @@ class GraphAlgorithms:
             }
 
         if graph.is_directed():
-            components = list(nx.weakly_connected_components(graph))
-            strong_components = list(nx.strongly_connected_components(graph))
+            components = list[Any](nx.weakly_connected_components(graph))
+            strong_components = list[Any](nx.strongly_connected_components(graph))
 
             return {
-                "weakly_connected_components": [list(comp) for comp in components],
+                "weakly_connected_components": [list[Any](comp) for comp in components],
                 "strongly_connected_components": [
-                    list(comp) for comp in strong_components
+                    list[Any](comp) for comp in strong_components
                 ],
                 "num_weakly_connected": len(components),
                 "num_strongly_connected": len(strong_components),
@@ -152,10 +144,10 @@ class GraphAlgorithms:
                 ),
             }
         else:
-            components = list(nx.connected_components(graph))
+            components = list[Any](nx.connected_components(graph))
 
             return {
-                "connected_components": [list(comp) for comp in components],
+                "connected_components": [list[Any](comp) for comp in components],
                 "num_components": len(components),
                 "is_connected": (
                     nx.is_connected(graph) if graph.number_of_nodes() > 0 else False
@@ -166,9 +158,7 @@ class GraphAlgorithms:
             }
 
     @staticmethod
-    def centrality_measures(
-        graph: nx.Graph, measures: list[str] | None = None
-    ) -> dict[str, Any]:
+    def centrality_measures(graph: nx.Graph, measures: list[str] | None = None) -> dict[str, Any]:
         """Calculate various centrality measures."""
         if measures is None:
             measures = ["degree", "betweenness", "closeness", "eigenvector"]
@@ -226,9 +216,7 @@ class GraphAlgorithms:
         }
 
     @staticmethod
-    def minimum_spanning_tree(
-        graph: nx.Graph, weight: str = "weight", algorithm: str = "kruskal"
-    ) -> dict[str, Any]:
+    def minimum_spanning_tree(graph: nx.Graph, weight: str = "weight", algorithm: str = "kruskal") -> dict[str, Any]:
         """Find minimum spanning tree."""
         if graph.is_directed():
             msg = "Minimum spanning tree requires undirected graph"
@@ -245,19 +233,14 @@ class GraphAlgorithms:
         total_weight = sum(data.get(weight, 1) for _, _, data in mst.edges(data=True))
 
         return {
-            "edges": list(mst.edges()),
+            "edges": list[Any](mst.edges()),
             "total_weight": total_weight,
             "num_edges": mst.number_of_edges(),
             "algorithm": algorithm,
         }
 
     @staticmethod
-    def maximum_flow(
-        graph: nx.Graph,
-        source: str | int,
-        sink: str | int,
-        capacity: str = "capacity",
-    ) -> dict[str, Any]:
+    def maximum_flow(graph: nx.Graph, source: str | int, sink: str | int, capacity: str = "capacity") -> dict[str, Any]:
         """Calculate maximum flow."""
         if not graph.is_directed():
             msg = "Maximum flow requires directed graph"
@@ -267,27 +250,25 @@ class GraphAlgorithms:
 
         return {
             "flow_value": flow_value,
-            "flow_dict": dict(flow_dict),
+            "flow_dict": dict[str, Any](flow_dict),
             "source": source,
             "sink": sink,
         }
 
     @staticmethod
-    def graph_coloring(
-        graph: nx.Graph, strategy: str = "largest_first"
-    ) -> dict[str, Any]:
+    def graph_coloring(graph: nx.Graph, strategy: str = "largest_first") -> dict[str, Any]:
         """Color graph vertices."""
         coloring = nx.greedy_color(graph, strategy=strategy)
         num_colors = max(coloring.values()) + 1 if coloring else 0
 
-        color_classes = defaultdict(list)
+        color_classes = defaultdict(list[Any])
         for node, color in coloring.items():
             color_classes[color].append(node)
 
         return {
             "coloring": coloring,
             "num_colors": num_colors,
-            "color_classes": dict(color_classes),
+            "color_classes": dict[str, Any](color_classes),
             "chromatic_number_upper_bound": num_colors,
         }
 
@@ -303,15 +284,15 @@ class GraphAlgorithms:
         if method == "louvain":
             communities = nx_comm.louvain_communities(graph)
         elif method == "label_propagation":
-            communities = list(nx_comm.label_propagation_communities(graph))
+            communities = list[Any](nx_comm.label_propagation_communities(graph))
         elif method == "greedy_modularity":
-            communities = list(nx_comm.greedy_modularity_communities(graph))
+            communities = list[Any](nx_comm.greedy_modularity_communities(graph))
         else:
             msg = f"Unknown method: {method}"
             raise ValueError(msg)
 
-        # Convert communities to list format
-        communities_list = [list(comm) for comm in communities]
+        # Convert communities to list[Any] format
+        communities_list = [list[Any](comm) for comm in communities]
 
         # Calculate modularity
         mod_score = modularity(graph, communities)
@@ -335,7 +316,7 @@ class GraphAlgorithms:
 
             if has_cycle:
                 try:
-                    cycles = list(nx.simple_cycles(graph))
+                    cycles = list[Any](nx.simple_cycles(graph))
                     result["cycles"] = cycles[:10]  # Limit to first 10 cycles
                     result["num_cycles_found"] = len(cycles)
                 except (RecursionError, MemoryError) as e:
@@ -365,7 +346,7 @@ class GraphAlgorithms:
         else:
             matching = nx.maximal_matching(graph)
 
-        matching_list = list(matching)
+        matching_list = list[Any](matching)
 
         return {
             "matching": matching_list,
@@ -385,26 +366,26 @@ class GraphAlgorithms:
         }
 
         if graph.number_of_nodes() > 0:
-            degrees = dict(graph.degree())
+            degrees = dict[str, Any](graph.degree())
             stats["degree_stats"] = {
-                "mean": np.mean(list(degrees.values())),
-                "std": np.std(list(degrees.values())),
+                "mean": np.mean(list[Any](degrees.values())),
+                "std": np.std(list[Any](degrees.values())),
                 "min": min(degrees.values()),
                 "max": max(degrees.values()),
             }
 
             if graph.is_directed():
-                in_degrees = dict(graph.in_degree())
-                out_degrees = dict(graph.out_degree())
+                in_degrees = dict[str, Any](graph.in_degree())
+                out_degrees = dict[str, Any](graph.out_degree())
                 stats["in_degree_stats"] = {
-                    "mean": np.mean(list(in_degrees.values())),
-                    "std": np.std(list(in_degrees.values())),
+                    "mean": np.mean(list[Any](in_degrees.values())),
+                    "std": np.std(list[Any](in_degrees.values())),
                     "min": min(in_degrees.values()),
                     "max": max(in_degrees.values()),
                 }
                 stats["out_degree_stats"] = {
-                    "mean": np.mean(list(out_degrees.values())),
-                    "std": np.std(list(out_degrees.values())),
+                    "mean": np.mean(list[Any](out_degrees.values())),
+                    "std": np.std(list[Any](out_degrees.values())),
                     "min": min(out_degrees.values()),
                     "max": max(out_degrees.values()),
                 }

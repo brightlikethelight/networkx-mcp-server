@@ -29,7 +29,7 @@ from .base import (
 class RedisTransaction(Transaction):
     """Redis transaction implementation."""
 
-    def __init__(self, pipeline):
+    def __init__(self, pipeline: Any) -> None:
         self.pipeline = pipeline
         self._committed = False
         self._rolled_back = False
@@ -66,13 +66,7 @@ class RedisTransaction(Transaction):
 class RedisBackend(StorageBackend):
     """Production Redis backend with compression and metadata."""
 
-    def __init__(
-        self,
-        redis_url: str = "redis://localhost:6379",
-        max_graph_size_mb: int = 100,
-        compression_level: int = 6,
-        key_prefix: str = "networkx_mcp",
-    ):
+    def __init__(self, redis_url: str = "redis://localhost:6379", max_graph_size_mb: int = 100, compression_level: int = 6, key_prefix: str = "networkx_mcp"):
         self.redis_url = redis_url
         self.max_size_bytes = max_graph_size_mb * 1024 * 1024
         self.compression_level = compression_level
@@ -106,7 +100,7 @@ class RedisBackend(StorageBackend):
             await self.pool.disconnect()
 
     @asynccontextmanager
-    async def transaction(self):
+    async def transaction(self) -> None:
         """Create a Redis transaction."""
         async with self._client.pipeline(transaction=True) as pipe:
             try:
@@ -130,14 +124,7 @@ class RedisBackend(StorageBackend):
             safe_parts.append(part)
         return ":".join(safe_parts)
 
-    async def save_graph(
-        self,
-        user_id: str,
-        graph_id: str,
-        graph: nx.Graph,
-        metadata: dict[str, Any] | None = None,
-        tx: Transaction | None = None,
-    ) -> bool:
+    async def save_graph(self, user_id: str, graph_id: str, graph: nx.Graph, metadata: dict[str, Any] | None = None, tx: Transaction | None = None) -> bool:
         """Save graph with compression and metadata."""
         # Validate inputs
         user_id = SecurityValidator.validate_user_id(user_id)
@@ -198,10 +185,10 @@ class RedisBackend(StorageBackend):
                 exists = await self._client.exists(data_key)
 
                 # Save data and metadata
-                await pipe.set(data_key, compressed)
-                await pipe.set(meta_key, json.dumps(graph_metadata))
+                await pipe.set[Any](data_key, compressed)
+                await pipe.set[Any](meta_key, json.dumps(graph_metadata))
 
-                # Add to user's graph list
+                # Add to user's graph list[Any]
                 if not exists:
                     await pipe.sadd(user_graphs_key, graph_id)
                     await pipe.hincrby(user_stats_key, "graph_count", 1)
@@ -212,17 +199,15 @@ class RedisBackend(StorageBackend):
                 await pipe.execute()
         else:
             # Within existing transaction
-            await client.set(data_key, compressed)
-            await client.set(meta_key, json.dumps(graph_metadata))
+            await client.set[Any](data_key, compressed)
+            await client.set[Any](meta_key, json.dumps(graph_metadata))
             await client.sadd(user_graphs_key, graph_id)
             await client.hincrby(user_stats_key, "graph_count", 1)
             await client.hincrby(user_stats_key, "total_bytes", len(compressed))
 
         return True
 
-    async def load_graph(
-        self, user_id: str, graph_id: str, tx: Transaction | None = None
-    ) -> nx.Graph | None:
+    async def load_graph(self, user_id: str, graph_id: str, tx: Transaction | None = None) -> nx.Graph | None:
         """Load graph from storage."""
         # Validate inputs
         user_id = SecurityValidator.validate_user_id(user_id)
@@ -260,9 +245,7 @@ class RedisBackend(StorageBackend):
 
         return graph
 
-    async def delete_graph(
-        self, user_id: str, graph_id: str, tx: Transaction | None = None
-    ) -> bool:
+    async def delete_graph(self, user_id: str, graph_id: str, tx: Transaction | None = None) -> bool:
         """Delete graph from storage."""
         # Validate inputs
         user_id = SecurityValidator.validate_user_id(user_id)
@@ -303,13 +286,7 @@ class RedisBackend(StorageBackend):
             await client.hincrby(user_stats_key, "graph_count", -1)
             return True
 
-    async def list_graphs(
-        self,
-        user_id: str,
-        limit: int = 100,
-        offset: int = 0,
-        tx: Transaction | None = None,
-    ) -> list[dict[str, Any]]:
+    async def list_graphs(self, user_id: str, limit: int = 100, offset: int = 0, tx: Transaction | None = None) -> list[dict[str, Any]]:
         """List user's graphs with metadata."""
         # Validate inputs
         user_id = SecurityValidator.validate_user_id(user_id)
@@ -349,9 +326,7 @@ class RedisBackend(StorageBackend):
 
         return graphs
 
-    async def get_graph_metadata(
-        self, user_id: str, graph_id: str, tx: Transaction | None = None
-    ) -> dict[str, Any] | None:
+    async def get_graph_metadata(self, user_id: str, graph_id: str, tx: Transaction | None = None) -> dict[str, Any] | None:
         """Get graph metadata without loading the full graph."""
         # Validate inputs
         user_id = SecurityValidator.validate_user_id(user_id)
@@ -365,13 +340,7 @@ class RedisBackend(StorageBackend):
             return json.loads(metadata)
         return None
 
-    async def update_graph_metadata(
-        self,
-        user_id: str,
-        graph_id: str,
-        metadata: dict[str, Any],
-        tx: Transaction | None = None,
-    ) -> bool:
+    async def update_graph_metadata(self, user_id: str, graph_id: str, metadata: dict[str, Any], tx: Transaction | None = None) -> bool:
         """Update graph metadata."""
         # Validate inputs
         user_id = SecurityValidator.validate_user_id(user_id)
@@ -393,7 +362,7 @@ class RedisBackend(StorageBackend):
         meta_key = self._make_key("graph_meta", user_id, graph_id)
         client = tx.pipeline if tx else self._client
 
-        await client.set(meta_key, json.dumps(existing))
+        await client.set[Any](meta_key, json.dumps(existing))
         return True
 
     async def get_storage_stats(self, user_id: str) -> dict[str, Any]:

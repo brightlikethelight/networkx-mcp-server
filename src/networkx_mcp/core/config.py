@@ -152,7 +152,7 @@ class AppConfig:
     quality: QualityConfig = field(default_factory=QualityConfig)
 
     # Additional custom configuration
-    custom: dict[str, Any] = field(default_factory=dict)
+    custom: dict[str, Any] = field(default_factory=dict[str, Any])
 
 
 class ConfigLoader(ABC):
@@ -194,7 +194,7 @@ class FileConfigLoader(ConfigLoader):
 class EnvironmentConfigLoader(ConfigLoader):
     """Load configuration from environment variables."""
 
-    def __init__(self, prefix: str = "MCP_"):
+    def __init__(self, prefix: str = "MCP_") -> None:
         self.prefix = prefix
 
     def supports(self, source: str) -> bool:
@@ -207,14 +207,14 @@ class EnvironmentConfigLoader(ConfigLoader):
 
         for key, value in os.environ.items():
             if key.startswith(self.prefix):
-                # Remove prefix and convert to nested dict
+                # Remove prefix and convert to nested dict[str, Any]
                 config_key = key[len(self.prefix) :].lower()
                 self._set_nested_value(config, config_key, self._convert_value(value))
 
         return config
 
     def _set_nested_value(self, config: dict[str, Any], key: str, value: Any) -> None:
-        """Set nested value in config dict."""
+        """Set nested value in config dict[str, Any]."""
         parts = key.split("_")
         current = config
 
@@ -257,7 +257,7 @@ class EnvironmentConfigLoader(ConfigLoader):
 class ConfigManager:
     """Manages application configuration with multiple sources."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._config: AppConfig | None = None
         self._loaders: list[ConfigLoader] = [
             FileConfigLoader(),
@@ -344,22 +344,20 @@ class ConfigManager:
                 field_info.type, "__dataclass_fields__"
             ):
                 field_data = config_dict[field_info.name]
-                if isinstance(field_data, dict):
+                if isinstance(field_data, dict[str, Any]):
                     config_dict[field_info.name] = field_info.type(**field_data)
 
         return AppConfig(**config_dict)
 
-    def _deep_merge(
-        self, base: dict[str, Any], update: dict[str, Any]
-    ) -> dict[str, Any]:
+    def _deep_merge(self, base: dict[str, Any], update: dict[str, Any]) -> dict[str, Any]:
         """Deep merge two dictionaries."""
         result = base.copy()
 
         for key, value in update.items():
             if (
                 key in result
-                and isinstance(result[key], dict)
-                and isinstance(value, dict)
+                and isinstance(result[key], dict[str, Any])
+                and isinstance(value, dict[str, Any])
             ):
                 result[key] = self._deep_merge(result[key], value)
             else:
@@ -414,11 +412,7 @@ def get_config() -> AppConfig:
     return get_config_manager().get_config()
 
 
-def load_config(
-    config_file: str | None = None,
-    env_prefix: str = "MCP_",
-    environment: Environment | None = None,
-) -> AppConfig:
+def load_config(config_file: str | None = None, env_prefix: str = "MCP_", environment: Environment | None = None) -> AppConfig:
     """Load application configuration."""
     manager = get_config_manager()
 
@@ -445,12 +439,12 @@ def load_config(
 
 
 # Configuration decorators
-def config_value(key: str, default: Any = None):
+def config_value(key: str, default: Any = None) -> Any:
     """Decorator to inject configuration values."""
 
-    def decorator(func):
+    def decorator(func: Any) -> Any:
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args, **kwargs) -> Any:
             config = get_config()
             value = _get_nested_value(config, key, default)
             return func(value, *args, **kwargs)

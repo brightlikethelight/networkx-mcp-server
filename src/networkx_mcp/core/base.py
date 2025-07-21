@@ -62,7 +62,7 @@ class ComponentMetrics:
 class Component(ABC):
     """Base class for all server components."""
 
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         self.name = name
         self.status = ComponentStatus.UNINITIALIZED
         self.metrics = ComponentMetrics()
@@ -152,7 +152,7 @@ class Repository(ABC, Generic[T]):
 class Service(Component):
     """Base class for business logic services."""
 
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         super().__init__(name)
         self.dependencies: dict[str, Component] = {}
 
@@ -176,7 +176,7 @@ class Service(Component):
         logger.info(f"Service {self.name} initialized successfully")
 
     @asynccontextmanager
-    async def track_request(self):
+    async def track_request(self) -> None:
         """Context manager to track request metrics."""
         start_time = asyncio.get_event_loop().time()
         try:
@@ -195,7 +195,7 @@ class Service(Component):
 class EventBus(Component):
     """Simple event bus for inter-component communication."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("EventBus")
         self._subscribers: dict[str, list[asyncio.Queue]] = {}
 
@@ -238,8 +238,8 @@ class ValidationResult:
     """Result of a validation operation."""
 
     valid: bool
-    errors: list[str] = field(default_factory=list)
-    warnings: list[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list[Any])
+    warnings: list[str] = field(default_factory=list[Any])
 
     def add_error(self, message: str) -> None:
         """Add an error message."""
@@ -282,7 +282,7 @@ class Cache(ABC, Generic[T]):
 class Registry(Generic[T]):
     """Generic registry for managing named components."""
 
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         self.name = name
         self._items: dict[str, T] = {}
         self._lock = asyncio.Lock()
@@ -308,7 +308,7 @@ class Registry(Generic[T]):
     async def list(self) -> list[str]:
         """List all registered item names."""
         async with self._lock:
-            return list(self._items.keys())
+            return list[Any](self._items.keys())
 
     async def clear(self) -> None:
         """Clear all registered items."""
@@ -319,7 +319,7 @@ class Registry(Generic[T]):
 class Pipeline(Generic[T]):
     """Generic pipeline for processing data through stages."""
 
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         self.name = name
         self._stages: list[Any] = []
 

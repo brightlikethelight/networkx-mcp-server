@@ -58,12 +58,7 @@ def resolve_doi(doi: str) -> Optional[Dict[str, Any]]:
         return None
 
 
-def build_citation_network(
-    graph_name: str,
-    seed_dois: List[str],
-    max_depth: int = 2,
-    graphs: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+def build_citation_network(graph_name: str, seed_dois: List[str], max_depth: int = 2, graphs: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """Build citation network from seed DOIs using CrossRef API."""
     if graphs is None:
         graphs = {}
@@ -73,7 +68,7 @@ def build_citation_network(
 
     # Create directed graph for citations
     citation_graph: nx.DiGraph[Any] = nx.DiGraph()
-    processed = set()
+    processed = set[Any]()
     to_process = [(doi, 0) for doi in seed_dois]
 
     nodes_added = 0
@@ -118,9 +113,7 @@ def build_citation_network(
     }
 
 
-def export_bibtex(
-    graph_name: str, graphs: Optional[Dict[str, Any]] = None
-) -> Dict[str, Any]:
+def export_bibtex(graph_name: str, graphs: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """Export citation network as BibTeX format."""
     if graphs is None:
         graphs = {}
@@ -162,12 +155,7 @@ def export_bibtex(
     }
 
 
-def recommend_papers(
-    graph_name: str,
-    seed_doi: str,
-    max_recommendations: int = 10,
-    graphs: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+def recommend_papers(graph_name: str, seed_doi: str, max_recommendations: int = 10, graphs: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """Recommend papers based on citation network analysis."""
     if graphs is None:
         graphs = {}
@@ -193,10 +181,10 @@ def recommend_papers(
         }
 
     # Find papers cited by seed paper
-    cited_papers = list(graph.successors(seed_doi))
+    cited_papers = list[Any](graph.successors(seed_doi))
 
     # Find papers that cite the seed paper
-    citing_papers = list(graph.predecessors(seed_doi))
+    citing_papers = list[Any](graph.predecessors(seed_doi))
 
     # Calculate recommendation scores based on citation patterns
     recommendations = []
@@ -204,7 +192,7 @@ def recommend_papers(
     # Score papers that are co-cited with seed paper
     for cited in cited_papers:
         # Find other papers that also cite this paper
-        co_citing = list(graph.predecessors(cited))
+        co_citing = list[Any](graph.predecessors(cited))
 
         for paper in co_citing:
             if paper != seed_doi and paper not in cited_papers:
@@ -214,13 +202,13 @@ def recommend_papers(
                 paper_data = graph.nodes.get(paper, {})
                 citation_count = (
                     paper_data.get("citations", 0)
-                    if isinstance(paper_data, dict)
+                    if isinstance(paper_data, dict[str, Any])
                     else 0
                 )
                 score += min(citation_count / 100, 2.0)  # Max boost of 2.0
 
                 # Boost score based on recency
-                year = paper_data.get("year") if isinstance(paper_data, dict) else None
+                year = paper_data.get("year") if isinstance(paper_data, dict[str, Any]) else None
                 if year:
                     current_year = datetime.now().year
                     recency_score = max(0, (year - (current_year - 10)) / 10)
@@ -231,10 +219,10 @@ def recommend_papers(
                         "paper": paper,  # Use 'paper' for compatibility
                         "doi": paper,
                         "title": paper_data.get("title", paper)
-                        if isinstance(paper_data, dict)
+                        if isinstance(paper_data, dict[str, Any])
                         else paper,
                         "authors": paper_data.get("authors", [])
-                        if isinstance(paper_data, dict)
+                        if isinstance(paper_data, dict[str, Any])
                         else [],
                         "year": year,
                         "citations": citation_count,

@@ -43,7 +43,7 @@ class MCPError(Exception):
     error handling and JSON-RPC 2.0 compliance.
     """
 
-    def __init__(self, code: int, message: str, data: Optional[Any] = None):
+    def __init__(self, code: int, message: str, data: Optional[Any] = None) -> None:
         """Initialize MCP error.
 
         Args:
@@ -67,7 +67,7 @@ class MCPError(Exception):
 class GraphNotFoundError(MCPError):
     """Raised when attempting to access a non-existent graph."""
 
-    def __init__(self, graph_id: str):
+    def __init__(self, graph_id: str) -> None:
         super().__init__(
             ErrorCodes.GRAPH_NOT_FOUND,
             f"Graph '{graph_id}' not found",
@@ -79,7 +79,7 @@ class GraphNotFoundError(MCPError):
 class NodeNotFoundError(MCPError):
     """Raised when attempting to access a non-existent node."""
 
-    def __init__(self, graph_id: str, node_id: str):
+    def __init__(self, graph_id: str, node_id: str) -> None:
         super().__init__(
             ErrorCodes.NODE_NOT_FOUND,
             f"Node '{node_id}' not found in graph '{graph_id}'",
@@ -92,7 +92,7 @@ class NodeNotFoundError(MCPError):
 class EdgeNotFoundError(MCPError):
     """Raised when attempting to access a non-existent edge."""
 
-    def __init__(self, graph_id: str, source: str, target: str):
+    def __init__(self, graph_id: str, source: str, target: str) -> None:
         super().__init__(
             ErrorCodes.EDGE_NOT_FOUND,
             f"Edge '{source}' -> '{target}' not found in graph '{graph_id}'",
@@ -106,7 +106,7 @@ class EdgeNotFoundError(MCPError):
 class GraphAlreadyExistsError(MCPError):
     """Raised when attempting to create a graph that already exists."""
 
-    def __init__(self, graph_id: str):
+    def __init__(self, graph_id: str) -> None:
         super().__init__(
             ErrorCodes.GRAPH_ALREADY_EXISTS,
             f"Graph '{graph_id}' already exists",
@@ -118,7 +118,7 @@ class GraphAlreadyExistsError(MCPError):
 class InvalidGraphIdError(MCPError):
     """Raised when graph ID is invalid or malformed."""
 
-    def __init__(self, graph_id: str, reason: str = "Invalid format"):
+    def __init__(self, graph_id: str, reason: str = "Invalid format") -> None:
         # Don't include the full malicious input in the error message for security
         safe_message = f"Invalid graph ID: {reason}"
         super().__init__(
@@ -132,7 +132,7 @@ class InvalidGraphIdError(MCPError):
 class InvalidNodeIdError(MCPError):
     """Raised when node ID is invalid or malformed."""
 
-    def __init__(self, node_id: str, reason: str = "Invalid format"):
+    def __init__(self, node_id: str, reason: str = "Invalid format") -> None:
         # Don't include the full malicious input in the error message for security
         safe_message = f"Invalid node ID: {reason}"
         super().__init__(
@@ -146,7 +146,7 @@ class InvalidNodeIdError(MCPError):
 class InvalidEdgeError(MCPError):
     """Raised when edge specification is invalid."""
 
-    def __init__(self, edge_data: Any, reason: str = "Invalid edge format"):
+    def __init__(self, edge_data: Any, reason: str = "Invalid edge format") -> None:
         super().__init__(
             ErrorCodes.INVALID_EDGE,
             f"Invalid edge: {reason}",
@@ -158,7 +158,7 @@ class InvalidEdgeError(MCPError):
 class GraphOperationError(MCPError):
     """Raised when a graph operation fails."""
 
-    def __init__(self, operation: str, graph_id: str, reason: str):
+    def __init__(self, operation: str, graph_id: str, reason: str) -> None:
         super().__init__(
             ErrorCodes.GRAPH_OPERATION_FAILED,
             f"Graph operation '{operation}' failed on graph '{graph_id}': {reason}",
@@ -171,7 +171,7 @@ class GraphOperationError(MCPError):
 class AlgorithmError(MCPError):
     """Raised when graph algorithm execution fails."""
 
-    def __init__(self, algorithm: str, graph_id: str, reason: str):
+    def __init__(self, algorithm: str, graph_id: str, reason: str) -> None:
         super().__init__(
             ErrorCodes.ALGORITHM_ERROR,
             f"Algorithm '{algorithm}' failed on graph '{graph_id}': {reason}",
@@ -184,7 +184,7 @@ class AlgorithmError(MCPError):
 class ValidationError(MCPError):
     """Raised when input validation fails."""
 
-    def __init__(self, parameter: str, value: Any, reason: str):
+    def __init__(self, parameter: str, value: Any, reason: str) -> None:
         super().__init__(
             ErrorCodes.VALIDATION_ERROR,
             f"Validation failed for parameter '{parameter}': {reason}",
@@ -197,7 +197,7 @@ class ValidationError(MCPError):
 class ResourceLimitExceededError(MCPError):
     """Raised when resource limits are exceeded."""
 
-    def __init__(self, resource: str, limit: Any, current: Any):
+    def __init__(self, resource: str, limit: Any, current: Any) -> None:
         super().__init__(
             ErrorCodes.RESOURCE_LIMIT_EXCEEDED,
             f"Resource limit exceeded for {resource}: {current} > {limit}",
@@ -211,7 +211,7 @@ class ResourceLimitExceededError(MCPError):
 class ServerNotInitializedError(MCPError):
     """Raised when MCP server is not properly initialized."""
 
-    def __init__(self, operation: str):
+    def __init__(self, operation: str) -> None:
         super().__init__(
             ErrorCodes.SERVER_NOT_INITIALIZED,
             f"Server not initialized - cannot perform '{operation}'",
@@ -351,8 +351,8 @@ def validate_edge(edge: Any) -> tuple[str, str]:
     Raises:
         InvalidEdgeError: If edge specification is invalid
     """
-    if not isinstance(edge, (list, tuple)):
-        raise InvalidEdgeError(edge, "Edge must be a list or tuple")
+    if not isinstance(edge, (list[Any], tuple[Any, ...])):
+        raise InvalidEdgeError(edge, "Edge must be a list[Any] or tuple[Any, ...]")
 
     if len(edge) != 2:
         raise InvalidEdgeError(
@@ -387,22 +387,22 @@ def validate_required_params(params: Dict[str, Any], required: list[str]) -> Non
 
 
 def validate_centrality_measures(measures: Any) -> list[str]:
-    """Validate centrality measures list.
+    """Validate centrality measures list[Any].
 
     Args:
         measures: List of centrality measures
 
     Returns:
-        Validated list of centrality measures
+        Validated list[Any] of centrality measures
 
     Raises:
         ValidationError: If measures are invalid
     """
-    if not isinstance(measures, list):
-        raise ValidationError("measures", measures, "Measures must be a list")
+    if not isinstance(measures, list[Any]):
+        raise ValidationError("measures", measures, "Measures must be a list[Any]")
 
     if not measures:
-        raise ValidationError("measures", measures, "Measures list cannot be empty")
+        raise ValidationError("measures", measures, "Measures list[Any] cannot be empty")
 
     valid_measures = {"degree", "betweenness", "closeness", "eigenvector"}
 

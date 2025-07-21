@@ -29,15 +29,7 @@ class Scope(Enum):
 class DependencyDescriptor:
     """Descriptor for a dependency."""
 
-    def __init__(
-        self,
-        interface: type[T],
-        implementation: type[T] | Callable[..., T] | None = None,
-        factory: Callable[..., T] | None = None,
-        scope: Scope = Scope.SINGLETON,
-        name: str | None = None,
-        tags: list[str] | None = None,
-    ):
+    def __init__(self, interface: type[T], implementation: type[T] | Callable[..., T] | None = None, factory: Callable[..., T] | None = None, scope: Scope = Scope.SINGLETON, name: str | None = None, tags: list[str] | None = None):
         self.interface = interface
         self.implementation = implementation or interface
         self.factory = factory
@@ -73,7 +65,7 @@ class DependencyDescriptor:
 class Container:
     """Dependency injection container."""
 
-    def __init__(self, name: str = "default"):
+    def __init__(self, name: str = "default") -> None:
         self.name = name
         self._dependencies: dict[type, DependencyDescriptor] = {}
         self._named_dependencies: dict[str, DependencyDescriptor] = {}
@@ -81,15 +73,7 @@ class Container:
         self._lock = asyncio.Lock()
         logger.info(f"Container {name} created")
 
-    def register(
-        self,
-        interface: type[T],
-        implementation: type[T] | Callable[..., T] | None = None,
-        factory: Callable[..., T] | None = None,
-        scope: Scope = Scope.SINGLETON,
-        name: str | None = None,
-        tags: list[str] | None = None,
-    ) -> None:
+    def register(self, interface: type[T], implementation: type[T] | Callable[..., T] | None = None, factory: Callable[..., T] | None = None, scope: Scope = Scope.SINGLETON, name: str | None = None, tags: list[str] | None = None) -> None:
         """Register a dependency."""
         descriptor = DependencyDescriptor(
             interface=interface,
@@ -106,24 +90,15 @@ class Container:
 
         logger.debug(f"Registered {interface.__name__} with scope {scope.value}")
 
-    def register_singleton(
-        self, interface: type[T], implementation: type[T] | None = None
-    ) -> None:
+    def register_singleton(self, interface: type[T], implementation: type[T] | None = None) -> None:
         """Register a singleton dependency."""
         self.register(interface, implementation, scope=Scope.SINGLETON)
 
-    def register_transient(
-        self, interface: type[T], implementation: type[T] | None = None
-    ) -> None:
+    def register_transient(self, interface: type[T], implementation: type[T] | None = None) -> None:
         """Register a transient dependency."""
         self.register(interface, implementation, scope=Scope.TRANSIENT)
 
-    def register_factory(
-        self,
-        interface: type[T],
-        factory: Callable[["Container"], T],
-        scope: Scope = Scope.SINGLETON,
-    ) -> None:
+    def register_factory(self, interface: type[T], factory: Callable[["Container"], T], scope: Scope = Scope.SINGLETON) -> None:
         """Register a factory function."""
         self.register(interface, factory=factory, scope=scope)
 
@@ -169,7 +144,7 @@ class Container:
         params = {}
 
         # Skip 'self' parameter
-        for param_name, param in list(sig.parameters.items())[1:]:
+        for param_name, param in list[Any](sig.parameters.items())[1:]:
             if param.annotation != param.empty:
                 # Try to resolve the dependency
                 try:
@@ -241,7 +216,7 @@ def injectable(cls: type[T]) -> type[T]:
     return cls
 
 
-def factory(scope: Scope = Scope.SINGLETON):
+def factory(scope: Scope = Scope.SINGLETON) -> Any:
     """Factory method decorator."""
 
     def decorator(func: Callable[..., T]) -> Callable[..., T]:
@@ -257,13 +232,13 @@ class ServiceLocator:
     _instance: Optional["ServiceLocator"] = None
     _lock = asyncio.Lock()
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.containers: dict[str, Container] = {}
         self.default_container = Container("default")
         self.containers["default"] = self.default_container
 
     @classmethod
-    async def get_instance(cls) -> "ServiceLocator":
+    async def get_instance(cls: Any) -> "ServiceLocator":
         """Get the singleton instance."""
         if cls._instance is None:
             async with cls._lock:
@@ -291,13 +266,13 @@ class ServiceLocator:
 class RequestScope:
     """Context manager for request-scoped dependencies."""
 
-    def __init__(self, container: Container):
+    def __init__(self, container: Container) -> None:
         self.container = container
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> Any:
         return self
 
-    async def __aexit__(self, exc_type, _exc_val, _exc_tb):
+    async def __aexit__(self, exc_type: Any, _exc_val: Any, _exc_tb: Any) -> None:
         self.container.clear_request_scope()
 
 
@@ -305,7 +280,7 @@ class RequestScope:
 class Bootstrap:
     """Helper class for bootstrapping the application."""
 
-    def __init__(self, container: Container):
+    def __init__(self, container: Container) -> None:
         self.container = container
         self._modules: list[Callable[[Container], None]] = []
 

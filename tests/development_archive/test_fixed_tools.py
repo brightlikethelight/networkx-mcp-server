@@ -153,7 +153,7 @@ E,F"""
                 exported_data = json.loads(result)
                 print(f"   Exported {len(exported_data.get('nodes', []))} nodes")
                 print(f"   Exported {len(exported_data.get('links', []))} links")
-            except:
+            except Exception:
                 print(
                     f"   Result format: {list(result.keys()) if isinstance(result, dict) else type(result)}"
                 )

@@ -91,7 +91,7 @@ class AuditEvent:
 
     # What happened
     description: str = ""
-    details: dict[str, Any] = field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict[str, Any])
 
     # Result
     success: bool = True
@@ -102,7 +102,7 @@ class AuditEvent:
     correlation_id: str | None = None
 
     # Compliance
-    regulation_tags: list[str] = field(default_factory=list)
+    regulation_tags: list[str] = field(default_factory=list[Any])
     retention_policy: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
@@ -121,9 +121,7 @@ class AuditStorage:
         """Store an audit event."""
         raise NotImplementedError
 
-    async def query_events(
-        self, filters: dict[str, Any], limit: int = 100
-    ) -> list[AuditEvent]:
+    async def query_events(self, filters: dict[str, Any], limit: int = 100) -> list[AuditEvent]:
         """Query audit events with filters."""
         raise NotImplementedError
 
@@ -135,7 +133,7 @@ class AuditStorage:
 class FileAuditStorage(AuditStorage):
     """File-based audit storage."""
 
-    def __init__(self, log_file: str | Path):
+    def __init__(self, log_file: str | Path) -> None:
         self.log_file = Path(log_file)
         self.log_file.parent.mkdir(parents=True, exist_ok=True)
 
@@ -150,9 +148,7 @@ class FileAuditStorage(AuditStorage):
             logger.error(f"Failed to store audit event: {e}")
             return False
 
-    async def query_events(
-        self, filters: dict[str, Any], limit: int = 100
-    ) -> list[AuditEvent]:
+    async def query_events(self, filters: dict[str, Any], limit: int = 100) -> list[AuditEvent]:
         """Query events from log file."""
         events = []
         try:
@@ -216,7 +212,7 @@ class FileAuditStorage(AuditStorage):
 class MemoryAuditStorage(AuditStorage):
     """In-memory audit storage for testing/development."""
 
-    def __init__(self, max_events: int = 10000):
+    def __init__(self, max_events: int = 10000) -> None:
         self.events: list[AuditEvent] = []
         self.max_events = max_events
 
@@ -230,9 +226,7 @@ class MemoryAuditStorage(AuditStorage):
 
         return True
 
-    async def query_events(
-        self, filters: dict[str, Any], limit: int = 100
-    ) -> list[AuditEvent]:
+    async def query_events(self, filters: dict[str, Any], limit: int = 100) -> list[AuditEvent]:
         """Query events from memory."""
         matching_events = []
 
@@ -253,9 +247,7 @@ class MemoryAuditStorage(AuditStorage):
                 count += 1
         return count
 
-    def _event_matches_filters(
-        self, event: AuditEvent, filters: dict[str, Any]
-    ) -> bool:
+    def _event_matches_filters(self, event: AuditEvent, filters: dict[str, Any]) -> bool:
         """Check if event matches filters."""
         for key, value in filters.items():
             event_value = getattr(event, key, None)
@@ -267,9 +259,7 @@ class MemoryAuditStorage(AuditStorage):
 class AuditLogger:
     """Main audit logging system."""
 
-    def __init__(
-        self, storage: AuditStorage, buffer_size: int = 100, flush_interval: float = 5.0
-    ):
+    def __init__(self, storage: AuditStorage, buffer_size: int = 100, flush_interval: float = 5.0):
         self.storage = storage
         self.buffer_size = buffer_size
         self.flush_interval = flush_interval
@@ -281,13 +271,13 @@ class AuditLogger:
         self._flush_task = None
         self._running = False
 
-    async def start(self):
+    async def start(self) -> None:
         """Start the audit logger."""
         if not self._running:
             self._running = True
             self._flush_task = asyncio.create_task(self._periodic_flush())
 
-    async def stop(self):
+    async def stop(self) -> None:
         """Stop the audit logger and flush remaining events."""
         self._running = False
         if self._flush_task:
@@ -304,12 +294,7 @@ class AuditLogger:
         """Generate unique event ID."""
         return hashlib.sha256(f"{time.time()}{id(self)}".encode()).hexdigest()[:16]
 
-    async def log_event(
-        self,
-        event_type: AuditEventType,
-        severity: AuditSeverity = AuditSeverity.MEDIUM,
-        **kwargs,
-    ) -> str:
+    async def log_event(self, event_type: AuditEventType, severity: AuditSeverity = AuditSeverity.MEDIUM, **kwargs) -> str:
         """Log an audit event."""
         event_id = self.generate_event_id()
 
@@ -331,13 +316,7 @@ class AuditLogger:
         logger.debug(f"Audit event logged: {event_type.value} ({event_id})")
         return event_id
 
-    async def log_authentication_event(
-        self,
-        success: bool,
-        user_id: str,
-        source_ip: str | None = None,
-        details: dict[str, Any] | None = None,
-    ):
+    async def log_authentication_event(self, success: bool, user_id: str, source_ip: str | None = None, details: dict[str, Any] | None = None):
         """Log authentication event."""
         event_type = (
             AuditEventType.AUTH_LOGIN_SUCCESS
@@ -356,14 +335,7 @@ class AuditLogger:
             regulation_tags=["authentication", "access_control"],
         )
 
-    async def log_authorization_event(
-        self,
-        granted: bool,
-        user_id: str,
-        operation: str,
-        resource: str,
-        details: dict[str, Any] | None = None,
-    ):
+    async def log_authorization_event(self, granted: bool, user_id: str, operation: str, resource: str, details: dict[str, Any] | None = None):
         """Log authorization event."""
         event_type = (
             AuditEventType.AUTHZ_PERMISSION_GRANTED
@@ -383,14 +355,7 @@ class AuditLogger:
             regulation_tags=["authorization", "access_control"],
         )
 
-    async def log_data_access_event(
-        self,
-        operation: str,
-        resource: str,
-        user_id: str,
-        success: bool = True,
-        details: dict[str, Any] | None = None,
-    ):
+    async def log_data_access_event(self, operation: str, resource: str, user_id: str, success: bool = True, details: dict[str, Any] | None = None):
         """Log data access event."""
         event_type_map = {
             "read": AuditEventType.DATA_ACCESS_READ,
@@ -416,13 +381,7 @@ class AuditLogger:
             regulation_tags=["data_access", "privacy"],
         )
 
-    async def log_security_event(
-        self,
-        threat_type: str,
-        severity: AuditSeverity,
-        source_ip: str | None = None,
-        details: dict[str, Any] | None = None,
-    ):
+    async def log_security_event(self, threat_type: str, severity: AuditSeverity, source_ip: str | None = None, details: dict[str, Any] | None = None):
         """Log security threat event."""
         await self.log_event(
             event_type=AuditEventType.SECURITY_THREAT_DETECTED,
@@ -433,7 +392,7 @@ class AuditLogger:
             regulation_tags=["security", "incident_response"],
         )
 
-    async def _flush_events(self):
+    async def _flush_events(self) -> None:
         """Flush buffered events to storage."""
         if not self.event_buffer:
             return
@@ -458,7 +417,7 @@ class AuditLogger:
 
         logger.debug(f"Flushed {success_count}/{len(events_to_flush)} audit events")
 
-    async def _periodic_flush(self):
+    async def _periodic_flush(self) -> None:
         """Periodically flush events."""
         while self._running:
             try:
@@ -470,9 +429,7 @@ class AuditLogger:
             except Exception as e:
                 logger.error(f"Error in periodic flush: {e}")
 
-    async def query_events(
-        self, filters: dict[str, Any] | None = None, limit: int = 100
-    ) -> list[AuditEvent]:
+    async def query_events(self, filters: dict[str, Any] | None = None, limit: int = 100) -> list[AuditEvent]:
         """Query audit events."""
         return await self.storage.query_events(filters or {}, limit)
 
@@ -490,12 +447,10 @@ class AuditLogger:
 class ComplianceReporter:
     """Generate compliance reports from audit logs."""
 
-    def __init__(self, audit_logger: AuditLogger):
+    def __init__(self, audit_logger: AuditLogger) -> None:
         self.audit_logger = audit_logger
 
-    async def generate_access_report(
-        self, start_time: float, end_time: float
-    ) -> dict[str, Any]:
+    async def generate_access_report(self, start_time: float, end_time: float) -> dict[str, Any]:
         """Generate access control compliance report."""
         filters = {"timestamp": {"gte": start_time, "lte": end_time}}
 
@@ -535,7 +490,7 @@ class ComplianceReporter:
                         if e.event_type == AuditEventType.AUTH_LOGIN_FAILURE
                     ]
                 ),
-                "unique_users": len(set(e.user_id for e in auth_events if e.user_id)),
+                "unique_users": len(set[Any](e.user_id for e in auth_events if e.user_id)),
             },
             "authorization": {
                 "permissions_granted": len([e for e in authz_events if e.success]),
@@ -566,9 +521,7 @@ class ComplianceReporter:
             },
         }
 
-    async def generate_security_report(
-        self, start_time: float, end_time: float
-    ) -> dict[str, Any]:
+    async def generate_security_report(self, start_time: float, end_time: float) -> dict[str, Any]:
         """Generate security incident compliance report."""
         filters = {"timestamp": {"gte": start_time, "lte": end_time}}
 
@@ -607,10 +560,10 @@ class ComplianceReporter:
 class SecurityEventLogger:
     """Specialized logger for security events."""
 
-    def __init__(self, audit_logger: AuditLogger):
+    def __init__(self, audit_logger: AuditLogger) -> None:
         self.audit_logger = audit_logger
 
-    async def log_failed_login(self, user_id: str, source_ip: str, reason: str):
+    async def log_failed_login(self, user_id: str, source_ip: str, reason: str) -> None:
         """Log failed login attempt."""
         await self.audit_logger.log_security_event(
             threat_type="failed_login",
@@ -619,15 +572,13 @@ class SecurityEventLogger:
             details={"user_id": user_id, "reason": reason, "action": "login_failed"},
         )
 
-    async def log_suspicious_activity(
-        self, activity_type: str, details: dict[str, Any]
-    ):
+    async def log_suspicious_activity(self, activity_type: str, details: dict[str, Any]):
         """Log suspicious activity."""
         await self.audit_logger.log_security_event(
             threat_type=activity_type, severity=AuditSeverity.HIGH, details=details
         )
 
-    async def log_access_violation(self, user_id: str, resource: str, action: str):
+    async def log_access_violation(self, user_id: str, resource: str, action: str) -> None:
         """Log access violation."""
         await self.audit_logger.log_security_event(
             threat_type="access_violation",

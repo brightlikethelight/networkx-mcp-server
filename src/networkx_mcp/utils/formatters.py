@@ -18,9 +18,7 @@ class GraphFormatter:
         return {"success": False, "error": error_type, "message": message}
 
     @staticmethod
-    def format_algorithm_result(
-        algorithm: str, result: Any, execution_time: float | None = None
-    ) -> dict[str, Any]:
+    def format_algorithm_result(algorithm: str, result: Any, execution_time: float | None = None) -> dict[str, Any]:
         """Format algorithm result."""
         response = {"algorithm": algorithm, "result": result}
         if execution_time is not None:
@@ -38,9 +36,7 @@ class GraphFormatter:
         }
 
     @staticmethod
-    def format_visualization_data(
-        graph: Any, layout: dict[str, Any], options: dict[str, Any] | None = None
-    ) -> dict[str, Any]:
+    def format_visualization_data(graph: Any, layout: dict[str, Any], options: dict[str, Any] | None = None) -> dict[str, Any]:
         """Format visualization data."""
         nodes = []
         for node in graph.nodes():
@@ -93,5 +89,5 @@ def format_json_output(data: Any, pretty: bool = True) -> str:
 
 
 def format_error_response(error: Exception, context: str = "") -> dict[str, str]:
-    """Format error as response dict."""
+    """Format error as response dict[str, Any]."""
     return {"error": str(error), "type": type(error).__name__, "context": context}

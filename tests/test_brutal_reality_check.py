@@ -119,7 +119,7 @@ class BrutalTester:
             result = get_graph_info("test_graph", graphs)
             assert result["nodes"] == 5
             assert result["edges"] == 3
-            assert result["directed"] == False
+            assert not result["directed"]
             self.log_success("get_graph_info")
         except Exception as e:
             self.log_error("get_graph_info", str(e))
@@ -207,7 +207,7 @@ class BrutalTester:
 
         # Test nonexistent graph
         try:
-            result = get_graph_info("nonexistent", graphs)
+            get_graph_info("nonexistent", graphs)
             self.log_error("nonexistent_graph", "Should have raised ValueError")
         except ValueError:
             self.log_success("nonexistent_graph", "Correctly raised ValueError")
@@ -217,7 +217,7 @@ class BrutalTester:
         # Test empty graph operations
         try:
             create_graph("empty", False, graphs)
-            result = shortest_path("empty", 1, 2, graphs)
+            shortest_path("empty", 1, 2, graphs)
             self.log_error("empty_graph_path", "Should have raised exception")
         except Exception:
             self.log_success("empty_graph_path", "Correctly handled empty graph")
@@ -233,7 +233,7 @@ class BrutalTester:
 
         # Test invalid CSV
         try:
-            result = import_csv(
+            import_csv(
                 "invalid_csv", "invalid,csv,data,too,many,columns", False, graphs
             )
             self.log_success("invalid_csv", "Handled gracefully")
@@ -449,7 +449,7 @@ class BrutalTester:
                 create_graph(graph_name, False, graphs)
                 add_nodes(graph_name, list(range(50)), graphs)
                 add_edges(graph_name, [[i, (i + 1) % 50] for i in range(50)], graphs)
-                result = degree_centrality(graph_name, graphs)
+                degree_centrality(graph_name, graphs)
                 return True
             except Exception as e:
                 self.log_error(f"concurrent_{graph_name}", str(e))

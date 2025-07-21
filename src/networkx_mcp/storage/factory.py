@@ -15,9 +15,7 @@ class StorageFactory:
     """Factory for creating storage backends based on configuration."""
 
     @staticmethod
-    async def create_backend(
-        backend_type: Optional[str] = None, **kwargs
-    ) -> StorageBackend:
+    async def create_backend(backend_type: Optional[str] = None, **kwargs) -> StorageBackend:
         """
         Create a storage backend based on configuration.
 
@@ -139,7 +137,7 @@ def get_storage_backend() -> StorageBackend:
 
         # Try to run initialization in current event loop
         try:
-            loop = asyncio.get_running_loop()
+            asyncio.get_running_loop()
             # If we're in an event loop, we can't await here
             # Just return the uninitialized backend
             logger.warning(

@@ -13,7 +13,7 @@ from typing import Any, Dict, List, Optional, Set
 class APIKeyManager:
     """Manage API keys for authentication."""
 
-    def __init__(self, storage_path: Optional[Path] = None):
+    def __init__(self, storage_path: Optional[Path] = None) -> None:
         """Initialize API key manager."""
         self.storage_path = (
             storage_path or Path.home() / ".networkx-mcp" / "api_keys.json"
@@ -28,7 +28,7 @@ class APIKeyManager:
             try:
                 with open(self.storage_path, "r") as f:
                     loaded_data = json.load(f)
-                    return loaded_data if isinstance(loaded_data, dict) else {}
+                    return loaded_data if isinstance(loaded_data, dict[str, Any]) else {}
             except Exception:
                 return {}
         return {}
@@ -50,7 +50,7 @@ class APIKeyManager:
         self.keys[key_hash] = {
             "name": name,
             "created": datetime.now().isoformat(),
-            "permissions": list(permissions or {"read", "write"}),
+            "permissions": list[Any](permissions or {"read", "write"}),
             "active": True,
             "last_used": None,
             "request_count": 0,
@@ -76,9 +76,7 @@ class APIKeyManager:
 
         return None
 
-    def check_rate_limit(
-        self, api_key: str, limit: int = 1000, window_minutes: int = 60
-    ) -> bool:
+    def check_rate_limit(self, api_key: str, limit: int = 1000, window_minutes: int = 60) -> bool:
         """Check if API key has exceeded rate limit."""
         key_hash = hashlib.sha256(api_key.encode()).hexdigest()
         now = datetime.now()
@@ -131,7 +129,7 @@ class APIKeyManager:
 class AuthMiddleware:
     """Authentication middleware for MCP server."""
 
-    def __init__(self, key_manager: APIKeyManager, required: bool = True):
+    def __init__(self, key_manager: APIKeyManager, required: bool = True) -> None:
         """Initialize auth middleware."""
         self.key_manager = key_manager
         self.required = required
@@ -186,7 +184,7 @@ def main() -> None:
     )
 
     # List keys command
-    subparsers.add_parser("list", help="List all API keys")
+    subparsers.add_parser("list[Any]", help="List all API keys")
 
     # Revoke key command
     revoke_parser = subparsers.add_parser("revoke", help="Revoke an API key")
@@ -197,12 +195,12 @@ def main() -> None:
     manager = APIKeyManager()
 
     if args.command == "generate":
-        key = manager.generate_key(args.name, set(args.permissions))
+        key = manager.generate_key(args.name, set[Any](args.permissions))
         print(f"Generated API key for '{args.name}':")
         print(f"\n{key}\n")
         print("⚠️  Save this key securely - it cannot be retrieved later!")
 
-    elif args.command == "list":
+    elif args.command == "list[Any]":
         keys = manager.list_keys()
         if not keys:
             print("No API keys found")

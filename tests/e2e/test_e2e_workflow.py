@@ -199,7 +199,7 @@ async def test_social_network_analysis():
             print(f"   ✅ Found {len(communities)} communities")
             for i, community in enumerate(communities):
                 print(f"      Community {i + 1}: {', '.join(community)}")
-    except:
+    except Exception:
         print("   ⚠️  Community detection not available")
 
     # 6. Find shortest paths

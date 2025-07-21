@@ -35,7 +35,7 @@ class AlgorithmSpec:
 class AlgorithmValidator(Component):
     """Validator for graph algorithms and their parameters."""
 
-    def __init__(self, config: dict[str, Any] | None = None):
+    def __init__(self, config: dict[str, Any] | None = None) -> None:
         super().__init__("AlgorithmValidator")
         self.config = config or {}
 
@@ -246,9 +246,7 @@ class AlgorithmValidator(Component):
             f"Algorithm validator initialized with {len(self._algorithm_specs)} algorithms"
         )
 
-    async def validate_algorithm_request(
-        self, request: dict[str, Any]
-    ) -> ValidationResult:
+    async def validate_algorithm_request(self, request: dict[str, Any]) -> ValidationResult:
         """Validate an algorithm execution request."""
         errors = []
         warnings = []
@@ -297,9 +295,7 @@ class AlgorithmValidator(Component):
             },
         )
 
-    async def validate_algorithm_compatibility(
-        self, algorithm: str, graph: nx.Graph
-    ) -> ValidationResult:
+    async def validate_algorithm_compatibility(self, algorithm: str, graph: nx.Graph) -> ValidationResult:
         """Validate algorithm compatibility with graph."""
         errors = []
         warnings = []
@@ -370,9 +366,7 @@ class AlgorithmValidator(Component):
             },
         )
 
-    def _validate_parameters(
-        self, spec: AlgorithmSpec, parameters: dict[str, Any]
-    ) -> tuple:
+    def _validate_parameters(self, spec: AlgorithmSpec, parameters: dict[str, Any]) -> tuple[Any, ...]:
         """Validate algorithm parameters."""
         errors = []
         warnings = []
@@ -393,9 +387,7 @@ class AlgorithmValidator(Component):
 
         return errors, warnings
 
-    def _validate_parameter_value(
-        self, param: str, value: Any, spec: AlgorithmSpec
-    ) -> list[str]:
+    def _validate_parameter_value(self, param: str, value: Any, spec: AlgorithmSpec) -> list[str]:
         """Validate a specific parameter value."""
         errors = []
 
@@ -452,14 +444,14 @@ class AlgorithmValidator(Component):
         # Nodes parameter (for clustering)
         elif param == "nodes":
             if value is not None:
-                if not isinstance(value, list):
-                    errors.append("Nodes parameter must be a list or None")
+                if not isinstance(value, list[Any]):
+                    errors.append("Nodes parameter must be a list[Any] or None")
                 elif len(value) > 10000:
                     errors.append("Too many nodes specified (max 10000)")
 
         return errors
 
-    def _validate_algorithm_specific(self, algorithm: str, graph: nx.Graph) -> tuple:
+    def _validate_algorithm_specific(self, algorithm: str, graph: nx.Graph) -> tuple[Any, ...]:
         """Algorithm-specific validations."""
         errors = []
         warnings = []
@@ -527,8 +519,8 @@ class AlgorithmValidator(Component):
         return self._algorithm_specs.copy()
 
     def get_supported_algorithms(self) -> list[str]:
-        """Get list of supported algorithms."""
-        return list(self._algorithm_specs.keys())
+        """Get list[Any] of supported algorithms."""
+        return list[Any](self._algorithm_specs.keys())
 
     def get_algorithm_info(self, algorithm: str) -> dict[str, Any] | None:
         """Get detailed information about an algorithm."""

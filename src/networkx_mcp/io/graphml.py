@@ -39,9 +39,7 @@ class GraphMLWriter(GraphWriter):
     def __init__(self) -> None:
         super().__init__("graphml", ".graphml")
 
-    async def write(
-        self, graph: nx.Graph, filepath: str | Path, **options: Any
-    ) -> bool:
+    async def write(self, graph: nx.Graph, filepath: str | Path, **options: Any) -> bool:
         """Write graph to GraphML file."""
         path = validate_file_path(filepath, must_exist=False)
 

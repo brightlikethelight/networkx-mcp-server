@@ -31,9 +31,7 @@ except (ImportError, Exception):
 logger = logging.getLogger(__name__)
 
 
-def _get_limit_value(
-    env_var: str, default: int, config_path: Optional[str] = None
-) -> int:
+def _get_limit_value(env_var: str, default: int, config_path: Optional[str] = None) -> int:
     """Get limit value from config or environment variable."""
     # First try config if available
     if _settings and config_path:
@@ -215,7 +213,6 @@ def check_graph_size(graph: nx.Graph) -> None:
 def check_operation_feasibility(graph: nx.Graph, operation: str) -> None:
     """Check if an operation is feasible given the graph size."""
     node_count = graph.number_of_nodes()
-    edge_count = graph.number_of_edges()
 
     # Define complexity limits for different operations
     complexity_limits = {
@@ -276,19 +273,19 @@ def check_rate_limit() -> None:
         _request_times.append(current_time)
 
 
-def timeout(seconds: Optional[int] = None):
+def timeout(seconds: Optional[int] = None) -> Any:
     """Decorator to add timeout to functions."""
     if seconds is None:
         seconds = LIMITS.operation_timeout_seconds
 
-    def decorator(func):
+    def decorator(func: Any) -> Any:
         @functools.wraps(func)
-        def sync_wrapper(*args, **kwargs):
+        def sync_wrapper(*args, **kwargs) -> Any:
             """Wrapper for synchronous functions."""
             result = [None]
             exception = [None]
 
-            def target():
+            def target() -> None:
                 try:
                     result[0] = func(*args, **kwargs)
                 except Exception as e:
@@ -309,7 +306,7 @@ def timeout(seconds: Optional[int] = None):
             return result[0]
 
         @functools.wraps(func)
-        async def async_wrapper(*args, **kwargs):
+        async def async_wrapper(*args, **kwargs) -> Any:
             """Wrapper for asynchronous functions."""
             try:
                 return await asyncio.wait_for(func(*args, **kwargs), timeout=seconds)
@@ -329,7 +326,7 @@ def with_resource_limits(func: Callable) -> Callable:
     """Decorator to enforce resource limits on a function."""
 
     @functools.wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args, **kwargs) -> Any:
         # Check rate limit
         try:
             check_rate_limit()
@@ -350,7 +347,7 @@ def with_resource_limits(func: Callable) -> Callable:
 
             # Execute with timeout
             @timeout()
-            def execute():
+            def execute() -> Any:
                 return func(*args, **kwargs)
 
             result = execute()
@@ -375,7 +372,7 @@ def with_resource_limits(func: Callable) -> Callable:
     return wrapper
 
 
-def cleanup_if_needed():
+def cleanup_if_needed() -> None:
     """Perform cleanup if memory usage is high."""
     usage_ratio = get_memory_usage_mb() / LIMITS.max_memory_mb
 
@@ -391,7 +388,7 @@ def cleanup_if_needed():
 
 
 # Resource monitoring thread
-def resource_monitor():
+def resource_monitor() -> None:
     """Background thread to monitor resources."""
     while True:
         try:

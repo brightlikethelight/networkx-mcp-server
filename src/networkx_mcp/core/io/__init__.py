@@ -13,12 +13,12 @@ except ImportError:
         """Placeholder GraphIOHandler for compatibility."""
 
         @staticmethod
-        def import_from_file(file_path, format_type):
+        def import_from_file(file_path: Any, format_type: Any) -> None:
             """Placeholder import method."""
             raise NotImplementedError("GraphIOHandler.import_from_file not implemented")
 
         @staticmethod
-        def export_to_file(graph, file_path, format_type):
+        def export_to_file(graph: Any, file_path: Any, format_type: Any) -> None:
             """Placeholder export method."""
             raise NotImplementedError("GraphIOHandler.export_to_file not implemented")
 

@@ -31,16 +31,16 @@ class GraphValidator:
             return False
 
         # Lists and dicts are not valid node IDs
-        if isinstance(node_id, (list, dict)):
+        if isinstance(node_id, (list[Any], dict[str, Any])):
             return False
 
         # Node IDs can be non-empty strings, integers, or tuples
-        return isinstance(node_id, (str, int, tuple))
+        return isinstance(node_id, (str, int, tuple[Any, ...]))
 
     @staticmethod
     def validate_edge(edge: Any) -> bool:
         """Validate edge format."""
-        if not isinstance(edge, (tuple, list)):
+        if not isinstance(edge, (tuple[Any, ...], list[Any])):
             return False
 
         if len(edge) < 2:
@@ -52,9 +52,9 @@ class GraphValidator:
         ) and GraphValidator.validate_node_id(edge[1])
 
     @staticmethod
-    def validate_attributes(attributes: dict[str, Any]) -> bool:
+    def validate_attributes(attributes: Any) -> bool:
         """Validate node/edge attributes."""
-        if not isinstance(attributes, dict):
+        if not isinstance(attributes, dict[str, Any]):
             return False
 
         # Check for reserved attribute names
@@ -84,9 +84,7 @@ class GraphValidator:
         return False
 
     @staticmethod
-    def validate_path_exists(
-        graph: nx.Graph, source: str | int, target: str | int
-    ) -> bool:
+    def validate_path_exists(graph: nx.Graph, source: str | int, target: str | int) -> bool:
         """Validate if path exists between two nodes."""
         if source not in graph or target not in graph:
             return False
@@ -94,9 +92,7 @@ class GraphValidator:
         return nx.has_path(graph, source, target)
 
     @staticmethod
-    def validate_graph_connectivity(
-        graph: nx.Graph, require_connected: bool = False
-    ) -> dict[str, Any]:
+    def validate_graph_connectivity(graph: nx.Graph, require_connected: bool = False) -> dict[str, Any]:
         """Validate graph connectivity properties."""
         result = {
             "valid": True,
@@ -126,9 +122,7 @@ class GraphValidator:
         return result
 
     @staticmethod
-    def validate_algorithm_input(
-        algorithm: str, graph: nx.Graph, params: dict[str, Any]
-    ) -> dict[str, Any]:
+    def validate_algorithm_input(algorithm: str, graph: nx.Graph, params: dict[str, Any]) -> dict[str, Any]:
         """Validate inputs for specific algorithms."""
         result = {"valid": True, "errors": []}
 
@@ -207,9 +201,7 @@ class GraphValidator:
         return measure in valid_measures
 
     @staticmethod
-    def validate_file_format(
-        file_format: str | Any, operation: str | list = "export"
-    ) -> bool | tuple[bool, str | None]:
+    def validate_file_format(file_format: str | Any, operation: str | list[Any] = "export") -> bool | tuple[bool, str | None]:
         """Validate file format for import/export.
 
         This method supports two signatures for backward compatibility:
@@ -217,7 +209,7 @@ class GraphValidator:
         2. validate_file_format(filepath, [formats]) -> tuple[bool, str | None]
         """
         # Handle the case where it's called with (filepath, [formats])
-        if isinstance(operation, list):
+        if isinstance(operation, list[Any]):
             filepath = file_format
             expected_formats = operation
             return GraphValidator.validate_file_path_format(filepath, expected_formats)
@@ -274,7 +266,7 @@ class GraphValidator:
         if "nodes" in data:
             sanitized["nodes"] = []
             for node in data["nodes"]:
-                if isinstance(node, dict) and "id" in node:
+                if isinstance(node, dict[str, Any]) and "id" in node:
                     node_data = {"id": str(node["id"])}
                     # Add other attributes
                     for key, value in node.items():
@@ -288,7 +280,7 @@ class GraphValidator:
         if "edges" in data:
             sanitized["edges"] = []
             for edge in data["edges"]:
-                if isinstance(edge, dict):
+                if isinstance(edge, dict[str, Any]):
                     if "source" in edge and "target" in edge:
                         edge_data = {
                             "source": str(edge["source"]),
@@ -299,13 +291,13 @@ class GraphValidator:
                             if key not in ["source", "target"] and isinstance(key, str):
                                 edge_data[key] = value
                         sanitized["edges"].append(edge_data)
-                elif isinstance(edge, (tuple, list)) and len(edge) >= 2:
+                elif isinstance(edge, (tuple[Any, ...], list[Any])) and len(edge) >= 2:
                     sanitized["edges"].append(
                         {"source": str(edge[0]), "target": str(edge[1])}
                     )
 
         # Copy graph attributes
-        if "graph" in data and isinstance(data["graph"], dict):
+        if "graph" in data and isinstance(data["graph"], dict[str, Any]):
             sanitized["graph"] = data["graph"].copy()
 
         return sanitized
@@ -341,7 +333,7 @@ class GraphValidator:
         reserved_names = {
             "graph",
             "graphs",
-            "list",
+            "list[Any]",
             "all",
             "none",
             "null",
@@ -375,9 +367,7 @@ class GraphValidator:
         return True, None
 
     @staticmethod
-    def validate_file_path_format(
-        filepath: str | Path | None, expected_formats: list[str] | None = None
-    ) -> tuple[bool, str | None]:
+    def validate_file_path_format(filepath: str | Path | None, expected_formats: list[str] | None = None) -> tuple[bool, str | None]:
         """Validate file format based on extension and expected formats.
 
         Args:
@@ -480,17 +470,17 @@ class GraphValidator:
         """
         errors = []
 
-        if not isinstance(data, dict):
+        if not isinstance(data, dict[str, Any]):
             return False, ["Graph data must be a dictionary"]
 
         # Check for required structure
         if "nodes" in data:
-            if not isinstance(data["nodes"], list):
-                errors.append("'nodes' must be a list")
+            if not isinstance(data["nodes"], list[Any]):
+                errors.append("'nodes' must be a list[Any]")
             else:
                 # Validate each node
                 for i, node in enumerate(data["nodes"]):
-                    if isinstance(node, dict):
+                    if isinstance(node, dict[str, Any]):
                         if "id" not in node:
                             errors.append(f"Node at index {i} missing 'id' field")
                         elif not GraphValidator.validate_node_id(node.get("id")):
@@ -502,17 +492,17 @@ class GraphValidator:
 
         if "edges" in data or "links" in data:
             edges = data.get("edges", data.get("links", []))
-            if not isinstance(edges, list):
-                errors.append("'edges' must be a list")
+            if not isinstance(edges, list[Any]):
+                errors.append("'edges' must be a list[Any]")
             else:
                 # Validate each edge
                 for i, edge in enumerate(edges):
-                    if isinstance(edge, dict):
+                    if isinstance(edge, dict[str, Any]):
                         if "source" not in edge:
                             errors.append(f"Edge at index {i} missing 'source' field")
                         if "target" not in edge:
                             errors.append(f"Edge at index {i} missing 'target' field")
-                    elif isinstance(edge, (list, tuple)):
+                    elif isinstance(edge, (list[Any], tuple[Any, ...])):
                         if len(edge) < 2:
                             errors.append(
                                 f"Edge at index {i} must have at least 2 elements"
@@ -526,32 +516,30 @@ class GraphValidator:
 
         # Check graph metadata
         if "graph" in data:
-            if not isinstance(data["graph"], dict):
+            if not isinstance(data["graph"], dict[str, Any]):
                 errors.append("'graph' metadata must be a dictionary")
 
         # Check for alternative formats
         if "adjacency_matrix" in data:
             matrix = data["adjacency_matrix"]
-            if not isinstance(matrix, list):
-                errors.append("'adjacency_matrix' must be a list")
+            if not isinstance(matrix, list[Any]):
+                errors.append("'adjacency_matrix' must be a list[Any]")
             # Check if square matrix
             elif matrix:
                 n = len(matrix)
                 for i, row in enumerate(matrix):
-                    if not isinstance(row, list) or len(row) != n:
+                    if not isinstance(row, list[Any]) or len(row) != n:
                         errors.append(f"Adjacency matrix row {i} has incorrect length")
                         break
 
         if "edge_list" in data:
-            if not isinstance(data["edge_list"], list):
-                errors.append("'edge_list' must be a list")
+            if not isinstance(data["edge_list"], list[Any]):
+                errors.append("'edge_list' must be a list[Any]")
 
         return len(errors) == 0, errors
 
     @staticmethod
-    def validate_import_data(
-        format: str, data: Any | None = None, path: str | Path | None = None
-    ) -> tuple[bool, str | None]:
+    def validate_import_data(format: str, data: Any | None = None, path: str | Path | None = None) -> tuple[bool, str | None]:
         """Validate import data based on format.
 
         Args:
@@ -590,8 +578,8 @@ class GraphValidator:
             if data and format in ["json", "yaml", "adjacency"]:
                 # Basic structure validation
                 if format == "adjacency":
-                    if not isinstance(data, dict) or "matrix" not in data:
-                        return False, "Adjacency format requires dict with 'matrix' key"
+                    if not isinstance(data, dict[str, Any]) or "matrix" not in data:
+                        return False, "Adjacency format requires dict[str, Any] with 'matrix' key"
 
         else:
             return False, f"Unknown import format: {format}"

@@ -18,7 +18,7 @@ class ValidationResult:
 
     is_valid: bool
     sanitized_data: Any | None = None
-    errors: list[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list[Any])
 
 
 class RequestValidator:
@@ -71,7 +71,7 @@ class RequestValidator:
     @staticmethod
     def validate_node_data(data: dict[str, Any]) -> ValidationResult:
         """Sanitize and validate node attributes."""
-        if not isinstance(data, dict):
+        if not isinstance(data, dict[str, Any]):
             return ValidationResult(False, None, ["Node data must be a dictionary"])
 
         # Remove potentially dangerous keys
@@ -117,8 +117,8 @@ class RequestValidator:
     @staticmethod
     def validate_edge_data(edge: list[Any] | tuple[Any, ...]) -> ValidationResult:
         """Validate edge format."""
-        if not isinstance(edge, (list, tuple)):
-            return ValidationResult(False, None, ["Edge must be a list or tuple"])
+        if not isinstance(edge, (list[Any], tuple[Any, ...])):
+            return ValidationResult(False, None, ["Edge must be a list[Any] or tuple[Any, ...]"])
 
         if len(edge) < 2:
             return ValidationResult(False, None, ["Edge must have at least 2 nodes"])
@@ -145,7 +145,7 @@ class RequestValidator:
         clean_edge = [source_result.sanitized_data, target_result.sanitized_data]
 
         if len(edge) == 3:
-            if isinstance(edge[2], dict):
+            if isinstance(edge[2], dict[str, Any]):
                 data_result = RequestValidator.validate_node_data(edge[2])
                 if not data_result.is_valid:
                     return ValidationResult(
@@ -165,11 +165,11 @@ class RequestValidator:
             return True
 
         # Allow lists of safe values
-        if isinstance(value, list):
+        if isinstance(value, list[Any]):
             return all(RequestValidator._is_safe_value(item) for item in value)
 
         # Allow dicts of safe values
-        if isinstance(value, dict):
+        if isinstance(value, dict[str, Any]):
             return all(
                 isinstance(k, str) and RequestValidator._is_safe_value(v)
                 for k, v in value.items()
@@ -183,9 +183,7 @@ class SecurityValidator:
     """Additional security validation for operations."""
 
     @staticmethod
-    def validate_algorithm_parameters(
-        algorithm: str, params: dict[str, Any]
-    ) -> ValidationResult:
+    def validate_algorithm_parameters(algorithm: str, params: dict[str, Any]) -> ValidationResult:
         """Validate algorithm parameters for safety."""
         if not isinstance(algorithm, str):
             return ValidationResult(False, None, ["Algorithm name must be a string"])
@@ -217,7 +215,7 @@ class SecurityValidator:
             )
 
         # Validate parameters
-        if not isinstance(params, dict):
+        if not isinstance(params, dict[str, Any]):
             return ValidationResult(False, None, ["Parameters must be a dictionary"])
 
         # Basic parameter validation

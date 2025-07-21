@@ -27,11 +27,11 @@ class User:
     permissions: set[str] = None
     metadata: dict[str, Any] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.roles is None:
-            self.roles = set()
+            self.roles = set[Any]()
         if self.permissions is None:
-            self.permissions = set()
+            self.permissions = set[Any]()
         if self.metadata is None:
             self.metadata = {}
 
@@ -63,9 +63,9 @@ class AuthToken:
     token_type: str = "bearer"
     scopes: set[str] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.scopes is None:
-            self.scopes = set()
+            self.scopes = set[Any]()
 
     def is_expired(self) -> bool:
         """Check if token is expired."""
@@ -79,12 +79,10 @@ class AuthToken:
 class TokenValidator:
     """Service for validating authentication tokens."""
 
-    def __init__(self, secret_key: str):
+    def __init__(self, secret_key: str) -> None:
         self.secret_key = secret_key.encode("utf-8")
 
-    def create_token(
-        self, user_id: str, expires_in: int = 3600, scopes: set[str] | None = None
-    ) -> AuthToken:
+    def create_token(self, user_id: str, expires_in: int = 3600, scopes: set[str] | None = None) -> AuthToken:
         """Create a new authentication token."""
         now = time.time()
         expires_at = now + expires_in
@@ -93,7 +91,7 @@ class TokenValidator:
             "user_id": user_id,
             "iat": now,
             "exp": expires_at,
-            "scopes": list(scopes or set()),
+            "scopes": list[Any](scopes or set[Any]()),
         }
 
         # Simple HMAC-based token (in production, use JWT)
@@ -109,7 +107,7 @@ class TokenValidator:
             user_id=user_id,
             issued_at=now,
             expires_at=expires_at,
-            scopes=scopes or set(),
+            scopes=scopes or set[Any](),
         )
 
     def validate_token(self, token: str) -> AuthToken | None:
@@ -137,7 +135,7 @@ class TokenValidator:
                 user_id=payload["user_id"],
                 issued_at=payload["iat"],
                 expires_at=payload["exp"],
-                scopes=set(payload.get("scopes", [])),
+                scopes=set[Any](payload.get("scopes", [])),
             )
 
             # Check expiration
@@ -153,7 +151,7 @@ class TokenValidator:
 class AuthService(Component):
     """Service for authentication and authorization."""
 
-    def __init__(self, secret_key: str):
+    def __init__(self, secret_key: str) -> None:
         super().__init__("auth_service")
         self.token_validator = TokenValidator(secret_key)
         self.users: dict[str, User] = {}
@@ -175,13 +173,7 @@ class AuthService(Component):
         }
 
     # @with_logging_context removed - monitoring module deleted
-    async def register_user(
-        self,
-        username: str,
-        password: str,
-        email: str | None = None,
-        roles: set[str] | None = None,
-    ) -> User:
+    async def register_user(self, username: str, password: str, email: str | None = None, roles: set[str] | None = None) -> User:
         """Register a new user."""
         user_id = f"user_{len(self.users) + 1}"
 
@@ -190,9 +182,9 @@ class AuthService(Component):
 
         # Calculate permissions based on roles
         roles = roles or {"user"}
-        permissions = set()
+        permissions = set[Any]()
         for role in roles:
-            permissions.update(self.role_permissions.get(role, set()))
+            permissions.update(self.role_permissions.get(role, set[Any]()))
 
         user = User(
             user_id=user_id,
@@ -311,7 +303,7 @@ class AuthService(Component):
 
         logger.info("Auth service initialized")
 
-    async def _token_cleanup_loop(self):
+    async def _token_cleanup_loop(self) -> None:
         """Background task to clean up expired tokens."""
         while self.status.is_running():
             try:
@@ -327,10 +319,10 @@ class AuthService(Component):
 class AuthMiddleware:
     """Middleware for handling authentication."""
 
-    def __init__(self, auth_service: AuthService):
+    def __init__(self, auth_service: AuthService) -> None:
         self.auth_service = auth_service
 
-    async def __call__(self, request, handler):
+    async def __call__(self, request: Any, handler: Any) -> Any:
         """Process authentication for incoming requests."""
         # Extract token from Authorization header
         auth_header = request.headers.get("Authorization", "")
@@ -357,13 +349,13 @@ class AuthMiddleware:
         return await handler(request)
 
 
-def require_auth(permission: str | None = None, roles: list[str] | None = None):
+def require_auth(permission: str | None = None, roles: list[str] | None = None) -> Any:
     """Decorator to require authentication and optionally specific permissions/roles."""
 
-    def decorator(func):
+    def decorator(func: Any) -> Any:
         if asyncio.iscoroutinefunction(func):
 
-            async def async_wrapper(*args, **kwargs):
+            async def async_wrapper(*args, **kwargs) -> Any:
                 # Extract request from args (assuming it's the first argument)
                 request = args[0] if args else None
 
@@ -385,7 +377,7 @@ def require_auth(permission: str | None = None, roles: list[str] | None = None):
             return async_wrapper
         else:
 
-            def sync_wrapper(*args, **kwargs):
+            def sync_wrapper(*args, **kwargs) -> Any:
                 request = args[0] if args else None
 
                 if not hasattr(request, "user") or not request.user:

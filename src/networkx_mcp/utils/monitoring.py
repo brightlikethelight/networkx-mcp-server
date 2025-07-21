@@ -10,7 +10,7 @@ from typing import Any
 class PerformanceMonitor:
     """Monitor performance metrics for graph operations."""
 
-    def __init__(self, max_history: int = 1000):
+    def __init__(self, max_history: int = 1000) -> None:
         """Initialize performance monitor.
 
         Args:
@@ -22,9 +22,7 @@ class PerformanceMonitor:
         )
         self.start_time = time.time()
 
-    def record_operation(
-        self, operation: str, duration: float, metadata: dict[str, Any] | None = None
-    ) -> None:
+    def record_operation(self, operation: str, duration: float, metadata: dict[str, Any] | None = None) -> None:
         """Record an operation's performance metrics.
 
         Args:
@@ -63,7 +61,7 @@ class PerformanceMonitor:
                 "min_ms": min(durations),
                 "max_ms": max(durations),
                 "total_ms": sum(durations),
-                "recent_operations": list(self.operations[operation])[-10:],
+                "recent_operations": list[Any](self.operations[operation])[-10:],
             }
         else:
             # Stats for all operations
@@ -174,7 +172,7 @@ class OperationCounter:
         # Calculate hourly patterns
         hourly_patterns = {}
         for op, hours in self.hourly_counts.items():
-            hourly_patterns[op] = dict(hours)
+            hourly_patterns[op] = dict[str, Any](hours)
 
         # Error rate by operation
         error_rates: dict[str, dict[str, Any]] = {}
@@ -202,7 +200,7 @@ class OperationCounter:
                 else 0
             ),
             "uptime": str(datetime.now(UTC).replace(tzinfo=None) - self.start_time),
-            "operation_counts": dict(self.counts),
+            "operation_counts": dict[str, Any](self.counts),
             "operation_distribution": operation_distribution,
             "hourly_patterns": hourly_patterns,
             "error_rates": error_rates,

@@ -431,7 +431,7 @@ class TestAutomation:
                 logger.warning(f"⚠️ Optional check had issues: {name} - {e}")
 
         # Generate final report
-        report = self.generate_report()
+        self.generate_report()
 
         if self.quality_gate_passed:
             logger.info("✅ Quality gate PASSED!")

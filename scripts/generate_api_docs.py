@@ -192,7 +192,7 @@ class MCPToolExtractor:
 
         try:
             return ast.unparse(annotation)
-        except:
+        except Exception:
             return "Any"
 
     def _extract_default_value(self, default_node) -> Any:
@@ -204,7 +204,7 @@ class MCPToolExtractor:
                 return default_node.id
             else:
                 return ast.unparse(default_node)
-        except:
+        except Exception:
             return None
 
     def _extract_return_type(self, node: ast.AsyncFunctionDef) -> str:
@@ -212,7 +212,7 @@ class MCPToolExtractor:
         if node.returns:
             try:
                 return ast.unparse(node.returns)
-            except:
+            except Exception:
                 return "Any"
         return "Any"
 

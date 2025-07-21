@@ -46,12 +46,12 @@ def is_feature_enabled(feature_name: str) -> bool:
 
 
 def get_enabled_features() -> list[str]:
-    """Get list of all enabled (working) features."""
+    """Get list[Any] of all enabled (working) features."""
     return [name for name, enabled in FEATURE_FLAGS.items() if enabled]
 
 
 def get_disabled_features() -> list[str]:
-    """Get list of all disabled (not implemented) features."""
+    """Get list[Any] of all disabled (not implemented) features."""
     return [name for name, enabled in FEATURE_FLAGS.items() if not enabled]
 
 

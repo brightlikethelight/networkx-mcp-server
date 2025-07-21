@@ -210,7 +210,7 @@ class MCPHandlersSuite:
         self.graph_manager.graphs["large_temp"] = large_graph
 
         # Perform memory-intensive operations
-        info = self.graph_manager.get_graph_info("large_temp")
+        self.graph_manager.get_graph_info("large_temp")
         stats = {
             "num_nodes": large_graph.number_of_nodes(),
             "num_edges": large_graph.number_of_edges(),

@@ -21,13 +21,13 @@ from .base import (
 class MemoryTransaction(Transaction):
     """In-memory transaction implementation."""
 
-    def __init__(self, backend: "MemoryBackend"):
+    def __init__(self, backend: "MemoryBackend") -> None:
         self.backend = backend
         self._operations = []
         self._committed = False
         self._rolled_back = False
 
-    def add_operation(self, op_type: str, *args, **kwargs):
+    def add_operation(self, op_type: str, *args, **kwargs) -> None:
         """Add an operation to the transaction."""
         self._operations.append((op_type, args, kwargs))
 
@@ -54,10 +54,10 @@ class MemoryTransaction(Transaction):
 class MemoryBackend(StorageBackend):
     """In-memory storage backend for development."""
 
-    def __init__(self, max_graph_size_mb: int = 100):
+    def __init__(self, max_graph_size_mb: int = 100) -> None:
         self.max_size_bytes = max_graph_size_mb * 1024 * 1024
-        # Storage structure: {user_id: {graph_id: {"graph": nx.Graph, "metadata": dict}}}
-        self._storage = defaultdict(dict)
+        # Storage structure: {user_id: {graph_id: {"graph": nx.Graph, "metadata": dict[str, Any]}}}
+        self._storage = defaultdict(dict[str, Any])
         self._initialized = False
         self._lock = asyncio.Lock()
 
@@ -70,7 +70,7 @@ class MemoryBackend(StorageBackend):
         self._initialized = False
 
     @asynccontextmanager
-    async def transaction(self):
+    async def transaction(self) -> None:
         """Context manager for atomic operations."""
         tx = MemoryTransaction(self)
         try:
@@ -80,14 +80,7 @@ class MemoryBackend(StorageBackend):
             await tx.rollback()
             raise
 
-    async def save_graph(
-        self,
-        user_id: str,
-        graph_id: str,
-        graph: nx.Graph,
-        metadata: dict[str, Any] | None = None,
-        tx: Transaction | None = None,
-    ) -> bool:
+    async def save_graph(self, user_id: str, graph_id: str, graph: nx.Graph, metadata: dict[str, Any] | None = None, tx: Transaction | None = None) -> bool:
         """Save graph with metadata."""
         if not self._initialized:
             raise StorageError("Storage not initialized")
@@ -130,9 +123,7 @@ class MemoryBackend(StorageBackend):
 
             return True
 
-    async def load_graph(
-        self, user_id: str, graph_id: str, tx: Transaction | None = None
-    ) -> nx.Graph | None:
+    async def load_graph(self, user_id: str, graph_id: str, tx: Transaction | None = None) -> nx.Graph | None:
         """Load graph from storage."""
         if not self._initialized:
             raise StorageError("Storage not initialized")
@@ -147,9 +138,7 @@ class MemoryBackend(StorageBackend):
             # Return a copy to prevent external modifications
             return graph_data["graph"].copy()
 
-    async def delete_graph(
-        self, user_id: str, graph_id: str, tx: Transaction | None = None
-    ) -> bool:
+    async def delete_graph(self, user_id: str, graph_id: str, tx: Transaction | None = None) -> bool:
         """Delete graph from storage."""
         if not self._initialized:
             raise StorageError("Storage not initialized")
@@ -161,13 +150,7 @@ class MemoryBackend(StorageBackend):
                 return True
             return False
 
-    async def list_graphs(
-        self,
-        user_id: str,
-        limit: int = 100,
-        offset: int = 0,
-        tx: Transaction | None = None,
-    ) -> list[dict[str, Any]]:
+    async def list_graphs(self, user_id: str, limit: int = 100, offset: int = 0, tx: Transaction | None = None) -> list[dict[str, Any]]:
         """List user's graphs with metadata."""
         if not self._initialized:
             raise StorageError("Storage not initialized")
@@ -188,9 +171,7 @@ class MemoryBackend(StorageBackend):
             # Apply pagination
             return graphs[offset : offset + limit]
 
-    async def get_graph_metadata(
-        self, user_id: str, graph_id: str, tx: Transaction | None = None
-    ) -> dict[str, Any] | None:
+    async def get_graph_metadata(self, user_id: str, graph_id: str, tx: Transaction | None = None) -> dict[str, Any] | None:
         """Get graph metadata without loading the full graph."""
         if not self._initialized:
             raise StorageError("Storage not initialized")
@@ -206,13 +187,7 @@ class MemoryBackend(StorageBackend):
             metadata["graph_id"] = graph_id
             return metadata
 
-    async def update_graph_metadata(
-        self,
-        user_id: str,
-        graph_id: str,
-        metadata: dict[str, Any],
-        tx: Transaction | None = None,
-    ) -> bool:
+    async def update_graph_metadata(self, user_id: str, graph_id: str, metadata: dict[str, Any], tx: Transaction | None = None) -> bool:
         """Update graph metadata."""
         if not self._initialized:
             raise StorageError("Storage not initialized")

@@ -143,7 +143,7 @@ class TestRequestValidator:
             # These might be valid Python but problematic for JSON
             try:
                 json.dumps(data)
-            except:
+            except Exception:
                 # If it can't be serialized, it should be invalid
                 pass
 

@@ -83,7 +83,7 @@ class RealBenchmark:
                         self.responses.append(response)
                     except json.JSONDecodeError:
                         pass
-            except:
+            except Exception:
                 break
 
     async def _initialize_server(self):
@@ -148,7 +148,7 @@ class RealBenchmark:
             try:
                 process = psutil.Process(self.server_process.pid)
                 return process.memory_info().rss / (1024 * 1024)
-            except:
+            except Exception:
                 return 0.0
         return 0.0
 

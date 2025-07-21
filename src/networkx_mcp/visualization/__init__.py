@@ -1,3 +1,5 @@
+from typing import Any
+
 """Graph visualization modules.
 
 This package provides multiple visualization backends for graphs:
@@ -57,7 +59,7 @@ if PyvisVisualizer is not None:
 
 
 # Factory function
-def get_visualizer(backend: str = "matplotlib"):
+def get_visualizer(backend: str = "matplotlib") -> Any:
     """Get visualizer by backend name."""
     visualizers = {}
 
@@ -69,7 +71,7 @@ def get_visualizer(backend: str = "matplotlib"):
         visualizers["pyvis"] = PyvisVisualizer
 
     if backend not in visualizers:
-        available = list(visualizers.keys())
+        available = list[Any](visualizers.keys())
         msg = f"Backend '{backend}' not available. Available backends: {available}"
         raise ValueError(msg)
 

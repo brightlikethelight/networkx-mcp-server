@@ -7,20 +7,20 @@ from typing import Optional
 from ..storage import StorageBackend, StorageFactory
 from .graph_operations import GraphManager
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__, Any)
 
 
 class StorageManager:
     """Manages graph persistence using storage backends."""
 
-    def __init__(self, graph_manager: GraphManager, user_id: str = "default"):
+    def __init__(self, graph_manager: GraphManager, user_id: str = "default") -> None:
         self.graph_manager = graph_manager
         self.user_id = user_id
         self.storage_backend: Optional[StorageBackend] = None
         self._sync_task: Optional[asyncio.Task] = None
         self._sync_interval = 30  # seconds
 
-    async def initialize(self, backend_type: Optional[str] = None, **kwargs):
+    async def initialize(self, backend_type: Optional[str] = None, **kwargs) -> None:
         """Initialize storage backend."""
         self.storage_backend = await StorageFactory.create_backend(
             backend_type=backend_type, **kwargs
@@ -36,7 +36,7 @@ class StorageManager:
             f"StorageManager initialized with {type(self.storage_backend).__name__}"
         )
 
-    async def close(self):
+    async def close(self) -> None:
         """Close storage connections and stop sync."""
         if self._sync_task:
             self._sync_task.cancel()
@@ -48,7 +48,7 @@ class StorageManager:
         if self.storage_backend:
             await self.storage_backend.close()
 
-    async def save_graph(self, graph_id: str, immediate: bool = False):
+    async def save_graph(self, graph_id: str, immediate: bool = False) -> None:
         """Save a graph to storage."""
         if not self.storage_backend:
             return
@@ -97,7 +97,7 @@ class StorageManager:
 
         return False
 
-    async def delete_graph(self, graph_id: str):
+    async def delete_graph(self, graph_id: str) -> None:
         """Delete a graph from storage."""
         if not self.storage_backend:
             return
@@ -110,7 +110,7 @@ class StorageManager:
         except Exception as e:
             logger.error(f"Failed to delete graph {graph_id} from storage: {e}")
 
-    async def load_all_graphs(self):
+    async def load_all_graphs(self) -> None:
         """Load all graphs from storage into GraphManager."""
         if not self.storage_backend:
             return
@@ -131,17 +131,17 @@ class StorageManager:
         except Exception as e:
             logger.error(f"Failed to load graphs from storage: {e}")
 
-    async def sync_all_graphs(self):
+    async def sync_all_graphs(self) -> None:
         """Sync all in-memory graphs to storage."""
         if not self.storage_backend:
             return
 
-        for graph_id in list(self.graph_manager.graphs.keys()):
+        for graph_id in list[Any](self.graph_manager.graphs.keys()):
             await self.save_graph(graph_id)
 
         logger.debug(f"Synced {len(self.graph_manager.graphs)} graphs to storage")
 
-    async def _background_sync(self):
+    async def _background_sync(self) -> None:
         """Background task to periodically sync graphs to storage."""
         while True:
             try:
@@ -154,7 +154,7 @@ class StorageManager:
             except Exception as e:
                 logger.error(f"Background sync error: {e}")
 
-    async def get_storage_stats(self) -> dict:
+    async def get_storage_stats(self) -> dict[str, Any]:
         """Get storage statistics."""
         if not self.storage_backend:
             return {"backend": "none", "initialized": False}

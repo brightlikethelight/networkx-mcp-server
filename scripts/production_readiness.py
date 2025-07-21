@@ -421,13 +421,6 @@ class ProductionReadiness:
         print("🔍 Checking High Availability...")
 
         # HA requires multiple things
-        ha_requirements = {
-            "Load balancing": False,
-            "State sharing": False,
-            "Health checks": False,
-            "Graceful shutdown": False,
-            "Clustering": False,
-        }
 
         # Check for HA indicators
         ha_files = [
@@ -443,7 +436,6 @@ class ProductionReadiness:
                 found_ha.append(ha_file)
 
         # stdio transport is inherently not HA
-        transport_check = True  # Assume stdio only unless proven otherwise
 
         if found_ha:
             ha_score = len(found_ha) / len(ha_files)

@@ -8,23 +8,21 @@ import networkx as nx
 class EdgeOperations:
     """Handle all edge-related operations efficiently."""
 
-    def __init__(self, graph: nx.Graph):
+    def __init__(self, graph: nx.Graph) -> None:
         self.graph = graph
 
-    def add_edge_with_validation(
-        self, source: str | int, target: str | int, **attrs
-    ) -> bool:
+    def add_edge_with_validation(self, source: str | int, target: str | int, **attrs: Any) -> bool:
         """Add edge with validation."""
         if self.graph.has_edge(source, target):
             return False
         self.graph.add_edge(source, target, **attrs)
         return True
 
-    def bulk_add_edges(self, edges: list[tuple]) -> int:
+    def bulk_add_edges(self, edges: list[tuple[Any, Any]]) -> int:
         """Efficiently add multiple edges."""
         initial_count = self.graph.number_of_edges()
         self.graph.add_edges_from(edges)
-        return self.graph.number_of_edges() - initial_count
+        return int(self.graph.number_of_edges() - initial_count)
 
     def get_edge_summary(self, source: str | int, target: str | int) -> dict[str, Any]:
         """Get comprehensive edge information."""
@@ -35,6 +33,6 @@ class EdgeOperations:
         return {
             "source": source,
             "target": target,
-            "attributes": dict(self.graph.edges[source, target]),
+            "attributes": dict[str, Any](self.graph.edges[source, target]),
             "weight": self.graph.edges[source, target].get("weight", 1),
         }

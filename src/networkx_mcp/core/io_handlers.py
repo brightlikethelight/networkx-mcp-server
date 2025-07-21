@@ -71,12 +71,7 @@ class GraphIOHandler:
         raise ValueError(msg)
 
     @staticmethod
-    def export_graph(
-        graph: nx.Graph,
-        output_format: str,
-        path: str | Path | None = None,
-        **kwargs,
-    ) -> str | bytes | dict[str, Any]:
+    def export_graph(graph: nx.Graph, output_format: str, path: str | Path | None = None, **kwargs) -> str | bytes | dict[str, Any]:
         """Export graph to various formats with validation."""
         logger.info(f"Exporting graph to {output_format} format")
 
@@ -129,13 +124,7 @@ class GraphIOHandler:
             raise ValueError(msg)
 
     @staticmethod
-    def import_graph(
-        input_format: str | None = None,
-        data: str | bytes | dict[str, Any] | None = None,
-        path: str | Path | None = None,
-        auto_detect: bool = True,
-        **kwargs,
-    ) -> nx.Graph:
+    def import_graph(input_format: str | None = None, data: str | bytes | dict[str, Any] | None = None, path: str | Path | None = None, auto_detect: bool = True, **kwargs) -> nx.Graph:
         """Import graph from various formats with auto-detection."""
         # Auto-detect format if not provided
         if input_format is None and path and auto_detect:
@@ -201,9 +190,7 @@ class GraphIOHandler:
             raise ValueError(msg)
 
     @staticmethod
-    def _export_json(
-        graph: nx.Graph, pretty_print: bool = True, **kwargs
-    ) -> dict[str, Any]:
+    def _export_json(graph: nx.Graph, pretty_print: bool = True, **kwargs) -> dict[str, Any]:
         """Export graph to JSON format with metadata preservation."""
         data = nx.node_link_data(graph)
 
@@ -225,9 +212,7 @@ class GraphIOHandler:
         return data
 
     @staticmethod
-    def _import_json(
-        data: dict[str, Any] | None, path: str | Path | None, **kwargs
-    ) -> nx.Graph:
+    def _import_json(data: dict[str, Any] | None, path: str | Path | None, **kwargs) -> nx.Graph:
         """Import graph from JSON format."""
         if data is None and path:
             with open(path) as f:
@@ -235,7 +220,7 @@ class GraphIOHandler:
         elif isinstance(data, str):
             data = json.loads(data)
 
-        if not isinstance(data, dict):
+        if not isinstance(data, dict[str, Any]):
             msg = "JSON data must be a dictionary"
             raise ValueError(msg)
 
@@ -266,7 +251,7 @@ class GraphIOHandler:
 
     @staticmethod
     def _export_csv(graph: nx.Graph, path: str | Path, **kwargs) -> str:
-        """Export graph to CSV edge list format."""
+        """Export graph to CSV edge list[Any] format."""
         if path is None:
             msg = "Path required for CSV export"
             raise ValueError(msg)
@@ -288,7 +273,7 @@ class GraphIOHandler:
 
         # Collect all edge attributes
         if include_attrs:
-            all_attrs = set()
+            all_attrs = set[Any]()
             for _, _, data in graph.edges(data=True):
                 all_attrs.update(data.keys())
             all_attrs.discard("weight")  # Already handled
@@ -314,7 +299,7 @@ class GraphIOHandler:
 
     @staticmethod
     def _import_csv(path: str | Path, **kwargs) -> nx.Graph:
-        """Import graph from CSV edge list."""
+        """Import graph from CSV edge list[Any]."""
         source_col = kwargs.get("source_col", "source")
         target_col = kwargs.get("target_col", "target")
         weight_col = kwargs.get("weight_col", "weight")
@@ -356,15 +341,8 @@ class GraphIOHandler:
         return G
 
     @staticmethod
-    def csv_to_edge_list(
-        filepath: str | Path,
-        source_col: str,
-        target_col: str,
-        weight_col: str | None = None,
-        delimiter: str = ",",
-        **kwargs,
-    ) -> list[tuple[Any, Any] | tuple[Any, Any, float]]:
-        """Convert CSV file to edge list format.
+    def csv_to_edge_list(filepath: str | Path, source_col: str, target_col: str, weight_col: str | None = None, delimiter: str = ",", **kwargs) -> list[tuple[Any, Any] | tuple[Any, Any, float]]:
+        """Convert CSV file to edge list[Any] format.
 
         Args:
             filepath: Path to CSV file
@@ -377,7 +355,7 @@ class GraphIOHandler:
         Returns:
             List of edges as tuples (source, target) or (source, target, weight)
         """
-        logger.info(f"Converting CSV to edge list: {filepath}")
+        logger.info(f"Converting CSV to edge list[Any]: {filepath}")
 
         # Read CSV with pandas
         df = pd.read_csv(filepath, delimiter=delimiter, **kwargs)
@@ -393,7 +371,7 @@ class GraphIOHandler:
             msg = f"Weight column '{weight_col}' not found in CSV"
             raise ValueError(msg)
 
-        # Build edge list
+        # Build edge list[Any]
         edges = []
         for _, row in df.iterrows():
             source = row[source_col]
@@ -415,15 +393,7 @@ class GraphIOHandler:
         return edges
 
     @staticmethod
-    def dataframe_to_graph(
-        df: pd.DataFrame,
-        source_col: str,
-        target_col: str,
-        edge_attr: str | list[str] | None = None,
-        create_using: nx.Graph | None = None,
-        node_attr_df: pd.DataFrame | None = None,
-        node_key: str | None = None,
-    ) -> nx.Graph:
+    def dataframe_to_graph(df: pd.DataFrame, source_col: str, target_col: str, edge_attr: str | list[str] | None = None, create_using: nx.Graph | None = None, node_attr_df: pd.DataFrame | None = None, node_key: str | None = None) -> nx.Graph:
         """Convert pandas DataFrame to NetworkX graph.
 
         Args:
@@ -440,7 +410,7 @@ class GraphIOHandler:
         """
         logger.info(f"Converting DataFrame to graph ({len(df)} rows)")
 
-        # Create graph from edge list
+        # Create graph from edge list[Any]
         if isinstance(edge_attr, str):
             edge_attr = [edge_attr]
 
@@ -476,13 +446,8 @@ class GraphIOHandler:
         return G
 
     @staticmethod
-    def adjacency_to_edge_list(
-        matrix: list[list[float]] | np.ndarray,
-        node_labels: list[Any] | None = None,
-        threshold: float = 0,
-        directed: bool = False,
-    ) -> list[tuple[Any, Any, float]]:
-        """Convert adjacency matrix to edge list.
+    def adjacency_to_edge_list(matrix: list[list[float]] | np.ndarray, node_labels: list[Any] | None = None, threshold: float = 0, directed: bool = False) -> list[tuple[Any, Any, float]]:
+        """Convert adjacency matrix to edge list[Any].
 
         Args:
             matrix: 2D adjacency matrix
@@ -494,7 +459,7 @@ class GraphIOHandler:
             List of edges as (source, target, weight) tuples
         """
         # Convert to numpy array
-        if isinstance(matrix, list):
+        if isinstance(matrix, list[Any]):
             matrix = np.array(matrix)
 
         n = matrix.shape[0]
@@ -504,7 +469,7 @@ class GraphIOHandler:
 
         # Default node labels
         if node_labels is None:
-            node_labels = list(range(n))
+            node_labels = list[Any](range(n))
         elif len(node_labels) != n:
             msg = (
                 f"Node labels length ({len(node_labels)}) must match matrix size ({n})"
@@ -526,13 +491,7 @@ class GraphIOHandler:
         return edges
 
     @staticmethod
-    def export_for_streaming(
-        graph: nx.Graph,
-        output_format: str,
-        output_stream: TextIO,
-        chunk_size: int = 1000,
-        **kwargs,
-    ) -> int:
+    def export_for_streaming(graph: nx.Graph, output_format: str, output_stream: TextIO, chunk_size: int = 1000, **kwargs) -> int:
         """Export large graphs using streaming to handle memory constraints.
 
         Args:
@@ -550,7 +509,7 @@ class GraphIOHandler:
         if output_format == "edgelist":
             # Write header if needed
             if kwargs.get("header", True):
-                output_stream.write("# NetworkX edge list\n")
+                output_stream.write("# NetworkX edge list[Any]\n")
                 output_stream.write(f"# Nodes: {graph.number_of_nodes()}\n")
                 output_stream.write(f"# Edges: {graph.number_of_edges()}\n")
 
@@ -595,7 +554,7 @@ class GraphIOHandler:
             # Write header
             headers = ["source", "target"]
             # Collect all edge attributes
-            all_attrs = set()
+            all_attrs = set[Any]()
             sample_size = min(100, graph.number_of_edges())
             for i, (_, _, data) in enumerate(graph.edges(data=True)):
                 if i >= sample_size:
@@ -675,10 +634,8 @@ class GraphIOHandler:
         return nx.read_gexf(path)
 
     @staticmethod
-    def _export_edgelist(
-        graph: nx.Graph, path: str | Path | None, **kwargs
-    ) -> str | list[dict]:
-        """Export graph to edge list format."""
+    def _export_edgelist(graph: nx.Graph, path: str | Path | None, **kwargs) -> str | list[dict[str, Any]]:
+        """Export graph to edge list[Any] format."""
         if path:
             # Handle large graphs with streaming
             if graph.number_of_edges() > 100000:  # Large graph threshold
@@ -694,7 +651,7 @@ class GraphIOHandler:
                 nx.write_edgelist(graph, path, **kwargs)
                 return f"Graph exported to {path}"
         else:
-            # Return as list
+            # Return as list[Any]
             edges = []
             for u, v, data in graph.edges(data=True):
                 edge = {"source": str(u), "target": str(v)}
@@ -704,9 +661,9 @@ class GraphIOHandler:
 
     @staticmethod
     def _import_edgelist(path: str | Path, **kwargs) -> nx.Graph:
-        """Import graph from edge list format."""
+        """Import graph from edge list[Any] format."""
         if path is None:
-            msg = "Path required for edge list import"
+            msg = "Path required for edge list[Any] import"
             raise ValueError(msg)
 
         # Determine graph type from kwargs
@@ -717,12 +674,12 @@ class GraphIOHandler:
     @staticmethod
     def _export_adjacency(graph: nx.Graph, **kwargs) -> dict[str, Any]:
         """Export graph as adjacency matrix with metadata."""
-        nodes = list(graph.nodes())
+        nodes = list[Any](graph.nodes())
 
         # Handle node ordering
         if "node_order" in kwargs:
             node_order = kwargs["node_order"]
-            if set(node_order) != set(nodes):
+            if set[Any](node_order) != set[Any](nodes):
                 msg = "node_order must contain all graph nodes"
                 raise ValueError(msg)
             nodes = node_order
@@ -763,15 +720,13 @@ class GraphIOHandler:
         return result
 
     @staticmethod
-    def _import_adjacency(
-        data: dict[str, Any] | None, path: str | Path | None, **kwargs
-    ) -> nx.Graph:
+    def _import_adjacency(data: dict[str, Any] | None, path: str | Path | None, **kwargs) -> nx.Graph:
         """Import graph from adjacency matrix."""
         if data is None and path:
             # Load from file
             if path.suffix.lower() == ".npy":
                 matrix = np.load(path)
-                nodes = kwargs.get("nodes", list(range(matrix.shape[0])))
+                nodes = kwargs.get("nodes", list[Any](range(matrix.shape[0])))
                 directed = kwargs.get("directed", False)
             else:
                 with open(path) as f:
@@ -793,7 +748,7 @@ class GraphIOHandler:
         else:
             matrix = np.array(data["matrix"])
 
-        nodes = data.get("nodes", list(range(matrix.shape[0])))
+        nodes = data.get("nodes", list[Any](range(matrix.shape[0])))
         directed = data.get("directed", False)
 
         # Create appropriate graph type
@@ -911,19 +866,12 @@ class GraphIOHandler:
         return {
             "nodes": nodes_df.to_dict("records"),
             "edges": edges_df.to_dict("records"),
-            "node_columns": list(nodes_df.columns),
-            "edge_columns": list(edges_df.columns),
+            "node_columns": list[Any](nodes_df.columns),
+            "edge_columns": list[Any](edges_df.columns),
         }
 
     @staticmethod
-    def import_from_dataframe(
-        nodes_df: pd.DataFrame | None = None,
-        edges_df: pd.DataFrame | None = None,
-        source_col: str = "source",
-        target_col: str = "target",
-        node_id_col: str = "node_id",
-        create_using: nx.Graph | None = None,
-    ) -> nx.Graph:
+    def import_from_dataframe(nodes_df: pd.DataFrame | None = None, edges_df: pd.DataFrame | None = None, source_col: str = "source", target_col: str = "target", node_id_col: str = "node_id", create_using: nx.Graph | None = None) -> nx.Graph:
         """Import graph from pandas DataFrames."""
         if create_using is None:
             graph = nx.Graph()

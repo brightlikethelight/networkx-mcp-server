@@ -67,6 +67,24 @@ from .core.basic_operations import (
 # Global state - simple and effective
 graphs: Dict[str, nx.Graph] = {}
 
+class GraphManager:
+    """Simple graph manager for test compatibility."""
+    
+    def __init__(self) -> None:
+        self.graphs = graphs
+    
+    def get_graph(self, graph_id: str) -> nx.Graph | None:
+        """Get a graph by ID."""
+        return graphs.get(graph_id)
+    
+    def delete_graph(self, graph_id: str) -> None:
+        """Delete a graph by ID."""
+        if graph_id in graphs:
+            del graphs[graph_id]
+
+# Create global graph manager instance
+graph_manager = GraphManager()
+
 # Optional authentication
 try:
     from .auth import APIKeyManager, AuthMiddleware
@@ -77,7 +95,7 @@ except ImportError:
 
 # Optional monitoring
 try:
-    from .monitoring import HealthMonitor, create_health_endpoint
+    from .monitoring import HealthMonitor
 
     HAS_MONITORING = True
 except ImportError:
@@ -85,62 +103,77 @@ except ImportError:
 
 
 # Re-export functions with graphs parameter bound
-def create_graph(name: str, directed: bool = False):
+def create_graph(name: str, directed: bool = False) -> Any:
     return _create_graph(name, directed, graphs)
 
 
-def add_nodes(graph_name: str, nodes: List):
+def add_nodes(graph_name: str, nodes: List) -> Any:
     return _add_nodes(graph_name, nodes, graphs)
 
 
-def add_edges(graph_name: str, edges: List):
+def add_edges(graph_name: str, edges: List) -> Any:
     return _add_edges(graph_name, edges, graphs)
 
 
-def get_graph_info(graph_name: str):
+def get_graph_info(graph_name: str) -> Any:
     return _get_graph_info(graph_name, graphs)
 
 
-def shortest_path(graph_name: str, source, target):
+def shortest_path(graph_name: str, source: Any, target: Any) -> Any:
     return _shortest_path(graph_name, source, target, graphs)
 
 
-def degree_centrality(graph_name: str):
+def degree_centrality(graph_name: str) -> Any:
     return _degree_centrality(graph_name, graphs)
 
 
-def betweenness_centrality(graph_name: str):
+def betweenness_centrality(graph_name: str) -> Any:
     return _betweenness_centrality(graph_name, graphs)
 
 
-def connected_components(graph_name: str):
+def connected_components(graph_name: str) -> Any:
     return _connected_components(graph_name, graphs)
 
 
-def pagerank(graph_name: str):
+def pagerank(graph_name: str) -> Any:
     return _pagerank(graph_name, graphs)
 
 
-def visualize_graph(graph_name: str, layout: str = "spring"):
+def visualize_graph(graph_name: str, layout: str = "spring") -> Any:
     return _visualize_graph(graph_name, layout, graphs)
 
 
-def import_csv(graph_name: str, csv_data: str, directed: bool = False):
+def import_csv(graph_name: str, csv_data: str, directed: bool = False) -> Any:
     return _import_csv(graph_name, csv_data, directed, graphs)
 
 
-def export_json(graph_name: str):
+def export_json(graph_name: str) -> Any:
     return _export_json(graph_name, graphs)
 
+def delete_graph(graph_name: str) -> Any:
+    """Delete a graph - compatibility function."""
+    if graph_name not in graphs:
+        return {
+            "success": False,
+            "error": f"Graph '{graph_name}' not found"
+        }
+    
+    del graphs[graph_name]
+    return {
+        "success": True,
+        "graph_id": graph_name,
+        "deleted": True
+    }
 
-def community_detection(graph_name: str):
+
+def community_detection(graph_name: str) -> Any:
     return _community_detection(graph_name, graphs)
 
 
 class NetworkXMCPServer:
     """Minimal MCP server - no unnecessary abstraction."""
 
-    def __init__(self, auth_required: bool = False, enable_monitoring: bool = False):
+    def __init__(self, auth_required: bool = False, enable_monitoring: bool = False) -> None:
         self.running = True
         self.mcp = self  # For test compatibility
         self.graphs = graphs  # Reference to global graphs
@@ -161,11 +194,11 @@ class NetworkXMCPServer:
         else:
             self.monitor = None
 
-    def tool(self, func):
+    def tool(self, func: Any) -> Any:
         """Mock tool decorator for test compatibility."""
         return func
 
-    async def handle_request(self, request: dict) -> dict:
+    async def handle_request(self, request: dict[str, Any]) -> dict[str, Any]:
         """Route requests to handlers."""
         method = request.get("method", "")
         params = request.get("params", {})
@@ -204,7 +237,7 @@ class NetworkXMCPServer:
             if req_id is None:
                 return None
             result = {}  # Just acknowledge
-        elif method == "tools/list":
+        elif method == "tools/list[Any]":
             result = {"tools": self._get_tools()}
         elif method == "tools/call":
             # Check permissions for write operations
@@ -371,7 +404,7 @@ class NetworkXMCPServer:
             },
             {
                 "name": "import_csv",
-                "description": "Import graph from CSV edge list (format: source,target per line)",
+                "description": "Import graph from CSV edge list[Any] (format: source,target per line)",
                 "inputSchema": {
                     "type": "object",
                     "properties": {
@@ -486,7 +519,7 @@ class NetworkXMCPServer:
 
         return tools
 
-    async def _call_tool(self, params: dict) -> dict:
+    async def _call_tool(self, params: dict[str, Any]) -> dict[str, Any]:
         """Execute a tool."""
         tool_name = params.get("name")
         args = params.get("arguments", {})
@@ -505,7 +538,7 @@ class NetworkXMCPServer:
                 graph_name = args["graph"]
                 if graph_name not in graphs:
                     raise ValueError(
-                        f"Graph '{graph_name}' not found. Available graphs: {list(graphs.keys())}"
+                        f"Graph '{graph_name}' not found. Available graphs: {list[Any](graphs.keys())}"
                     )
                 graph = graphs[graph_name]
                 graph.add_nodes_from(args["nodes"])
@@ -515,10 +548,10 @@ class NetworkXMCPServer:
                 graph_name = args["graph"]
                 if graph_name not in graphs:
                     raise ValueError(
-                        f"Graph '{graph_name}' not found. Available graphs: {list(graphs.keys())}"
+                        f"Graph '{graph_name}' not found. Available graphs: {list[Any](graphs.keys())}"
                     )
                 graph = graphs[graph_name]
-                edges = [tuple(e) for e in args["edges"]]
+                edges = [tuple[Any, ...](e) for e in args["edges"]]
                 graph.add_edges_from(edges)
                 result = {"added": len(edges), "total": graph.number_of_edges()}
 
@@ -526,7 +559,7 @@ class NetworkXMCPServer:
                 graph_name = args["graph"]
                 if graph_name not in graphs:
                     raise ValueError(
-                        f"Graph '{graph_name}' not found. Available graphs: {list(graphs.keys())}"
+                        f"Graph '{graph_name}' not found. Available graphs: {list[Any](graphs.keys())}"
                     )
                 graph = graphs[graph_name]
                 path = nx.shortest_path(graph, args["source"], args["target"])
@@ -536,7 +569,7 @@ class NetworkXMCPServer:
                 graph_name = args["graph"]
                 if graph_name not in graphs:
                     raise ValueError(
-                        f"Graph '{graph_name}' not found. Available graphs: {list(graphs.keys())}"
+                        f"Graph '{graph_name}' not found. Available graphs: {list[Any](graphs.keys())}"
                     )
                 graph = graphs[graph_name]
                 result = {
@@ -633,7 +666,7 @@ class NetworkXMCPServer:
                 "isError": True,
             }
 
-    async def run(self):
+    async def run(self) -> None:
         """Main server loop - read stdin, write stdout."""
         while self.running:
             try:
@@ -656,7 +689,7 @@ class NetworkXMCPServer:
 mcp = NetworkXMCPServer()
 
 
-def main():
+def main() -> None:
     """Main entry point for the NetworkX MCP Server."""
     # Check environment variables
     auth_required = os.environ.get("NETWORKX_MCP_AUTH", "false").lower() == "true"

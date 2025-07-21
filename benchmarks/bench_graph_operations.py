@@ -134,7 +134,7 @@ class GraphOperationsSuite:
         G = nx.erdos_renyi_graph(300, 0.5, seed=42)
         # Perform memory-intensive operations
         nodes = list(G.nodes())
-        edges = list(G.edges())
+        list(G.edges())
         subgraph = G.subgraph(nodes[:100])
         return subgraph
 
