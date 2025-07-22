@@ -70,7 +70,7 @@ jobs:
       run: |
         # Test MCP protocol implementation
         python -c "from networkx_mcp import server; print('✅ MCP server imports successfully')"
-        
+
         # Test CLI entry point
         networkx-mcp --version || echo "CLI not available in test environment"
 
@@ -87,28 +87,28 @@ jobs:
   pre-commit:
     name: Pre-commit Checks
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: ${{ env.PYTHON_VERSION_DEFAULT }}
         cache: 'pip'
-        
+
     - name: Install pre-commit
       run: |
         python -m pip install --upgrade pip
         pip install pre-commit
-        
+
     - name: Cache pre-commit environments
       uses: actions/cache@v4
       with:
         path: ~/.cache/pre-commit
         key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
-        
+
     - name: Run pre-commit
       run: pre-commit run --all-files --show-diff-on-failure
 
@@ -116,16 +116,16 @@ jobs:
   docs:
     name: Documentation Check
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: ${{ env.PYTHON_VERSION_DEFAULT }}
-        
+
     - name: Validate README
       run: |
         # Check for broken links in README
@@ -150,37 +150,37 @@ jobs:
   build:
     name: Build Package
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: ${{ env.PYTHON_VERSION_DEFAULT }}
-        
+
     - name: Install build tools
       run: |
         python -m pip install --upgrade pip
         pip install build twine
-        
+
     - name: Build package
       run: python -m build
-      
+
     - name: Check package
       run: |
         twine check dist/*
         # List package contents
         python -m zipfile -l dist/*.whl
-        
+
     - name: Test installation
       run: |
         # Test wheel installation
         pip install dist/*.whl
         python -c "from networkx_mcp import server; print('✅ Package imports successfully')"
         pip uninstall -y networkx-mcp-server
-        
+
         # Test sdist installation
         pip install dist/*.tar.gz
         python -c "from networkx_mcp import server; print('✅ Package imports successfully')"
@@ -191,7 +191,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [test, pre-commit, docs, build]
     if: always()
-    
+
     steps:
     - name: Check results
       run: |

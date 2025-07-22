@@ -16,11 +16,11 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
@@ -38,7 +38,7 @@ jobs:
         # Run bandit and create reports
         bandit -r src/ -f json -o bandit-report.json --severity-level medium || true
         bandit -r src/ -f txt -o bandit-report.txt --severity-level medium || true
-        
+
         # Display results
         echo "## Bandit Security Scan Results" >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
@@ -49,11 +49,11 @@ jobs:
       run: |
         # Generate requirements file
         pip freeze > requirements-scan.txt
-        
+
         # Run safety check
         safety check --json --file requirements-scan.txt > safety-report.json || true
         safety check --file requirements-scan.txt > safety-report.txt || true
-        
+
         # Display results
         echo "## Dependency Vulnerability Scan" >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
@@ -96,11 +96,11 @@ jobs:
           echo "::error::Critical security issues found in code!"
           exit 1
         fi
-        
+
         # Check for critical dependency vulnerabilities
         if grep -q "CRITICAL" safety-report.txt 2>/dev/null; then
           echo "::error::Critical vulnerabilities found in dependencies!"
           exit 1
         fi
-        
+
         echo "✅ No critical security issues found"

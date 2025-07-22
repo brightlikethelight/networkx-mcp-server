@@ -29,7 +29,6 @@ else:
     from networkx_mcp.handlers.graph_ops import GraphOpsHandler
     from networkx_mcp.handlers.visualization import VisualizationHandler
 
-
     class TestCoverageExplosion:
         """Comprehensive coverage tests targeting 95%+ code coverage."""
 

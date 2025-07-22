@@ -9,11 +9,13 @@ Successfully consolidated and optimized the CI/CD workflows for the NetworkX MCP
 ### 1. **Workflow Consolidation**
 
 #### Removed Workflows
+
 - **`deploy.yaml`** - Removed duplicate deployment workflow that conflicted with release.yml
 
 #### Updated Workflows
 
 ##### `release.yml` (Primary Release Pipeline)
+
 - **Consolidated features from both deploy.yaml and release.yml**
 - **Added comprehensive validation stage** with version checking
 - **Implemented parallel build jobs** for Python and Docker
@@ -24,6 +26,7 @@ Successfully consolidated and optimized the CI/CD workflows for the NetworkX MCP
 - **Concurrency controls** to prevent simultaneous releases
 
 ##### `ci.yml` (Continuous Integration)
+
 - **Fixed test commands** - Removed `|| true` that was hiding failures
 - **Updated all actions to v5** (setup-python) and v4 (checkout, upload-artifact)
 - **Added coverage threshold** (`--cov-fail-under=60`)
@@ -33,6 +36,7 @@ Successfully consolidated and optimized the CI/CD workflows for the NetworkX MCP
 - **Integrated pre-commit checks**
 
 ##### `security.yml` (Security Scanning)
+
 - **Updated setup-python from v4 to v5**
 - **Added Semgrep integration** for advanced static analysis
 - **SARIF upload** to GitHub Security tab
@@ -40,6 +44,7 @@ Successfully consolidated and optimized the CI/CD workflows for the NetworkX MCP
 - **Critical issue detection** with build failure on HIGH severity
 
 ##### `docker-build.yml` (Docker CI)
+
 - **Updated docker actions to v6**
 - **Added MCP protocol validation**
 - **Multi-platform builds by default**
@@ -62,6 +67,7 @@ Successfully consolidated and optimized the CI/CD workflows for the NetworkX MCP
 ### 3. **Best Practices Implementation**
 
 #### Concurrency Control
+
 ```yaml
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -69,6 +75,7 @@ concurrency:
 ```
 
 #### Environment Protection
+
 ```yaml
 environment: pypi
 permissions:
@@ -76,11 +83,13 @@ permissions:
 ```
 
 #### Proper Error Handling
+
 - Removed all `|| true` statements that were hiding test failures
 - Added explicit error checks with proper exit codes
 - Implemented retry logic for flaky operations
 
 #### Caching Strategy
+
 - Python dependencies cached via setup-python
 - Docker layer caching via GitHub Actions cache
 - Pre-commit environments cached
@@ -96,6 +105,7 @@ permissions:
 ### 5. **Docker Enhancements**
 
 #### Updated Dockerfile
+
 - **Multi-stage build** for smaller images
 - **Python 3.12** as base
 - **Health check** for container monitoring
@@ -104,6 +114,7 @@ permissions:
 - **Non-root user** for security
 
 #### Optimized .dockerignore
+
 - Excludes all unnecessary files
 - Keeps only essential build files
 - Reduces build context size
@@ -111,6 +122,7 @@ permissions:
 ### 6. **Documentation**
 
 #### Added Workflow Status Badges
+
 ```markdown
 [![CI](https://github.com/Bright-L01/networkx-mcp-server/actions/workflows/ci.yml/badge.svg)](...)
 [![Release](https://github.com/Bright-L01/networkx-mcp-server/actions/workflows/release.yml/badge.svg)](...)
@@ -119,6 +131,7 @@ permissions:
 ```
 
 #### Created Workflow Documentation
+
 - `.github/workflows/README.md` explaining all workflows
 - Best practices guide
 - Maintenance instructions

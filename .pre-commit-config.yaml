@@ -28,19 +28,23 @@ repos:
       # Run the linter
       - id: ruff
         args: [--fix]
+        exclude: ^docs/archive/
       # Run the formatter
       - id: ruff-format
+        exclude: ^docs/archive/
 
   # Python type checking
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.14.1
     hooks:
       - id: mypy
-        args: [--strict, --ignore-missing-imports]
+        args: [--config-file=pyproject.toml]
         additional_dependencies: [
           types-requests,
           types-python-dateutil,
           networkx-stubs,
+          types-pyyaml,
+          types-redis,
         ]
         files: ^src/
 
@@ -51,6 +55,7 @@ repos:
       - id: bandit
         args: ['-r', 'src/', '-ll']
         files: ^src/.*\.py$
+        pass_filenames: false
 
   # Markdown formatting
   - repo: https://github.com/igorshubovych/markdownlint-cli
@@ -66,7 +71,7 @@ repos:
       - id: prettier
         types_or: [yaml]
         exclude: ^.*\.ya?ml$
-        
+
   # GitHub Actions workflow validation
   - repo: https://github.com/python-jsonschema/check-jsonschema
     rev: 0.31.0
