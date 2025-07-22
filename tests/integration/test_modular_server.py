@@ -35,9 +35,9 @@ def test_handler_imports():
 
         for handler in handlers:
             assert hasattr(handler, "__init__"), f"{handler.__name__} missing __init__"
-            assert hasattr(handler, "_register_tools"), (
-                f"{handler.__name__} missing _register_tools"
-            )
+            assert hasattr(
+                handler, "_register_tools"
+            ), f"{handler.__name__} missing _register_tools"
             print(f"✓ {handler.__name__} has required methods")
 
         return True

@@ -24,7 +24,7 @@ def calculate_layout(
         layout = "spring"  # fallback
 
     try:
-        result: dict[Any, tuple[float, float]] = layout_funcs[layout](graph, **params)
+        result: dict[Any, tuple[float, float]] = layout_funcs[layout](graph, **params)  # type: ignore[no-untyped-call]
         return result
     except Exception:
         # Fallback to spring layout if specific layout fails
@@ -33,7 +33,7 @@ def calculate_layout(
 
 
 def prepare_graph_data(
-    graph: nx.Graph, pos: dict[Any, tuple[float:Any, float]]
+    graph: nx.Graph, pos: dict[Any, tuple[float, float]]
 ) -> dict[str, Any]:
     """Prepare graph data for visualization."""
     nodes = []

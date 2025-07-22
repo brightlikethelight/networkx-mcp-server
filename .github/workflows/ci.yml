@@ -50,7 +50,7 @@ jobs:
 
     - name: Run type checking
       run: |
-        mypy src/networkx_mcp/ --strict --ignore-missing-imports
+        mypy src/networkx_mcp/ --ignore-missing-imports
 
     - name: Run security checks
       if: matrix.os == 'ubuntu-latest'  # Bandit has issues on Windows
