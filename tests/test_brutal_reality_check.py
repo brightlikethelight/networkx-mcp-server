@@ -582,7 +582,7 @@ class BrutalTester:
         return {
             "total_tests": total_tests,
             "passed": passed_tests,
-            "warnings": warning_tests,
+            "warning_count": warning_tests,
             "failed": failed_tests,
             "success_rate": (passed_tests / max(total_tests, 1)) * 100,
             "errors": self.errors,

@@ -19,10 +19,7 @@ async def call_tool(server, tool_name, arguments):
         "jsonrpc": "2.0",
         "id": 1,
         "method": "tools/call",
-        "params": {
-            "name": tool_name,
-            "arguments": arguments
-        }
+        "params": {"name": tool_name, "arguments": arguments},
     }
 
     response = await server.handle_request(request)
@@ -40,18 +37,16 @@ async def test_input_validation():
 
     # Test 1: SQL injection attempt in graph name
     print("\n1. Testing SQL injection prevention...")
-    response = await call_tool(server, "create_graph", {
-        "name": "test'; DROP TABLE graphs; --"
-    })
+    response = await call_tool(
+        server, "create_graph", {"name": "test'; DROP TABLE graphs; --"}
+    )
     success = "error" not in response and response.get("result")
     tests.append(("SQL injection in graph name", success))
     print(f"   Created graph with SQL-like name: {success}")
 
     # Test 2: Path traversal attempt
     print("\n2. Testing path traversal prevention...")
-    response = await call_tool(server, "create_graph", {
-        "name": "../../../etc/passwd"
-    })
+    response = await call_tool(server, "create_graph", {"name": "../../../etc/passwd"})
     success = "error" not in response
     tests.append(("Path traversal in graph name", success))
     print(f"   Created graph with path-like name: {success}")
@@ -59,28 +54,28 @@ async def test_input_validation():
     # Test 3: XSS attempt in node names
     print("\n3. Testing XSS prevention...")
     await call_tool(server, "create_graph", {"name": "xss_test"})
-    response = await call_tool(server, "add_nodes", {
-        "graph": "xss_test",
-        "nodes": ["<script>alert('XSS')</script>", "normal_node"]
-    })
+    response = await call_tool(
+        server,
+        "add_nodes",
+        {
+            "graph": "xss_test",
+            "nodes": ["<script>alert('XSS')</script>", "normal_node"],
+        },
+    )
     success = "error" not in response
     tests.append(("XSS in node names", success))
     print(f"   Added nodes with script tags: {success}")
 
     # Test 4: Command injection attempt
     print("\n4. Testing command injection prevention...")
-    response = await call_tool(server, "create_graph", {
-        "name": "test`rm -rf /`"
-    })
+    response = await call_tool(server, "create_graph", {"name": "test`rm -rf /`"})
     success = "error" not in response
     tests.append(("Command injection in graph name", success))
     print(f"   Created graph with command-like name: {success}")
 
     # Test 5: Unicode and special characters
     print("\n5. Testing Unicode handling...")
-    response = await call_tool(server, "create_graph", {
-        "name": "测试图表🎯"
-    })
+    response = await call_tool(server, "create_graph", {"name": "测试图表🎯"})
     success = "error" not in response
     tests.append(("Unicode in graph name", success))
     print(f"   Created graph with Unicode name: {success}")
@@ -88,28 +83,28 @@ async def test_input_validation():
     # Test 6: Very long names
     print("\n6. Testing length limits...")
     long_name = "A" * 10000
-    response = await call_tool(server, "create_graph", {
-        "name": long_name
-    })
+    response = await call_tool(server, "create_graph", {"name": long_name})
     success = "error" not in response
     tests.append(("Very long graph name", success))
     print(f"   Created graph with 10k character name: {success}")
 
     # Test 7: Null and empty values
     print("\n7. Testing null/empty value handling...")
-    response = await call_tool(server, "create_graph", {
-        "name": ""
-    })
+    response = await call_tool(server, "create_graph", {"name": ""})
     handled_properly = "error" in response or response.get("result", {}).get("isError")
     tests.append(("Empty graph name", handled_properly))
     print(f"   Empty name handled properly: {handled_properly}")
 
     # Test 8: Invalid data types
     print("\n8. Testing type validation...")
-    response = await call_tool(server, "add_nodes", {
-        "graph": "xss_test",
-        "nodes": "not_a_list"  # Should be a list
-    })
+    response = await call_tool(
+        server,
+        "add_nodes",
+        {
+            "graph": "xss_test",
+            "nodes": "not_a_list",  # Should be a list
+        },
+    )
     handled_properly = "error" in response or response.get("result", {}).get("isError")
     tests.append(("Invalid type for nodes", handled_properly))
     print(f"   Invalid type handled properly: {handled_properly}")
@@ -133,10 +128,9 @@ async def test_dos_prevention():
 
         # Try to add a million nodes (should be handled gracefully)
         huge_nodes = list(range(10000))  # Start with 10k
-        response = await call_tool(server, "add_nodes", {
-            "graph": "large_test",
-            "nodes": huge_nodes
-        })
+        response = await call_tool(
+            server, "add_nodes", {"graph": "large_test", "nodes": huge_nodes}
+        )
         success = "error" not in response
         tests.append(("Large node addition (10k)", success))
         print(f"   Added 10k nodes: {success}")
@@ -148,12 +142,11 @@ async def test_dos_prevention():
     print("\n2. Testing deeply nested CSV...")
     nested_csv = "source,target\n"
     for i in range(1000):
-        nested_csv += f"node{i},node{i+1}\n"
+        nested_csv += f"node{i},node{i + 1}\n"
 
-    response = await call_tool(server, "import_csv", {
-        "graph": "nested_csv",
-        "csv_data": nested_csv
-    })
+    response = await call_tool(
+        server, "import_csv", {"graph": "nested_csv", "csv_data": nested_csv}
+    )
     success = "error" not in response
     tests.append(("Large CSV import", success))
     print(f"   Imported 1000-line CSV: {success}")
@@ -161,21 +154,19 @@ async def test_dos_prevention():
     # Test 3: Circular references
     print("\n3. Testing circular reference handling...")
     await call_tool(server, "create_graph", {"name": "circular"})
-    await call_tool(server, "add_nodes", {
-        "graph": "circular",
-        "nodes": ["A", "B", "C"]
-    })
-    await call_tool(server, "add_edges", {
-        "graph": "circular",
-        "edges": [["A", "B"], ["B", "C"], ["C", "A"]]
-    })
+    await call_tool(
+        server, "add_nodes", {"graph": "circular", "nodes": ["A", "B", "C"]}
+    )
+    await call_tool(
+        server,
+        "add_edges",
+        {"graph": "circular", "edges": [["A", "B"], ["B", "C"], ["C", "A"]]},
+    )
 
     # This should handle cycles gracefully
-    response = await call_tool(server, "shortest_path", {
-        "graph": "circular",
-        "source": "A",
-        "target": "A"
-    })
+    response = await call_tool(
+        server, "shortest_path", {"graph": "circular", "source": "A", "target": "A"}
+    )
     handled = "error" not in response or "path" in response.get("result", {})
     tests.append(("Circular path handling", handled))
     print(f"   Circular paths handled: {handled}")
@@ -194,9 +185,7 @@ async def test_error_handling():
 
     # Test 1: Non-existent graph
     print("\n1. Testing non-existent graph errors...")
-    response = await call_tool(server, "get_info", {
-        "graph": "does_not_exist"
-    })
+    response = await call_tool(server, "get_info", {"graph": "does_not_exist"})
 
     # Check error doesn't reveal internals
     if "error" in response:
@@ -204,8 +193,9 @@ async def test_error_handling():
     else:
         error_msg = response.get("result", {}).get("content", [{}])[0].get("text", "")
 
-    reveals_internals = any(word in error_msg.lower() for word in
-                           ["traceback", "file", "line", "__"])
+    reveals_internals = any(
+        word in error_msg.lower() for word in ["traceback", "file", "line", "__"]
+    )
     tests.append(("Error message safety", not reveals_internals))
     print(f"   Error messages safe: {not reveals_internals}")
     print(f"   Error: {error_msg[:100]}...")
@@ -214,7 +204,7 @@ async def test_error_handling():
     print("\n2. Testing malformed request handling...")
     malformed = {
         "jsonrpc": "1.0",  # Wrong version
-        "method": "tools/list"
+        "method": "tools/list",
     }
     response = await server.handle_request(malformed)
     handled = response is not None and "error" not in str(response).lower()
@@ -223,10 +213,14 @@ async def test_error_handling():
 
     # Test 3: Missing required fields
     print("\n3. Testing missing field handling...")
-    response = await call_tool(server, "shortest_path", {
-        "graph": "test"
-        # Missing source and target
-    })
+    response = await call_tool(
+        server,
+        "shortest_path",
+        {
+            "graph": "test"
+            # Missing source and target
+        },
+    )
     handled = "error" in response or response.get("result", {}).get("isError")
     tests.append(("Missing required fields", handled))
     print(f"   Missing fields handled: {handled}")
@@ -249,17 +243,16 @@ async def test_resource_limits():
 
     # Create a moderately complex graph
     nodes = list(range(100))
-    edges = [[i, (i+1) % 100] for i in range(100)]
-    edges.extend([[i, (i+50) % 100] for i in range(0, 100, 5)])
+    edges = [[i, (i + 1) % 100] for i in range(100)]
+    edges.extend([[i, (i + 50) % 100] for i in range(0, 100, 5)])
 
     await call_tool(server, "add_nodes", {"graph": "viz_memory", "nodes": nodes})
     await call_tool(server, "add_edges", {"graph": "viz_memory", "edges": edges})
 
     # Generate visualization
-    response = await call_tool(server, "visualize_graph", {
-        "graph": "viz_memory",
-        "layout": "spring"
-    })
+    response = await call_tool(
+        server, "visualize_graph", {"graph": "viz_memory", "layout": "spring"}
+    )
     success = "error" not in response
     tests.append(("Visualization memory handling", success))
     print(f"   100-node visualization: {success}")
@@ -295,15 +288,15 @@ async def main():
     all_tests.extend(await test_resource_limits())
 
     # Summary
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("SECURITY TEST SUMMARY")
-    print("="*60)
+    print("=" * 60)
 
     passed = sum(1 for _, success in all_tests if success)
     total = len(all_tests)
 
     print(f"\nTotal Tests: {total}")
-    print(f"Passed: {passed} ({passed/total*100:.1f}%)")
+    print(f"Passed: {passed} ({passed / total * 100:.1f}%)")
     print(f"Failed: {total - passed}")
 
     print("\nDetailed Results:")
@@ -326,4 +319,5 @@ async def main():
 
 if __name__ == "__main__":
     import time
+
     asyncio.run(main())

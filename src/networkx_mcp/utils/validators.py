@@ -84,7 +84,9 @@ class GraphValidator:
         return False
 
     @staticmethod
-    def validate_path_exists(graph: nx.Graph, source: str | int, target: str | int) -> bool:
+    def validate_path_exists(
+        graph: nx.Graph, source: str | int, target: str | int
+    ) -> bool:
         """Validate if path exists between two nodes."""
         if source not in graph or target not in graph:
             return False
@@ -92,7 +94,9 @@ class GraphValidator:
         return nx.has_path(graph, source, target)
 
     @staticmethod
-    def validate_graph_connectivity(graph: nx.Graph, require_connected: bool = False) -> dict[str, Any]:
+    def validate_graph_connectivity(
+        graph: nx.Graph, require_connected: bool = False
+    ) -> dict[str, Any]:
         """Validate graph connectivity properties."""
         result = {
             "valid": True,
@@ -122,7 +126,9 @@ class GraphValidator:
         return result
 
     @staticmethod
-    def validate_algorithm_input(algorithm: str, graph: nx.Graph, params: dict[str, Any]) -> dict[str, Any]:
+    def validate_algorithm_input(
+        algorithm: str, graph: nx.Graph, params: dict[str, Any]
+    ) -> dict[str, Any]:
         """Validate inputs for specific algorithms."""
         result = {"valid": True, "errors": []}
 
@@ -201,7 +207,9 @@ class GraphValidator:
         return measure in valid_measures
 
     @staticmethod
-    def validate_file_format(file_format: str | Any, operation: str | list[Any] = "export") -> bool | tuple[bool, str | None]:
+    def validate_file_format(
+        file_format: str | Any, operation: str | list[Any] = "export"
+    ) -> bool | tuple[bool, str | None]:
         """Validate file format for import/export.
 
         This method supports two signatures for backward compatibility:
@@ -367,7 +375,9 @@ class GraphValidator:
         return True, None
 
     @staticmethod
-    def validate_file_path_format(filepath: str | Path | None, expected_formats: list[str] | None = None) -> tuple[bool, str | None]:
+    def validate_file_path_format(
+        filepath: str | Path | None, expected_formats: list[str] | None = None
+    ) -> tuple[bool, str | None]:
         """Validate file format based on extension and expected formats.
 
         Args:
@@ -539,7 +549,9 @@ class GraphValidator:
         return len(errors) == 0, errors
 
     @staticmethod
-    def validate_import_data(format: str, data: Any | None = None, path: str | Path | None = None) -> tuple[bool, str | None]:
+    def validate_import_data(
+        format: str, data: Any | None = None, path: str | Path | None = None
+    ) -> tuple[bool, str | None]:
         """Validate import data based on format.
 
         Args:
@@ -579,7 +591,10 @@ class GraphValidator:
                 # Basic structure validation
                 if format == "adjacency":
                     if not isinstance(data, dict[str, Any]) or "matrix" not in data:
-                        return False, "Adjacency format requires dict[str, Any] with 'matrix' key"
+                        return (
+                            False,
+                            "Adjacency format requires dict[str, Any] with 'matrix' key",
+                        )
 
         else:
             return False, f"Unknown import format: {format}"

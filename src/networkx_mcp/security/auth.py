@@ -82,7 +82,9 @@ class TokenValidator:
     def __init__(self, secret_key: str) -> None:
         self.secret_key = secret_key.encode("utf-8")
 
-    def create_token(self, user_id: str, expires_in: int = 3600, scopes: set[str] | None = None) -> AuthToken:
+    def create_token(
+        self, user_id: str, expires_in: int = 3600, scopes: set[str] | None = None
+    ) -> AuthToken:
         """Create a new authentication token."""
         now = time.time()
         expires_at = now + expires_in
@@ -173,7 +175,13 @@ class AuthService(Component):
         }
 
     # @with_logging_context removed - monitoring module deleted
-    async def register_user(self, username: str, password: str, email: str | None = None, roles: set[str] | None = None) -> User:
+    async def register_user(
+        self,
+        username: str,
+        password: str,
+        email: str | None = None,
+        roles: set[str] | None = None,
+    ) -> User:
         """Register a new user."""
         user_id = f"user_{len(self.users) + 1}"
 

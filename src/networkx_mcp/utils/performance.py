@@ -20,7 +20,9 @@ class PerformanceMonitor:
     def __init__(self) -> None:
         self.metrics: dict[str, Any] = {}
 
-    def time_operation(self, operation_name: str) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+    def time_operation(
+        self, operation_name: str
+    ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
         """Decorator to time operations."""
 
         def decorator(func: Callable[..., Any]) -> Callable[..., Any]:

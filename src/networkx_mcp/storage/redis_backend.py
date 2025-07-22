@@ -66,7 +66,13 @@ class RedisTransaction(Transaction):
 class RedisBackend(StorageBackend):
     """Production Redis backend with compression and metadata."""
 
-    def __init__(self, redis_url: str = "redis://localhost:6379", max_graph_size_mb: int = 100, compression_level: int = 6, key_prefix: str = "networkx_mcp"):
+    def __init__(
+        self,
+        redis_url: str = "redis://localhost:6379",
+        max_graph_size_mb: int = 100,
+        compression_level: int = 6,
+        key_prefix: str = "networkx_mcp",
+    ):
         self.redis_url = redis_url
         self.max_size_bytes = max_graph_size_mb * 1024 * 1024
         self.compression_level = compression_level
@@ -124,7 +130,14 @@ class RedisBackend(StorageBackend):
             safe_parts.append(part)
         return ":".join(safe_parts)
 
-    async def save_graph(self, user_id: str, graph_id: str, graph: nx.Graph, metadata: dict[str, Any] | None = None, tx: Transaction | None = None) -> bool:
+    async def save_graph(
+        self,
+        user_id: str,
+        graph_id: str,
+        graph: nx.Graph,
+        metadata: dict[str, Any] | None = None,
+        tx: Transaction | None = None,
+    ) -> bool:
         """Save graph with compression and metadata."""
         # Validate inputs
         user_id = SecurityValidator.validate_user_id(user_id)
@@ -207,7 +220,9 @@ class RedisBackend(StorageBackend):
 
         return True
 
-    async def load_graph(self, user_id: str, graph_id: str, tx: Transaction | None = None) -> nx.Graph | None:
+    async def load_graph(
+        self, user_id: str, graph_id: str, tx: Transaction | None = None
+    ) -> nx.Graph | None:
         """Load graph from storage."""
         # Validate inputs
         user_id = SecurityValidator.validate_user_id(user_id)
@@ -245,7 +260,9 @@ class RedisBackend(StorageBackend):
 
         return graph
 
-    async def delete_graph(self, user_id: str, graph_id: str, tx: Transaction | None = None) -> bool:
+    async def delete_graph(
+        self, user_id: str, graph_id: str, tx: Transaction | None = None
+    ) -> bool:
         """Delete graph from storage."""
         # Validate inputs
         user_id = SecurityValidator.validate_user_id(user_id)
@@ -286,7 +303,13 @@ class RedisBackend(StorageBackend):
             await client.hincrby(user_stats_key, "graph_count", -1)
             return True
 
-    async def list_graphs(self, user_id: str, limit: int = 100, offset: int = 0, tx: Transaction | None = None) -> list[dict[str, Any]]:
+    async def list_graphs(
+        self,
+        user_id: str,
+        limit: int = 100,
+        offset: int = 0,
+        tx: Transaction | None = None,
+    ) -> list[dict[str, Any]]:
         """List user's graphs with metadata."""
         # Validate inputs
         user_id = SecurityValidator.validate_user_id(user_id)
@@ -326,7 +349,9 @@ class RedisBackend(StorageBackend):
 
         return graphs
 
-    async def get_graph_metadata(self, user_id: str, graph_id: str, tx: Transaction | None = None) -> dict[str, Any] | None:
+    async def get_graph_metadata(
+        self, user_id: str, graph_id: str, tx: Transaction | None = None
+    ) -> dict[str, Any] | None:
         """Get graph metadata without loading the full graph."""
         # Validate inputs
         user_id = SecurityValidator.validate_user_id(user_id)
@@ -340,7 +365,13 @@ class RedisBackend(StorageBackend):
             return json.loads(metadata)
         return None
 
-    async def update_graph_metadata(self, user_id: str, graph_id: str, metadata: dict[str, Any], tx: Transaction | None = None) -> bool:
+    async def update_graph_metadata(
+        self,
+        user_id: str,
+        graph_id: str,
+        metadata: dict[str, Any],
+        tx: Transaction | None = None,
+    ) -> bool:
         """Update graph metadata."""
         # Validate inputs
         user_id = SecurityValidator.validate_user_id(user_id)

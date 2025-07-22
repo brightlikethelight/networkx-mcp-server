@@ -6,6 +6,7 @@ and other components.
 """
 
 import logging
+from typing import Any
 
 from ..caching.cache_service import CacheService, MemoryCache, RedisCache
 from ..events.graph_events import (
@@ -32,6 +33,7 @@ logger = logging.getLogger(__name__)
 
 def configure_core_services(container: Container) -> None:
     """Configure core services in the DI container."""
+
     # Configuration
     def config_factory(c: Container) -> AppConfig:
         return get_config()

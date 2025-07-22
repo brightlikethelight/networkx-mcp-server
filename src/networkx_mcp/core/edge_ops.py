@@ -11,7 +11,9 @@ class EdgeOperations:
     def __init__(self, graph: nx.Graph) -> None:
         self.graph = graph
 
-    def add_edge_with_validation(self, source: str | int, target: str | int, **attrs: Any) -> bool:
+    def add_edge_with_validation(
+        self, source: str | int, target: str | int, **attrs: Any
+    ) -> bool:
         """Add edge with validation."""
         if self.graph.has_edge(source, target):
             return False

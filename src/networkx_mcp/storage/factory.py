@@ -15,7 +15,9 @@ class StorageFactory:
     """Factory for creating storage backends based on configuration."""
 
     @staticmethod
-    async def create_backend(backend_type: Optional[str] = None, **kwargs) -> StorageBackend:
+    async def create_backend(
+        backend_type: Optional[str] = None, **kwargs
+    ) -> StorageBackend:
         """
         Create a storage backend based on configuration.
 

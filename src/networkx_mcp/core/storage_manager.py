@@ -2,12 +2,12 @@
 
 import asyncio
 import logging
-from typing import Optional
+from typing import Any, Optional
 
 from ..storage import StorageBackend, StorageFactory
 from .graph_operations import GraphManager
 
-logger = logging.getLogger(__name__, Any)
+logger = logging.getLogger(__name__)
 
 
 class StorageManager:
@@ -136,7 +136,7 @@ class StorageManager:
         if not self.storage_backend:
             return
 
-        for graph_id in list[Any](self.graph_manager.graphs.keys()):
+        for graph_id in list(self.graph_manager.graphs.keys()):
             await self.save_graph(graph_id)
 
         logger.debug(f"Synced {len(self.graph_manager.graphs)} graphs to storage")

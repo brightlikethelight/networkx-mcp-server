@@ -349,7 +349,9 @@ class ConfigManager:
 
         return AppConfig(**config_dict)
 
-    def _deep_merge(self, base: dict[str, Any], update: dict[str, Any]) -> dict[str, Any]:
+    def _deep_merge(
+        self, base: dict[str, Any], update: dict[str, Any]
+    ) -> dict[str, Any]:
         """Deep merge two dictionaries."""
         result = base.copy()
 
@@ -412,7 +414,11 @@ def get_config() -> AppConfig:
     return get_config_manager().get_config()
 
 
-def load_config(config_file: str | None = None, env_prefix: str = "MCP_", environment: Environment | None = None) -> AppConfig:
+def load_config(
+    config_file: str | None = None,
+    env_prefix: str = "MCP_",
+    environment: Environment | None = None,
+) -> AppConfig:
     """Load application configuration."""
     manager = get_config_manager()
 

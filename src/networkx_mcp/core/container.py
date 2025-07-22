@@ -29,7 +29,15 @@ class Scope(Enum):
 class DependencyDescriptor:
     """Descriptor for a dependency."""
 
-    def __init__(self, interface: type[T], implementation: type[T] | Callable[..., T] | None = None, factory: Callable[..., T] | None = None, scope: Scope = Scope.SINGLETON, name: str | None = None, tags: list[str] | None = None):
+    def __init__(
+        self,
+        interface: type[T],
+        implementation: type[T] | Callable[..., T] | None = None,
+        factory: Callable[..., T] | None = None,
+        scope: Scope = Scope.SINGLETON,
+        name: str | None = None,
+        tags: list[str] | None = None,
+    ):
         self.interface = interface
         self.implementation = implementation or interface
         self.factory = factory
@@ -73,7 +81,15 @@ class Container:
         self._lock = asyncio.Lock()
         logger.info(f"Container {name} created")
 
-    def register(self, interface: type[T], implementation: type[T] | Callable[..., T] | None = None, factory: Callable[..., T] | None = None, scope: Scope = Scope.SINGLETON, name: str | None = None, tags: list[str] | None = None) -> None:
+    def register(
+        self,
+        interface: type[T],
+        implementation: type[T] | Callable[..., T] | None = None,
+        factory: Callable[..., T] | None = None,
+        scope: Scope = Scope.SINGLETON,
+        name: str | None = None,
+        tags: list[str] | None = None,
+    ) -> None:
         """Register a dependency."""
         descriptor = DependencyDescriptor(
             interface=interface,
@@ -90,15 +106,24 @@ class Container:
 
         logger.debug(f"Registered {interface.__name__} with scope {scope.value}")
 
-    def register_singleton(self, interface: type[T], implementation: type[T] | None = None) -> None:
+    def register_singleton(
+        self, interface: type[T], implementation: type[T] | None = None
+    ) -> None:
         """Register a singleton dependency."""
         self.register(interface, implementation, scope=Scope.SINGLETON)
 
-    def register_transient(self, interface: type[T], implementation: type[T] | None = None) -> None:
+    def register_transient(
+        self, interface: type[T], implementation: type[T] | None = None
+    ) -> None:
         """Register a transient dependency."""
         self.register(interface, implementation, scope=Scope.TRANSIENT)
 
-    def register_factory(self, interface: type[T], factory: Callable[["Container"], T], scope: Scope = Scope.SINGLETON) -> None:
+    def register_factory(
+        self,
+        interface: type[T],
+        factory: Callable[["Container"], T],
+        scope: Scope = Scope.SINGLETON,
+    ) -> None:
         """Register a factory function."""
         self.register(interface, factory=factory, scope=scope)
 

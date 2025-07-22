@@ -99,7 +99,9 @@ def validate_id(value: Any, field_name: str = "ID") -> str:
     return str_value
 
 
-def validate_node_list(nodes: list[Any], max_nodes: int = MAX_NODES_PER_REQUEST) -> list[Union[str, int]]:
+def validate_node_list(
+    nodes: list[Any], max_nodes: int = MAX_NODES_PER_REQUEST
+) -> list[Union[str, int]]:
     """
     Validate a list[Any] of nodes.
 
@@ -160,7 +162,9 @@ def validate_node_list(nodes: list[Any], max_nodes: int = MAX_NODES_PER_REQUEST)
     return validated_nodes
 
 
-def validate_edge_list(edges: list[Any], max_edges: int = MAX_EDGES_PER_REQUEST) -> list[EdgeTuple]:
+def validate_edge_list(
+    edges: list[Any], max_edges: int = MAX_EDGES_PER_REQUEST
+) -> list[EdgeTuple]:
     """
     Validate a list[Any] of edges.
 
@@ -187,7 +191,9 @@ def validate_edge_list(edges: list[Any], max_edges: int = MAX_EDGES_PER_REQUEST)
 
     for i, edge in enumerate(edges):
         if not isinstance(edge, (list[Any], tuple[Any, ...])):
-            raise ValidationError(f"Edge at index {i} must be a list[Any] or tuple[Any, ...]")
+            raise ValidationError(
+                f"Edge at index {i} must be a list[Any] or tuple[Any, ...]"
+            )
 
         if len(edge) < 2:
             raise ValidationError(
@@ -315,12 +321,18 @@ def sanitize_value(value: Any, field_name: str = "Value") -> Any:
     # Handle lists and tuples
     if isinstance(value, (list[Any], tuple[Any, ...])):
         if len(value) > 100:  # Reasonable limit for attribute lists
-            raise ValidationError(f"{field_name}: list[Any] too long (max 100 elements)")
+            raise ValidationError(
+                f"{field_name}: list[Any] too long (max 100 elements)"
+            )
 
         sanitized_list = []
         for i, item in enumerate(value):
             sanitized_list.append(sanitize_value(item, f"{field_name}[{i}]"))
-        return sanitized_list if isinstance(value, list[Any]) else tuple[Any, ...](sanitized_list)
+        return (
+            sanitized_list
+            if isinstance(value, list[Any])
+            else tuple[Any, ...](sanitized_list)
+        )
 
     # Handle nested dictionaries (with depth limit)
     if isinstance(value, dict[str, Any]):

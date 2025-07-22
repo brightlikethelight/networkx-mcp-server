@@ -73,7 +73,9 @@ print(f"Total: {final:.1f}MB")
 
         # Parse memory usage
         if "Total:" in result.stdout:
-            total_line = [line for line in result.stdout.split("\n") if "Total:" in line][0]
+            total_line = [
+                line for line in result.stdout.split("\n") if "Total:" in line
+            ][0]
             total_mb = float(total_line.split(":")[1].replace("MB", "").strip())
 
             if total_mb < 60:  # Realistic target

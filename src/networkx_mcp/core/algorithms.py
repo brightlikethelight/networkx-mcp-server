@@ -25,7 +25,13 @@ class GraphAlgorithms:
     """Implements various graph algorithms using NetworkX."""
 
     @staticmethod
-    def shortest_path(graph: nx.Graph, source: str | int, target: str | int | None = None, weight: str | None = None, method: str = "dijkstra") -> dict[str, Any]:
+    def shortest_path(
+        graph: nx.Graph,
+        source: str | int,
+        target: str | int | None = None,
+        weight: str | None = None,
+        method: str = "dijkstra",
+    ) -> dict[str, Any]:
         """Find shortest path(s) in a graph."""
         if source not in graph:
             msg = f"Source node '{source}' not in graph"
@@ -83,10 +89,14 @@ class GraphAlgorithms:
         return result
 
     @staticmethod
-    def all_pairs_shortest_path(graph: nx.Graph, weight: str | None = None) -> dict[str, Any]:
+    def all_pairs_shortest_path(
+        graph: nx.Graph, weight: str | None = None
+    ) -> dict[str, Any]:
         """Compute shortest paths between all pairs of nodes."""
         if weight:
-            lengths = dict[str, Any](nx.all_pairs_dijkstra_path_length(graph, weight=weight))
+            lengths = dict[str, Any](
+                nx.all_pairs_dijkstra_path_length(graph, weight=weight)
+            )
             paths = dict[str, Any](nx.all_pairs_dijkstra_path(graph, weight=weight))
         else:
             lengths = dict[str, Any](nx.all_pairs_shortest_path_length(graph))
@@ -158,7 +168,9 @@ class GraphAlgorithms:
             }
 
     @staticmethod
-    def centrality_measures(graph: nx.Graph, measures: list[str] | None = None) -> dict[str, Any]:
+    def centrality_measures(
+        graph: nx.Graph, measures: list[str] | None = None
+    ) -> dict[str, Any]:
         """Calculate various centrality measures."""
         if measures is None:
             measures = ["degree", "betweenness", "closeness", "eigenvector"]
@@ -216,7 +228,9 @@ class GraphAlgorithms:
         }
 
     @staticmethod
-    def minimum_spanning_tree(graph: nx.Graph, weight: str = "weight", algorithm: str = "kruskal") -> dict[str, Any]:
+    def minimum_spanning_tree(
+        graph: nx.Graph, weight: str = "weight", algorithm: str = "kruskal"
+    ) -> dict[str, Any]:
         """Find minimum spanning tree."""
         if graph.is_directed():
             msg = "Minimum spanning tree requires undirected graph"
@@ -240,7 +254,9 @@ class GraphAlgorithms:
         }
 
     @staticmethod
-    def maximum_flow(graph: nx.Graph, source: str | int, sink: str | int, capacity: str = "capacity") -> dict[str, Any]:
+    def maximum_flow(
+        graph: nx.Graph, source: str | int, sink: str | int, capacity: str = "capacity"
+    ) -> dict[str, Any]:
         """Calculate maximum flow."""
         if not graph.is_directed():
             msg = "Maximum flow requires directed graph"
@@ -256,7 +272,9 @@ class GraphAlgorithms:
         }
 
     @staticmethod
-    def graph_coloring(graph: nx.Graph, strategy: str = "largest_first") -> dict[str, Any]:
+    def graph_coloring(
+        graph: nx.Graph, strategy: str = "largest_first"
+    ) -> dict[str, Any]:
         """Color graph vertices."""
         coloring = nx.greedy_color(graph, strategy=strategy)
         num_colors = max(coloring.values()) + 1 if coloring else 0

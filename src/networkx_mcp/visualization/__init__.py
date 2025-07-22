@@ -1,5 +1,3 @@
-from typing import Any
-
 """Graph visualization modules.
 
 This package provides multiple visualization backends for graphs:
@@ -16,6 +14,8 @@ Example usage:
     # Use existing plotly visualizer
     plotly_viz = PlotlyVisualizer()
 """
+
+from typing import Any
 
 # Import existing visualizers
 # Import helper functions

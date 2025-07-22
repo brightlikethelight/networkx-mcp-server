@@ -4,6 +4,8 @@ I/O handler modules.
 Provides compatibility exports for the old io_handlers module.
 """
 
+from typing import Any
+
 # For backward compatibility, re-export GraphIOHandler from core.io_handlers
 try:
     from ..io_handlers import GraphIOHandler

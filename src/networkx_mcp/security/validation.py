@@ -118,7 +118,9 @@ class RequestValidator:
     def validate_edge_data(edge: list[Any] | tuple[Any, ...]) -> ValidationResult:
         """Validate edge format."""
         if not isinstance(edge, (list[Any], tuple[Any, ...])):
-            return ValidationResult(False, None, ["Edge must be a list[Any] or tuple[Any, ...]"])
+            return ValidationResult(
+                False, None, ["Edge must be a list[Any] or tuple[Any, ...]"]
+            )
 
         if len(edge) < 2:
             return ValidationResult(False, None, ["Edge must have at least 2 nodes"])
@@ -183,7 +185,9 @@ class SecurityValidator:
     """Additional security validation for operations."""
 
     @staticmethod
-    def validate_algorithm_parameters(algorithm: str, params: dict[str, Any]) -> ValidationResult:
+    def validate_algorithm_parameters(
+        algorithm: str, params: dict[str, Any]
+    ) -> ValidationResult:
         """Validate algorithm parameters for safety."""
         if not isinstance(algorithm, str):
             return ValidationResult(False, None, ["Algorithm name must be a string"])

@@ -204,7 +204,9 @@ class TestActualTools:
         # Test with empty graph
         create_graph("empty_centrality")
         empty_graph = graph_manager.get_graph("empty_centrality")
-        empty_centrality_data = GraphAlgorithms.centrality_measures(empty_graph, ["degree"])
+        empty_centrality_data = GraphAlgorithms.centrality_measures(
+            empty_graph, ["degree"]
+        )
         result2 = {"success": True, "centrality": empty_centrality_data}
         assert result2.get("success") is True
         assert result2["centrality"]["degree_centrality"] == {}
@@ -265,7 +267,9 @@ class TestActualTools:
 
         # 6. Calculate who's most central
         social_graph = graph_manager.get_graph("social_network")
-        centrality_data = GraphAlgorithms.centrality_measures(social_graph, ["degree", "betweenness"])
+        centrality_data = GraphAlgorithms.centrality_measures(
+            social_graph, ["degree", "betweenness"]
+        )
         centrality = {"centrality": centrality_data}
 
         # Bob, Charlie, and David should have higher centrality

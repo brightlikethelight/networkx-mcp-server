@@ -71,7 +71,9 @@ class GraphValidator(Component):
         await self._set_status(ComponentStatus.READY)
         logger.info("Graph validator initialized")
 
-    async def validate_graph_creation(self, request: dict[str, Any]) -> ValidationResult:
+    async def validate_graph_creation(
+        self, request: dict[str, Any]
+    ) -> ValidationResult:
         """Validate graph creation request."""
         errors = []
         warnings = []
@@ -155,7 +157,9 @@ class GraphValidator(Component):
             },
         )
 
-    async def validate_node_operation(self, operation: dict[str, Any]) -> ValidationResult:
+    async def validate_node_operation(
+        self, operation: dict[str, Any]
+    ) -> ValidationResult:
         """Validate node operations (add/remove/update)."""
         errors = []
         warnings = []
@@ -182,7 +186,9 @@ class GraphValidator(Component):
             metadata={"validation_type": "node_operation", "operation": operation_type},
         )
 
-    async def validate_edge_operation(self, operation: dict[str, Any]) -> ValidationResult:
+    async def validate_edge_operation(
+        self, operation: dict[str, Any]
+    ) -> ValidationResult:
         """Validate edge operations (add/remove/update)."""
         errors = []
         warnings = []

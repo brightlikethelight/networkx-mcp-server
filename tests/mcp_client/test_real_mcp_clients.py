@@ -15,7 +15,7 @@ import pytest
 
 # Try to import official MCP client libraries
 try:
-    from mcp import ClientSession, StdioServerParameters
+    from mcp import ClientSession, StdioServerParameters  # noqa: F401
     from mcp.client.stdio import stdio_client
 
     HAS_MCP_CLIENT = True
@@ -23,7 +23,7 @@ except ImportError:
     HAS_MCP_CLIENT = False
 
 try:
-    import anthropic
+    import anthropic  # noqa: F401
 
     HAS_ANTHROPIC = True
 except ImportError:

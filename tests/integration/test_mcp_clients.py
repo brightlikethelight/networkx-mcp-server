@@ -19,7 +19,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 try:
     from mcp import ClientSession, StdioServerParameters
     from mcp.client.stdio import stdio_client
-    from mcp.types import Resource, Tool
 
     MCP_SDK_AVAILABLE = True
 except ImportError:

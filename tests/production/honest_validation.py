@@ -117,8 +117,10 @@ class HonestProductionValidator:
 
         # Test if modules can be imported
         try:
-            from networkx_mcp.mcp.jsonrpc_handler import MCPJsonRpcHandler
-            from networkx_mcp.transport.stdio_transport import StdioTransport
+            from networkx_mcp.mcp.jsonrpc_handler import MCPJsonRpcHandler  # noqa: F401
+            from networkx_mcp.transport.stdio_transport import (
+                StdioTransport,  # noqa: F401
+            )
 
             return ValidationResult(
                 test_name="MCP Protocol Implementation",
@@ -140,7 +142,7 @@ class HonestProductionValidator:
 
         try:
             # Try to import the main server module
-            from networkx_mcp.__main__ import main
+            from networkx_mcp.__main__ import main  # noqa: F401
 
             # Check if server_minimal.py exists (referenced in __main__.py)
             if not Path("src/networkx_mcp/server_minimal.py").exists():

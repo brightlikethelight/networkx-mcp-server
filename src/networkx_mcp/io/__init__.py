@@ -1,5 +1,3 @@
-from typing import Any
-
 """Graph I/O operations.
 
 This package provides readers and writers for various graph formats:
@@ -11,6 +9,8 @@ Example usage:
     graph = await read_graphml("data.graphml")
     await write_graphml(graph, "output.graphml")
 """
+
+from typing import Any
 
 from networkx_mcp.io.base import (
     GraphReader,

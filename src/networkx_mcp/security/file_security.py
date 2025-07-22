@@ -187,7 +187,9 @@ class SecureFileHandler:
             msg = f"Failed to read graph: {safe_error}"
             raise FileSecurityError(msg) from e
 
-    def safe_write_graph(self, graph: nx.Graph, filepath: str | Path, file_format: str) -> Path:
+    def safe_write_graph(
+        self, graph: nx.Graph, filepath: str | Path, file_format: str
+    ) -> Path:
         """Safely write graph to file."""
         # Validate inputs
         secure_path = self.validate_path(filepath)

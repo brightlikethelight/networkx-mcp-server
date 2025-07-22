@@ -24,11 +24,7 @@ class MCPClient:
     async def send_request(self, method, params=None):
         """Send a request to the server."""
         self.request_id += 1
-        request = {
-            "jsonrpc": "2.0",
-            "id": self.request_id,
-            "method": method
-        }
+        request = {"jsonrpc": "2.0", "id": self.request_id, "method": method}
         if params:
             request["params"] = params
 
@@ -37,21 +33,19 @@ class MCPClient:
 
     async def initialize(self):
         """Initialize the connection."""
-        response = await self.send_request("initialize", {
-            "protocolVersion": "2024-11-05",
-            "capabilities": {},
-            "clientInfo": {
-                "name": "test-client",
-                "version": "1.0.0"
-            }
-        })
+        response = await self.send_request(
+            "initialize",
+            {
+                "protocolVersion": "2024-11-05",
+                "capabilities": {},
+                "clientInfo": {"name": "test-client", "version": "1.0.0"},
+            },
+        )
 
         # Send initialized notification
-        await self.server.handle_request({
-            "jsonrpc": "2.0",
-            "method": "initialized",
-            "params": {}
-        })
+        await self.server.handle_request(
+            {"jsonrpc": "2.0", "method": "initialized", "params": {}}
+        )
 
         return response
 
@@ -62,10 +56,9 @@ class MCPClient:
 
     async def call_tool(self, name, arguments):
         """Call a specific tool."""
-        response = await self.send_request("tools/call", {
-            "name": name,
-            "arguments": arguments
-        })
+        response = await self.send_request(
+            "tools/call", {"name": name, "arguments": arguments}
+        )
         return response
 
 
@@ -116,44 +109,43 @@ async def test_client_workflow():
 
     # Create graph
     print("\n   a. Creating graph...")
-    response = await client.call_tool("create_graph", {
-        "name": "social_network",
-        "directed": False
-    })
+    response = await client.call_tool(
+        "create_graph", {"name": "social_network", "directed": False}
+    )
     result = json.loads(response["result"]["content"][0]["text"])
     print(f"      Created: {result['created']} ({result['type']})")
 
     # Add nodes
     print("\n   b. Adding users...")
     users = ["Alice", "Bob", "Charlie", "David", "Eve", "Frank"]
-    response = await client.call_tool("add_nodes", {
-        "graph": "social_network",
-        "nodes": users
-    })
+    response = await client.call_tool(
+        "add_nodes", {"graph": "social_network", "nodes": users}
+    )
     result = json.loads(response["result"]["content"][0]["text"])
     print(f"      Added {result['added']} users")
 
     # Add friendships
     print("\n   c. Adding friendships...")
     friendships = [
-        ["Alice", "Bob"], ["Alice", "Charlie"],
-        ["Bob", "Charlie"], ["Bob", "David"],
-        ["Charlie", "David"], ["Charlie", "Eve"],
-        ["David", "Eve"], ["David", "Frank"],
-        ["Eve", "Frank"]
+        ["Alice", "Bob"],
+        ["Alice", "Charlie"],
+        ["Bob", "Charlie"],
+        ["Bob", "David"],
+        ["Charlie", "David"],
+        ["Charlie", "Eve"],
+        ["David", "Eve"],
+        ["David", "Frank"],
+        ["Eve", "Frank"],
     ]
-    response = await client.call_tool("add_edges", {
-        "graph": "social_network",
-        "edges": friendships
-    })
+    response = await client.call_tool(
+        "add_edges", {"graph": "social_network", "edges": friendships}
+    )
     result = json.loads(response["result"]["content"][0]["text"])
     print(f"      Added {result['added']} friendships")
 
     # Get graph info
     print("\n   d. Graph statistics...")
-    response = await client.call_tool("get_info", {
-        "graph": "social_network"
-    })
+    response = await client.call_tool("get_info", {"graph": "social_network"})
     result = json.loads(response["result"]["content"][0]["text"])
     print(f"      Nodes: {result['nodes']}")
     print(f"      Edges: {result['edges']}")
@@ -161,9 +153,7 @@ async def test_client_workflow():
 
     # Find most influential users
     print("\n   e. Finding influential users...")
-    response = await client.call_tool("degree_centrality", {
-        "graph": "social_network"
-    })
+    response = await client.call_tool("degree_centrality", {"graph": "social_network"})
     result = json.loads(response["result"]["content"][0]["text"])
     most_central = result.get("most_central")
     if most_central:
@@ -171,11 +161,10 @@ async def test_client_workflow():
 
     # Find shortest path
     print("\n   f. Finding connection path...")
-    response = await client.call_tool("shortest_path", {
-        "graph": "social_network",
-        "source": "Alice",
-        "target": "Frank"
-    })
+    response = await client.call_tool(
+        "shortest_path",
+        {"graph": "social_network", "source": "Alice", "target": "Frank"},
+    )
     result = json.loads(response["result"]["content"][0]["text"])
     print(f"      Path from Alice to Frank: {' -> '.join(result['path'])}")
     print(f"      Degrees of separation: {result['length']}")
@@ -183,9 +172,9 @@ async def test_client_workflow():
     # Detect communities
     print("\n   g. Detecting communities...")
     try:
-        response = await client.call_tool("community_detection", {
-            "graph": "social_network"
-        })
+        response = await client.call_tool(
+            "community_detection", {"graph": "social_network"}
+        )
         result = json.loads(response["result"]["content"][0]["text"])
         print(f"      Found {result['num_communities']} communities")
         print(f"      Sizes: {result['community_sizes']}")
@@ -194,10 +183,9 @@ async def test_client_workflow():
 
     # Visualize
     print("\n   h. Creating visualization...")
-    response = await client.call_tool("visualize_graph", {
-        "graph": "social_network",
-        "layout": "spring"
-    })
+    response = await client.call_tool(
+        "visualize_graph", {"graph": "social_network", "layout": "spring"}
+    )
     result = json.loads(response["result"]["content"][0]["text"])
     img_key = "visualization" if "visualization" in result else "image"
     if img_key in result:
@@ -207,13 +195,13 @@ async def test_client_workflow():
 
     # Export data
     print("\n   i. Exporting data...")
-    response = await client.call_tool("export_json", {
-        "graph": "social_network"
-    })
+    response = await client.call_tool("export_json", {"graph": "social_network"})
     result = json.loads(response["result"]["content"][0]["text"])
     json_key = "json" if "json" in result else "graph_data"
     if json_key in result:
-        print(f"      Exported {result.get('nodes', 0)} nodes, {result.get('edges', 0)} edges")
+        print(
+            f"      Exported {result.get('nodes', 0)} nodes, {result.get('edges', 0)} edges"
+        )
         print(f"      Format: {result.get('format', 'node-link')}")
 
     print("\n4. Workflow completed successfully!")
@@ -260,18 +248,15 @@ async def test_error_scenarios():
     print("\n4. Testing protocol compliance...")
 
     # Wrong protocol version
-    response = await client.server.handle_request({
-        "jsonrpc": "1.0",
-        "id": 1,
-        "method": "tools/list"
-    })
+    response = await client.server.handle_request(
+        {"jsonrpc": "1.0", "id": 1, "method": "tools/list"}
+    )
     print(f"   Wrong version handled: {'error' not in str(response).lower()}")
 
     # Missing ID
-    response = await client.server.handle_request({
-        "jsonrpc": "2.0",
-        "method": "tools/list"
-    })
+    response = await client.server.handle_request(
+        {"jsonrpc": "2.0", "method": "tools/list"}
+    )
     print(f"   Missing ID handled: {response is not None}")
 
     return True
@@ -297,17 +282,11 @@ async def test_concurrent_clients():
 
         # Add some nodes
         nodes = [f"node_{i}" for i in range(10)]
-        await client.call_tool("add_nodes", {
-            "graph": graph_name,
-            "nodes": nodes
-        })
+        await client.call_tool("add_nodes", {"graph": graph_name, "nodes": nodes})
 
         # Add edges
-        edges = [[f"node_{i}", f"node_{(i+1)%10}"] for i in range(10)]
-        await client.call_tool("add_edges", {
-            "graph": graph_name,
-            "edges": edges
-        })
+        edges = [[f"node_{i}", f"node_{(i + 1) % 10}"] for i in range(10)]
+        await client.call_tool("add_edges", {"graph": graph_name, "edges": edges})
 
         # Get info
         response = await client.call_tool("get_info", {"graph": graph_name})
@@ -322,7 +301,9 @@ async def test_concurrent_clients():
 
     print("\nResults:")
     for client_id, result in results:
-        print(f"   Client {client_id}: {result['nodes']} nodes, {result['edges']} edges")
+        print(
+            f"   Client {client_id}: {result['nodes']} nodes, {result['edges']} edges"
+        )
 
     print("\n✅ All clients completed successfully")
 
@@ -346,9 +327,9 @@ async def main():
     concurrent_success = await test_concurrent_clients()
 
     # Summary
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("CLIENT TEST SUMMARY")
-    print("="*60)
+    print("=" * 60)
 
     all_success = workflow_success and error_success and concurrent_success
 
@@ -369,4 +350,5 @@ async def main():
 
 if __name__ == "__main__":
     import time
+
     asyncio.run(main())

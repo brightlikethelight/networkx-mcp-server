@@ -67,20 +67,22 @@ from .core.basic_operations import (
 # Global state - simple and effective
 graphs: Dict[str, nx.Graph] = {}
 
+
 class GraphManager:
     """Simple graph manager for test compatibility."""
-    
+
     def __init__(self) -> None:
         self.graphs = graphs
-    
+
     def get_graph(self, graph_id: str) -> nx.Graph | None:
         """Get a graph by ID."""
         return graphs.get(graph_id)
-    
+
     def delete_graph(self, graph_id: str) -> None:
         """Delete a graph by ID."""
         if graph_id in graphs:
             del graphs[graph_id]
+
 
 # Create global graph manager instance
 graph_manager = GraphManager()
@@ -150,20 +152,14 @@ def import_csv(graph_name: str, csv_data: str, directed: bool = False) -> Any:
 def export_json(graph_name: str) -> Any:
     return _export_json(graph_name, graphs)
 
+
 def delete_graph(graph_name: str) -> Any:
     """Delete a graph - compatibility function."""
     if graph_name not in graphs:
-        return {
-            "success": False,
-            "error": f"Graph '{graph_name}' not found"
-        }
-    
+        return {"success": False, "error": f"Graph '{graph_name}' not found"}
+
     del graphs[graph_name]
-    return {
-        "success": True,
-        "graph_id": graph_name,
-        "deleted": True
-    }
+    return {"success": True, "graph_id": graph_name, "deleted": True}
 
 
 def community_detection(graph_name: str) -> Any:
@@ -173,7 +169,9 @@ def community_detection(graph_name: str) -> Any:
 class NetworkXMCPServer:
     """Minimal MCP server - no unnecessary abstraction."""
 
-    def __init__(self, auth_required: bool = False, enable_monitoring: bool = False) -> None:
+    def __init__(
+        self, auth_required: bool = False, enable_monitoring: bool = False
+    ) -> None:
         self.running = True
         self.mcp = self  # For test compatibility
         self.graphs = graphs  # Reference to global graphs

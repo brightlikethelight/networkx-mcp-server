@@ -55,7 +55,19 @@ class MatplotlibVisualizer:
     }
 
     @staticmethod
-    def create_static_plot(graph: nx.Graph | nx.DiGraph, layout: str = "spring", node_size: int | dict[str, Any] | str = 300, node_color: str | dict[str, Any] | str = "lightblue", node_shape: str | dict[str, Any] = "circle", edge_width: float | dict[str, Any] | str = 1.0, edge_color: str | dict[str, Any] | str = "gray", edge_style: str | dict[str, Any] = "solid", show_labels: bool = True, label_font_size: int = 10, title: str | None = None, figsize: tuple[int, int] = (12, 8),
+    def create_static_plot(
+        graph: nx.Graph | nx.DiGraph,
+        layout: str = "spring",
+        node_size: int | dict[str, Any] | str = 300,
+        node_color: str | dict[str, Any] | str = "lightblue",
+        node_shape: str | dict[str, Any] = "circle",
+        edge_width: float | dict[str, Any] | str = 1.0,
+        edge_color: str | dict[str, Any] | str = "gray",
+        edge_style: str | dict[str, Any] = "solid",
+        show_labels: bool = True,
+        label_font_size: int = 10,
+        title: str | None = None,
+        figsize: tuple[int, int] = (12, 8),
         dpi: int = 100,
         **kwargs,
     ) -> dict[str, Any]:
@@ -263,7 +275,9 @@ class MatplotlibVisualizer:
             return nx.spring_layout(graph)
 
     @staticmethod
-    def _get_node_attributes(graph: nx.Graph, attr: int | float | str | dict[str, Any], default: Any) -> list[Any]:
+    def _get_node_attributes(
+        graph: nx.Graph, attr: int | float | str | dict[str, Any], default: Any
+    ) -> list[Any]:
         """Get node attributes as a list[Any]."""
         if isinstance(attr, dict[str, Any]):
             return [attr.get(node, default) for node in graph.nodes()]
@@ -275,7 +289,9 @@ class MatplotlibVisualizer:
             return [attr] * graph.number_of_nodes()
 
     @staticmethod
-    def _get_edge_attributes(graph: nx.Graph, attr: int | float | str | dict[str, Any], default: Any) -> list[Any]:
+    def _get_edge_attributes(
+        graph: nx.Graph, attr: int | float | str | dict[str, Any], default: Any
+    ) -> list[Any]:
         """Get edge attributes as a list[Any]."""
         if isinstance(attr, dict[str, Any]):
             return [attr.get(edge, default) for edge in graph.edges()]
@@ -287,7 +303,9 @@ class MatplotlibVisualizer:
             return [attr] * graph.number_of_edges()
 
     @staticmethod
-    def _smart_label_placement(graph: nx.Graph, pos: dict[Any, tuple[float: Any, float]], font_size: int) -> dict[Any, str]:
+    def _smart_label_placement(
+        graph: nx.Graph, pos: dict[Any, tuple[float:Any, float]], font_size: int
+    ) -> dict[Any, str]:
         """Smart label placement to avoid overlap."""
         # For now, show labels only for high-degree nodes
         degrees = dict[str, Any](graph.degree())
@@ -326,7 +344,10 @@ class MatplotlibVisualizer:
         plt.legend(handles=patches, title=color_attr, loc="best")
 
     @staticmethod
-    def create_subplot_layout(graph: nx.Graph, views: list[dict[str, Any]], figsize: tuple[int, int] = (16, 8),
+    def create_subplot_layout(
+        graph: nx.Graph,
+        views: list[dict[str, Any]],
+        figsize: tuple[int, int] = (16, 8),
         dpi: int = 100,
     ) -> dict[str, Any]:
         """Create multiple graph views in subplots."""

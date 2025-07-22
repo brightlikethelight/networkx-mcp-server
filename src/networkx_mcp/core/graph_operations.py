@@ -24,7 +24,9 @@ class GraphManager:
         self.graphs: dict[str, nx.Graph] = {}
         self.metadata: dict[str, dict[str, Any]] = {}
 
-    def create_graph(self, graph_id: str, graph_type: str = "Graph", **kwargs) -> dict[str, Any]:
+    def create_graph(
+        self, graph_id: str, graph_type: str = "Graph", **kwargs
+    ) -> dict[str, Any]:
         """Create a new graph instance.
 
         ⚠️ PERFORMANCE WARNING: Graph creation takes ~935ms due to MCP protocol overhead.
@@ -105,7 +107,9 @@ class GraphManager:
             for gid in self.graphs
         }
 
-    def add_node(self, graph_id: str, node_id: str | int, **attributes) -> dict[str, Any]:
+    def add_node(
+        self, graph_id: str, node_id: str | int, **attributes
+    ) -> dict[str, Any]:
         """Add a node to a graph."""
         graph = self.get_graph(graph_id)
         graph.add_node(node_id, **attributes)
@@ -117,7 +121,9 @@ class GraphManager:
             "added": True,
         }
 
-    def add_nodes_from(self, graph_id: str, nodes: list[str | int | tuple[Any, ...]]) -> dict[str, Any]:
+    def add_nodes_from(
+        self, graph_id: str, nodes: list[str | int | tuple[Any, ...]]
+    ) -> dict[str, Any]:
         """Add multiple nodes to a graph.
 
         ⚠️ PERFORMANCE WARNING: Scaling characteristics (measured):
@@ -135,7 +141,9 @@ class GraphManager:
             "total_nodes": graph.number_of_nodes(),
         }
 
-    def add_edge(self, graph_id: str, source: str | int, target: str | int, **attributes) -> dict[str, Any]:
+    def add_edge(
+        self, graph_id: str, source: str | int, target: str | int, **attributes
+    ) -> dict[str, Any]:
         """Add an edge to a graph."""
         graph = self.get_graph(graph_id)
         graph.add_edge(source, target, **attributes)
@@ -147,7 +155,9 @@ class GraphManager:
             "added": True,
         }
 
-    def add_edges_from(self, graph_id: str, edges: list[tuple[Any, ...]]) -> dict[str, Any]:
+    def add_edges_from(
+        self, graph_id: str, edges: list[tuple[Any, ...]]
+    ) -> dict[str, Any]:
         """Add multiple edges to a graph.
 
         ⚠️ PERFORMANCE WARNING: Similar scaling to nodes:
@@ -176,7 +186,9 @@ class GraphManager:
 
         return {"graph_id": graph_id, "node_id": node_id, "removed": True}
 
-    def remove_edge(self, graph_id: str, source: str | int, target: str | int) -> dict[str, Any]:
+    def remove_edge(
+        self, graph_id: str, source: str | int, target: str | int
+    ) -> dict[str, Any]:
         """Remove an edge from a graph."""
         graph = self.get_graph(graph_id)
         if not graph.has_edge(source, target):
@@ -204,9 +216,14 @@ class GraphManager:
 
         if graph.number_of_nodes() > 0:
             info["degree_stats"] = {
-                "average": sum(dict[str, Any](graph.degree()).values()) / graph.number_of_nodes(),
-                "max": max(dict[str, Any](graph.degree()).values()) if graph.degree() else 0,
-                "min": min(dict[str, Any](graph.degree()).values()) if graph.degree() else 0,
+                "average": sum(dict[str, Any](graph.degree()).values())
+                / graph.number_of_nodes(),
+                "max": max(dict[str, Any](graph.degree()).values())
+                if graph.degree()
+                else 0,
+                "min": min(dict[str, Any](graph.degree()).values())
+                if graph.degree()
+                else 0,
             }
 
         return info
@@ -220,7 +237,12 @@ class GraphManager:
 
         return list[Any](graph.neighbors(node_id))
 
-    def get_node_attributes(self, graph_id: str, node_id: str | int | None = None, attribute: str | None = None) -> dict[str, Any]:
+    def get_node_attributes(
+        self,
+        graph_id: str,
+        node_id: str | int | None = None,
+        attribute: str | None = None,
+    ) -> dict[str, Any]:
         """Get node attributes."""
         graph = self.get_graph(graph_id)
 
@@ -235,7 +257,12 @@ class GraphManager:
 
         return dict[str, Any](graph.nodes(data=True))
 
-    def get_edge_attributes(self, graph_id: str, edge: tuple[str | int, str | int] | None = None, attribute: str | None = None) -> dict[str, Any]:
+    def get_edge_attributes(
+        self,
+        graph_id: str,
+        edge: tuple[str | int, str | int] | None = None,
+        attribute: str | None = None,
+    ) -> dict[str, Any]:
         """Get edge attributes."""
         graph = self.get_graph(graph_id)
 
@@ -250,7 +277,12 @@ class GraphManager:
 
         return {edge: data for *edge, data in graph.edges(data=True)}
 
-    def set_node_attributes(self, graph_id: str, values: dict[str | int, dict[str: Any, Any]], name: str | None = None) -> dict[str, Any]:
+    def set_node_attributes(
+        self,
+        graph_id: str,
+        values: dict[str | int, dict[str:Any, Any]],
+        name: str | None = None,
+    ) -> dict[str, Any]:
         """Set node attributes."""
         graph = self.get_graph(graph_id)
 
@@ -261,7 +293,12 @@ class GraphManager:
 
         return {"graph_id": graph_id, "nodes_updated": len(values), "success": True}
 
-    def set_edge_attributes(self, graph_id: str, values: dict[tuple[str | int, str | int], dict[str: Any, Any]], name: str | None = None) -> dict[str, Any]:
+    def set_edge_attributes(
+        self,
+        graph_id: str,
+        values: dict[tuple[str | int, str | int], dict[str:Any, Any]],
+        name: str | None = None,
+    ) -> dict[str, Any]:
         """Set edge attributes."""
         graph = self.get_graph(graph_id)
 
@@ -272,7 +309,9 @@ class GraphManager:
 
         return {"graph_id": graph_id, "edges_updated": len(values), "success": True}
 
-    def subgraph(self, graph_id: str, nodes: list[str | int], create_copy: bool = True) -> nx.Graph | dict[str, Any]:
+    def subgraph(
+        self, graph_id: str, nodes: list[str | int], create_copy: bool = True
+    ) -> nx.Graph | dict[str, Any]:
         """Create a subgraph from specified nodes."""
         graph = self.get_graph(graph_id)
 

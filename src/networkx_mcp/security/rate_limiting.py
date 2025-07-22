@@ -1,5 +1,3 @@
-from typing import Any
-
 """Rate limiting and throttling services."""
 
 import asyncio
@@ -7,6 +5,7 @@ import logging
 import time
 from collections import deque
 from dataclasses import dataclass
+from typing import Any
 
 from ..core.base import Component
 
@@ -148,7 +147,9 @@ class RateLimiter(Component):
         return self.limiters[identifier]
 
     # @with_logging_context removed - monitoring module deleted
-    async def check_rate_limit(self, identifier: str, limit_type: str = "user", tokens: int = 1) -> RateLimitResult:
+    async def check_rate_limit(
+        self, identifier: str, limit_type: str = "user", tokens: int = 1
+    ) -> RateLimitResult:
         """Check if request is within rate limits."""
 
         # Get rate limit configuration
@@ -195,7 +196,9 @@ class RateLimiter(Component):
         return result
 
     # @with_logging_context removed - monitoring module deleted
-    async def check_multiple_limits(self, checks: list[tuple[str, str]], # [(identifier: Any, limit_type: Any), ...]
+    async def check_multiple_limits(
+        self,
+        checks: list[tuple[str, str]],  # [(identifier: Any, limit_type: Any), ...]
     ) -> RateLimitResult:
         """Check multiple rate limits and return most restrictive result."""
         results = []
@@ -242,7 +245,9 @@ class RateLimiter(Component):
 
         return len(expired_keys)
 
-    async def get_rate_limit_status(self, identifier: str, limit_type: str) -> dict[str, Any]:
+    async def get_rate_limit_status(
+        self, identifier: str, limit_type: str
+    ) -> dict[str, Any]:
         """Get current rate limit status for an identifier."""
         rate_limit = self.rate_limits.get(
             limit_type, self.default_limits.get(limit_type)

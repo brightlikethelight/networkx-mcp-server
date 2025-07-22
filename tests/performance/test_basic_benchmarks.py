@@ -46,7 +46,7 @@ def test_edge_addition_benchmark(benchmark):
     add_nodes("edge_graph", nodes, graphs=graphs)
 
     # Create edges between consecutive nodes
-    edges = [[f"node_{i}", f"node_{i+1}"] for i in range(49)]
+    edges = [[f"node_{i}", f"node_{i + 1}"] for i in range(49)]
 
     def add_test_edges():
         return add_edges("edge_graph", edges, graphs=graphs)

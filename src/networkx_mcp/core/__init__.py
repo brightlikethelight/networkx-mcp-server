@@ -1,6 +1,6 @@
-from typing import Any
-
 """Core NetworkX MCP functionality."""
+
+from typing import Any
 
 from networkx_mcp.core.algorithms import GraphAlgorithms
 from networkx_mcp.core.graph_operations import GraphManager

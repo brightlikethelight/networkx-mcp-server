@@ -122,7 +122,13 @@ class AuthenticationMiddleware:
         self.valid_tokens: dict[str, dict[str, Any]] = {}
         self.revoked_tokens: set[str] = set[Any]()
 
-    def add_token(self, token: str, user_id: str, permissions: list[str], expires_at: float | None = None) -> None:
+    def add_token(
+        self,
+        token: str,
+        user_id: str,
+        permissions: list[str],
+        expires_at: float | None = None,
+    ) -> None:
         """Add a valid authentication token."""
         self.valid_tokens[token] = {
             "user_id": user_id,
@@ -187,7 +193,9 @@ class SecurityMiddleware:
         """Generate unique request ID."""
         return hashlib.sha256(f"{time.time()}{id(self)}".encode()).hexdigest()[:16]
 
-    def extract_client_identifier(self, headers: dict[str, str], source_ip: str | None = None) -> str:
+    def extract_client_identifier(
+        self, headers: dict[str, str], source_ip: str | None = None
+    ) -> str:
         """Extract client identifier for rate limiting."""
         # Try to get authenticated user first
         auth_info = self.auth_middleware.authenticate_request(headers)
@@ -201,7 +209,12 @@ class SecurityMiddleware:
         # Last resort - use a generic identifier
         return "anonymous"
 
-    async def process_request(self, request_data: dict[str, Any], headers: dict[str, str], source_ip: str | None = None) -> RequestContext:
+    async def process_request(
+        self,
+        request_data: dict[str, Any],
+        headers: dict[str, str],
+        source_ip: str | None = None,
+    ) -> RequestContext:
         """Process incoming request through security middleware."""
         context = RequestContext(
             request_id=self.generate_request_id(),
@@ -304,7 +317,9 @@ class SecurityMiddleware:
 
         return response_data
 
-    def log_request(self, context: RequestContext, request_data: dict[str, Any]) -> None:
+    def log_request(
+        self, context: RequestContext, request_data: dict[str, Any]
+    ) -> None:
         """Log request for security monitoring."""
         log_entry = {
             "request_id": context.request_id,
@@ -384,7 +399,9 @@ class AuthorizationError(SecurityError):
     """Authorization failed exception."""
 
 
-def require_permissions(*required_permissions: str) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+def require_permissions(
+    *required_permissions: str,
+) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """Decorator to require specific permissions for a function."""
 
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
@@ -399,7 +416,9 @@ def require_permissions(*required_permissions: str) -> Callable[[Callable[..., A
             if not context.is_authenticated:
                 raise AuthenticationError("Authentication required")
 
-            missing_permissions = set[Any](required_permissions) - set[Any](context.permissions)
+            missing_permissions = set[Any](required_permissions) - set[Any](
+                context.permissions
+            )
             if missing_permissions:
                 raise AuthorizationError(f"Missing permissions: {missing_permissions}")
 
@@ -413,7 +432,12 @@ def require_permissions(*required_permissions: str) -> Callable[[Callable[..., A
 class CORSMiddleware:
     """CORS (Cross-Origin Resource Sharing) middleware."""
 
-    def __init__(self, allowed_origins: list[str] | None = None, allowed_methods: list[str] | None = None, allowed_headers: list[str] | None = None):
+    def __init__(
+        self,
+        allowed_origins: list[str] | None = None,
+        allowed_methods: list[str] | None = None,
+        allowed_headers: list[str] | None = None,
+    ):
         self.allowed_origins = allowed_origins or ["*"]
         self.allowed_methods = allowed_methods or [
             "GET",
@@ -424,7 +448,9 @@ class CORSMiddleware:
         ]
         self.allowed_headers = allowed_headers or ["*"]
 
-    def add_cors_headers(self, headers: dict[str, str], origin: str | None = None) -> dict[str, str]:
+    def add_cors_headers(
+        self, headers: dict[str, str], origin: str | None = None
+    ) -> dict[str, str]:
         """Add CORS headers to response."""
         cors_headers = headers.copy()
 

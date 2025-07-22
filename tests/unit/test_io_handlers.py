@@ -1,10 +1,5 @@
 """Comprehensive tests for I/O handlers."""
 
-import pytest
-
-# Skip IO handler tests until modules are fully implemented
-pytestmark = pytest.mark.skip(reason="IO handler modules need implementation updates")
-
 import csv
 import json
 import os
@@ -16,6 +11,9 @@ import pandas as pd
 import pytest
 
 from networkx_mcp.core.io import GraphIOHandler
+
+# Skip IO handler tests until modules are fully implemented
+pytestmark = pytest.mark.skip(reason="IO handler modules need implementation updates")
 
 
 class TestJSONIO:

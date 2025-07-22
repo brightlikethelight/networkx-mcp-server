@@ -246,7 +246,9 @@ class AlgorithmValidator(Component):
             f"Algorithm validator initialized with {len(self._algorithm_specs)} algorithms"
         )
 
-    async def validate_algorithm_request(self, request: dict[str, Any]) -> ValidationResult:
+    async def validate_algorithm_request(
+        self, request: dict[str, Any]
+    ) -> ValidationResult:
         """Validate an algorithm execution request."""
         errors = []
         warnings = []
@@ -295,7 +297,9 @@ class AlgorithmValidator(Component):
             },
         )
 
-    async def validate_algorithm_compatibility(self, algorithm: str, graph: nx.Graph) -> ValidationResult:
+    async def validate_algorithm_compatibility(
+        self, algorithm: str, graph: nx.Graph
+    ) -> ValidationResult:
         """Validate algorithm compatibility with graph."""
         errors = []
         warnings = []
@@ -366,7 +370,9 @@ class AlgorithmValidator(Component):
             },
         )
 
-    def _validate_parameters(self, spec: AlgorithmSpec, parameters: dict[str, Any]) -> tuple[Any, ...]:
+    def _validate_parameters(
+        self, spec: AlgorithmSpec, parameters: dict[str, Any]
+    ) -> tuple[Any, ...]:
         """Validate algorithm parameters."""
         errors = []
         warnings = []
@@ -387,7 +393,9 @@ class AlgorithmValidator(Component):
 
         return errors, warnings
 
-    def _validate_parameter_value(self, param: str, value: Any, spec: AlgorithmSpec) -> list[str]:
+    def _validate_parameter_value(
+        self, param: str, value: Any, spec: AlgorithmSpec
+    ) -> list[str]:
         """Validate a specific parameter value."""
         errors = []
 
@@ -451,7 +459,9 @@ class AlgorithmValidator(Component):
 
         return errors
 
-    def _validate_algorithm_specific(self, algorithm: str, graph: nx.Graph) -> tuple[Any, ...]:
+    def _validate_algorithm_specific(
+        self, algorithm: str, graph: nx.Graph
+    ) -> tuple[Any, ...]:
         """Algorithm-specific validations."""
         errors = []
         warnings = []

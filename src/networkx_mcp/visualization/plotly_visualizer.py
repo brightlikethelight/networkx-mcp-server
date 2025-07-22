@@ -28,7 +28,20 @@ class PlotlyVisualizer:
             )
 
     @staticmethod
-    def create_interactive_plot(graph: nx.Graph | nx.DiGraph, layout: str = "spring", node_size: int | dict[str, Any] | str = 10, node_color: str | dict[str, Any] | str = "degree", edge_width: float | dict[str, Any] | str = 1.0, edge_color: str | dict[str, Any] | str = "gray", hover_data: list[str] | None = None, title: str | None = None, height: int = 800, width: int = 1200, show_edge_labels: bool = False, **kwargs) -> dict[str, Any]:
+    def create_interactive_plot(
+        graph: nx.Graph | nx.DiGraph,
+        layout: str = "spring",
+        node_size: int | dict[str, Any] | str = 10,
+        node_color: str | dict[str, Any] | str = "degree",
+        edge_width: float | dict[str, Any] | str = 1.0,
+        edge_color: str | dict[str, Any] | str = "gray",
+        hover_data: list[str] | None = None,
+        title: str | None = None,
+        height: int = 800,
+        width: int = 1200,
+        show_edge_labels: bool = False,
+        **kwargs,
+    ) -> dict[str, Any]:
         """
         Create an interactive graph visualization with zoom, pan, and hover.
 
@@ -109,7 +122,14 @@ class PlotlyVisualizer:
         }
 
     @staticmethod
-    def create_3d_plot(graph: nx.Graph | nx.DiGraph, layout: str = "spring3d", node_color: str | dict[str, Any] | str = "degree", title: str | None = None, height: int = 800, width: int = 1200) -> dict[str, Any]:
+    def create_3d_plot(
+        graph: nx.Graph | nx.DiGraph,
+        layout: str = "spring3d",
+        node_color: str | dict[str, Any] | str = "degree",
+        title: str | None = None,
+        height: int = 800,
+        width: int = 1200,
+    ) -> dict[str, Any]:
         """Create 3D force-directed graph visualization."""
         # Calculate 3D layout
         if layout == "spring3d":
@@ -200,7 +220,14 @@ class PlotlyVisualizer:
         }
 
     @staticmethod
-    def create_animated_plot(graphs: list[nx.Graph], timestamps: list[str] | None = None, layout: str = "spring", title: str = "Temporal Network Animation", height: int = 800, width: int = 1200) -> dict[str, Any]:
+    def create_animated_plot(
+        graphs: list[nx.Graph],
+        timestamps: list[str] | None = None,
+        layout: str = "spring",
+        title: str = "Temporal Network Animation",
+        height: int = 800,
+        width: int = 1200,
+    ) -> dict[str, Any]:
         """Create animated visualization for temporal networks."""
         if not timestamps:
             timestamps = [f"T{i}" for i in range(len(graphs))]
@@ -302,7 +329,13 @@ class PlotlyVisualizer:
         }
 
     @staticmethod
-    def _create_edge_traces(graph: nx.Graph, pos: dict[str, Any], edge_width: float | str | dict[str, Any], edge_color: str | dict[str, Any], show_labels: bool = False) -> list[Any]:
+    def _create_edge_traces(
+        graph: nx.Graph,
+        pos: dict[str, Any],
+        edge_width: float | str | dict[str, Any],
+        edge_color: str | dict[str, Any],
+        show_labels: bool = False,
+    ) -> list[Any]:
         """Create edge traces for plotly."""
         if not HAS_PLOTLY:
             return []
@@ -353,7 +386,13 @@ class PlotlyVisualizer:
         return edge_traces
 
     @staticmethod
-    def _create_node_trace(graph: nx.Graph, pos: dict[str, Any], node_size: int | str | dict[str, Any], node_color: str | dict[str, Any], hover_data: list[str] | None = None) -> Any:
+    def _create_node_trace(
+        graph: nx.Graph,
+        pos: dict[str, Any],
+        node_size: int | str | dict[str, Any],
+        node_color: str | dict[str, Any],
+        hover_data: list[str] | None = None,
+    ) -> Any:
         """Create node trace for plotly."""
         if not HAS_PLOTLY:
             return None
@@ -424,7 +463,12 @@ class PlotlyVisualizer:
         return node_trace
 
     @staticmethod
-    def export_interactive_html(figure: dict[str, Any], filename: str, include_plotlyjs: str = "cdn", config: dict[str, Any] | None = None) -> str:
+    def export_interactive_html(
+        figure: dict[str, Any],
+        filename: str,
+        include_plotlyjs: str = "cdn",
+        config: dict[str, Any] | None = None,
+    ) -> str:
         """Export interactive plot as standalone HTML."""
         if config is None:
             config = {

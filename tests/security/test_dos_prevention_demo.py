@@ -169,29 +169,12 @@ def test_resource_monitoring():
     print("Current resource status:")
     # Resource status monitoring removed - no longer available
     # status = resource_status()
-
-    if "memory" in status:
-        mem = status["memory"]
-        print("\nMemory Usage:")
-        print(f"  Current: {mem['current_mb']:.1f} MB")
-        print(f"  Limit: {mem['limit_mb']} MB")
-        print(f"  Available: {mem['available_mb']:.1f} MB")
-
-    if "requests" in status:
-        req = status["requests"]
-        print("\nRequest Status:")
-        print(f"  Active: {req['active']}")
-        print(f"  Max concurrent: {req['max_concurrent']}")
-        print(f"  Recent (per minute): {req['recent_per_minute']}")
-        print(f"  Limit (per minute): {req['limit_per_minute']}")
-
-    if "limits" in status:
-        lim = status["limits"]
-        print("\nConfigured Limits:")
-        print(f"  Max graph size: {lim['max_graph_size_mb']} MB")
-        print(f"  Max nodes per graph: {lim['max_nodes_per_graph']:,}")
-        print(f"  Max edges per graph: {lim['max_edges_per_graph']:,}")
-        print(f"  Operation timeout: {lim['operation_timeout_seconds']} seconds")
+    print("  Resource monitoring functionality has been removed from the server")
+    print("  This demo shows what would have been monitored:")
+    print("\n  - Memory usage and limits")
+    print("  - Request rate limiting")
+    print("  - Graph size constraints")
+    print("  - Operation timeouts")
 
 
 def main():

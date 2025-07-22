@@ -58,7 +58,12 @@ def resolve_doi(doi: str) -> Optional[Dict[str, Any]]:
         return None
 
 
-def build_citation_network(graph_name: str, seed_dois: List[str], max_depth: int = 2, graphs: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def build_citation_network(
+    graph_name: str,
+    seed_dois: List[str],
+    max_depth: int = 2,
+    graphs: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
     """Build citation network from seed DOIs using CrossRef API."""
     if graphs is None:
         graphs = {}
@@ -113,7 +118,9 @@ def build_citation_network(graph_name: str, seed_dois: List[str], max_depth: int
     }
 
 
-def export_bibtex(graph_name: str, graphs: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def export_bibtex(
+    graph_name: str, graphs: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
     """Export citation network as BibTeX format."""
     if graphs is None:
         graphs = {}
@@ -155,7 +162,12 @@ def export_bibtex(graph_name: str, graphs: Optional[Dict[str, Any]] = None) -> D
     }
 
 
-def recommend_papers(graph_name: str, seed_doi: str, max_recommendations: int = 10, graphs: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def recommend_papers(
+    graph_name: str,
+    seed_doi: str,
+    max_recommendations: int = 10,
+    graphs: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
     """Recommend papers based on citation network analysis."""
     if graphs is None:
         graphs = {}
@@ -208,7 +220,11 @@ def recommend_papers(graph_name: str, seed_doi: str, max_recommendations: int = 
                 score += min(citation_count / 100, 2.0)  # Max boost of 2.0
 
                 # Boost score based on recency
-                year = paper_data.get("year") if isinstance(paper_data, dict[str, Any]) else None
+                year = (
+                    paper_data.get("year")
+                    if isinstance(paper_data, dict[str, Any])
+                    else None
+                )
                 if year:
                     current_year = datetime.now().year
                     recency_score = max(0, (year - (current_year - 10)) / 10)

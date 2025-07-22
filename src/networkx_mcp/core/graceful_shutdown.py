@@ -256,7 +256,9 @@ class GracefulShutdownHandler:
 class ShutdownContextManager:
     """Context manager for tracking operations during shutdown."""
 
-    def __init__(self, shutdown_handler: GracefulShutdownHandler, operation_id: str) -> None:
+    def __init__(
+        self, shutdown_handler: GracefulShutdownHandler, operation_id: str
+    ) -> None:
         self.shutdown_handler = shutdown_handler
         self.operation_id = operation_id
 
@@ -283,7 +285,9 @@ def get_shutdown_handler() -> GracefulShutdownHandler:
     return _shutdown_handler
 
 
-def initialize_shutdown_handler(graph_manager: Any = None, storage_backend: Any = None) -> GracefulShutdownHandler:
+def initialize_shutdown_handler(
+    graph_manager: Any = None, storage_backend: Any = None
+) -> GracefulShutdownHandler:
     """Initialize the shutdown handler with components."""
     global _shutdown_handler
     _shutdown_handler = GracefulShutdownHandler(graph_manager, storage_backend)

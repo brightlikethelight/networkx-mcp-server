@@ -31,7 +31,9 @@ except (ImportError, Exception):
 logger = logging.getLogger(__name__)
 
 
-def _get_limit_value(env_var: str, default: int, config_path: Optional[str] = None) -> int:
+def _get_limit_value(
+    env_var: str, default: int, config_path: Optional[str] = None
+) -> int:
     """Get limit value from config or environment variable."""
     # First try config if available
     if _settings and config_path:

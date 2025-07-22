@@ -41,27 +41,52 @@ class StorageBackend(ABC):
     # yield  # type: ignore[unreachable]  # Removed unreachable code
 
     @abstractmethod
-    async def save_graph(self, user_id: str, graph_id: str, graph: nx.Graph, metadata: dict[str, Any] | None = None, tx: Transaction | None = None) -> bool:
+    async def save_graph(
+        self,
+        user_id: str,
+        graph_id: str,
+        graph: nx.Graph,
+        metadata: dict[str, Any] | None = None,
+        tx: Transaction | None = None,
+    ) -> bool:
         """Save graph with metadata."""
 
     @abstractmethod
-    async def load_graph(self, user_id: str, graph_id: str, tx: Transaction | None = None) -> nx.Graph | None:
+    async def load_graph(
+        self, user_id: str, graph_id: str, tx: Transaction | None = None
+    ) -> nx.Graph | None:
         """Load graph from storage."""
 
     @abstractmethod
-    async def delete_graph(self, user_id: str, graph_id: str, tx: Transaction | None = None) -> bool:
+    async def delete_graph(
+        self, user_id: str, graph_id: str, tx: Transaction | None = None
+    ) -> bool:
         """Delete graph from storage."""
 
     @abstractmethod
-    async def list_graphs(self, user_id: str, limit: int = 100, offset: int = 0, tx: Transaction | None = None) -> list[dict[str, Any]]:
+    async def list_graphs(
+        self,
+        user_id: str,
+        limit: int = 100,
+        offset: int = 0,
+        tx: Transaction | None = None,
+    ) -> list[dict[str, Any]]:
         """List user's graphs with metadata."""
 
     @abstractmethod
-    async def get_graph_metadata(self, user_id: str, graph_id: str, tx: Transaction | None = None) -> dict[str, Any] | None:
+    async def get_graph_metadata(
+        self, user_id: str, graph_id: str, tx: Transaction | None = None
+    ) -> dict[str, Any] | None:
         """Get graph metadata without loading the full graph."""
 
     @abstractmethod
-    async def update_graph_metadata(self, user_id: str, graph_id: str, metadata: dict[str, Any], tx: Transaction | None = None) -> bool:
+    async def update_graph_metadata(
+        self,
+        user_id: str,
+        graph_id: str,
+        metadata: dict[str, Any],
+        tx: Transaction | None = None,
+    ) -> bool:
         """Update graph metadata."""
 
     @abstractmethod

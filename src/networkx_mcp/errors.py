@@ -402,7 +402,9 @@ def validate_centrality_measures(measures: Any) -> list[str]:
         raise ValidationError("measures", measures, "Measures must be a list[Any]")
 
     if not measures:
-        raise ValidationError("measures", measures, "Measures list[Any] cannot be empty")
+        raise ValidationError(
+            "measures", measures, "Measures list[Any] cannot be empty"
+        )
 
     valid_measures = {"degree", "betweenness", "closeness", "eigenvector"}
 

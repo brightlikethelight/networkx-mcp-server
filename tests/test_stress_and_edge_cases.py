@@ -16,7 +16,15 @@ import psutil
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from networkx_mcp.core.basic_operations import add_edges, add_nodes, create_graph
+from networkx_mcp.core.basic_operations import (
+    add_edges,
+    add_nodes,
+    connected_components,
+    create_graph,
+    degree_centrality,
+    export_json,
+    shortest_path,
+)
 from networkx_mcp.server import NetworkXMCPServer
 
 

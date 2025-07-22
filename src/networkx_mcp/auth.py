@@ -28,7 +28,9 @@ class APIKeyManager:
             try:
                 with open(self.storage_path, "r") as f:
                     loaded_data = json.load(f)
-                    return loaded_data if isinstance(loaded_data, dict[str, Any]) else {}
+                    return (
+                        loaded_data if isinstance(loaded_data, dict[str, Any]) else {}
+                    )
             except Exception:
                 return {}
         return {}
@@ -76,7 +78,9 @@ class APIKeyManager:
 
         return None
 
-    def check_rate_limit(self, api_key: str, limit: int = 1000, window_minutes: int = 60) -> bool:
+    def check_rate_limit(
+        self, api_key: str, limit: int = 1000, window_minutes: int = 60
+    ) -> bool:
         """Check if API key has exceeded rate limit."""
         key_hash = hashlib.sha256(api_key.encode()).hexdigest()
         now = datetime.now()

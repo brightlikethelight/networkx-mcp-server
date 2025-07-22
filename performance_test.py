@@ -22,10 +22,7 @@ async def call_tool(server, tool_name, arguments):
         "jsonrpc": "2.0",
         "id": 1,
         "method": "tools/call",
-        "params": {
-            "name": tool_name,
-            "arguments": arguments
-        }
+        "params": {"name": tool_name, "arguments": arguments},
     }
 
     response = await server.handle_request(request)
@@ -68,7 +65,9 @@ async def test_graph_size_performance(server, sizes):
     """Test performance with different graph sizes."""
     print("\nGRAPH SIZE PERFORMANCE TESTS")
     print("=" * 60)
-    print(f"{'Size':<10} {'Create':<10} {'PageRank':<10} {'Betweenness':<12} {'Components':<12}")
+    print(
+        f"{'Size':<10} {'Create':<10} {'PageRank':<10} {'Betweenness':<12} {'Components':<12}"
+    )
     print("-" * 60)
 
     results = {}
@@ -111,14 +110,16 @@ async def test_graph_size_performance(server, sizes):
         except Exception:
             components_time = -1
 
-        print(f"{size:<10} {create_time:<10.3f} {pagerank_time:<10.3f} "
-              f"{betweenness_time:<12.3f} {components_time:<12.3f}")
+        print(
+            f"{size:<10} {create_time:<10.3f} {pagerank_time:<10.3f} "
+            f"{betweenness_time:<12.3f} {components_time:<12.3f}"
+        )
 
         results[size] = {
             "create": create_time,
             "pagerank": pagerank_time,
             "betweenness": betweenness_time,
-            "components": components_time
+            "components": components_time,
         }
 
     return results
@@ -136,36 +137,38 @@ async def test_algorithm_complexity(server):
     # Sparse graph (tree-like)
     await call_tool(server, "create_graph", {"name": "sparse_graph"})
     nodes = list(range(100))
-    edges = [[i, i+1] for i in range(99)]  # Linear chain
+    edges = [[i, i + 1] for i in range(99)]  # Linear chain
 
     await call_tool(server, "add_nodes", {"graph": "sparse_graph", "nodes": nodes})
     await call_tool(server, "add_edges", {"graph": "sparse_graph", "edges": edges})
 
     start = time.time()
-    result = await call_tool(server, "shortest_path", {
-        "graph": "sparse_graph",
-        "source": 0,
-        "target": 99
-    })
+    result = await call_tool(
+        server, "shortest_path", {"graph": "sparse_graph", "source": 0, "target": 99}
+    )
     sparse_path_time = time.time() - start
-    print(f"Sparse graph shortest path (0->99): {sparse_path_time:.3f}s, length: {result['length']}")
+    print(
+        f"Sparse graph shortest path (0->99): {sparse_path_time:.3f}s, length: {result['length']}"
+    )
 
     # Dense graph (almost complete)
     await call_tool(server, "create_graph", {"name": "dense_graph"})
     nodes = list(range(50))
-    edges = [[i, j] for i in range(50) for j in range(i+1, 50) if random.random() < 0.8]
+    edges = [
+        [i, j] for i in range(50) for j in range(i + 1, 50) if random.random() < 0.8
+    ]
 
     await call_tool(server, "add_nodes", {"graph": "dense_graph", "nodes": nodes})
     await call_tool(server, "add_edges", {"graph": "dense_graph", "edges": edges})
 
     start = time.time()
-    result = await call_tool(server, "shortest_path", {
-        "graph": "dense_graph",
-        "source": 0,
-        "target": 49
-    })
+    result = await call_tool(
+        server, "shortest_path", {"graph": "dense_graph", "source": 0, "target": 49}
+    )
     dense_path_time = time.time() - start
-    print(f"Dense graph shortest path (0->49): {dense_path_time:.3f}s, length: {result['length']}")
+    print(
+        f"Dense graph shortest path (0->49): {dense_path_time:.3f}s, length: {result['length']}"
+    )
 
     # Test 2: Community detection on different structures
     print("\n2. Community Detection Performance")
@@ -183,26 +186,30 @@ async def test_algorithm_complexity(server):
         start_node = community * 20
         end_node = start_node + 20
         for i in range(start_node, end_node):
-            for j in range(i+1, end_node):
+            for j in range(i + 1, end_node):
                 if random.random() < 0.3:  # 30% connection probability
                     edges.append([i, j])
 
     # Sparse connections between communities
     for i in range(3):
-        for j in range(i+1, 3):
+        for j in range(i + 1, 3):
             # Connect a few nodes between communities
             for _ in range(2):
-                u = random.randint(i*20, (i+1)*20-1)
-                v = random.randint(j*20, (j+1)*20-1)
+                u = random.randint(i * 20, (i + 1) * 20 - 1)
+                v = random.randint(j * 20, (j + 1) * 20 - 1)
                 edges.append([u, v])
 
     await call_tool(server, "add_nodes", {"graph": "community_graph", "nodes": nodes})
     await call_tool(server, "add_edges", {"graph": "community_graph", "edges": edges})
 
     start = time.time()
-    result = await call_tool(server, "community_detection", {"graph": "community_graph"})
+    result = await call_tool(
+        server, "community_detection", {"graph": "community_graph"}
+    )
     community_time = time.time() - start
-    print(f"Community detection: {community_time:.3f}s, found {result['num_communities']} communities")
+    print(
+        f"Community detection: {community_time:.3f}s, found {result['num_communities']} communities"
+    )
     print(f"Community sizes: {result['community_sizes']}")
 
 
@@ -214,8 +221,8 @@ async def test_visualization_performance(server):
     # Create test graph
     await call_tool(server, "create_graph", {"name": "viz_test"})
     nodes = list(range(30))
-    edges = [[i, (i+1) % 30] for i in range(30)]  # Circle
-    edges.extend([[i, (i+10) % 30] for i in range(0, 30, 3)])  # Cross connections
+    edges = [[i, (i + 1) % 30] for i in range(30)]  # Circle
+    edges.extend([[i, (i + 10) % 30] for i in range(0, 30, 3)])  # Cross connections
 
     await call_tool(server, "add_nodes", {"graph": "viz_test", "nodes": nodes})
     await call_tool(server, "add_edges", {"graph": "viz_test", "edges": edges})
@@ -228,10 +235,9 @@ async def test_visualization_performance(server):
     for layout in layouts:
         start = time.time()
         try:
-            result = await call_tool(server, "visualize_graph", {
-                "graph": "viz_test",
-                "layout": layout
-            })
+            result = await call_tool(
+                server, "visualize_graph", {"graph": "viz_test", "layout": layout}
+            )
             viz_time = time.time() - start
             success = "image" in result or "visualization" in result
             print(f"{layout:<15} {viz_time:<10.3f} {str(success):<10}")
@@ -254,9 +260,9 @@ async def test_import_export_performance(server):
         # Generate CSV data
         csv_lines = ["source,target"]
         for i in range(size):
-            csv_lines.append(f"node{i},node{(i+1) % size}")
+            csv_lines.append(f"node{i},node{(i + 1) % size}")
             if i % 10 == 0:  # Add some cross connections
-                csv_lines.append(f"node{i},node{(i+size//2) % size}")
+                csv_lines.append(f"node{i},node{(i + size // 2) % size}")
 
         csv_data = "\n".join(csv_lines)
 
@@ -264,10 +270,9 @@ async def test_import_export_performance(server):
         graph_name = f"import_test_{size}"
         start = time.time()
         try:
-            await call_tool(server, "import_csv", {
-                "graph": graph_name,
-                "csv_data": csv_data
-            })
+            await call_tool(
+                server, "import_csv", {"graph": graph_name, "csv_data": csv_data}
+            )
             import_time = time.time() - start
 
             # Test JSON export
@@ -305,9 +310,9 @@ async def main():
     await test_import_export_performance(server)
 
     # Summary
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("PERFORMANCE SUMMARY")
-    print("="*60)
+    print("=" * 60)
 
     print("\nScalability:")
     print("- Server handles graphs up to 1000+ nodes efficiently")

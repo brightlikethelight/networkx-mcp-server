@@ -22,7 +22,9 @@ class PerformanceMonitor:
         )
         self.start_time = time.time()
 
-    def record_operation(self, operation: str, duration: float, metadata: dict[str, Any] | None = None) -> None:
+    def record_operation(
+        self, operation: str, duration: float, metadata: dict[str, Any] | None = None
+    ) -> None:
         """Record an operation's performance metrics.
 
         Args:

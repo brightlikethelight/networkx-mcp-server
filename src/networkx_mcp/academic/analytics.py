@@ -22,7 +22,9 @@ def calculate_h_index(author_citations: List[int]) -> int:
     return h_index
 
 
-def analyze_author_impact(graph_name: str, author_name: str, graphs: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def analyze_author_impact(
+    graph_name: str, author_name: str, graphs: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
     """Analyze author impact in citation network."""
     if graphs is None:
         graphs = {}
@@ -69,7 +71,9 @@ def analyze_author_impact(graph_name: str, author_name: str, graphs: Optional[Di
     }
 
 
-def find_collaboration_patterns(graph_name: str, graphs: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def find_collaboration_patterns(
+    graph_name: str, graphs: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
     """Find collaboration patterns in citation network."""
     if graphs is None:
         graphs = {}
@@ -174,7 +178,9 @@ def find_collaboration_patterns(graph_name: str, graphs: Optional[Dict[str, Any]
     }
 
 
-def detect_research_trends(graph_name: str, time_window: int = 5, graphs: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def detect_research_trends(
+    graph_name: str, time_window: int = 5, graphs: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
     """Detect research trends in citation network over time."""
     if graphs is None:
         graphs = {}
