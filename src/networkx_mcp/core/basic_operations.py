@@ -26,11 +26,7 @@ def create_graph(
     return {
         "created": True,
         "graph_id": name,
-        "metadata": {
-            "attributes": {
-                "directed": directed
-            }
-        }
+        "metadata": {"attributes": {"directed": directed}},
     }
 
 
@@ -54,7 +50,7 @@ def add_nodes(
     return {
         "success": True,
         "nodes_added": len(new_nodes),
-        "total": graph.number_of_nodes()
+        "total": graph.number_of_nodes(),
     }
 
 
@@ -74,7 +70,7 @@ def add_edges(
     return {
         "success": True,
         "edges_added": len(edge_tuples),
-        "total": graph.number_of_edges()
+        "total": graph.number_of_edges(),
     }
 
 
@@ -85,24 +81,17 @@ def get_graph_info(
     if graphs is None:
         graphs = {}
     if graph_name not in graphs:
-        return {
-            "success": False,
-            "error": f"Graph '{graph_name}' not found"
-        }
+        return {"success": False, "error": f"Graph '{graph_name}' not found"}
     graph = graphs[graph_name]
     return {
         "graph_id": graph_name,
         "num_nodes": graph.number_of_nodes(),
         "num_edges": graph.number_of_edges(),
         "nodes": list(graph.nodes()),  # Return actual nodes list
-        "edges": [[u, v] for u, v in graph.edges()],  # Return edges as list of lists  
+        "edges": [[u, v] for u, v in graph.edges()],  # Return edges as list of lists
         "is_directed": graph.is_directed(),  # Use is_directed as expected by test
         "directed": graph.is_directed(),  # Keep for backward compatibility
-        "metadata": {
-            "attributes": {
-                "directed": graph.is_directed()
-            }
-        }
+        "metadata": {"attributes": {"directed": graph.is_directed()}},
     }
 
 
@@ -116,29 +105,19 @@ def shortest_path(
     if graphs is None:
         graphs = {}
     if graph_name not in graphs:
-        return {
-            "success": False,
-            "error": f"Graph '{graph_name}' not found"
-        }
+        return {"success": False, "error": f"Graph '{graph_name}' not found"}
 
     graph = graphs[graph_name]
     try:
         path = nx.shortest_path(graph, source, target)
-        return {
-            "success": True,
-            "path": path,
-            "length": len(path) - 1
-        }
+        return {"success": True, "path": path, "length": len(path) - 1}
     except nx.NetworkXNoPath:
         return {
             "success": False,
-            "error": f"No path found between {source} and {target}"
+            "error": f"No path found between {source} and {target}",
         }
     except nx.NodeNotFound as e:
-        return {
-            "success": False,
-            "error": f"Node not found: {e}"
-        }
+        return {"success": False, "error": f"Node not found: {e}"}
 
 
 def degree_centrality(

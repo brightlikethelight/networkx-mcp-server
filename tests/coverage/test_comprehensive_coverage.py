@@ -24,9 +24,9 @@ else:
     import pytest
 
     from networkx_mcp.core.graph_operations import GraphManager
-    from networkx_mcp.handlers.graph_ops import GraphOpsHandler
     from networkx_mcp.handlers.algorithms import AlgorithmHandler
     from networkx_mcp.handlers.analysis import AnalysisHandler
+    from networkx_mcp.handlers.graph_ops import GraphOpsHandler
     from networkx_mcp.handlers.visualization import VisualizationHandler
 
 

@@ -417,9 +417,7 @@ class TestGraphIOHandler:
             temp_path = f.name
 
         try:
-            GraphIOHandler.export_graph(
-                self.simple_graph, "json", path=temp_path
-            )
+            GraphIOHandler.export_graph(self.simple_graph, "json", path=temp_path)
             assert Path(temp_path).exists()
         finally:
             Path(temp_path).unlink()
