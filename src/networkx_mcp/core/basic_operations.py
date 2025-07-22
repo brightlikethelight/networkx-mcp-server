@@ -22,13 +22,8 @@ def create_graph(name: str, directed: bool = False, graphs: Optional[Dict[str, A
         graphs = {}
     graphs[name] = nx.DiGraph() if directed else nx.Graph()
     return {
-        "created": True,
-        "graph_id": name,
-        "metadata": {
-            "attributes": {
-                "directed": directed
-            }
-        }
+        "created": name,
+        "type": "directed" if directed else "undirected"
     }
 
 
@@ -46,8 +41,7 @@ def add_nodes(graph_name: str, nodes: List[Union[str, int]], graphs: Optional[Di
     
     graph.add_nodes_from(nodes)
     return {
-        "success": True,
-        "nodes_added": len(new_nodes),
+        "added": len(new_nodes),
         "total": graph.number_of_nodes()
     }
 
@@ -62,8 +56,7 @@ def add_edges(graph_name: str, edges: List[List[Union[str, int]]], graphs: Optio
     edge_tuples = [(e[0], e[1]) for e in edges if len(e) >= 2]
     graph.add_edges_from(edge_tuples)
     return {
-        "success": True,
-        "edges_added": len(edge_tuples),
+        "added": len(edge_tuples),
         "total": graph.number_of_edges()
     }
 
@@ -73,18 +66,12 @@ def get_graph_info(graph_name: str, graphs: Optional[Dict[str, Any]] = None) -> 
     if graphs is None:
         graphs = {}
     if graph_name not in graphs:
-        return {
-            "success": False,
-            "error": f"Graph '{graph_name}' not found"
-        }
+        raise ValueError(f"Graph '{graph_name}' not found")
     graph = graphs[graph_name]
     return {
-        "graph_id": graph_name,
-        "num_nodes": graph.number_of_nodes(),
-        "num_edges": graph.number_of_edges(),
-        "is_directed": graph.is_directed(),
-        "nodes": list(graph.nodes()),
-        "edges": [[u, v] for u, v in graph.edges()],
+        "nodes": graph.number_of_nodes(),
+        "edges": graph.number_of_edges(),
+        "directed": graph.is_directed()
     }
 
 
@@ -93,29 +80,19 @@ def shortest_path(graph_name: str, source: Union[str, int], target: Union[str, i
     if graphs is None:
         graphs = {}
     if graph_name not in graphs:
-        return {
-            "success": False,
-            "error": f"Graph '{graph_name}' not found"
-        }
+        raise ValueError(f"Graph '{graph_name}' not found")
     
     graph = graphs[graph_name]
     try:
         path = nx.shortest_path(graph, source, target)
         return {
-            "success": True,
             "path": path,
             "length": len(path) - 1
         }
     except nx.NetworkXNoPath:
-        return {
-            "success": False,
-            "error": f"No path found between {source} and {target}"
-        }
+        raise Exception(f"No path found between {source} and {target}")
     except nx.NodeNotFound as e:
-        return {
-            "success": False,
-            "error": f"Node not found: {e}"
-        }
+        raise ValueError(f"Node not found: {e}")
 
 
 def degree_centrality(graph_name: str, graphs: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:

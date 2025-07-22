@@ -459,7 +459,7 @@ class GraphIOHandler:
             List of edges as (source, target, weight) tuples
         """
         # Convert to numpy array
-        if isinstance(matrix, list[Any]):
+        if isinstance(matrix, list):
             matrix = np.array(matrix)
 
         n = matrix.shape[0]
