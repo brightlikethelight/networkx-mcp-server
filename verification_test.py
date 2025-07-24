@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).parent / "src"))
 from networkx_mcp.server import NetworkXMCPServer
 
 
-class TestResults:
+class VerificationResults:
     """Track test results."""
 
     def __init__(self):
@@ -823,7 +823,7 @@ async def main():
 
     # Initialize server
     server = NetworkXMCPServer(auth_required=False, enable_monitoring=False)
-    results = TestResults()
+    results = VerificationResults()
 
     # Run all test suites
     await test_mcp_protocol(server, results)

@@ -4,10 +4,7 @@ This test suite focuses specifically on modules with 0% coverage and very low
 coverage to achieve the maximum boost toward 90%+ coverage goal.
 """
 
-import asyncio
-import json
-from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, mock_open, patch
+from unittest.mock import MagicMock, patch
 
 import networkx as nx
 import pytest
@@ -20,6 +17,7 @@ class TestCLIModule:
         """Test that CLI module can be imported."""
         try:
             from networkx_mcp.cli import NetworkXCLI
+
             assert NetworkXCLI is not None
         except ImportError:
             pytest.skip("CLI module not available")
@@ -31,9 +29,9 @@ class TestCLIModule:
 
             cli = NetworkXCLI()
             assert cli is not None
-            assert hasattr(cli, 'graph_manager')
-            assert hasattr(cli, 'performance_monitor') 
-            assert hasattr(cli, 'operation_counter')
+            assert hasattr(cli, "graph_manager")
+            assert hasattr(cli, "performance_monitor")
+            assert hasattr(cli, "operation_counter")
             assert cli.current_graph is None
         except ImportError:
             pytest.skip("CLI not available")
@@ -64,6 +62,7 @@ class TestCLIModule:
         """Test console utilities are available."""
         try:
             from networkx_mcp.cli import console
+
             assert console is not None
         except ImportError:
             pytest.skip("CLI console not available")
@@ -92,11 +91,7 @@ class TestSecurityAuthModule:
         try:
             from networkx_mcp.security.auth import User
 
-            user = User(
-                user_id="test_id",
-                username="testuser",
-                roles={"admin", "user"}
-            )
+            user = User(user_id="test_id", username="testuser", roles={"admin", "user"})
 
             assert user.has_role("admin")
             assert user.has_role("user")
@@ -114,7 +109,7 @@ class TestSecurityAuthModule:
             user = User(
                 user_id="test_id",
                 username="testuser",
-                permissions={"read", "write", "delete"}
+                permissions={"read", "write", "delete"},
             )
 
             assert user.has_permission("read")
@@ -163,6 +158,7 @@ class TestSecurityResourceLimits:
         """Test resource limits import."""
         try:
             from networkx_mcp.security import resource_limits
+
             assert resource_limits is not None
         except ImportError:
             pytest.skip("Resource limits not available")
@@ -174,7 +170,7 @@ class TestSecurityResourceLimits:
 
             checker = MemoryLimitChecker(max_memory_mb=100)
             assert checker is not None
-            assert hasattr(checker, 'check_memory_usage')
+            assert hasattr(checker, "check_memory_usage")
         except ImportError:
             pytest.skip("MemoryLimitChecker not available")
 
@@ -206,6 +202,7 @@ class TestSecurityInputValidation:
         """Test input validation import."""
         try:
             from networkx_mcp.security import input_validation
+
             assert input_validation is not None
         except ImportError:
             pytest.skip("Input validation not available")
@@ -249,6 +246,7 @@ class TestSecurityAudit:
         """Test audit module import."""
         try:
             from networkx_mcp.security import audit
+
             assert audit is not None
         except ImportError:
             pytest.skip("Audit module not available")
@@ -291,6 +289,7 @@ class TestSecurityMiddleware:
         """Test middleware import."""
         try:
             from networkx_mcp.security import middleware
+
             assert middleware is not None
         except ImportError:
             pytest.skip("Middleware not available")
@@ -329,7 +328,7 @@ class TestSecurityMiddleware:
 class TestStorageRedisBackend:
     """Test storage.redis_backend module (14% coverage, 452 lines)."""
 
-    @patch('redis.Redis')
+    @patch("redis.Redis")
     def test_redis_backend_creation(self, mock_redis_class):
         """Test Redis backend creation."""
         try:
@@ -344,7 +343,7 @@ class TestStorageRedisBackend:
         except ImportError:
             pytest.skip("Redis backend not available")
 
-    @patch('redis.Redis')
+    @patch("redis.Redis")
     def test_redis_store_graph(self, mock_redis_class):
         """Test Redis graph storage."""
         try:
@@ -364,7 +363,7 @@ class TestStorageRedisBackend:
         except ImportError:
             pytest.skip("Redis backend not available")
 
-    @patch('redis.Redis')
+    @patch("redis.Redis")
     def test_redis_connection_config(self, mock_redis_class):
         """Test Redis connection configuration."""
         try:
@@ -380,7 +379,7 @@ class TestStorageRedisBackend:
             backend3 = RedisStorageBackend(db=1)
 
             assert backend1 is not None
-            assert backend2 is not None  
+            assert backend2 is not None
             assert backend3 is not None
         except ImportError:
             pytest.skip("Redis backend not available")
@@ -396,10 +395,10 @@ class TestStorageMemoryBackend:
 
             backend = MemoryStorageBackend()
             assert backend is not None
-            assert hasattr(backend, 'store_graph')
-            assert hasattr(backend, 'retrieve_graph')
-            assert hasattr(backend, 'list_graphs')
-            assert hasattr(backend, 'delete_graph')
+            assert hasattr(backend, "store_graph")
+            assert hasattr(backend, "retrieve_graph")
+            assert hasattr(backend, "list_graphs")
+            assert hasattr(backend, "delete_graph")
         except ImportError:
             pytest.skip("Memory backend not available")
 
@@ -437,12 +436,12 @@ class TestStorageMemoryBackend:
 
             backend = MemoryStorageBackend()
 
-            if hasattr(backend, 'store_metadata'):
+            if hasattr(backend, "store_metadata"):
                 metadata = {"created": "2024-01-01", "type": "social"}
                 result = backend.store_metadata("test", metadata)
                 assert isinstance(result, dict)
 
-            if hasattr(backend, 'get_metadata'):
+            if hasattr(backend, "get_metadata"):
                 result = backend.get_metadata("test")
                 assert isinstance(result, dict)
         except ImportError:
@@ -456,6 +455,7 @@ class TestStorageFactory:
         """Test storage factory import."""
         try:
             from networkx_mcp.storage.factory import StorageFactory
+
             assert StorageFactory is not None
         except ImportError:
             pytest.skip("Storage factory not available")
@@ -485,7 +485,7 @@ class TestStorageFactory:
         try:
             from networkx_mcp.storage.factory import StorageFactory
 
-            if hasattr(StorageFactory, 'list_backends'):
+            if hasattr(StorageFactory, "list_backends"):
                 backends = StorageFactory.list_backends()
                 assert isinstance(backends, list)
         except ImportError:
@@ -499,24 +499,27 @@ class TestVisualizationModules:
         """Test visualization base import."""
         try:
             from networkx_mcp.visualization import base
+
             assert base is not None
         except ImportError:
             pytest.skip("Visualization base not available")
 
-    @patch('matplotlib.pyplot.figure')
-    @patch('matplotlib.pyplot.savefig')
-    @patch('matplotlib.pyplot.close')
+    @patch("matplotlib.pyplot.figure")
+    @patch("matplotlib.pyplot.savefig")
+    @patch("matplotlib.pyplot.close")
     def test_matplotlib_visualizer(self, mock_close, mock_savefig, mock_figure):
         """Test matplotlib visualizer."""
         try:
-            from networkx_mcp.visualization.matplotlib_visualizer import MatplotlibVisualizer
+            from networkx_mcp.visualization.matplotlib_visualizer import (
+                MatplotlibVisualizer,
+            )
 
             visualizer = MatplotlibVisualizer()
             assert visualizer is not None
 
             # Test visualization
             graph = nx.karate_club_graph()
-            if hasattr(visualizer, 'visualize'):
+            if hasattr(visualizer, "visualize"):
                 result = visualizer.visualize(graph)
                 assert isinstance(result, dict)
         except ImportError:
@@ -565,11 +568,11 @@ class TestValidatorModules:
             graph = nx.Graph()
             graph.add_edge("A", "B")
 
-            if hasattr(validator, 'validate'):
+            if hasattr(validator, "validate"):
                 result = validator.validate(graph)
                 assert isinstance(result, (bool, dict))
 
-            if hasattr(validator, 'validate_structure'):
+            if hasattr(validator, "validate_structure"):
                 result = validator.validate_structure(graph)
                 assert isinstance(result, (bool, dict))
         except ImportError:
@@ -592,12 +595,12 @@ class TestValidatorModules:
 
             validator = AlgorithmValidator()
 
-            if hasattr(validator, 'validate_shortest_path'):
+            if hasattr(validator, "validate_shortest_path"):
                 graph = nx.path_graph(5)
                 result = validator.validate_shortest_path(graph, 0, 4)
                 assert isinstance(result, (bool, dict))
 
-            if hasattr(validator, 'validate_centrality'):
+            if hasattr(validator, "validate_centrality"):
                 graph = nx.karate_club_graph()
                 result = validator.validate_centrality(graph, "degree")
                 assert isinstance(result, (bool, dict))
@@ -623,14 +626,14 @@ class TestUtilsModules:
         """Test formatters module (39% coverage)."""
         try:
             from networkx_mcp.utils import formatters
-            
-            if hasattr(formatters, 'format_graph_response'):
+
+            if hasattr(formatters, "format_graph_response"):
                 graph = nx.Graph()
                 graph.add_edge("A", "B")
                 result = formatters.format_graph_response(graph)
                 assert isinstance(result, dict)
 
-            if hasattr(formatters, 'format_algorithm_result'):
+            if hasattr(formatters, "format_algorithm_result"):
                 data = {"path": ["A", "B"], "length": 1}
                 result = formatters.format_algorithm_result(data)
                 assert isinstance(result, dict)
@@ -659,10 +662,10 @@ class TestUtilsModules:
             counter = OperationCounter()
             assert counter is not None
 
-            if hasattr(counter, 'increment'):
+            if hasattr(counter, "increment"):
                 counter.increment("test_operation")
 
-            if hasattr(counter, 'get_count'):
+            if hasattr(counter, "get_count"):
                 count = counter.get_count("test_operation")
                 assert isinstance(count, int)
         except ImportError:
@@ -680,11 +683,11 @@ class TestCoreModules:
             config = Config()
             assert config is not None
 
-            if hasattr(config, 'load'):
+            if hasattr(config, "load"):
                 config.load()
 
-            if hasattr(config, 'get'):
-                value = config.get('test_key', 'default')
+            if hasattr(config, "get"):
+                value = config.get("test_key", "default")
                 assert value is not None
         except ImportError:
             pytest.skip("Config not available")
@@ -692,16 +695,18 @@ class TestCoreModules:
     def test_thread_safe_graph_manager(self):
         """Test thread safe graph manager (26% coverage)."""
         try:
-            from networkx_mcp.core.thread_safe_graph_manager import ThreadSafeGraphManager
+            from networkx_mcp.core.thread_safe_graph_manager import (
+                ThreadSafeGraphManager,
+            )
 
             manager = ThreadSafeGraphManager()
             assert manager is not None
 
-            if hasattr(manager, 'create_graph'):
+            if hasattr(manager, "create_graph"):
                 result = manager.create_graph("test_graph")
                 assert isinstance(result, (bool, dict))
 
-            if hasattr(manager, 'get_graph'):
+            if hasattr(manager, "get_graph"):
                 result = manager.get_graph("test_graph")
                 assert result is not None or result is None  # Either way is valid
         except ImportError:
@@ -719,11 +724,11 @@ class TestCoreModules:
             graph = nx.Graph()
             graph.add_edge("A", "B")
 
-            if hasattr(handler, 'export_to_dict'):
+            if hasattr(handler, "export_to_dict"):
                 result = handler.export_to_dict(graph)
                 assert isinstance(result, dict)
 
-            if hasattr(handler, 'detect_format'):
+            if hasattr(handler, "detect_format"):
                 fmt = handler.detect_format("test.json")
                 assert isinstance(fmt, str)
         except ImportError:

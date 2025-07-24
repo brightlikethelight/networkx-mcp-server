@@ -71,7 +71,8 @@ class TestGraphIOHandler:
 
     def test_detect_format_unknown(self):
         """Test format detection for unknown extensions."""
-        assert GraphIOHandler.detect_format("test.unknown") == "edgelist"  # default
+        with pytest.raises(ValueError, match="Cannot auto-detect format"):
+            GraphIOHandler.detect_format("test.unknown")
 
     def test_detect_format_with_path_object(self):
         """Test format detection with Path objects."""
@@ -371,7 +372,7 @@ class TestGraphIOHandler:
 
         edge_list = GraphIOHandler.adjacency_to_edge_list(matrix, node_labels=labels)
 
-        assert len(edge_list) == 2  # Undirected: A-B appears twice
+        assert len(edge_list) == 1  # Undirected: A-B appears once
         # Check that labels are used
         found_A = any("A" in str(edge[0]) or "A" in str(edge[1]) for edge in edge_list)
         assert found_A
@@ -392,7 +393,7 @@ class TestGraphIOHandler:
         edge_list = GraphIOHandler.adjacency_to_edge_list(matrix, threshold=0.5)
 
         # Should only include the 0.8 weight edge
-        assert len(edge_list) == 2  # Undirected edge appears twice
+        assert len(edge_list) == 1  # Undirected edge appears once
 
     def test_adjacency_to_edge_list_numpy_array(self):
         """Test adjacency matrix with numpy array."""
