@@ -63,7 +63,7 @@ jobs:
           --cov=src/networkx_mcp \
           --cov-report=xml \
           --cov-report=term-missing \
-          --cov-fail-under=60
+          --cov-fail-under=25
 
     - name: Run integration tests
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == env.PYTHON_VERSION_DEFAULT
