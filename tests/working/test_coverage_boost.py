@@ -337,9 +337,6 @@ class TestModuleStructureCoverage:
             from networkx_mcp.core.io import (
                 base_handler,
                 csv_handler,
-                excel_handler,
-                gml_handler,
-                graphml_handler,
                 json_handler,
             )
             from networkx_mcp.io import base, graphml

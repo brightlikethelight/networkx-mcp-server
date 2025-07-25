@@ -12,6 +12,8 @@ from unittest.mock import patch
 import networkx as nx
 import pytest
 
+from networkx_mcp.io.base import GraphReader, GraphWriter
+
 
 class ConcreteGraphReader:
     """Concrete implementation for testing abstract GraphReader."""
@@ -44,9 +46,6 @@ class ConcreteGraphWriter:
     async def write(self, graph: nx.Graph, filepath, **options) -> bool:
         """Concrete implementation of write method."""
         return True
-
-
-from networkx_mcp.io.base import GraphReader, GraphWriter
 
 
 class ProperGraphReader(GraphReader):

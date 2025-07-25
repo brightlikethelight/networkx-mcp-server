@@ -143,7 +143,7 @@ class TestAggressiveCoverage:
                 manager.add_key("test_user", "test_key_123")
 
             if hasattr(manager, "validate_key"):
-                result = manager.validate_key("test_key_123")
+                manager.validate_key("test_key_123")
                 # Result could be True, False, or None depending on implementation
 
         except (ImportError, AttributeError):
@@ -181,7 +181,6 @@ class TestAggressiveCoverage:
     def test_storage_functionality(self):
         """Test storage module functionality."""
         try:
-            from networkx_mcp.storage.base import BaseStorageBackend
             from networkx_mcp.storage.factory import StorageFactory
             from networkx_mcp.storage.memory_backend import MemoryStorageBackend
 
@@ -237,7 +236,6 @@ class TestAggressiveCoverage:
     def test_visualization_functionality(self):
         """Test visualization module functionality."""
         try:
-            from networkx_mcp.visualization.base import BaseVisualizer
             from networkx_mcp.visualization.matplotlib_visualizer import (
                 MatplotlibVisualizer,
             )
@@ -352,7 +350,6 @@ class TestAggressiveCoverage:
         """Test I/O module functionality."""
         try:
             from networkx_mcp.io.base import BaseIOHandler
-            from networkx_mcp.io.graphml import GraphMLHandler
 
             # Test I/O handlers if available
             if hasattr(BaseIOHandler, "__init__"):

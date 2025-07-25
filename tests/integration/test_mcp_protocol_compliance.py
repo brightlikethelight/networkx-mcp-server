@@ -74,9 +74,9 @@ class MCPProtocolTester:
         # Must have either result or error, not both
         has_result = "result" in response
         has_error = "error" in response
-        assert has_result != has_error, (
-            "Response must have either result or error, not both"
-        )
+        assert (
+            has_result != has_error
+        ), "Response must have either result or error, not both"
 
         if has_error:
             self.validate_error_object(response["error"])

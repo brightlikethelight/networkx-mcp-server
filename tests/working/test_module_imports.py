@@ -34,7 +34,9 @@ class TestModuleImports:
     def test_core_init_import(self):
         """Test core module __init__ import."""
         try:
-            from networkx_mcp.core import __init__
+            import networkx_mcp.core
+
+            assert hasattr(networkx_mcp.core, "__file__")
         except ImportError:
             # Module may not have exportable content, that's OK
             pass
@@ -90,7 +92,9 @@ class TestModuleImports:
     def test_security_init_import(self):
         """Test security module __init__ import."""
         try:
-            from networkx_mcp.security import __init__
+            import networkx_mcp.security
+
+            assert hasattr(networkx_mcp.security, "__file__")
         except ImportError:
             # Module may not have exportable content
             pass

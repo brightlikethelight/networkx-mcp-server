@@ -118,17 +118,17 @@ class TestCoverage60Push:
                         try:
                             # Try calling with test parameters
                             if method_name == "generate_key":
-                                result = method("test_user")
+                                method("test_user")
                             elif method_name in ["add_key", "validate_key"]:
-                                result = method("test_key")
+                                method("test_key")
                             elif method_name == "remove_key":
-                                result = method("test_key")
+                                method("test_key")
                             elif method_name in ["list_keys", "get_user"]:
-                                result = method()
+                                method()
                             elif method_name == "create_user":
-                                result = method("test_user")
+                                method("test_user")
                             else:
-                                result = method()
+                                method()
                             # Don't assert specific values, just that it runs
                         except Exception:
                             # Method might require specific setup
@@ -143,7 +143,7 @@ class TestCoverage60Push:
                     # Test middleware methods
                     if hasattr(middleware, "authenticate"):
                         try:
-                            result = middleware.authenticate({"auth": "test"})
+                            middleware.authenticate({"auth": "test"})
                         except Exception:
                             pass
 
@@ -193,9 +193,9 @@ class TestCoverage60Push:
                         try:
                             # Try calling with test graph
                             if method_name == "shortest_path":
-                                result = method(test_graph, 1, 3)
+                                method(test_graph, 1, 3)
                             else:
-                                result = method(test_graph)
+                                method(test_graph)
                             # Don't assert specific values
                         except Exception:
                             # Algorithm might not be implemented or have different signature
@@ -242,17 +242,17 @@ class TestCoverage60Push:
                         try:
                             # Try calling with test parameters
                             if method_name == "create_graph":
-                                result = method("test_ops")
+                                method("test_ops")
                             elif method_name in ["add_node", "remove_node"]:
-                                result = method("test_ops", "node1")
+                                method("test_ops", "node1")
                             elif method_name in ["add_edge", "remove_edge"]:
-                                result = method("test_ops", "node1", "node2")
+                                method("test_ops", "node1", "node2")
                             elif method_name in ["get_neighbors", "get_degree"]:
-                                result = method("test_ops", "node1")
+                                method("test_ops", "node1")
                             elif method_name == "get_graph_info":
-                                result = method("test_ops")
+                                method("test_ops")
                             else:
-                                result = method("test_ops")
+                                method("test_ops")
                             # Don't assert specific values
                         except Exception:
                             pass
@@ -332,11 +332,11 @@ class TestCoverage60Push:
                     if callable(method):
                         try:
                             if method_name == "store":
-                                result = method("test_key", {"data": "test"})
+                                method("test_key", {"data": "test"})
                             elif method_name in ["retrieve", "delete", "exists"]:
-                                result = method("test_key")
+                                method("test_key")
                             else:
-                                result = method()
+                                method()
                         except Exception:
                             pass
 
@@ -483,11 +483,11 @@ class TestCoverage60Push:
                     if callable(method):
                         try:
                             if method_name == "visualize":
-                                result = method(test_graph)
+                                method(test_graph)
                             elif method_name == "get_layout":
-                                result = method(test_graph, "spring")
+                                method(test_graph, "spring")
                             else:
-                                result = method(test_graph, "test.png")
+                                method(test_graph, "test.png")
                         except Exception:
                             pass
 
@@ -537,13 +537,13 @@ class TestCoverage60Push:
                     if callable(method):
                         try:
                             if method_name.startswith("read_"):
-                                result = method("test.csv")
+                                method("test.csv")
                             else:
                                 import networkx as nx
 
                                 test_graph = nx.Graph()
                                 test_graph.add_edge(1, 2)
-                                result = method(test_graph, "test.csv")
+                                method(test_graph, "test.csv")
                         except Exception:
                             pass
 
@@ -595,11 +595,11 @@ class TestCoverage60Push:
                     if callable(method):
                         try:
                             if method_name == "log_event":
-                                result = method("test_event", {"data": "test"})
+                                method("test_event", {"data": "test"})
                             elif method_name == "check_graph_health":
-                                result = method({})
+                                method({})
                             else:
-                                result = method()
+                                method()
                         except Exception:
                             pass
 
