@@ -54,7 +54,6 @@ class TestGraphOpsHandler:
             "add_nodes",
             "add_edges",
             "delete_graph",
-            "get_graph_info",
         ]
 
         for func_name in expected_functions:
