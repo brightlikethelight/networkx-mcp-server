@@ -351,8 +351,8 @@ def validate_edge(edge: Any) -> tuple[str, str]:
     Raises:
         InvalidEdgeError: If edge specification is invalid
     """
-    if not isinstance(edge, (list[Any], tuple[Any, ...])):
-        raise InvalidEdgeError(edge, "Edge must be a list[Any] or tuple[Any, ...]")
+    if not isinstance(edge, (list, tuple)):
+        raise InvalidEdgeError(edge, "Edge must be a list or tuple")
 
     if len(edge) != 2:
         raise InvalidEdgeError(
@@ -368,7 +368,7 @@ def validate_edge(edge: Any) -> tuple[str, str]:
     return source, target
 
 
-def validate_required_params(params: Dict[str, Any], required: list[str]) -> None:
+def validate_required_params(params: dict[str, Any], required: list[str]) -> None:
     """Validate that all required parameters are present.
 
     Args:
@@ -387,24 +387,22 @@ def validate_required_params(params: Dict[str, Any], required: list[str]) -> Non
 
 
 def validate_centrality_measures(measures: Any) -> list[str]:
-    """Validate centrality measures list[Any].
+    """Validate centrality measures list.
 
     Args:
         measures: List of centrality measures
 
     Returns:
-        Validated list[Any] of centrality measures
+        Validated list of centrality measures
 
     Raises:
         ValidationError: If measures are invalid
     """
-    if not isinstance(measures, list[Any]):
-        raise ValidationError("measures", measures, "Measures must be a list[Any]")
+    if not isinstance(measures, list):
+        raise ValidationError("measures", measures, "Measures must be a list")
 
     if not measures:
-        raise ValidationError(
-            "measures", measures, "Measures list[Any] cannot be empty"
-        )
+        raise ValidationError("measures", measures, "Measures list cannot be empty")
 
     valid_measures = {"degree", "betweenness", "closeness", "eigenvector"}
 

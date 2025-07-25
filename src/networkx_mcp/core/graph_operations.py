@@ -54,7 +54,7 @@ class GraphManager:
             raise ValidationError(
                 "graph_type",
                 graph_type,
-                f"Must be one of: {list[Any](graph_classes.keys())}",
+                f"Must be one of: {list(graph_classes.keys())}",
             )
 
         self.graphs[graph_id] = graph_classes[graph_type](**kwargs)

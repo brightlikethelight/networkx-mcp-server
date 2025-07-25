@@ -6,6 +6,7 @@ import networkx as nx
 import pytest
 
 from networkx_mcp.core.graph_operations import GraphManager
+from networkx_mcp.errors import GraphAlreadyExistsError, GraphNotFoundError
 from networkx_mcp.utils.monitoring import PerformanceMonitor
 from networkx_mcp.utils.validators import GraphValidator
 
@@ -39,7 +40,7 @@ class TestGraphManager:
         assert graph.graph["weight"] == 1.0
 
         # Test duplicate graph ID
-        with pytest.raises(ValueError):
+        with pytest.raises(GraphAlreadyExistsError):
             self.manager.create_graph("test1", "Graph")
 
     def test_get_graph(self):
@@ -49,7 +50,7 @@ class TestGraphManager:
         assert isinstance(graph, nx.Graph)
 
         # Test non-existent graph
-        with pytest.raises(KeyError):
+        with pytest.raises(GraphNotFoundError):
             self.manager.get_graph("nonexistent")
 
     def test_delete_graph(self):
@@ -60,7 +61,7 @@ class TestGraphManager:
         assert "test" not in self.manager.graphs
 
         # Test deleting non-existent graph
-        with pytest.raises(KeyError):
+        with pytest.raises(GraphNotFoundError):
             self.manager.delete_graph("nonexistent")
 
     def test_list_graphs(self):

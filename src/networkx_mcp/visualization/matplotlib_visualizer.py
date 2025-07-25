@@ -168,7 +168,7 @@ class MatplotlibVisualizer:
                 )
 
         # Draw nodes by shape groups
-        if isinstance(node_shape, dict[str, Any]):
+        if isinstance(node_shape, dict):
             shape_groups = {}
             for node in graph.nodes():
                 shape = node_shape.get(node, "circle")
@@ -279,7 +279,7 @@ class MatplotlibVisualizer:
         graph: nx.Graph, attr: int | float | str | dict[str, Any], default: Any
     ) -> list[Any]:
         """Get node attributes as a list[Any]."""
-        if isinstance(attr, dict[str, Any]):
+        if isinstance(attr, dict):
             return [attr.get(node, default) for node in graph.nodes()]
         elif isinstance(attr, str):
             # Attribute name
@@ -293,7 +293,7 @@ class MatplotlibVisualizer:
         graph: nx.Graph, attr: int | float | str | dict[str, Any], default: Any
     ) -> list[Any]:
         """Get edge attributes as a list[Any]."""
-        if isinstance(attr, dict[str, Any]):
+        if isinstance(attr, dict):
             return [attr.get(edge, default) for edge in graph.edges()]
         elif isinstance(attr, str):
             # Attribute name

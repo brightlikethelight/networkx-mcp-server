@@ -31,16 +31,16 @@ class GraphValidator:
             return False
 
         # Lists and dicts are not valid node IDs
-        if isinstance(node_id, (list[Any], dict[str, Any])):
+        if isinstance(node_id, (list, dict)):
             return False
 
         # Node IDs can be non-empty strings, integers, or tuples
-        return isinstance(node_id, (str, int, tuple[Any, ...]))
+        return isinstance(node_id, (str, int, tuple))
 
     @staticmethod
     def validate_edge(edge: Any) -> bool:
         """Validate edge format."""
-        if not isinstance(edge, (tuple[Any, ...], list[Any])):
+        if not isinstance(edge, (tuple, list)):
             return False
 
         if len(edge) < 2:
@@ -54,7 +54,7 @@ class GraphValidator:
     @staticmethod
     def validate_attributes(attributes: Any) -> bool:
         """Validate node/edge attributes."""
-        if not isinstance(attributes, dict[str, Any]):
+        if not isinstance(attributes, dict):
             return False
 
         # Check for reserved attribute names
@@ -217,7 +217,7 @@ class GraphValidator:
         2. validate_file_format(filepath, [formats]) -> tuple[bool, str | None]
         """
         # Handle the case where it's called with (filepath, [formats])
-        if isinstance(operation, list[Any]):
+        if isinstance(operation, list):
             filepath = file_format
             expected_formats = operation
             return GraphValidator.validate_file_path_format(filepath, expected_formats)
@@ -274,7 +274,7 @@ class GraphValidator:
         if "nodes" in data:
             sanitized["nodes"] = []
             for node in data["nodes"]:
-                if isinstance(node, dict[str, Any]) and "id" in node:
+                if isinstance(node, dict) and "id" in node:
                     node_data = {"id": str(node["id"])}
                     # Add other attributes
                     for key, value in node.items():
@@ -288,7 +288,7 @@ class GraphValidator:
         if "edges" in data:
             sanitized["edges"] = []
             for edge in data["edges"]:
-                if isinstance(edge, dict[str, Any]):
+                if isinstance(edge, dict):
                     if "source" in edge and "target" in edge:
                         edge_data = {
                             "source": str(edge["source"]),
@@ -299,13 +299,13 @@ class GraphValidator:
                             if key not in ["source", "target"] and isinstance(key, str):
                                 edge_data[key] = value
                         sanitized["edges"].append(edge_data)
-                elif isinstance(edge, (tuple[Any, ...], list[Any])) and len(edge) >= 2:
+                elif isinstance(edge, (tuple, list)) and len(edge) >= 2:
                     sanitized["edges"].append(
                         {"source": str(edge[0]), "target": str(edge[1])}
                     )
 
         # Copy graph attributes
-        if "graph" in data and isinstance(data["graph"], dict[str, Any]):
+        if "graph" in data and isinstance(data["graph"], dict):
             sanitized["graph"] = data["graph"].copy()
 
         return sanitized
@@ -480,17 +480,17 @@ class GraphValidator:
         """
         errors = []
 
-        if not isinstance(data, dict[str, Any]):
+        if not isinstance(data, dict):
             return False, ["Graph data must be a dictionary"]
 
         # Check for required structure
         if "nodes" in data:
-            if not isinstance(data["nodes"], list[Any]):
+            if not isinstance(data["nodes"], list):
                 errors.append("'nodes' must be a list[Any]")
             else:
                 # Validate each node
                 for i, node in enumerate(data["nodes"]):
-                    if isinstance(node, dict[str, Any]):
+                    if isinstance(node, dict):
                         if "id" not in node:
                             errors.append(f"Node at index {i} missing 'id' field")
                         elif not GraphValidator.validate_node_id(node.get("id")):
@@ -502,17 +502,17 @@ class GraphValidator:
 
         if "edges" in data or "links" in data:
             edges = data.get("edges", data.get("links", []))
-            if not isinstance(edges, list[Any]):
+            if not isinstance(edges, list):
                 errors.append("'edges' must be a list[Any]")
             else:
                 # Validate each edge
                 for i, edge in enumerate(edges):
-                    if isinstance(edge, dict[str, Any]):
+                    if isinstance(edge, dict):
                         if "source" not in edge:
                             errors.append(f"Edge at index {i} missing 'source' field")
                         if "target" not in edge:
                             errors.append(f"Edge at index {i} missing 'target' field")
-                    elif isinstance(edge, (list[Any], tuple[Any, ...])):
+                    elif isinstance(edge, (list, tuple)):
                         if len(edge) < 2:
                             errors.append(
                                 f"Edge at index {i} must have at least 2 elements"
@@ -526,24 +526,24 @@ class GraphValidator:
 
         # Check graph metadata
         if "graph" in data:
-            if not isinstance(data["graph"], dict[str, Any]):
+            if not isinstance(data["graph"], dict):
                 errors.append("'graph' metadata must be a dictionary")
 
         # Check for alternative formats
         if "adjacency_matrix" in data:
             matrix = data["adjacency_matrix"]
-            if not isinstance(matrix, list[Any]):
+            if not isinstance(matrix, list):
                 errors.append("'adjacency_matrix' must be a list[Any]")
             # Check if square matrix
             elif matrix:
                 n = len(matrix)
                 for i, row in enumerate(matrix):
-                    if not isinstance(row, list[Any]) or len(row) != n:
+                    if not isinstance(row, list) or len(row) != n:
                         errors.append(f"Adjacency matrix row {i} has incorrect length")
                         break
 
         if "edge_list" in data:
-            if not isinstance(data["edge_list"], list[Any]):
+            if not isinstance(data["edge_list"], list):
                 errors.append("'edge_list' must be a list[Any]")
 
         return len(errors) == 0, errors
@@ -590,7 +590,7 @@ class GraphValidator:
             if data and format in ["json", "yaml", "adjacency"]:
                 # Basic structure validation
                 if format == "adjacency":
-                    if not isinstance(data, dict[str, Any]) or "matrix" not in data:
+                    if not isinstance(data, dict) or "matrix" not in data:
                         return (
                             False,
                             "Adjacency format requires dict[str, Any] with 'matrix' key",

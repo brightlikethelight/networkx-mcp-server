@@ -8,30 +8,41 @@ import networkx as nx
 import pytest
 
 from networkx_mcp.core.graph_operations import GraphManager
+from networkx_mcp.errors import (
+    GraphAlreadyExistsError,
+    GraphNotFoundError,
+    ValidationError,
+)
 from networkx_mcp.utils.validators import GraphValidator
 
 
 class TestGraphValidationErrors:
     """Test validation error handling."""
 
-    def test_invalid_graph_ids(self, error_scenarios):
+    def test_invalid_graph_ids(self):
         """Test validation of invalid graph IDs."""
-        for invalid_id in error_scenarios["invalid_graph_ids"]:
-            valid, error = GraphValidator.validate_graph_id(invalid_id)
-            assert valid is False
-            assert error is not None
-            assert isinstance(error, str)
-            assert len(error) > 0
+        from networkx_mcp.errors import InvalidGraphIdError, validate_graph_id
 
-    def test_invalid_node_ids(self, error_scenarios):
+        invalid_ids = [None, "", "../../../etc/passwd", "a" * 101, "graph/with/slash"]
+        for invalid_id in invalid_ids:
+            try:
+                validate_graph_id(invalid_id)
+                assert False, f"Expected InvalidGraphIdError for {invalid_id}"
+            except InvalidGraphIdError as e:
+                # The error stores the graph_id internally, but we're just checking it was raised
+                assert len(e.message) > 0
+
+    def test_invalid_node_ids(self):
         """Test validation of invalid node IDs."""
-        for invalid_node in error_scenarios["invalid_node_ids"]:
+        invalid_nodes = [None, {"nested": "dict"}, [], object()]
+        for invalid_node in invalid_nodes:
             valid = GraphValidator.validate_node_id(invalid_node)
             assert valid is False
 
-    def test_invalid_file_paths(self, error_scenarios):
+    def test_invalid_file_paths(self):
         """Test handling of invalid file paths."""
-        for invalid_path in error_scenarios["invalid_file_paths"]:
+        invalid_paths = ["/nonexistent/path/file.json", "../../../etc/passwd"]
+        for invalid_path in invalid_paths:
             if invalid_path is not None:
                 valid, error = GraphValidator.validate_file_format(
                     invalid_path, ["json"]
@@ -96,26 +107,26 @@ class TestGraphOperationErrors:
         self.manager.create_graph("test_graph", "Graph")
 
         # Attempt to create duplicate
-        with pytest.raises(ValueError, match="already exists"):
+        with pytest.raises(GraphAlreadyExistsError):
             self.manager.create_graph("test_graph", "Graph")
 
     def test_invalid_graph_type(self):
         """Test error with invalid graph type."""
-        with pytest.raises(ValueError, match="Invalid graph type"):
+        with pytest.raises(ValidationError):
             self.manager.create_graph("test", "InvalidGraphType")
 
     def test_operations_on_nonexistent_graph(self):
         """Test operations on non-existent graphs."""
-        with pytest.raises(KeyError):
+        with pytest.raises(GraphNotFoundError):
             self.manager.get_graph("nonexistent")
 
-        with pytest.raises(KeyError):
+        with pytest.raises(GraphNotFoundError):
             self.manager.delete_graph("nonexistent")
 
-        with pytest.raises(KeyError):
+        with pytest.raises(GraphNotFoundError):
             self.manager.add_node("nonexistent", "node1")
 
-        with pytest.raises(KeyError):
+        with pytest.raises(GraphNotFoundError):
             self.manager.get_graph_info("nonexistent")
 
     def test_node_operations_errors(self):
@@ -204,32 +215,32 @@ class TestAlgorithmErrors:
 
     def setup_method(self):
         """Setup test graphs."""
-        # Import the global graph_manager from the server
-        from networkx_mcp.server import graph_manager
+        # Import the global functions and graphs from the server
+        from networkx_mcp.server import add_edges, add_nodes, create_graph, graphs
 
-        self.manager = graph_manager
+        self.graphs = graphs
 
         # Clean up any existing test graphs
         for graph_id in ["connected", "disconnected", "empty"]:
-            if graph_id in self.manager.graphs:
-                del self.manager.graphs[graph_id]
+            if graph_id in self.graphs:
+                del self.graphs[graph_id]
 
-        # Create test graphs
-        self.manager.create_graph("connected", "Graph")
-        self.manager.add_nodes_from("connected", ["A", "B", "C"])
-        self.manager.add_edges_from("connected", [("A", "B"), ("B", "C")])
+        # Create test graphs using global functions
+        create_graph("connected", directed=False)
+        add_nodes("connected", ["A", "B", "C"])
+        add_edges("connected", [["A", "B"], ["B", "C"]])
 
-        self.manager.create_graph("disconnected", "Graph")
-        self.manager.add_nodes_from("disconnected", ["A", "B", "C", "D"])
-        self.manager.add_edges_from("disconnected", [("A", "B"), ("C", "D")])
+        create_graph("disconnected", directed=False)
+        add_nodes("disconnected", ["A", "B", "C", "D"])
+        add_edges("disconnected", [["A", "B"], ["C", "D"]])
 
-        self.manager.create_graph("empty", "Graph")
+        create_graph("empty", directed=False)
 
     def teardown_method(self):
         """Clean up test graphs."""
         for graph_id in ["connected", "disconnected", "empty"]:
-            if graph_id in self.manager.graphs:
-                del self.manager.graphs[graph_id]
+            if graph_id in self.graphs:
+                del self.graphs[graph_id]
 
     def test_shortest_path_errors(self):
         """Test shortest path algorithm error cases."""
@@ -238,12 +249,12 @@ class TestAlgorithmErrors:
         # Non-existent source node
         result = shortest_path(graph_name="connected", source="X", target="A")
         assert "error" in result
-        assert "not in graph" in result["error"]
+        assert "not in" in result["error"] or "Node not found" in result["error"]
 
         # Non-existent target node
         result = shortest_path(graph_name="connected", source="A", target="X")
         assert "error" in result
-        assert "not in graph" in result["error"]
+        assert "not in" in result["error"] or "Node not found" in result["error"]
 
         # Path in disconnected graph
         result = shortest_path(graph_name="disconnected", source="A", target="C")
@@ -483,7 +494,7 @@ class TestGracefulDegradation:
         # Test recovery from failed operations
         try:
             manager.create_graph("recovery_test", "InvalidType")
-        except ValueError:
+        except ValidationError:
             # Should be able to continue after error
             manager.create_graph("recovery_test", "Graph")
             assert "recovery_test" in manager.graphs

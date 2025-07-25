@@ -5,7 +5,7 @@ This module re-exports algorithm functions from the main server module.
 """
 
 # Re-export functions from the main server module
-from ..server import graphs, mcp, node_degree, shortest_path
+from ..server import graphs, mcp, shortest_path
 
 
 # For backward compatibility
@@ -23,7 +23,6 @@ algorithms_handler = AlgorithmsHandler()
 # Export the functions for direct import
 __all__ = [
     "shortest_path",
-    "node_degree",
     "graphs",
     "mcp",
     "AlgorithmsHandler",
