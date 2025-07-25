@@ -99,8 +99,8 @@ class RedisConfig:
 class SecurityConfig:
     """Security configuration."""
 
-    enable_auth: bool = False
-    api_key_required: bool = False
+    enable_auth: bool = True
+    api_key_required: bool = True
     allowed_origins: list[str] = field(default_factory=lambda: ["*"])
     rate_limit_enabled: bool = True
     rate_limit_requests: int = 1000

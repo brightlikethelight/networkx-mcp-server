@@ -38,9 +38,17 @@ This document outlines the security measures implemented in NetworkX MCP Server 
 
 ### 1. Authentication & Authorization
 
-- **Status**: NOT IMPLEMENTED
-- **Risk**: High - No user authentication or API key validation
-- **Recommendation**: Implement JWT or API key authentication before production
+- **Status**: ✅ IMPLEMENTED AND ENABLED BY DEFAULT
+- **Risk**: ✅ RESOLVED - Authentication now enabled by default
+- **Features**:
+  - API key authentication with secure key generation
+  - Authentication middleware with request validation
+  - Secure defaults: `auth_required=True` by default
+  - Safety mechanisms prevent insecure startup without explicit confirmation
+  - Clear security warnings when authentication is disabled
+- **Usage**:
+  - Generate API keys: `python -m networkx_mcp.auth generate <name>`
+  - Disable auth (NOT RECOMMENDED): `export NETWORKX_MCP_AUTH=false && export NETWORKX_MCP_INSECURE_CONFIRM=true`
 
 ### 2. Network Security
 

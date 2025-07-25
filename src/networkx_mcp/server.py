@@ -170,7 +170,7 @@ class NetworkXMCPServer:
     """Minimal MCP server - no unnecessary abstraction."""
 
     def __init__(
-        self, auth_required: bool = False, enable_monitoring: bool = False
+        self, auth_required: bool = True, enable_monitoring: bool = False
     ) -> None:
         self.running = True
         self.mcp = self  # For test compatibility
@@ -183,6 +183,16 @@ class NetworkXMCPServer:
             self.auth = AuthMiddleware(self.key_manager, required=auth_required)
         else:
             self.auth = None
+            # SECURITY WARNING: Authentication is disabled
+            import warnings
+
+            warnings.warn(
+                "SECURITY WARNING: Authentication is disabled! "
+                "This allows unrestricted access to all server functionality. "
+                "Enable authentication in production with auth_required=True.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
 
         # Set up monitoring if enabled
         self.monitoring_enabled = enable_monitoring and HAS_MONITORING
@@ -690,25 +700,42 @@ mcp = NetworkXMCPServer()
 def main() -> None:
     """Main entry point for the NetworkX MCP Server."""
     # Check environment variables
-    auth_required = os.environ.get("NETWORKX_MCP_AUTH", "false").lower() == "true"
+    auth_required = os.environ.get("NETWORKX_MCP_AUTH", "true").lower() == "true"
     enable_monitoring = (
         os.environ.get("NETWORKX_MCP_MONITORING", "false").lower() == "true"
     )
 
-    if auth_required or enable_monitoring:
-        import logging
+    import logging
 
-        logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO)
 
-        if auth_required:
-            logging.info("Starting NetworkX MCP Server with authentication enabled")
-            logging.info(
-                "Use 'python -m networkx_mcp.auth generate <name>' to create API keys"
+    if auth_required:
+        logging.info(
+            "✅ SECURE: Starting NetworkX MCP Server with authentication ENABLED"
+        )
+        logging.info(
+            "Use 'python -m networkx_mcp.auth generate <name>' to create API keys"
+        )
+    else:
+        logging.warning("🚨 SECURITY ALERT: Authentication is DISABLED!")
+        logging.warning("This allows unrestricted access to all server functionality!")
+        logging.warning("To enable security: export NETWORKX_MCP_AUTH=true")
+        logging.warning("Or set auth_required=True in server constructor")
+
+        # Require explicit confirmation to run without auth
+        if not os.environ.get("NETWORKX_MCP_INSECURE_CONFIRM", "").lower() == "true":
+            logging.error("SECURITY: Server startup blocked for safety")
+            logging.error(
+                "To run without auth (NOT RECOMMENDED): export NETWORKX_MCP_INSECURE_CONFIRM=true"
+            )
+            raise RuntimeError(
+                "SECURITY: Authentication disabled but not explicitly confirmed. "
+                "Set NETWORKX_MCP_INSECURE_CONFIRM=true to bypass this safety check."
             )
 
-        if enable_monitoring:
-            logging.info("Starting NetworkX MCP Server with monitoring enabled")
-            logging.info("Health status available via 'health_status' tool")
+    if enable_monitoring:
+        logging.info("Starting NetworkX MCP Server with monitoring enabled")
+        logging.info("Health status available via 'health_status' tool")
 
     server = NetworkXMCPServer(
         auth_required=auth_required, enable_monitoring=enable_monitoring
