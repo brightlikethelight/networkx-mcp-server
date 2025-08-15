@@ -7,7 +7,7 @@ ensuring data integrity and security boundaries.
 import logging
 import re
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Dict, List, Tuple
 
 import networkx as nx
 
@@ -29,7 +29,7 @@ class GraphValidationRule:
 class GraphValidator(Component):
     """Validator for graph operations and data."""
 
-    def __init__(self, config: dict[str, Any] | None = None) -> None:
+    def __init__(self, config: Dict[str, Any] | None = None) -> None:
         super().__init__("GraphValidator")
         self.config = config or {}
 
@@ -43,7 +43,7 @@ class GraphValidator(Component):
         self.max_attribute_size = self.config.get("max_attribute_size", 1048576)  # 1MB
 
         # Validation rules
-        self._validation_rules: list[GraphValidationRule] = [
+        self._validation_rules: List[GraphValidationRule] = [
             GraphValidationRule(
                 name="graph_id_format",
                 validator=self._validate_graph_id_format,
@@ -72,7 +72,7 @@ class GraphValidator(Component):
         logger.info("Graph validator initialized")
 
     async def validate_graph_creation(
-        self, request: dict[str, Any]
+        self, request: Dict[str, Any]
     ) -> ValidationResult:
         """Validate graph creation request."""
         errors = []
@@ -136,12 +136,12 @@ class GraphValidator(Component):
 
         # Check for self-loops in undirected graphs
         if not graph.is_directed():
-            self_loops = list[Any](nx.selfloop_edges(graph))
+            self_loops = List[Any](nx.selfloop_edges(graph))
             if self_loops:
                 warnings.append(f"Undirected graph has {len(self_loops)} self-loops")
 
         # Check for isolated nodes
-        isolated = list[Any](nx.isolates(graph))
+        isolated = List[Any](nx.isolates(graph))
         if isolated:
             warnings.append(f"Graph has {len(isolated)} isolated nodes")
 
@@ -158,7 +158,7 @@ class GraphValidator(Component):
         )
 
     async def validate_node_operation(
-        self, operation: dict[str, Any]
+        self, operation: Dict[str, Any]
     ) -> ValidationResult:
         """Validate node operations (add/remove/update)."""
         errors = []
@@ -171,8 +171,8 @@ class GraphValidator(Component):
         # Validate nodes data
         if "nodes" in operation:
             nodes = operation["nodes"]
-            if not isinstance(nodes, list[Any]):
-                errors.append("Nodes must be a list[Any]")
+            if not isinstance(nodes, List[Any]):
+                errors.append("Nodes must be a List[Any]")
             else:
                 for i, node in enumerate(nodes):
                     node_errors = self._validate_node_data(node)
@@ -187,7 +187,7 @@ class GraphValidator(Component):
         )
 
     async def validate_edge_operation(
-        self, operation: dict[str, Any]
+        self, operation: Dict[str, Any]
     ) -> ValidationResult:
         """Validate edge operations (add/remove/update)."""
         errors = []
@@ -200,8 +200,8 @@ class GraphValidator(Component):
         # Validate edges data
         if "edges" in operation:
             edges = operation["edges"]
-            if not isinstance(edges, list[Any]):
-                errors.append("Edges must be a list[Any]")
+            if not isinstance(edges, List[Any]):
+                errors.append("Edges must be a List[Any]")
             else:
                 for i, edge in enumerate(edges):
                     edge_errors = self._validate_edge_data(edge)
@@ -277,9 +277,9 @@ class GraphValidator(Component):
 
         return True
 
-    def _validate_attributes_dict(self, attrs: dict[str, Any]) -> bool:
+    def _validate_attributes_dict(self, attrs: Dict[str, Any]) -> bool:
         """Validate attributes dictionary."""
-        if not isinstance(attrs, dict[str, Any]):
+        if not isinstance(attrs, Dict[str, Any]):
             return True  # Empty attributes are OK
 
         for key, value in attrs.items():
@@ -309,14 +309,14 @@ class GraphValidator(Component):
                 return False
 
         # Recursively check containers
-        if isinstance(value, (list[Any], tuple[Any, ...])):
+        if isinstance(value, (List[Any], Tuple[Any, ...])):
             if len(value) > 10000:  # Prevent huge lists
                 return False
             for item in value:
                 if not self._validate_attribute_value(item):
                     return False
 
-        elif isinstance(value, dict[str, Any]):
+        elif isinstance(value, Dict[str, Any]):
             if len(value) > 1000:  # Prevent huge dicts
                 return False
             for k, v in value.items():
@@ -327,14 +327,14 @@ class GraphValidator(Component):
 
         return True
 
-    def _validate_node_data(self, node: Any) -> list[str]:
+    def _validate_node_data(self, node: Any) -> List[str]:
         """Validate node data."""
         errors = []
 
-        if isinstance(node, dict[str, Any]):
+        if isinstance(node, Dict[str, Any]):
             # Node with attributes
             if "id" not in node:
-                errors.append("Node dict[str, Any] must have 'id' field")
+                errors.append("Node Dict[str, Any] must have 'id' field")
             else:
                 if not self._validate_single_node_id(node["id"]):
                     errors.append("Invalid node ID")
@@ -349,16 +349,16 @@ class GraphValidator(Component):
 
         return errors
 
-    def _validate_edge_data(self, edge: Any) -> list[str]:
+    def _validate_edge_data(self, edge: Any) -> List[str]:
         """Validate edge data."""
         errors = []
 
-        if isinstance(edge, dict[str, Any]):
+        if isinstance(edge, Dict[str, Any]):
             # Edge with attributes
             required_fields = ["source", "target"]
             for field in required_fields:
                 if field not in edge:
-                    errors.append(f"Edge dict[str, Any] must have '{field}' field")
+                    errors.append(f"Edge Dict[str, Any] must have '{field}' field")
                 else:
                     if not self._validate_single_node_id(edge[field]):
                         errors.append(f"Invalid {field} ID")
@@ -367,8 +367,8 @@ class GraphValidator(Component):
                 if not self._validate_attributes_dict(edge["attributes"]):
                     errors.append("Invalid edge attributes")
 
-        elif isinstance(edge, (tuple[Any, ...], list[Any])):
-            # Edge as tuple[Any, ...]/list[Any]
+        elif isinstance(edge, (Tuple[Any, ...], List[Any])):
+            # Edge as Tuple[Any, ...]/List[Any]
             if len(edge) < 2:
                 errors.append("Edge must have at least source and target")
             else:
@@ -382,11 +382,11 @@ class GraphValidator(Component):
                     if not self._validate_attributes_dict(edge[2]):
                         errors.append("Invalid edge attributes")
         else:
-            errors.append("Edge must be dict[str, Any], tuple[Any, ...], or list[Any]")
+            errors.append("Edge must be Dict[str, Any], Tuple[Any, ...], or List[Any]")
 
         return errors
 
-    async def health_check(self) -> dict[str, Any]:
+    async def health_check(self) -> Dict[str, Any]:
         """Perform health check."""
         return {
             "healthy": self.status == ComponentStatus.READY,
@@ -398,6 +398,6 @@ class GraphValidator(Component):
             },
         }
 
-    def get_validation_rules(self) -> list[str]:
-        """Get list[Any] of validation rule names."""
+    def get_validation_rules(self) -> List[str]:
+        """Get List[Any] of validation rule names."""
         return [rule.name for rule in self._validation_rules]

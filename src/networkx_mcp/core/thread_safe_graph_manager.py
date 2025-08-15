@@ -6,7 +6,7 @@ using the GraphLockManager to prevent data corruption in concurrent environments
 
 import asyncio
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import networkx as nx
 
@@ -126,7 +126,7 @@ class ThreadSafeGraphManager:
         return graph.number_of_nodes() - initial_count
 
     async def add_edges(
-        self, graph_name: str, edges: List[tuple[Any, ...]], **attrs
+        self, graph_name: str, edges: List[Tuple[Any, ...]], **attrs
     ) -> Dict[str, Any]:
         """Add edges to a graph (thread-safe).
 
@@ -156,7 +156,7 @@ class ThreadSafeGraphManager:
             }
 
     def _add_edges_sync(
-        self, graph: nx.Graph, edges: List[tuple[Any, ...]], **attrs
+        self, graph: nx.Graph, edges: List[Tuple[Any, ...]], **attrs
     ) -> int:
         """Synchronous edge addition (runs in thread pool)."""
         initial_count = graph.number_of_edges()
@@ -259,10 +259,10 @@ class ThreadSafeGraphManager:
             offset: Number of graphs to skip
 
         Returns:
-            Dictionary with graph list[Any]
+            Dictionary with graph List[Any]
         """
         async with self.lock_manager.read_lock("_manager"):
-            graph_names = list[Any](self.graphs.keys())
+            graph_names = List[Any](self.graphs.keys())
 
         # Get info for each graph
         graphs_info = []
@@ -346,26 +346,26 @@ class ThreadSafeGraphManager:
 
         for measure in measures:
             if measure == "degree":
-                results["degree_centrality"] = dict[str, Any](
+                results["degree_centrality"] = Dict[str, Any](
                     nx.degree_centrality(graph)
                 )
             elif measure == "betweenness":
-                results["betweenness_centrality"] = dict[str, Any](
+                results["betweenness_centrality"] = Dict[str, Any](
                     nx.betweenness_centrality(graph, normalized=normalized)
                 )
             elif measure == "closeness":
-                results["closeness_centrality"] = dict[str, Any](
+                results["closeness_centrality"] = Dict[str, Any](
                     nx.closeness_centrality(graph)
                 )
             elif measure == "eigenvector":
                 try:
-                    results["eigenvector_centrality"] = dict[str, Any](
+                    results["eigenvector_centrality"] = Dict[str, Any](
                         nx.eigenvector_centrality(graph, max_iter=1000)
                     )
                 except Exception:
                     results["eigenvector_centrality"] = "Failed to converge"
             elif measure == "pagerank":
-                results["pagerank"] = dict[str, Any](nx.pagerank(graph))
+                results["pagerank"] = Dict[str, Any](nx.pagerank(graph))
 
         return results
 

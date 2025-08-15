@@ -12,7 +12,7 @@ from dataclasses import dataclass, field, fields
 from enum import Enum
 from functools import wraps
 from pathlib import Path
-from typing import Any, TypeVar
+from typing import Any, Dict, List, TypeVar
 
 import yaml
 
@@ -101,7 +101,7 @@ class SecurityConfig:
 
     enable_auth: bool = True
     api_key_required: bool = True
-    allowed_origins: list[str] = field(default_factory=lambda: ["*"])
+    allowed_origins: List[str] = field(default_factory=lambda: ["*"])
     rate_limit_enabled: bool = True
     rate_limit_requests: int = 1000
     rate_limit_window: int = 60
@@ -152,14 +152,14 @@ class AppConfig:
     quality: QualityConfig = field(default_factory=QualityConfig)
 
     # Additional custom configuration
-    custom: dict[str, Any] = field(default_factory=dict[str, Any])
+    custom: Dict[str, Any] = field(default_factory=Dict[str, Any])
 
 
 class ConfigLoader(ABC):
     """Abstract base class for configuration loaders."""
 
     @abstractmethod
-    def load(self, source: str) -> dict[str, Any]:
+    def load(self, source: str) -> Dict[str, Any]:
         """Load configuration from source."""
 
     @abstractmethod
@@ -174,7 +174,7 @@ class FileConfigLoader(ConfigLoader):
         """Check if source is a file path."""
         return Path(source).exists()
 
-    def load(self, source: str) -> dict[str, Any]:
+    def load(self, source: str) -> Dict[str, Any]:
         """Load configuration from file."""
         path = Path(source)
         if not path.exists():
@@ -201,20 +201,20 @@ class EnvironmentConfigLoader(ConfigLoader):
         """Always supports environment loading."""
         return True
 
-    def load(self, source: str = "") -> dict[str, Any]:
+    def load(self, source: str = "") -> Dict[str, Any]:
         """Load configuration from environment variables."""
         config = {}
 
         for key, value in os.environ.items():
             if key.startswith(self.prefix):
-                # Remove prefix and convert to nested dict[str, Any]
+                # Remove prefix and convert to nested Dict[str, Any]
                 config_key = key[len(self.prefix) :].lower()
                 self._set_nested_value(config, config_key, self._convert_value(value))
 
         return config
 
-    def _set_nested_value(self, config: dict[str, Any], key: str, value: Any) -> None:
-        """Set nested value in config dict[str, Any]."""
+    def _set_nested_value(self, config: Dict[str, Any], key: str, value: Any) -> None:
+        """Set nested value in config Dict[str, Any]."""
         parts = key.split("_")
         current = config
 
@@ -259,11 +259,11 @@ class ConfigManager:
 
     def __init__(self) -> None:
         self._config: AppConfig | None = None
-        self._loaders: list[ConfigLoader] = [
+        self._loaders: List[ConfigLoader] = [
             FileConfigLoader(),
             EnvironmentConfigLoader(),
         ]
-        self._sources: list[str] = []
+        self._sources: List[str] = []
 
     def add_loader(self, loader: ConfigLoader) -> None:
         """Add a configuration loader."""
@@ -281,7 +281,7 @@ class ConfigManager:
             self._loaders.append(env_loader)
         return self
 
-    def load_from_dict(self, config_dict: dict[str, Any]) -> "ConfigManager":
+    def load_from_dict(self, config_dict: Dict[str, Any]) -> "ConfigManager":
         """Load configuration from dictionary."""
         self._config = self._dict_to_config(config_dict)
         return self
@@ -330,7 +330,7 @@ class ConfigManager:
         logger.info("Reloading configuration")
         return self.build()
 
-    def _dict_to_config(self, config_dict: dict[str, Any]) -> AppConfig:
+    def _dict_to_config(self, config_dict: Dict[str, Any]) -> AppConfig:
         """Convert dictionary to AppConfig instance."""
         # Handle environment conversion
         if "environment" in config_dict:
@@ -344,22 +344,22 @@ class ConfigManager:
                 field_info.type, "__dataclass_fields__"
             ):
                 field_data = config_dict[field_info.name]
-                if isinstance(field_data, dict[str, Any]):
+                if isinstance(field_data, Dict[str, Any]):
                     config_dict[field_info.name] = field_info.type(**field_data)
 
         return AppConfig(**config_dict)
 
     def _deep_merge(
-        self, base: dict[str, Any], update: dict[str, Any]
-    ) -> dict[str, Any]:
+        self, base: Dict[str, Any], update: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Deep merge two dictionaries."""
         result = base.copy()
 
         for key, value in update.items():
             if (
                 key in result
-                and isinstance(result[key], dict[str, Any])
-                and isinstance(value, dict[str, Any])
+                and isinstance(result[key], Dict[str, Any])
+                and isinstance(value, Dict[str, Any])
             ):
                 result[key] = self._deep_merge(result[key], value)
             else:

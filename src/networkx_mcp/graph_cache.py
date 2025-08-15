@@ -12,7 +12,7 @@ import threading
 import time
 from collections import OrderedDict
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 import networkx as nx
 import psutil
@@ -163,7 +163,7 @@ class GraphCache:
             self.evictions += count
             logger.info(f"Cleared {count} graphs from cache")
 
-    def list_graphs(self) -> list[str]:
+    def list_graphs(self) -> List[str]:
         """Get list of cached graph keys."""
         with self._lock:
             return list(self._cache.keys())

@@ -133,7 +133,7 @@ def degree_centrality(
     # Convert to serializable format and sort by centrality
     sorted_nodes = sorted(centrality.items(), key=lambda x: x[1], reverse=True)
     return {
-        "centrality": dict[str, Any](sorted_nodes[:10]),  # Top 10 nodes
+        "centrality": Dict[str, Any](sorted_nodes[:10]),  # Top 10 nodes
         "most_central": sorted_nodes[0] if sorted_nodes else None,
     }
 
@@ -150,7 +150,7 @@ def betweenness_centrality(
     centrality = nx.betweenness_centrality(graph)
     sorted_nodes = sorted(centrality.items(), key=lambda x: x[1], reverse=True)
     return {
-        "centrality": dict[str, Any](sorted_nodes[:10]),  # Top 10 nodes
+        "centrality": Dict[str, Any](sorted_nodes[:10]),  # Top 10 nodes
         "most_central": sorted_nodes[0] if sorted_nodes else None,
     }
 
@@ -165,12 +165,12 @@ def connected_components(
         raise ValueError(f"Graph '{graph_name}' not found")
     graph = graphs[graph_name]
     if graph.is_directed():
-        components = list[Any](nx.weakly_connected_components(graph))
+        components = List[Any](nx.weakly_connected_components(graph))
     else:
-        components = list[Any](nx.connected_components(graph))
+        components = List[Any](nx.connected_components(graph))
 
     # Convert sets to lists for JSON serialization
-    components_list = [list[Any](comp) for comp in components]
+    components_list = [List[Any](comp) for comp in components]
     components_list.sort(key=len, reverse=True)  # Largest first
 
     return {
@@ -192,7 +192,7 @@ def pagerank(
     pr = nx.pagerank(graph)
     sorted_nodes = sorted(pr.items(), key=lambda x: x[1], reverse=True)
     return {
-        "pagerank": dict[str, Any](sorted_nodes[:10]),  # Top 10 nodes
+        "pagerank": Dict[str, Any](sorted_nodes[:10]),  # Top 10 nodes
         "highest_rank": sorted_nodes[0] if sorted_nodes else None,
     }
 
@@ -252,7 +252,7 @@ def import_csv(
     directed: bool = False,
     graphs: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Union[str, int]]:
-    """Import graph from CSV edge list[Any] - compatibility function."""
+    """Import graph from CSV edge List[Any] - compatibility function."""
     if graphs is None:
         graphs = {}
     # Parse CSV data
@@ -320,8 +320,8 @@ def community_detection(
     # Use Louvain method for community detection
     communities = nx_comm.louvain_communities(graph)
 
-    # Convert to list[Any] format
-    communities_list = [list[Any](comm) for comm in communities]
+    # Convert to List[Any] format
+    communities_list = [List[Any](comm) for comm in communities]
     communities_list.sort(key=len, reverse=True)  # Largest first
 
     # Create node to community mapping
@@ -336,7 +336,7 @@ def community_detection(
         "method": "louvain",
         "community_sizes": [len(comm) for comm in communities_list],
         "largest_community": communities_list[0] if communities_list else [],
-        "node_community_map": dict[str, Any](
-            list[Any](node_community.items())[:20]
+        "node_community_map": Dict[str, Any](
+            List[Any](node_community.items())[:20]
         ),  # First 20 nodes
     }

@@ -3,7 +3,7 @@
 import argparse
 import asyncio
 from pathlib import Path
-from typing import Any
+from typing import Any, List
 
 from rich.console import Console
 from rich.panel import Panel
@@ -32,7 +32,7 @@ class NetworkXCLI:
 ╔═══════════════════════════════════════════════════════════╗
 ║          NetworkX MCP Server - Interactive CLI            ║
 ║                                                           ║
-║  Commands: help, create, list[Any], info, add, analyze, exit  ║
+║  Commands: help, create, List[Any], info, add, analyze, exit  ║
 ╚═══════════════════════════════════════════════════════════╝
         """
         console.print(banner, style="bold blue")
@@ -44,7 +44,7 @@ class NetworkXCLI:
 
 [green]Graph Management:[/green]
   create <graph_id> [type]     - Create a new graph
-  list[Any]                         - List all graphs
+  List[Any]                         - List all graphs
   info [graph_id]              - Show graph information
   delete <graph_id>            - Delete a graph
   select <graph_id>            - Select active graph
@@ -72,7 +72,7 @@ class NetworkXCLI:
         """
         console.print(help_text)
 
-    async def create_graph(self, args: list[Any]) -> Any:
+    async def create_graph(self, args: List[Any]) -> Any:
         """Create a new graph."""
         if len(args) < 1:
             console.print("[red]Usage: create <graph_id> [type][/red]")
@@ -156,7 +156,7 @@ Degree Stats:
         except Exception as e:
             console.print(f"[red]✗ Error: {e}[/red]")
 
-    async def add_nodes(self, args: list[Any]) -> None:
+    async def add_nodes(self, args: List[Any]) -> None:
         """Add nodes to current graph."""
         if not self.current_graph:
             console.print("[red]No graph selected. Use 'select <graph_id>'[/red]")
@@ -172,7 +172,7 @@ Degree Stats:
         except Exception as e:
             console.print(f"[red]✗ Error: {e}[/red]")
 
-    async def add_edge(self, args: list[Any]) -> None:
+    async def add_edge(self, args: List[Any]) -> None:
         """Add edge to current graph."""
         if not self.current_graph:
             console.print("[red]No graph selected. Use 'select <graph_id>'[/red]")
@@ -191,7 +191,7 @@ Degree Stats:
         except Exception as e:
             console.print(f"[red]✗ Error: {e}[/red]")
 
-    async def analyze(self, args: list[Any]) -> None:
+    async def analyze(self, args: List[Any]) -> None:
         """Run various analyses."""
         if not args:
             console.print("[red]Usage: analyze <type> [options][/red]")
@@ -330,7 +330,7 @@ Radius: {stats["radius"]}
         import time
 
         start = time.time()
-        nodes = list[Any](range(size))
+        nodes = List[Any](range(size))
         self.graph_manager.add_nodes_from(test_id, nodes)
         node_time = time.time() - start
 
@@ -454,7 +454,7 @@ Total: {(node_time + edge_time + centrality_time + component_time) * 1000:.2f} m
                 elif cmd == "create":
                     await self.create_graph(args)
 
-                elif cmd == "list[Any]":
+                elif cmd == "List[Any]":
                     self.list_graphs()
 
                 elif cmd == "info":

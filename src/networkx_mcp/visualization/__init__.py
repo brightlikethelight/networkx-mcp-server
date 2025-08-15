@@ -15,7 +15,7 @@ Example usage:
     plotly_viz = PlotlyVisualizer()
 """
 
-from typing import Any
+from typing import Any, List
 
 # Import existing visualizers
 # Import helper functions
@@ -71,7 +71,7 @@ def get_visualizer(backend: str = "matplotlib") -> Any:
         visualizers["pyvis"] = PyvisVisualizer
 
     if backend not in visualizers:
-        available = list[Any](visualizers.keys())
+        available = List[Any](visualizers.keys())
         msg = f"Backend '{backend}' not available. Available backends: {available}"
         raise ValueError(msg)
 

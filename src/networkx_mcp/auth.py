@@ -29,7 +29,7 @@ class APIKeyManager:
                 with open(self.storage_path, "r") as f:
                     loaded_data = json.load(f)
                     return (
-                        loaded_data if isinstance(loaded_data, dict[str, Any]) else {}
+                        loaded_data if isinstance(loaded_data, Dict[str, Any]) else {}
                     )
             except Exception:
                 return {}
@@ -52,7 +52,7 @@ class APIKeyManager:
         self.keys[key_hash] = {
             "name": name,
             "created": datetime.now().isoformat(),
-            "permissions": list[Any](permissions or {"read", "write"}),
+            "permissions": List[Any](permissions or {"read", "write"}),
             "active": True,
             "last_used": None,
             "request_count": 0,
@@ -188,7 +188,7 @@ def main() -> None:
     )
 
     # List keys command
-    subparsers.add_parser("list[Any]", help="List all API keys")
+    subparsers.add_parser("List[Any]", help="List all API keys")
 
     # Revoke key command
     revoke_parser = subparsers.add_parser("revoke", help="Revoke an API key")
@@ -199,12 +199,12 @@ def main() -> None:
     manager = APIKeyManager()
 
     if args.command == "generate":
-        key = manager.generate_key(args.name, set[Any](args.permissions))
+        key = manager.generate_key(args.name, Set[Any](args.permissions))
         print(f"Generated API key for '{args.name}':")
         print(f"\n{key}\n")
         print("⚠️  Save this key securely - it cannot be retrieved later!")
 
-    elif args.command == "list[Any]":
+    elif args.command == "List[Any]":
         keys = manager.list_keys()
         if not keys:
             print("No API keys found")

@@ -11,7 +11,7 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Generic, Protocol, TypeVar
+from typing import Any, Dict, Generic, List, Protocol, TypeVar
 
 # Type variables
 T = TypeVar("T")
@@ -78,7 +78,7 @@ class Component(ABC):
         """Shutdown the component gracefully."""
 
     @abstractmethod
-    async def health_check(self) -> dict[str, Any]:
+    async def health_check(self) -> Dict[str, Any]:
         """Perform health check and return status."""
 
     async def _set_status(self, status: ComponentStatus) -> None:
@@ -87,7 +87,7 @@ class Component(ABC):
             self.status = status
             logger.debug(f"Component {self.name} status changed to {status.value}")
 
-    def get_metrics(self) -> dict[str, Any]:
+    def get_metrics(self) -> Dict[str, Any]:
         """Get component metrics as dictionary."""
         return {
             "component": self.name,
@@ -108,7 +108,7 @@ class Component(ABC):
 class Handler(Protocol):
     """Protocol for request handlers."""
 
-    async def handle(self, request: dict[str, Any]) -> dict[str, Any]:
+    async def handle(self, request: Dict[str, Any]) -> Dict[str, Any]:
         """Handle a request and return response."""
         ...
 
@@ -117,11 +117,11 @@ class Middleware(ABC):
     """Base class for middleware components."""
 
     @abstractmethod
-    async def process_request(self, request: dict[str, Any]) -> dict[str, Any]:
+    async def process_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
         """Process request before handler."""
 
     @abstractmethod
-    async def process_response(self, response: dict[str, Any]) -> dict[str, Any]:
+    async def process_response(self, response: Dict[str, Any]) -> Dict[str, Any]:
         """Process response after handler."""
 
 
@@ -133,7 +133,7 @@ class Repository(ABC, Generic[T]):
         """Get entity by ID."""
 
     @abstractmethod
-    async def list(self, **filters) -> list[T]:
+    async def list(self, **filters) -> List[T]:
         """List entities with optional filters."""
 
     @abstractmethod
@@ -154,7 +154,7 @@ class Service(Component):
 
     def __init__(self, name: str) -> None:
         super().__init__(name)
-        self.dependencies: dict[str, Component] = {}
+        self.dependencies: Dict[str, Component] = {}
 
     def add_dependency(self, name: str, component: Component) -> None:
         """Add a dependency to this service."""
@@ -197,7 +197,7 @@ class EventBus(Component):
 
     def __init__(self) -> None:
         super().__init__("EventBus")
-        self._subscribers: dict[str, list[asyncio.Queue]] = {}
+        self._subscribers: Dict[str, List[asyncio.Queue]] = {}
 
     async def initialize(self) -> None:
         """Initialize the event bus."""
@@ -210,7 +210,7 @@ class EventBus(Component):
         self._subscribers.clear()
         await self._set_status(ComponentStatus.SHUTDOWN)
 
-    async def health_check(self) -> dict[str, Any]:
+    async def health_check(self) -> Dict[str, Any]:
         """Check event bus health."""
         return {
             "healthy": self.status == ComponentStatus.READY,
@@ -238,8 +238,8 @@ class ValidationResult:
     """Result of a validation operation."""
 
     valid: bool
-    errors: list[str] = field(default_factory=list[Any])
-    warnings: list[str] = field(default_factory=list[Any])
+    errors: List[str] = field(default_factory=List[Any])
+    warnings: List[str] = field(default_factory=List[Any])
 
     def add_error(self, message: str) -> None:
         """Add an error message."""
@@ -284,7 +284,7 @@ class Registry(Generic[T]):
 
     def __init__(self, name: str) -> None:
         self.name = name
-        self._items: dict[str, T] = {}
+        self._items: Dict[str, T] = {}
         self._lock = asyncio.Lock()
 
     async def register(self, name: str, item: T) -> None:
@@ -305,10 +305,10 @@ class Registry(Generic[T]):
         async with self._lock:
             return self._items.get(name)
 
-    async def list(self) -> list[str]:
+    async def list(self) -> List[str]:
         """List all registered item names."""
         async with self._lock:
-            return list[Any](self._items.keys())
+            return List[Any](self._items.keys())
 
     async def clear(self) -> None:
         """Clear all registered items."""
@@ -321,7 +321,7 @@ class Pipeline(Generic[T]):
 
     def __init__(self, name: str) -> None:
         self.name = name
-        self._stages: list[Any] = []
+        self._stages: List[Any] = []
 
     def add_stage(self, stage: Any) -> "Pipeline[T]":
         """Add a processing stage."""

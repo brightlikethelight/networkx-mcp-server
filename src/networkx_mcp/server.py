@@ -8,7 +8,7 @@ import asyncio
 import json
 import os
 import sys
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 import networkx as nx
 
@@ -207,7 +207,7 @@ class NetworkXMCPServer:
         """Mock tool decorator for test compatibility."""
         return func
 
-    async def handle_request(self, request: dict[str, Any]) -> dict[str, Any]:
+    async def handle_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
         """Route requests to handlers."""
         method = request.get("method", "")
         params = request.get("params", {})
@@ -413,7 +413,7 @@ class NetworkXMCPServer:
             },
             {
                 "name": "import_csv",
-                "description": "Import graph from CSV edge list[Any] (format: source,target per line)",
+                "description": "Import graph from CSV edge List[Any] (format: source,target per line)",
                 "inputSchema": {
                     "type": "object",
                     "properties": {
@@ -528,7 +528,7 @@ class NetworkXMCPServer:
 
         return tools
 
-    async def _call_tool(self, params: dict[str, Any]) -> dict[str, Any]:
+    async def _call_tool(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """Execute a tool."""
         tool_name = params.get("name")
         args = params.get("arguments", {})
@@ -547,7 +547,7 @@ class NetworkXMCPServer:
                 graph_name = args["graph"]
                 if graph_name not in graphs:
                     raise ValueError(
-                        f"Graph '{graph_name}' not found. Available graphs: {list[Any](graphs.keys())}"
+                        f"Graph '{graph_name}' not found. Available graphs: {List[Any](graphs.keys())}"
                     )
                 graph = graphs[graph_name]
                 graph.add_nodes_from(args["nodes"])
@@ -557,10 +557,10 @@ class NetworkXMCPServer:
                 graph_name = args["graph"]
                 if graph_name not in graphs:
                     raise ValueError(
-                        f"Graph '{graph_name}' not found. Available graphs: {list[Any](graphs.keys())}"
+                        f"Graph '{graph_name}' not found. Available graphs: {List[Any](graphs.keys())}"
                     )
                 graph = graphs[graph_name]
-                edges = [tuple[Any, ...](e) for e in args["edges"]]
+                edges = [Tuple[Any, ...](e) for e in args["edges"]]
                 graph.add_edges_from(edges)
                 result = {"added": len(edges), "total": graph.number_of_edges()}
 
@@ -568,7 +568,7 @@ class NetworkXMCPServer:
                 graph_name = args["graph"]
                 if graph_name not in graphs:
                     raise ValueError(
-                        f"Graph '{graph_name}' not found. Available graphs: {list[Any](graphs.keys())}"
+                        f"Graph '{graph_name}' not found. Available graphs: {List[Any](graphs.keys())}"
                     )
                 graph = graphs[graph_name]
                 path = nx.shortest_path(graph, args["source"], args["target"])
@@ -578,7 +578,7 @@ class NetworkXMCPServer:
                 graph_name = args["graph"]
                 if graph_name not in graphs:
                     raise ValueError(
-                        f"Graph '{graph_name}' not found. Available graphs: {list[Any](graphs.keys())}"
+                        f"Graph '{graph_name}' not found. Available graphs: {List[Any](graphs.keys())}"
                     )
                 graph = graphs[graph_name]
                 result = {
@@ -654,9 +654,12 @@ class NetworkXMCPServer:
                 result = recommend_papers(args["graph"], seed, max_recs, graphs)
 
             elif tool_name == "resolve_doi":
-                result = resolve_doi(args["doi"])
+                result, error = resolve_doi(args["doi"])
                 if result is None:
-                    raise ValueError(f"Could not resolve DOI: {args['doi']}")
+                    error_msg = error or "Unknown error"
+                    raise ValueError(
+                        f"Could not resolve DOI: {args['doi']} - {error_msg}"
+                    )
 
             elif tool_name == "health_status":
                 if self.monitor:

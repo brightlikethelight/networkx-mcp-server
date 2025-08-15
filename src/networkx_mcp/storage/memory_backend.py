@@ -4,7 +4,7 @@ import asyncio
 from collections import defaultdict
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, Dict, List
 
 import networkx as nx
 
@@ -56,8 +56,8 @@ class MemoryBackend(StorageBackend):
 
     def __init__(self, max_graph_size_mb: int = 100) -> None:
         self.max_size_bytes = max_graph_size_mb * 1024 * 1024
-        # Storage structure: {user_id: {graph_id: {"graph": nx.Graph, "metadata": dict[str, Any]}}}
-        self._storage = defaultdict(dict[str, Any])
+        # Storage structure: {user_id: {graph_id: {"graph": nx.Graph, "metadata": Dict[str, Any]}}}
+        self._storage = defaultdict(Dict[str, Any])
         self._initialized = False
         self._lock = asyncio.Lock()
 
@@ -85,7 +85,7 @@ class MemoryBackend(StorageBackend):
         user_id: str,
         graph_id: str,
         graph: nx.Graph,
-        metadata: dict[str, Any] | None = None,
+        metadata: Dict[str, Any] | None = None,
         tx: Transaction | None = None,
     ) -> bool:
         """Save graph with metadata."""
@@ -167,7 +167,7 @@ class MemoryBackend(StorageBackend):
         limit: int = 100,
         offset: int = 0,
         tx: Transaction | None = None,
-    ) -> list[dict[str, Any]]:
+    ) -> List[Dict[str, Any]]:
         """List user's graphs with metadata."""
         if not self._initialized:
             raise StorageError("Storage not initialized")
@@ -190,7 +190,7 @@ class MemoryBackend(StorageBackend):
 
     async def get_graph_metadata(
         self, user_id: str, graph_id: str, tx: Transaction | None = None
-    ) -> dict[str, Any] | None:
+    ) -> Dict[str, Any] | None:
         """Get graph metadata without loading the full graph."""
         if not self._initialized:
             raise StorageError("Storage not initialized")
@@ -210,7 +210,7 @@ class MemoryBackend(StorageBackend):
         self,
         user_id: str,
         graph_id: str,
-        metadata: dict[str, Any],
+        metadata: Dict[str, Any],
         tx: Transaction | None = None,
     ) -> bool:
         """Update graph metadata."""
@@ -230,7 +230,7 @@ class MemoryBackend(StorageBackend):
 
             return True
 
-    async def get_storage_stats(self, user_id: str) -> dict[str, Any]:
+    async def get_storage_stats(self, user_id: str) -> Dict[str, Any]:
         """Get storage usage statistics for a user."""
         if not self._initialized:
             raise StorageError("Storage not initialized")
@@ -260,7 +260,7 @@ class MemoryBackend(StorageBackend):
                 "usage_percent": (estimated_bytes / self.max_size_bytes) * 100,
             }
 
-    async def check_health(self) -> dict[str, Any]:
+    async def check_health(self) -> Dict[str, Any]:
         """Check storage backend health."""
         return {
             "status": "healthy" if self._initialized else "not_initialized",

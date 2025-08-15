@@ -3,6 +3,7 @@
 import tempfile
 from abc import ABC, abstractmethod
 from pathlib import Path
+from typing import List
 
 import networkx as nx
 
@@ -10,7 +11,7 @@ import networkx as nx
 class GraphReader(ABC):
     """Base class for graph file readers."""
 
-    def __init__(self, format_name: str, file_extensions: list[str]) -> None:
+    def __init__(self, format_name: str, file_extensions: List[str]) -> None:
         self.format_name = format_name
         self.file_extensions = file_extensions
 

@@ -5,7 +5,7 @@ import json
 import os
 import tempfile
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Set
 
 import networkx as nx
 import yaml
@@ -20,7 +20,7 @@ class FileSecurityError(SecurityError):
 class SecureFileHandler:
     """Secure file operations with strict validation."""
 
-    def __init__(self, allowed_dirs: list[str] | None = None) -> None:
+    def __init__(self, allowed_dirs: List[str] | None = None) -> None:
         """Initialize with allowed directories."""
         if allowed_dirs is None:
             # Default to temp directory only for safety
@@ -44,7 +44,7 @@ class SecureFileHandler:
             self.allowed_dirs.append(self.temp_dir)
 
         # Track created files for cleanup
-        self._created_files = set[Any]()
+        self._created_files = Set[Any]()
 
     def validate_path(self, filepath: str | Path) -> Path:
         """Validate and resolve file path securely."""
@@ -247,7 +247,7 @@ class SecureFileHandler:
             raise FileSecurityError(msg) from e
 
         # Validate structure
-        if not isinstance(data, dict[str, Any]):
+        if not isinstance(data, Dict[str, Any]):
             msg = "JSON must be object at root"
             raise FileSecurityError(msg)
 
@@ -267,14 +267,14 @@ class SecureFileHandler:
         # Sanitize all attributes
         if "nodes" in data:
             for node in data["nodes"]:
-                if isinstance(node, dict[str, Any]) and "attributes" in node:
+                if isinstance(node, Dict[str, Any]) and "attributes" in node:
                     node["attributes"] = SecurityValidator.sanitize_attributes(
                         node["attributes"]
                     )
 
         if "edges" in data:
             for edge in data["edges"]:
-                if isinstance(edge, dict[str, Any]) and "attributes" in edge:
+                if isinstance(edge, Dict[str, Any]) and "attributes" in edge:
                     edge["attributes"] = SecurityValidator.sanitize_attributes(
                         edge["attributes"]
                     )
@@ -290,7 +290,7 @@ class SecureFileHandler:
             data = yaml.safe_load(f)
 
         # Validate and convert
-        if not isinstance(data, dict[str, Any]):
+        if not isinstance(data, Dict[str, Any]):
             msg = "YAML must be mapping at root"
             raise FileSecurityError(msg)
 
@@ -325,7 +325,7 @@ class SecureFileHandler:
         with open(filepath, "w", encoding="utf-8") as f:
             yaml.safe_dump(data, f, default_flow_style=False)
 
-    def _json_node_link_to_graph(self, data: dict[str, Any]) -> nx.Graph:
+    def _json_node_link_to_graph(self, data: Dict[str, Any]) -> nx.Graph:
         """Convert JSON node-link format to graph with validation."""
         # Determine graph type
         directed = data.get("directed", False)
@@ -343,7 +343,7 @@ class SecureFileHandler:
         # Add nodes with validation
         if "nodes" in data:
             for node_data in data["nodes"]:
-                if isinstance(node_data, dict[str, Any]) and "id" in node_data:
+                if isinstance(node_data, Dict[str, Any]) and "id" in node_data:
                     node_id = SecurityValidator.validate_node_id(node_data["id"])
                     attrs = SecurityValidator.sanitize_attributes(
                         node_data.get("attributes", {})
@@ -353,7 +353,7 @@ class SecureFileHandler:
         # Add edges with validation
         if "edges" in data:
             for edge_data in data["edges"]:
-                if isinstance(edge_data, dict[str, Any]):
+                if isinstance(edge_data, Dict[str, Any]):
                     if "source" in edge_data and "target" in edge_data:
                         source = SecurityValidator.validate_node_id(edge_data["source"])
                         target = SecurityValidator.validate_node_id(edge_data["target"])

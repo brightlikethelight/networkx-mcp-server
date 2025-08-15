@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 
 from ..storage import StorageBackend, StorageFactory
 from .graph_operations import GraphManager
@@ -154,7 +154,7 @@ class StorageManager:
             except Exception as e:
                 logger.error(f"Background sync error: {e}")
 
-    async def get_storage_stats(self) -> dict[str, Any]:
+    async def get_storage_stats(self) -> Dict[str, Any]:
         """Get storage statistics."""
         if not self.storage_backend:
             return {"backend": "none", "initialized": False}

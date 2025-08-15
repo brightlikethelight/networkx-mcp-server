@@ -7,7 +7,7 @@ for graph operations and user data.
 import logging
 import re
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Dict, List, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ class ValidationResult:
 
     is_valid: bool
     sanitized_data: Any | None = None
-    errors: list[str] = field(default_factory=list[Any])
+    errors: List[str] = field(default_factory=List[Any])
 
 
 class RequestValidator:
@@ -69,9 +69,9 @@ class RequestValidator:
         return ValidationResult(False, None, ["Node ID must be string, int, or float"])
 
     @staticmethod
-    def validate_node_data(data: dict[str, Any]) -> ValidationResult:
+    def validate_node_data(data: Dict[str, Any]) -> ValidationResult:
         """Sanitize and validate node attributes."""
-        if not isinstance(data, dict[str, Any]):
+        if not isinstance(data, Dict[str, Any]):
             return ValidationResult(False, None, ["Node data must be a dictionary"])
 
         # Remove potentially dangerous keys
@@ -115,11 +115,11 @@ class RequestValidator:
         return ValidationResult(True, clean_data)
 
     @staticmethod
-    def validate_edge_data(edge: list[Any] | tuple[Any, ...]) -> ValidationResult:
+    def validate_edge_data(edge: List[Any] | Tuple[Any, ...]) -> ValidationResult:
         """Validate edge format."""
-        if not isinstance(edge, (list[Any], tuple[Any, ...])):
+        if not isinstance(edge, (List[Any], Tuple[Any, ...])):
             return ValidationResult(
-                False, None, ["Edge must be a list[Any] or tuple[Any, ...]"]
+                False, None, ["Edge must be a List[Any] or Tuple[Any, ...]"]
             )
 
         if len(edge) < 2:
@@ -147,7 +147,7 @@ class RequestValidator:
         clean_edge = [source_result.sanitized_data, target_result.sanitized_data]
 
         if len(edge) == 3:
-            if isinstance(edge[2], dict[str, Any]):
+            if isinstance(edge[2], Dict[str, Any]):
                 data_result = RequestValidator.validate_node_data(edge[2])
                 if not data_result.is_valid:
                     return ValidationResult(
@@ -167,11 +167,11 @@ class RequestValidator:
             return True
 
         # Allow lists of safe values
-        if isinstance(value, list[Any]):
+        if isinstance(value, List[Any]):
             return all(RequestValidator._is_safe_value(item) for item in value)
 
         # Allow dicts of safe values
-        if isinstance(value, dict[str, Any]):
+        if isinstance(value, Dict[str, Any]):
             return all(
                 isinstance(k, str) and RequestValidator._is_safe_value(v)
                 for k, v in value.items()
@@ -186,7 +186,7 @@ class SecurityValidator:
 
     @staticmethod
     def validate_algorithm_parameters(
-        algorithm: str, params: dict[str, Any]
+        algorithm: str, params: Dict[str, Any]
     ) -> ValidationResult:
         """Validate algorithm parameters for safety."""
         if not isinstance(algorithm, str):
@@ -219,7 +219,7 @@ class SecurityValidator:
             )
 
         # Validate parameters
-        if not isinstance(params, dict[str, Any]):
+        if not isinstance(params, Dict[str, Any]):
             return ValidationResult(False, None, ["Parameters must be a dictionary"])
 
         # Basic parameter validation

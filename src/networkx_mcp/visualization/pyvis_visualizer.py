@@ -4,7 +4,7 @@ import json
 import logging
 import os
 import tempfile
-from typing import Any
+from typing import Any, Dict, List
 
 import networkx as nx
 
@@ -62,10 +62,10 @@ class PyvisVisualizer:
         width: str = "100%",
         bgcolor: str = "#ffffff",
         font_color: str = "#000000",
-        physics: bool | str | dict[str, Any] = "barnes_hut",
+        physics: bool | str | Dict[str, Any] = "barnes_hut",
         hierarchical: bool = False,
         **kwargs,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """
         Create an interactive network visualization with physics simulation.
 
@@ -81,7 +81,7 @@ class PyvisVisualizer:
             Background color
         font_color : str
             Default font color
-        physics : bool, str, or dict[str, Any]
+        physics : bool, str, or Dict[str, Any]
             Physics configuration ('barnes_hut', 'force_atlas', 'repulsion', or custom)
         hierarchical : bool
             Use hierarchical layout
@@ -103,7 +103,7 @@ class PyvisVisualizer:
         # Configure physics
         if isinstance(physics, str) and physics in PyvisVisualizer.PHYSICS_CONFIGS:
             physics_config = PyvisVisualizer.PHYSICS_CONFIGS[physics]
-        elif isinstance(physics, dict[str, Any]):
+        elif isinstance(physics, Dict[str, Any]):
             physics_config = physics
         else:
             physics_config = physics
@@ -167,11 +167,11 @@ class PyvisVisualizer:
     @staticmethod
     def create_community_visualization(
         graph: nx.Graph | nx.DiGraph,
-        communities: dict[int, list[Any]],
+        communities: Dict[int, List[Any]],
         height: str = "750px",
         width: str = "100%",
         physics: str = "force_atlas",
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """
         Visualize graph with community coloring.
 
@@ -179,7 +179,7 @@ class PyvisVisualizer:
         -----------
         graph : nx.Graph or nx.DiGraph
             The graph to visualize
-        communities : dict[str, Any]
+        communities : Dict[str, Any]
             Community assignments {community_id: [node_list]}
 
         Returns:
@@ -280,7 +280,7 @@ class PyvisVisualizer:
         root: Any | None = None,
         height: str = "750px",
         width: str = "100%",
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Create hierarchical visualization for tree structures."""
         if not nx.is_tree(tree):
             msg = "Graph must be a tree"
@@ -458,7 +458,7 @@ class PyvisVisualizer:
             net.add_edge(source, target, width=width, color=color, title=title)
 
     @staticmethod
-    def set_custom_options(net: Network, options: dict[str, Any]) -> Network:
+    def set_custom_options(net: Network, options: Dict[str, Any]) -> Network:
         """Set custom vis.js options."""
         options_str = json.dumps(options)
         net.set_options(f"var options = {options_str}")

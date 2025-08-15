@@ -9,7 +9,7 @@ import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Dict, Optional
 
 import networkx as nx
 import psutil
@@ -420,7 +420,7 @@ monitor_thread = threading.Thread(target=resource_monitor, daemon=True)
 monitor_thread.start()
 
 
-def get_resource_status() -> dict[str, Any]:
+def get_resource_status() -> Dict[str, Any]:
     """Get current resource usage status."""
     with _request_lock:
         active_requests = _active_requests

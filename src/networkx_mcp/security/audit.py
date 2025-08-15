@@ -12,7 +12,7 @@ import time
 from dataclasses import asdict, dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Set
 
 logger = logging.getLogger(__name__)
 
@@ -91,7 +91,7 @@ class AuditEvent:
 
     # What happened
     description: str = ""
-    details: dict[str, Any] = field(default_factory=dict[str, Any])
+    details: Dict[str, Any] = field(default_factory=Dict[str, Any])
 
     # Result
     success: bool = True
@@ -102,10 +102,10 @@ class AuditEvent:
     correlation_id: str | None = None
 
     # Compliance
-    regulation_tags: list[str] = field(default_factory=list[Any])
+    regulation_tags: List[str] = field(default_factory=List[Any])
     retention_policy: str | None = None
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             **asdict(self),
@@ -122,12 +122,12 @@ class AuditStorage:
         raise NotImplementedError
 
     async def query_events(
-        self, filters: dict[str, Any], limit: int = 100
-    ) -> list[AuditEvent]:
+        self, filters: Dict[str, Any], limit: int = 100
+    ) -> List[AuditEvent]:
         """Query audit events with filters."""
         raise NotImplementedError
 
-    async def get_event_count(self, filters: dict[str, Any]) -> int:
+    async def get_event_count(self, filters: Dict[str, Any]) -> int:
         """Get count of events matching filters."""
         raise NotImplementedError
 
@@ -151,8 +151,8 @@ class FileAuditStorage(AuditStorage):
             return False
 
     async def query_events(
-        self, filters: dict[str, Any], limit: int = 100
-    ) -> list[AuditEvent]:
+        self, filters: Dict[str, Any], limit: int = 100
+    ) -> List[AuditEvent]:
         """Query events from log file."""
         events = []
         try:
@@ -175,7 +175,7 @@ class FileAuditStorage(AuditStorage):
 
         return events[-limit:]  # Return most recent events
 
-    async def get_event_count(self, filters: dict[str, Any]) -> int:
+    async def get_event_count(self, filters: Dict[str, Any]) -> int:
         """Get count of matching events."""
         count = 0
         try:
@@ -195,7 +195,7 @@ class FileAuditStorage(AuditStorage):
 
         return count
 
-    def _matches_filters(self, data: dict[str, Any], filters: dict[str, Any]) -> bool:
+    def _matches_filters(self, data: Dict[str, Any], filters: Dict[str, Any]) -> bool:
         """Check if event data matches filters."""
         for key, value in filters.items():
             if key not in data:
@@ -204,7 +204,7 @@ class FileAuditStorage(AuditStorage):
                 return False
         return True
 
-    def _dict_to_event(self, data: dict[str, Any]) -> AuditEvent:
+    def _dict_to_event(self, data: Dict[str, Any]) -> AuditEvent:
         """Convert dictionary back to AuditEvent."""
         # Convert enum values back
         data["event_type"] = AuditEventType(data["event_type"])
@@ -217,7 +217,7 @@ class MemoryAuditStorage(AuditStorage):
     """In-memory audit storage for testing/development."""
 
     def __init__(self, max_events: int = 10000) -> None:
-        self.events: list[AuditEvent] = []
+        self.events: List[AuditEvent] = []
         self.max_events = max_events
 
     async def store_event(self, event: AuditEvent) -> bool:
@@ -231,8 +231,8 @@ class MemoryAuditStorage(AuditStorage):
         return True
 
     async def query_events(
-        self, filters: dict[str, Any], limit: int = 100
-    ) -> list[AuditEvent]:
+        self, filters: Dict[str, Any], limit: int = 100
+    ) -> List[AuditEvent]:
         """Query events from memory."""
         matching_events = []
 
@@ -245,7 +245,7 @@ class MemoryAuditStorage(AuditStorage):
 
         return matching_events
 
-    async def get_event_count(self, filters: dict[str, Any]) -> int:
+    async def get_event_count(self, filters: Dict[str, Any]) -> int:
         """Get count of matching events."""
         count = 0
         for event in self.events:
@@ -254,7 +254,7 @@ class MemoryAuditStorage(AuditStorage):
         return count
 
     def _event_matches_filters(
-        self, event: AuditEvent, filters: dict[str, Any]
+        self, event: AuditEvent, filters: Dict[str, Any]
     ) -> bool:
         """Check if event matches filters."""
         for key, value in filters.items():
@@ -274,7 +274,7 @@ class AuditLogger:
         self.buffer_size = buffer_size
         self.flush_interval = flush_interval
 
-        self.event_buffer: list[AuditEvent] = []
+        self.event_buffer: List[AuditEvent] = []
         self.stats = {"events_logged": 0, "events_failed": 0, "last_flush": time.time()}
 
         # Start background flush task
@@ -336,7 +336,7 @@ class AuditLogger:
         success: bool,
         user_id: str,
         source_ip: str | None = None,
-        details: dict[str, Any] | None = None,
+        details: Dict[str, Any] | None = None,
     ):
         """Log authentication event."""
         event_type = (
@@ -362,7 +362,7 @@ class AuditLogger:
         user_id: str,
         operation: str,
         resource: str,
-        details: dict[str, Any] | None = None,
+        details: Dict[str, Any] | None = None,
     ):
         """Log authorization event."""
         event_type = (
@@ -389,7 +389,7 @@ class AuditLogger:
         resource: str,
         user_id: str,
         success: bool = True,
-        details: dict[str, Any] | None = None,
+        details: Dict[str, Any] | None = None,
     ):
         """Log data access event."""
         event_type_map = {
@@ -421,7 +421,7 @@ class AuditLogger:
         threat_type: str,
         severity: AuditSeverity,
         source_ip: str | None = None,
-        details: dict[str, Any] | None = None,
+        details: Dict[str, Any] | None = None,
     ):
         """Log security threat event."""
         await self.log_event(
@@ -471,12 +471,12 @@ class AuditLogger:
                 logger.error(f"Error in periodic flush: {e}")
 
     async def query_events(
-        self, filters: dict[str, Any] | None = None, limit: int = 100
-    ) -> list[AuditEvent]:
+        self, filters: Dict[str, Any] | None = None, limit: int = 100
+    ) -> List[AuditEvent]:
         """Query audit events."""
         return await self.storage.query_events(filters or {}, limit)
 
-    async def get_stats(self) -> dict[str, Any]:
+    async def get_stats(self) -> Dict[str, Any]:
         """Get audit logger statistics."""
         return {
             **self.stats,
@@ -495,7 +495,7 @@ class ComplianceReporter:
 
     async def generate_access_report(
         self, start_time: float, end_time: float
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Generate access control compliance report."""
         filters = {"timestamp": {"gte": start_time, "lte": end_time}}
 
@@ -536,7 +536,7 @@ class ComplianceReporter:
                     ]
                 ),
                 "unique_users": len(
-                    set[Any](e.user_id for e in auth_events if e.user_id)
+                    Set[Any](e.user_id for e in auth_events if e.user_id)
                 ),
             },
             "authorization": {
@@ -570,7 +570,7 @@ class ComplianceReporter:
 
     async def generate_security_report(
         self, start_time: float, end_time: float
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Generate security incident compliance report."""
         filters = {"timestamp": {"gte": start_time, "lte": end_time}}
 
@@ -622,7 +622,7 @@ class SecurityEventLogger:
         )
 
     async def log_suspicious_activity(
-        self, activity_type: str, details: dict[str, Any]
+        self, activity_type: str, details: Dict[str, Any]
     ):
         """Log suspicious activity."""
         await self.audit_logger.log_security_event(

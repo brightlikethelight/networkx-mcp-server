@@ -373,10 +373,10 @@ class StressAndEdgeTester:
         try:
             from networkx_mcp.academic.citations import resolve_doi
 
-            result = resolve_doi("invalid_doi_123456789")
-            if result is None:
-                self.log_success("invalid_doi", "Correctly returned None")
-            else:
+            result, error = resolve_doi("invalid_doi_123456789")
+            if result is None and error:
+                self.log_success("invalid_doi", f"Correctly handled: {error}")
+            elif result is not None:
                 self.log_issue(
                     "warning", "invalid_doi", f"Returned unexpected result: {result}"
                 )
@@ -385,10 +385,10 @@ class StressAndEdgeTester:
 
         # Test with malformed DOI
         try:
-            result = resolve_doi("not_a_doi_at_all")
-            if result is None:
-                self.log_success("malformed_doi", "Correctly returned None")
-            else:
+            result, error = resolve_doi("not_a_doi_at_all")
+            if result is None and error:
+                self.log_success("malformed_doi", f"Correctly handled: {error}")
+            elif result is not None:
                 self.log_issue("warning", "malformed_doi", "Returned unexpected result")
         except Exception as e:
             self.log_issue("warning", "malformed_doi", f"Raised exception: {str(e)}")

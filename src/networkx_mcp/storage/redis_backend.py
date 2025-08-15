@@ -6,7 +6,7 @@ import pickle
 import zlib
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, Dict, List
 
 import networkx as nx
 
@@ -135,7 +135,7 @@ class RedisBackend(StorageBackend):
         user_id: str,
         graph_id: str,
         graph: nx.Graph,
-        metadata: dict[str, Any] | None = None,
+        metadata: Dict[str, Any] | None = None,
         tx: Transaction | None = None,
     ) -> bool:
         """Save graph with compression and metadata."""
@@ -198,10 +198,10 @@ class RedisBackend(StorageBackend):
                 exists = await self._client.exists(data_key)
 
                 # Save data and metadata
-                await pipe.set[Any](data_key, compressed)
-                await pipe.set[Any](meta_key, json.dumps(graph_metadata))
+                await pipe.Set[Any](data_key, compressed)
+                await pipe.Set[Any](meta_key, json.dumps(graph_metadata))
 
-                # Add to user's graph list[Any]
+                # Add to user's graph List[Any]
                 if not exists:
                     await pipe.sadd(user_graphs_key, graph_id)
                     await pipe.hincrby(user_stats_key, "graph_count", 1)
@@ -212,8 +212,8 @@ class RedisBackend(StorageBackend):
                 await pipe.execute()
         else:
             # Within existing transaction
-            await client.set[Any](data_key, compressed)
-            await client.set[Any](meta_key, json.dumps(graph_metadata))
+            await client.Set[Any](data_key, compressed)
+            await client.Set[Any](meta_key, json.dumps(graph_metadata))
             await client.sadd(user_graphs_key, graph_id)
             await client.hincrby(user_stats_key, "graph_count", 1)
             await client.hincrby(user_stats_key, "total_bytes", len(compressed))
@@ -309,7 +309,7 @@ class RedisBackend(StorageBackend):
         limit: int = 100,
         offset: int = 0,
         tx: Transaction | None = None,
-    ) -> list[dict[str, Any]]:
+    ) -> List[Dict[str, Any]]:
         """List user's graphs with metadata."""
         # Validate inputs
         user_id = SecurityValidator.validate_user_id(user_id)
@@ -351,7 +351,7 @@ class RedisBackend(StorageBackend):
 
     async def get_graph_metadata(
         self, user_id: str, graph_id: str, tx: Transaction | None = None
-    ) -> dict[str, Any] | None:
+    ) -> Dict[str, Any] | None:
         """Get graph metadata without loading the full graph."""
         # Validate inputs
         user_id = SecurityValidator.validate_user_id(user_id)
@@ -369,7 +369,7 @@ class RedisBackend(StorageBackend):
         self,
         user_id: str,
         graph_id: str,
-        metadata: dict[str, Any],
+        metadata: Dict[str, Any],
         tx: Transaction | None = None,
     ) -> bool:
         """Update graph metadata."""
@@ -393,10 +393,10 @@ class RedisBackend(StorageBackend):
         meta_key = self._make_key("graph_meta", user_id, graph_id)
         client = tx.pipeline if tx else self._client
 
-        await client.set[Any](meta_key, json.dumps(existing))
+        await client.Set[Any](meta_key, json.dumps(existing))
         return True
 
-    async def get_storage_stats(self, user_id: str) -> dict[str, Any]:
+    async def get_storage_stats(self, user_id: str) -> Dict[str, Any]:
         """Get storage usage statistics for a user."""
         # Validate input
         user_id = SecurityValidator.validate_user_id(user_id)
@@ -418,7 +418,7 @@ class RedisBackend(StorageBackend):
             ),
         }
 
-    async def check_health(self) -> dict[str, Any]:
+    async def check_health(self) -> Dict[str, Any]:
         """Check Redis backend health."""
         try:
             # Ping Redis

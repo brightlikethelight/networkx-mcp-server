@@ -11,7 +11,7 @@ from collections import defaultdict, deque
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from functools import wraps
-from typing import Any
+from typing import Any, Dict, List, Set
 
 logger = logging.getLogger(__name__)
 
@@ -51,8 +51,8 @@ class RequestContext:
     user_agent: str | None = None
     auth_token: str | None = None
     is_authenticated: bool = False
-    permissions: list[str] = field(default_factory=list[Any])
-    metadata: dict[str, Any] = field(default_factory=dict[str, Any])
+    permissions: List[str] = field(default_factory=List[Any])
+    metadata: Dict[str, Any] = field(default_factory=Dict[str, Any])
 
 
 class RateLimiter:
@@ -62,9 +62,9 @@ class RateLimiter:
         self.max_requests = max_requests
         self.window_seconds = window_seconds
         self.burst_size = burst_size
-        self.buckets: dict[str, deque[float]] = defaultdict(deque)
-        self.tokens: dict[str, int] = defaultdict(lambda: burst_size)
-        self.last_refill: dict[str, float] = defaultdict(time.time)
+        self.buckets: Dict[str, deque[float]] = defaultdict(deque)
+        self.tokens: Dict[str, int] = defaultdict(lambda: burst_size)
+        self.last_refill: Dict[str, float] = defaultdict(time.time)
 
     def is_allowed(self, identifier: str) -> bool:
         """Check if request is allowed for given identifier."""
@@ -97,7 +97,7 @@ class RateLimiter:
 
         return False
 
-    def get_status(self, identifier: str) -> dict[str, Any]:
+    def get_status(self, identifier: str) -> Dict[str, Any]:
         """Get rate limit status for identifier."""
         now = time.time()
         bucket = self.buckets[identifier]
@@ -119,14 +119,14 @@ class AuthenticationMiddleware:
 
     def __init__(self, config: SecurityConfig) -> None:
         self.config = config
-        self.valid_tokens: dict[str, dict[str, Any]] = {}
-        self.revoked_tokens: set[str] = set[Any]()
+        self.valid_tokens: Dict[str, Dict[str, Any]] = {}
+        self.revoked_tokens: Set[str] = Set[Any]()
 
     def add_token(
         self,
         token: str,
         user_id: str,
-        permissions: list[str],
+        permissions: List[str],
         expires_at: float | None = None,
     ) -> None:
         """Add a valid authentication token."""
@@ -143,7 +143,7 @@ class AuthenticationMiddleware:
             del self.valid_tokens[token]
         self.revoked_tokens.add(token)
 
-    def authenticate_request(self, headers: dict[str, str]) -> dict[str, Any] | None:
+    def authenticate_request(self, headers: Dict[str, str]) -> Dict[str, Any] | None:
         """Authenticate request based on headers."""
         if not self.config.enable_auth:
             return {"user_id": "anonymous", "permissions": ["read"]}
@@ -187,14 +187,14 @@ class SecurityMiddleware:
             self.config.rate_limit_burst,
         )
         self.auth_middleware = AuthenticationMiddleware(self.config)
-        self.request_log: list[dict[str, Any]] = []
+        self.request_log: List[Dict[str, Any]] = []
 
     def generate_request_id(self) -> str:
         """Generate unique request ID."""
         return hashlib.sha256(f"{time.time()}{id(self)}".encode()).hexdigest()[:16]
 
     def extract_client_identifier(
-        self, headers: dict[str, str], source_ip: str | None = None
+        self, headers: Dict[str, str], source_ip: str | None = None
     ) -> str:
         """Extract client identifier for rate limiting."""
         # Try to get authenticated user first
@@ -211,8 +211,8 @@ class SecurityMiddleware:
 
     async def process_request(
         self,
-        request_data: dict[str, Any],
-        headers: dict[str, str],
+        request_data: Dict[str, Any],
+        headers: Dict[str, str],
         source_ip: str | None = None,
     ) -> RequestContext:
         """Process incoming request through security middleware."""
@@ -306,7 +306,7 @@ class SecurityMiddleware:
 
     def filter_response(self, response_data: Any, context: RequestContext) -> Any:
         """Filter sensitive data from responses."""
-        if not isinstance(response_data, dict[str, Any]):
+        if not isinstance(response_data, Dict[str, Any]):
             return response_data
 
         # Remove sensitive fields if user doesn't have admin permissions
@@ -318,7 +318,7 @@ class SecurityMiddleware:
         return response_data
 
     def log_request(
-        self, context: RequestContext, request_data: dict[str, Any]
+        self, context: RequestContext, request_data: Dict[str, Any]
     ) -> None:
         """Log request for security monitoring."""
         log_entry = {
@@ -353,7 +353,7 @@ class SecurityMiddleware:
             "response_type": type(response_data).__name__,
             "has_error": (
                 "error" in str(response_data)
-                if isinstance(response_data, dict[str, Any])
+                if isinstance(response_data, Dict[str, Any])
                 else False
             ),
             "processing_time": time.time() - context.timestamp,
@@ -361,7 +361,7 @@ class SecurityMiddleware:
 
         logger.debug(f"Response logged: {log_entry}")
 
-    def get_security_status(self) -> dict[str, Any]:
+    def get_security_status(self) -> Dict[str, Any]:
         """Get security middleware status."""
         return {
             "rate_limiter_active": self.config.enable_rate_limiting,
@@ -386,7 +386,7 @@ class SecurityError(Exception):
 class RateLimitError(SecurityError):
     """Rate limit exceeded exception."""
 
-    def __init__(self, message: str, rate_status: dict[str, Any]) -> None:
+    def __init__(self, message: str, rate_status: Dict[str, Any]) -> None:
         super().__init__(message)
         self.rate_status = rate_status
 
@@ -416,7 +416,7 @@ def require_permissions(
             if not context.is_authenticated:
                 raise AuthenticationError("Authentication required")
 
-            missing_permissions = set[Any](required_permissions) - set[Any](
+            missing_permissions = Set[Any](required_permissions) - Set[Any](
                 context.permissions
             )
             if missing_permissions:
@@ -434,9 +434,9 @@ class CORSMiddleware:
 
     def __init__(
         self,
-        allowed_origins: list[str] | None = None,
-        allowed_methods: list[str] | None = None,
-        allowed_headers: list[str] | None = None,
+        allowed_origins: List[str] | None = None,
+        allowed_methods: List[str] | None = None,
+        allowed_headers: List[str] | None = None,
     ):
         self.allowed_origins = allowed_origins or ["*"]
         self.allowed_methods = allowed_methods or [
@@ -449,8 +449,8 @@ class CORSMiddleware:
         self.allowed_headers = allowed_headers or ["*"]
 
     def add_cors_headers(
-        self, headers: dict[str, str], origin: str | None = None
-    ) -> dict[str, str]:
+        self, headers: Dict[str, str], origin: str | None = None
+    ) -> Dict[str, str]:
         """Add CORS headers to response."""
         cors_headers = headers.copy()
 

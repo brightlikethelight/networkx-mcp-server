@@ -1,6 +1,6 @@
 """Focused edge operations module."""
 
-from typing import Any
+from typing import Any, Dict, List, Tuple
 
 import networkx as nx
 
@@ -20,13 +20,13 @@ class EdgeOperations:
         self.graph.add_edge(source, target, **attrs)
         return True
 
-    def bulk_add_edges(self, edges: list[tuple[Any, Any]]) -> int:
+    def bulk_add_edges(self, edges: List[Tuple[Any, Any]]) -> int:
         """Efficiently add multiple edges."""
         initial_count = self.graph.number_of_edges()
         self.graph.add_edges_from(edges)
         return int(self.graph.number_of_edges() - initial_count)
 
-    def get_edge_summary(self, source: str | int, target: str | int) -> dict[str, Any]:
+    def get_edge_summary(self, source: str | int, target: str | int) -> Dict[str, Any]:
         """Get comprehensive edge information."""
         if not self.graph.has_edge(source, target):
             msg = f"Edge ({source}, {target}) not found"
@@ -35,6 +35,6 @@ class EdgeOperations:
         return {
             "source": source,
             "target": target,
-            "attributes": dict[str, Any](self.graph.edges[source, target]),
+            "attributes": Dict[str, Any](self.graph.edges[source, target]),
             "weight": self.graph.edges[source, target].get("weight", 1),
         }

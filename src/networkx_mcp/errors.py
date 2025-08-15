@@ -5,7 +5,7 @@ error codes and meaningful messages for all possible error conditions.
 """
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -339,7 +339,7 @@ def validate_node_id(node_id: Any) -> str:
     return node_id_str
 
 
-def validate_edge(edge: Any) -> tuple[str, str]:
+def validate_edge(edge: Any) -> Tuple[str, str]:
     """Validate edge specification.
 
     Args:
@@ -368,7 +368,7 @@ def validate_edge(edge: Any) -> tuple[str, str]:
     return source, target
 
 
-def validate_required_params(params: dict[str, Any], required: list[str]) -> None:
+def validate_required_params(params: Dict[str, Any], required: List[str]) -> None:
     """Validate that all required parameters are present.
 
     Args:
@@ -386,7 +386,7 @@ def validate_required_params(params: dict[str, Any], required: list[str]) -> Non
             raise ValidationError(param, None, "Required parameter cannot be None")
 
 
-def validate_centrality_measures(measures: Any) -> list[str]:
+def validate_centrality_measures(measures: Any) -> List[str]:
     """Validate centrality measures list.
 
     Args:

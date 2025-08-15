@@ -1,7 +1,7 @@
 """Security validation utilities."""
 
 import re
-from typing import Any
+from typing import Any, Dict, List, Tuple
 
 
 class SecurityError(Exception):
@@ -43,15 +43,15 @@ class SecurityValidator:
         return graph_id
 
     @staticmethod
-    def sanitize_attributes(attributes: Any) -> dict[str, Any]:
+    def sanitize_attributes(attributes: Any) -> Dict[str, Any]:
         """Sanitize user-provided attributes."""
-        if not isinstance(attributes, dict[str, Any]):
+        if not isinstance(attributes, Dict[str, Any]):
             return {}
 
         # Remove any potentially dangerous keys
         dangerous_keys = ["__", "eval", "exec", "compile", "globals", "locals"]
 
-        sanitized: dict[str, Any] = {}
+        sanitized: Dict[str, Any] = {}
         for key, value in attributes.items():
             # Check key
             if not isinstance(key, str):
@@ -68,19 +68,19 @@ class SecurityValidator:
             # Sanitize value (basic type checking)
             if isinstance(value, (str, int, float, bool, type(None))):
                 sanitized[key] = value
-            elif isinstance(value, (list[Any], tuple[Any, ...])):
+            elif isinstance(value, (List[Any], Tuple[Any, ...])):
                 # Only allow simple lists
                 if all(
                     isinstance(item, (str, int, float, bool, type(None)))
                     for item in value[:100]
                 ):
-                    # Create a list[Any] from the first 100 items
-                    limited_list = list[Any](value[:100])
+                    # Create a List[Any] from the first 100 items
+                    limited_list = List[Any](value[:100])
                     sanitized[key] = limited_list
-            elif isinstance(value, dict[str, Any]):
+            elif isinstance(value, Dict[str, Any]):
                 # Recursively sanitize nested dicts (with depth limit)
                 if len(str(value)) < 10000:  # Limit total size
-                    # Recursively sanitize nested dict[str, Any]
+                    # Recursively sanitize nested Dict[str, Any]
                     nested_sanitized = SecurityValidator.sanitize_attributes(value)
                     sanitized[key] = nested_sanitized
 

@@ -3,7 +3,7 @@
 import logging
 import re
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Tuple
 
 import networkx as nx
 
@@ -96,7 +96,7 @@ class GraphValidator:
     @staticmethod
     def validate_graph_connectivity(
         graph: nx.Graph, require_connected: bool = False
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Validate graph connectivity properties."""
         result = {
             "valid": True,
@@ -127,8 +127,8 @@ class GraphValidator:
 
     @staticmethod
     def validate_algorithm_input(
-        algorithm: str, graph: nx.Graph, params: dict[str, Any]
-    ) -> dict[str, Any]:
+        algorithm: str, graph: nx.Graph, params: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Validate inputs for specific algorithms."""
         result = {"valid": True, "errors": []}
 
@@ -208,13 +208,13 @@ class GraphValidator:
 
     @staticmethod
     def validate_file_format(
-        file_format: str | Any, operation: str | list[Any] = "export"
-    ) -> bool | tuple[bool, str | None]:
+        file_format: str | Any, operation: str | List[Any] = "export"
+    ) -> bool | Tuple[bool, str | None]:
         """Validate file format for import/export.
 
         This method supports two signatures for backward compatibility:
         1. validate_file_format(format_str, operation="export") -> bool
-        2. validate_file_format(filepath, [formats]) -> tuple[bool, str | None]
+        2. validate_file_format(filepath, [formats]) -> Tuple[bool, str | None]
         """
         # Handle the case where it's called with (filepath, [formats])
         if isinstance(operation, list):
@@ -266,7 +266,7 @@ class GraphValidator:
         return algorithm in valid_algorithms
 
     @staticmethod
-    def sanitize_graph_data(data: dict[str, Any]) -> dict[str, Any]:
+    def sanitize_graph_data(data: Dict[str, Any]) -> Dict[str, Any]:
         """Sanitize graph data for safe processing."""
         sanitized = {}
 
@@ -311,7 +311,7 @@ class GraphValidator:
         return sanitized
 
     @staticmethod
-    def validate_graph_id(graph_id: str) -> tuple[bool, str | None]:
+    def validate_graph_id(graph_id: str) -> Tuple[bool, str | None]:
         """Validate graph ID format and constraints.
 
         Args:
@@ -341,7 +341,7 @@ class GraphValidator:
         reserved_names = {
             "graph",
             "graphs",
-            "list[Any]",
+            "List[Any]",
             "all",
             "none",
             "null",
@@ -376,8 +376,8 @@ class GraphValidator:
 
     @staticmethod
     def validate_file_path_format(
-        filepath: str | Path | None, expected_formats: list[str] | None = None
-    ) -> tuple[bool, str | None]:
+        filepath: str | Path | None, expected_formats: List[str] | None = None
+    ) -> Tuple[bool, str | None]:
         """Validate file format based on extension and expected formats.
 
         Args:
@@ -469,7 +469,7 @@ class GraphValidator:
             return False, f"Error validating file: {e!s}"
 
     @staticmethod
-    def validate_graph_data(data: dict[str, Any]) -> tuple[bool, list[str]]:
+    def validate_graph_data(data: Dict[str, Any]) -> Tuple[bool, List[str]]:
         """Validate graph data structure for import.
 
         Args:
@@ -486,7 +486,7 @@ class GraphValidator:
         # Check for required structure
         if "nodes" in data:
             if not isinstance(data["nodes"], list):
-                errors.append("'nodes' must be a list[Any]")
+                errors.append("'nodes' must be a List[Any]")
             else:
                 # Validate each node
                 for i, node in enumerate(data["nodes"]):
@@ -503,7 +503,7 @@ class GraphValidator:
         if "edges" in data or "links" in data:
             edges = data.get("edges", data.get("links", []))
             if not isinstance(edges, list):
-                errors.append("'edges' must be a list[Any]")
+                errors.append("'edges' must be a List[Any]")
             else:
                 # Validate each edge
                 for i, edge in enumerate(edges):
@@ -533,7 +533,7 @@ class GraphValidator:
         if "adjacency_matrix" in data:
             matrix = data["adjacency_matrix"]
             if not isinstance(matrix, list):
-                errors.append("'adjacency_matrix' must be a list[Any]")
+                errors.append("'adjacency_matrix' must be a List[Any]")
             # Check if square matrix
             elif matrix:
                 n = len(matrix)
@@ -544,14 +544,14 @@ class GraphValidator:
 
         if "edge_list" in data:
             if not isinstance(data["edge_list"], list):
-                errors.append("'edge_list' must be a list[Any]")
+                errors.append("'edge_list' must be a List[Any]")
 
         return len(errors) == 0, errors
 
     @staticmethod
     def validate_import_data(
         format: str, data: Any | None = None, path: str | Path | None = None
-    ) -> tuple[bool, str | None]:
+    ) -> Tuple[bool, str | None]:
         """Validate import data based on format.
 
         Args:
@@ -593,7 +593,7 @@ class GraphValidator:
                     if not isinstance(data, dict) or "matrix" not in data:
                         return (
                             False,
-                            "Adjacency format requires dict[str, Any] with 'matrix' key",
+                            "Adjacency format requires Dict[str, Any] with 'matrix' key",
                         )
 
         else:

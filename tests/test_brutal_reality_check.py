@@ -315,7 +315,7 @@ class BrutalTester:
         try:
             # Use a known DOI
             doi = "10.1038/nature12373"
-            result = resolve_doi(doi)
+            result, error = resolve_doi(doi)
             if result:
                 assert "doi" in result
                 assert "title" in result
@@ -324,7 +324,7 @@ class BrutalTester:
                 )
             else:
                 self.log_warning(
-                    "resolve_doi", "Could not resolve DOI - may be network issue"
+                    "resolve_doi", f"Could not resolve DOI - {error or 'network issue'}"
                 )
         except Exception as e:
             self.log_error("resolve_doi", str(e))

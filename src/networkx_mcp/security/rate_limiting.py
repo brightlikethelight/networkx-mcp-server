@@ -5,7 +5,7 @@ import logging
 import time
 from collections import deque
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Dict, List, Tuple
 
 from ..core.base import Component
 
@@ -86,7 +86,7 @@ class SlidingWindow:
         self.rate_limit = rate_limit
         self.requests = deque()
 
-    def is_allowed(self) -> tuple[bool, int]:
+    def is_allowed(self) -> Tuple[bool, int]:
         """Check if request is allowed and return remaining count."""
         now = time.time()
         window_start = now - self.rate_limit.window
@@ -117,8 +117,8 @@ class RateLimiter(Component):
     def __init__(self, algorithm: str = "token_bucket") -> None:
         super().__init__("rate_limiter")
         self.algorithm = algorithm
-        self.limiters: dict[str, object] = {}
-        self.rate_limits: dict[str, RateLimit] = {}
+        self.limiters: Dict[str, object] = {}
+        self.rate_limits: Dict[str, RateLimit] = {}
 
         # Default rate limits
         self.default_limits = {
@@ -198,7 +198,7 @@ class RateLimiter(Component):
     # @with_logging_context removed - monitoring module deleted
     async def check_multiple_limits(
         self,
-        checks: list[tuple[str, str]],  # [(identifier: Any, limit_type: Any), ...]
+        checks: List[Tuple[str, str]],  # [(identifier: Any, limit_type: Any), ...]
     ) -> RateLimitResult:
         """Check multiple rate limits and return most restrictive result."""
         results = []
@@ -247,7 +247,7 @@ class RateLimiter(Component):
 
     async def get_rate_limit_status(
         self, identifier: str, limit_type: str
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Get current rate limit status for an identifier."""
         rate_limit = self.rate_limits.get(
             limit_type, self.default_limits.get(limit_type)

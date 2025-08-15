@@ -1,13 +1,13 @@
 """Helper functions for graph visualization."""
 
-from typing import Any
+from typing import Any, Dict, Tuple
 
 import networkx as nx
 
 
 def calculate_layout(
     graph: nx.Graph, layout: str, **params: Any
-) -> dict[Any, tuple[float, float]]:
+) -> Dict[Any, Tuple[float, float]]:
     """Calculate node positions for given layout algorithm."""
     layout_funcs = {
         "spring": lambda g, **p: nx.spring_layout(g, **p),
@@ -24,17 +24,17 @@ def calculate_layout(
         layout = "spring"  # fallback
 
     try:
-        result: dict[Any, tuple[float, float]] = layout_funcs[layout](graph, **params)  # type: ignore[no-untyped-call]
+        result: Dict[Any, Tuple[float, float]] = layout_funcs[layout](graph, **params)  # type: ignore[no-untyped-call]
         return result
     except Exception:
         # Fallback to spring layout if specific layout fails
-        fallback_result: dict[Any, tuple[float, float]] = nx.spring_layout(graph)
+        fallback_result: Dict[Any, Tuple[float, float]] = nx.spring_layout(graph)
         return fallback_result
 
 
 def prepare_graph_data(
-    graph: nx.Graph, pos: dict[Any, tuple[float, float]]
-) -> dict[str, Any]:
+    graph: nx.Graph, pos: Dict[Any, Tuple[float, float]]
+) -> Dict[str, Any]:
     """Prepare graph data for visualization."""
     nodes = []
     for node in graph.nodes():

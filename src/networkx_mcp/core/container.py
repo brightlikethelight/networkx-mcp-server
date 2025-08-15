@@ -9,7 +9,7 @@ import inspect
 import logging
 from collections.abc import Callable
 from enum import Enum
-from typing import Any, Optional, TypeVar
+from typing import Any, Dict, List, Optional, TypeVar
 
 from .base import Component, ComponentStatus
 
@@ -36,7 +36,7 @@ class DependencyDescriptor:
         factory: Callable[..., T] | None = None,
         scope: Scope = Scope.SINGLETON,
         name: str | None = None,
-        tags: list[str] | None = None,
+        tags: List[str] | None = None,
     ):
         self.interface = interface
         self.implementation = implementation or interface
@@ -75,9 +75,9 @@ class Container:
 
     def __init__(self, name: str = "default") -> None:
         self.name = name
-        self._dependencies: dict[type, DependencyDescriptor] = {}
-        self._named_dependencies: dict[str, DependencyDescriptor] = {}
-        self._request_scope: dict[type, Any] = {}
+        self._dependencies: Dict[type, DependencyDescriptor] = {}
+        self._named_dependencies: Dict[str, DependencyDescriptor] = {}
+        self._request_scope: Dict[type, Any] = {}
         self._lock = asyncio.Lock()
         logger.info(f"Container {name} created")
 
@@ -88,7 +88,7 @@ class Container:
         factory: Callable[..., T] | None = None,
         scope: Scope = Scope.SINGLETON,
         name: str | None = None,
-        tags: list[str] | None = None,
+        tags: List[str] | None = None,
     ) -> None:
         """Register a dependency."""
         descriptor = DependencyDescriptor(
@@ -146,7 +146,7 @@ class Container:
 
         return await descriptor.resolve(self)
 
-    async def resolve_all(self, interface: type[T]) -> list[T]:
+    async def resolve_all(self, interface: type[T]) -> List[T]:
         """Resolve all implementations of an interface."""
         instances = []
         for descriptor in self._dependencies.values():
@@ -154,7 +154,7 @@ class Container:
                 instances.append(await descriptor.resolve(self))
         return instances
 
-    async def resolve_by_tag(self, tag: str) -> list[Any]:
+    async def resolve_by_tag(self, tag: str) -> List[Any]:
         """Resolve all dependencies with a specific tag."""
         instances = []
         for descriptor in self._dependencies.values():
@@ -169,7 +169,7 @@ class Container:
         params = {}
 
         # Skip 'self' parameter
-        for param_name, param in list[Any](sig.parameters.items())[1:]:
+        for param_name, param in List[Any](sig.parameters.items())[1:]:
             if param.annotation != param.empty:
                 # Try to resolve the dependency
                 try:
@@ -258,7 +258,7 @@ class ServiceLocator:
     _lock = asyncio.Lock()
 
     def __init__(self) -> None:
-        self.containers: dict[str, Container] = {}
+        self.containers: Dict[str, Container] = {}
         self.default_container = Container("default")
         self.containers["default"] = self.default_container
 
@@ -307,7 +307,7 @@ class Bootstrap:
 
     def __init__(self, container: Container) -> None:
         self.container = container
-        self._modules: list[Callable[[Container], None]] = []
+        self._modules: List[Callable[[Container], None]] = []
 
     def add_module(self, module: Callable[[Container], None]) -> "Bootstrap":
         """Add a configuration module."""

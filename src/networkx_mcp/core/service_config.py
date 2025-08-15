@@ -6,7 +6,7 @@ and other components.
 """
 
 import logging
-from typing import Any
+from typing import Any, Dict
 
 from ..caching.cache_service import CacheService, MemoryCache, RedisCache
 from ..events.graph_events import (
@@ -327,7 +327,7 @@ class ServiceManager:
             logger.error(f"Failed to stop service manager: {e}")
             raise
 
-    async def health_check(self) -> dict[str, Any]:
+    async def health_check(self) -> Dict[str, Any]:
         """Perform health check on all services."""
         if not self._initialized or not self.container:
             return {"healthy": False, "error": "Services not initialized"}

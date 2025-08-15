@@ -10,7 +10,7 @@ import sys
 import threading
 import time
 from dataclasses import dataclass
-from typing import Any, Callable, Optional, Set
+from typing import Any, Callable, List, Optional, Set
 
 from ..config.production import production_config
 from ..logging import get_logger
@@ -30,7 +30,7 @@ class ShutdownState:
 
     def __post_init__(self) -> None:
         if self.active_connections is None:
-            self.active_connections = set[Any]()
+            self.active_connections = Set[Any]()
 
 
 class GracefulShutdownHandler:
@@ -40,7 +40,7 @@ class GracefulShutdownHandler:
         self.graph_manager = graph_manager
         self.storage_backend = storage_backend
         self.state = ShutdownState()
-        self.shutdown_callbacks: list[Callable] = []
+        self.shutdown_callbacks: List[Callable] = []
         self.shutdown_timeout = production_config.SHUTDOWN_TIMEOUT
         self._lock = threading.Lock()
 

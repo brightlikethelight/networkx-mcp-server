@@ -4,7 +4,7 @@ import json
 import time
 from collections import defaultdict, deque
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, Dict, List
 
 
 class PerformanceMonitor:
@@ -17,13 +17,13 @@ class PerformanceMonitor:
             max_history: Maximum number of operations to keep in history
         """
         self.max_history = max_history
-        self.operations: dict[str, deque[dict[str, Any]]] = defaultdict(
+        self.operations: Dict[str, deque[Dict[str, Any]]] = defaultdict(
             lambda: deque(maxlen=max_history)
         )
         self.start_time = time.time()
 
     def record_operation(
-        self, operation: str, duration: float, metadata: dict[str, Any] | None = None
+        self, operation: str, duration: float, metadata: Dict[str, Any] | None = None
     ) -> None:
         """Record an operation's performance metrics.
 
@@ -39,7 +39,7 @@ class PerformanceMonitor:
         }
         self.operations[operation].append(record)
 
-    def get_statistics(self, operation: str | None = None) -> dict[str, Any]:
+    def get_statistics(self, operation: str | None = None) -> Dict[str, Any]:
         """Get performance statistics.
 
         Args:
@@ -63,7 +63,7 @@ class PerformanceMonitor:
                 "min_ms": min(durations),
                 "max_ms": max(durations),
                 "total_ms": sum(durations),
-                "recent_operations": list[Any](self.operations[operation])[-10:],
+                "recent_operations": List[Any](self.operations[operation])[-10:],
             }
         else:
             # Stats for all operations
@@ -83,7 +83,7 @@ class PerformanceMonitor:
                 "total_operations": sum(len(ops) for ops in self.operations.values()),
             }
 
-    def get_slow_operations(self, threshold_ms: float = 1000) -> list[dict[str, Any]]:
+    def get_slow_operations(self, threshold_ms: float = 1000) -> List[Dict[str, Any]]:
         """Get operations that exceeded a duration threshold.
 
         Args:
@@ -125,12 +125,12 @@ class OperationCounter:
 
     def __init__(self) -> None:
         """Initialize operation counter."""
-        self.counts: dict[str, int] = defaultdict(int)
-        self.hourly_counts: dict[str, dict[int, int]] = defaultdict(
+        self.counts: Dict[str, int] = defaultdict(int)
+        self.hourly_counts: Dict[str, Dict[int, int]] = defaultdict(
             lambda: defaultdict(int)
         )
         self.start_time = datetime.now(UTC).replace(tzinfo=None)
-        self.errors: dict[str, int] = defaultdict(int)
+        self.errors: Dict[str, int] = defaultdict(int)
 
     def increment(self, operation: str, count: int = 1) -> None:
         """Increment operation count.
@@ -153,7 +153,7 @@ class OperationCounter:
         error_key = f"{operation}:{error_type}"
         self.errors[error_key] += 1
 
-    def get_counts(self) -> dict[str, Any]:
+    def get_counts(self) -> Dict[str, Any]:
         """Get operation counts and statistics.
 
         Returns:
@@ -174,10 +174,10 @@ class OperationCounter:
         # Calculate hourly patterns
         hourly_patterns = {}
         for op, hours in self.hourly_counts.items():
-            hourly_patterns[op] = dict[str, Any](hours)
+            hourly_patterns[op] = Dict[str, Any](hours)
 
         # Error rate by operation
-        error_rates: dict[str, dict[str, Any]] = {}
+        error_rates: Dict[str, Dict[str, Any]] = {}
         for error_key, count in self.errors.items():
             operation = error_key.split(":")[0]
             if operation not in error_rates:
@@ -202,7 +202,7 @@ class OperationCounter:
                 else 0
             ),
             "uptime": str(datetime.now(UTC).replace(tzinfo=None) - self.start_time),
-            "operation_counts": dict[str, Any](self.counts),
+            "operation_counts": Dict[str, Any](self.counts),
             "operation_distribution": operation_distribution,
             "hourly_patterns": hourly_patterns,
             "error_rates": error_rates,
@@ -237,7 +237,7 @@ class MemoryMonitor:
     """Monitor memory usage of graphs."""
 
     @staticmethod
-    def estimate_graph_memory(graph: Any) -> dict[str, Any]:
+    def estimate_graph_memory(graph: Any) -> Dict[str, Any]:
         """Estimate memory usage of a graph.
 
         Args:

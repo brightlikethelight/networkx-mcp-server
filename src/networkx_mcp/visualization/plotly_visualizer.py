@@ -1,7 +1,7 @@
 """Plotly-based interactive graph visualization."""
 
 import logging
-from typing import Any
+from typing import Any, Dict, List
 
 import networkx as nx
 import numpy as np
@@ -31,17 +31,17 @@ class PlotlyVisualizer:
     def create_interactive_plot(
         graph: nx.Graph | nx.DiGraph,
         layout: str = "spring",
-        node_size: int | dict[str, Any] | str = 10,
-        node_color: str | dict[str, Any] | str = "degree",
-        edge_width: float | dict[str, Any] | str = 1.0,
-        edge_color: str | dict[str, Any] | str = "gray",
-        hover_data: list[str] | None = None,
+        node_size: int | Dict[str, Any] | str = 10,
+        node_color: str | Dict[str, Any] | str = "degree",
+        edge_width: float | Dict[str, Any] | str = 1.0,
+        edge_color: str | Dict[str, Any] | str = "gray",
+        hover_data: List[str] | None = None,
         title: str | None = None,
         height: int = 800,
         width: int = 1200,
         show_edge_labels: bool = False,
         **kwargs,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """
         Create an interactive graph visualization with zoom, pan, and hover.
 
@@ -51,11 +51,11 @@ class PlotlyVisualizer:
             The graph to visualize
         layout : str
             Layout algorithm ('spring', 'circular', 'random', 'spectral')
-        node_size : int, dict[str, Any], or attribute name
+        node_size : int, Dict[str, Any], or attribute name
             Node sizes
-        node_color : str, dict[str, Any], or attribute name
+        node_color : str, Dict[str, Any], or attribute name
             Node colors (can be 'degree', 'betweenness', etc.)
-        hover_data : list[Any]
+        hover_data : List[Any]
             Node attributes to show on hover
 
         Returns:
@@ -125,11 +125,11 @@ class PlotlyVisualizer:
     def create_3d_plot(
         graph: nx.Graph | nx.DiGraph,
         layout: str = "spring3d",
-        node_color: str | dict[str, Any] | str = "degree",
+        node_color: str | Dict[str, Any] | str = "degree",
         title: str | None = None,
         height: int = 800,
         width: int = 1200,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Create 3D force-directed graph visualization."""
         # Calculate 3D layout
         if layout == "spring3d":
@@ -165,9 +165,9 @@ class PlotlyVisualizer:
 
         # Node colors
         if node_color == "degree":
-            node_colors = list[Any](dict[str, Any](graph.degree()).values())
+            node_colors = List[Any](Dict[str, Any](graph.degree()).values())
         elif node_color == "betweenness":
-            node_colors = list[Any](nx.betweenness_centrality(graph).values())
+            node_colors = List[Any](nx.betweenness_centrality(graph).values())
         else:
             node_colors = node_color
 
@@ -221,13 +221,13 @@ class PlotlyVisualizer:
 
     @staticmethod
     def create_animated_plot(
-        graphs: list[nx.Graph],
-        timestamps: list[str] | None = None,
+        graphs: List[nx.Graph],
+        timestamps: List[str] | None = None,
         layout: str = "spring",
         title: str = "Temporal Network Animation",
         height: int = 800,
         width: int = 1200,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Create animated visualization for temporal networks."""
         if not timestamps:
             timestamps = [f"T{i}" for i in range(len(graphs))]
@@ -331,11 +331,11 @@ class PlotlyVisualizer:
     @staticmethod
     def _create_edge_traces(
         graph: nx.Graph,
-        pos: dict[str, Any],
-        edge_width: float | str | dict[str, Any],
-        edge_color: str | dict[str, Any],
+        pos: Dict[str, Any],
+        edge_width: float | str | Dict[str, Any],
+        edge_color: str | Dict[str, Any],
         show_labels: bool = False,
-    ) -> list[Any]:
+    ) -> List[Any]:
         """Create edge traces for plotly."""
         if not HAS_PLOTLY:
             return []
@@ -346,14 +346,14 @@ class PlotlyVisualizer:
             x1, y1 = pos[edge[1]]
 
             # Get edge attributes
-            if isinstance(edge_width, dict[str, Any]):
+            if isinstance(edge_width, Dict[str, Any]):
                 width = edge_width.get(edge, 1.0)
             elif isinstance(edge_width, str):
                 width = graph.edges[edge].get(edge_width, 1.0)
             else:
                 width = edge_width
 
-            if isinstance(edge_color, dict[str, Any]):
+            if isinstance(edge_color, Dict[str, Any]):
                 color = edge_color.get(edge, "gray")
             elif isinstance(edge_color, str) and edge_color != "gray":
                 color = graph.edges[edge].get(edge_color, "gray")
@@ -388,10 +388,10 @@ class PlotlyVisualizer:
     @staticmethod
     def _create_node_trace(
         graph: nx.Graph,
-        pos: dict[str, Any],
-        node_size: int | str | dict[str, Any],
-        node_color: str | dict[str, Any],
-        hover_data: list[str] | None = None,
+        pos: Dict[str, Any],
+        node_size: int | str | Dict[str, Any],
+        node_color: str | Dict[str, Any],
+        hover_data: List[str] | None = None,
     ) -> Any:
         """Create node trace for plotly."""
         if not HAS_PLOTLY:
@@ -405,7 +405,7 @@ class PlotlyVisualizer:
             y_nodes.append(y)
 
         # Node sizes
-        if isinstance(node_size, dict[str, Any]):
+        if isinstance(node_size, Dict[str, Any]):
             sizes = [node_size.get(node, 10) for node in graph.nodes()]
         elif isinstance(node_size, str):
             sizes = [graph.nodes[node].get(node_size, 10) for node in graph.nodes()]
@@ -414,15 +414,15 @@ class PlotlyVisualizer:
 
         # Node colors
         if node_color == "degree":
-            colors = list[Any](dict[str, Any](graph.degree()).values())
+            colors = List[Any](Dict[str, Any](graph.degree()).values())
             colorbar_title = "Degree"
         elif node_color == "betweenness":
-            colors = list[Any](nx.betweenness_centrality(graph).values())
+            colors = List[Any](nx.betweenness_centrality(graph).values())
             colorbar_title = "Betweenness"
         elif node_color == "closeness":
-            colors = list[Any](nx.closeness_centrality(graph).values())
+            colors = List[Any](nx.closeness_centrality(graph).values())
             colorbar_title = "Closeness"
-        elif isinstance(node_color, dict[str, Any]):
+        elif isinstance(node_color, Dict[str, Any]):
             colors = [node_color.get(node, 0) for node in graph.nodes()]
             colorbar_title = "Value"
         elif isinstance(node_color, str):
@@ -464,10 +464,10 @@ class PlotlyVisualizer:
 
     @staticmethod
     def export_interactive_html(
-        figure: dict[str, Any],
+        figure: Dict[str, Any],
         filename: str,
         include_plotlyjs: str = "cdn",
-        config: dict[str, Any] | None = None,
+        config: Dict[str, Any] | None = None,
     ) -> str:
         """Export interactive plot as standalone HTML."""
         if config is None:
@@ -477,8 +477,8 @@ class PlotlyVisualizer:
                 "modeBarButtonsToRemove": ["pan2d", "lasso2d"],
             }
 
-        # Convert dict[str, Any] back to figure if needed
-        if isinstance(figure, dict[str, Any]):
+        # Convert Dict[str, Any] back to figure if needed
+        if isinstance(figure, Dict[str, Any]):
             fig = go.Figure(figure)
         else:
             fig = figure

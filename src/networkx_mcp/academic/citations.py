@@ -2,19 +2,37 @@
 Citation analysis and DOI resolution functions for academic networks.
 """
 
+import logging
+import time
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import bibtexparser
 import networkx as nx
 import requests
 from bibtexparser.bwriter import BibTexWriter
+from requests.exceptions import HTTPError, RequestException, Timeout
+
+logger = logging.getLogger(__name__)
 
 
-def resolve_doi(doi: str) -> Optional[Dict[str, Any]]:
-    """Resolve DOI to publication metadata using CrossRef API."""
+def resolve_doi(
+    doi: str, retry_count: int = 3, retry_delay: float = 1.0
+) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    """Resolve DOI to publication metadata using CrossRef API.
+
+    Args:
+        doi: The DOI to resolve
+        retry_count: Number of retry attempts for network failures
+        retry_delay: Delay between retries in seconds
+
+    Returns:
+        Tuple of (metadata_dict, error_message)
+        - metadata_dict: Publication metadata if successful, None if failed
+        - error_message: Error description if failed, None if successful
+    """
     if not doi:
-        return None
+        return None, "Empty DOI provided"
 
     # Clean DOI format
     doi = doi.strip()
@@ -23,39 +41,88 @@ def resolve_doi(doi: str) -> Optional[Dict[str, Any]]:
             doi = doi[4:]
         elif doi.startswith("https://doi.org/"):
             doi = doi[16:]
+        elif doi.startswith("http://doi.org/"):
+            doi = doi[15:]
 
-    try:
-        url = f"https://api.crossref.org/works/{doi}"
-        headers = {
-            "Accept": "application/json",
-            "User-Agent": "NetworkX-MCP-Server/3.0.0 (mailto:support@networkx-mcp.org)",
-        }
+    # Validate DOI format
+    if not doi.startswith("10.") or "/" not in doi:
+        return None, f"Invalid DOI format: {doi}"
 
-        response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status()
+    url = f"https://api.crossref.org/works/{doi}"
+    headers = {
+        "Accept": "application/json",
+        "User-Agent": "NetworkX-MCP-Server/3.0.0 (mailto:support@networkx-mcp.org)",
+    }
 
-        data = response.json()
-        work = data.get("message", {})
+    last_error = None
 
-        # Extract key metadata
-        return {
-            "doi": work.get("DOI", doi),
-            "title": work.get("title", [""])[0] if work.get("title") else "",
-            "authors": [
-                f"{author.get('given', '')} {author.get('family', '')}"
-                for author in work.get("author", [])
-            ],
-            "journal": work.get("container-title", [""])[0]
-            if work.get("container-title")
-            else "",
-            "year": work.get("published-print", {}).get("date-parts", [[None]])[0][0]
-            or work.get("published-online", {}).get("date-parts", [[None]])[0][0],
-            "citations": work.get("is-referenced-by-count", 0),
-            "references": work.get("reference", []),
-        }
-    except Exception as e:
-        print(f"Error resolving DOI {doi}: {e}")
-        return None
+    for attempt in range(retry_count):
+        try:
+            response = requests.get(url, headers=headers, timeout=10)
+
+            if response.status_code == 404:
+                return None, f"DOI not found: {doi}"
+            elif response.status_code == 429:
+                # Rate limited - wait and retry
+                wait_time = retry_delay * (2**attempt)  # Exponential backoff
+                last_error = (
+                    f"Rate limited on DOI {doi} (attempt {attempt + 1}/{retry_count})"
+                )
+                logger.warning(f"Rate limited on DOI {doi}, waiting {wait_time}s")
+                time.sleep(wait_time)
+                continue
+
+            response.raise_for_status()
+            data = response.json()
+            work = data.get("message", {})
+
+            # Extract key metadata with safe access
+            metadata = {
+                "doi": work.get("DOI", doi),
+                "title": work.get("title", [""])[0] if work.get("title") else "",
+                "authors": [
+                    f"{author.get('given', '')} {author.get('family', '')}".strip()
+                    for author in work.get("author", [])
+                ],
+                "journal": work.get("container-title", [""])[0]
+                if work.get("container-title")
+                else "",
+                "year": work.get("published-print", {}).get("date-parts", [[None]])[0][
+                    0
+                ]
+                or work.get("published-online", {}).get("date-parts", [[None]])[0][0],
+                "citations": work.get("is-referenced-by-count", 0),
+                "references": work.get("reference", []),
+            }
+
+            return metadata, None
+
+        except Timeout:
+            last_error = (
+                f"Timeout resolving DOI {doi} (attempt {attempt + 1}/{retry_count})"
+            )
+            logger.warning(last_error)
+        except HTTPError as e:
+            last_error = f"HTTP error {e.response.status_code} for DOI {doi}: {str(e)}"
+            logger.error(last_error)
+            if e.response.status_code != 429:  # Don't retry non-rate-limit errors
+                break
+        except RequestException as e:
+            last_error = f"Network error resolving DOI {doi}: {str(e)}"
+            logger.error(last_error)
+        except (KeyError, ValueError, TypeError) as e:
+            last_error = f"Invalid response format for DOI {doi}: {str(e)}"
+            logger.error(last_error)
+            break  # Don't retry parsing errors
+        except Exception as e:
+            last_error = f"Unexpected error resolving DOI {doi}: {str(e)}"
+            logger.error(last_error)
+            break
+
+        if attempt < retry_count - 1:
+            time.sleep(retry_delay)
+
+    return None, last_error
 
 
 def build_citation_network(
@@ -64,7 +131,17 @@ def build_citation_network(
     max_depth: int = 2,
     graphs: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
-    """Build citation network from seed DOIs using CrossRef API."""
+    """Build citation network from seed DOIs using CrossRef API.
+
+    Args:
+        graph_name: Name for the new graph
+        seed_dois: List of DOIs to start building from
+        max_depth: Maximum depth to traverse citations
+        graphs: Dictionary to store the graph in
+
+    Returns:
+        Dictionary with build statistics and any errors encountered
+    """
     if graphs is None:
         graphs = {}
 
@@ -73,11 +150,13 @@ def build_citation_network(
 
     # Create directed graph for citations
     citation_graph: nx.DiGraph[Any] = nx.DiGraph()
-    processed = set[Any]()
+    processed = Set[Any]()
     to_process = [(doi, 0) for doi in seed_dois]
 
     nodes_added = 0
     edges_added = 0
+    errors = []
+    resolution_failures = 0
 
     while to_process and nodes_added < 1000:  # Limit to prevent overload
         current_doi, depth = to_process.pop(0)
@@ -87,10 +166,14 @@ def build_citation_network(
 
         processed.add(current_doi)
 
-        # Resolve current DOI
-        paper = resolve_doi(current_doi)
-        if not paper:
-            continue
+        # Resolve current DOI with error handling
+        paper, error = resolve_doi(current_doi)
+        if error:
+            resolution_failures += 1
+            if resolution_failures <= 10:  # Limit error reporting
+                errors.append(f"Failed to resolve {current_doi}: {error}")
+            if not paper:  # Complete failure
+                continue
 
         # Add node with metadata
         citation_graph.add_node(current_doi, **paper)
@@ -108,14 +191,21 @@ def build_citation_network(
 
     graphs[graph_name] = citation_graph
 
-    return {
+    result = {
         "created": graph_name,
         "type": "citation_network",
         "nodes": nodes_added,
         "edges": edges_added,
         "seed_dois": seed_dois,
         "max_depth": max_depth,
+        "resolution_failures": resolution_failures,
     }
+
+    if errors:
+        result["errors"] = errors[:10]  # Limit to first 10 errors
+        result["total_errors"] = len(errors)
+
+    return result
 
 
 def export_bibtex(
@@ -193,10 +283,10 @@ def recommend_papers(
         }
 
     # Find papers cited by seed paper
-    cited_papers = list[Any](graph.successors(seed_doi))
+    cited_papers = List[Any](graph.successors(seed_doi))
 
     # Find papers that cite the seed paper
-    citing_papers = list[Any](graph.predecessors(seed_doi))
+    citing_papers = List[Any](graph.predecessors(seed_doi))
 
     # Calculate recommendation scores based on citation patterns
     recommendations = []
@@ -204,7 +294,7 @@ def recommend_papers(
     # Score papers that are co-cited with seed paper
     for cited in cited_papers:
         # Find other papers that also cite this paper
-        co_citing = list[Any](graph.predecessors(cited))
+        co_citing = List[Any](graph.predecessors(cited))
 
         for paper in co_citing:
             if paper != seed_doi and paper not in cited_papers:
@@ -214,7 +304,7 @@ def recommend_papers(
                 paper_data = graph.nodes.get(paper, {})
                 citation_count = (
                     paper_data.get("citations", 0)
-                    if isinstance(paper_data, dict[str, Any])
+                    if isinstance(paper_data, Dict[str, Any])
                     else 0
                 )
                 score += min(citation_count / 100, 2.0)  # Max boost of 2.0
@@ -222,7 +312,7 @@ def recommend_papers(
                 # Boost score based on recency
                 year = (
                     paper_data.get("year")
-                    if isinstance(paper_data, dict[str, Any])
+                    if isinstance(paper_data, Dict[str, Any])
                     else None
                 )
                 if year:
@@ -235,10 +325,10 @@ def recommend_papers(
                         "paper": paper,  # Use 'paper' for compatibility
                         "doi": paper,
                         "title": paper_data.get("title", paper)
-                        if isinstance(paper_data, dict[str, Any])
+                        if isinstance(paper_data, Dict[str, Any])
                         else paper,
                         "authors": paper_data.get("authors", [])
-                        if isinstance(paper_data, dict[str, Any])
+                        if isinstance(paper_data, Dict[str, Any])
                         else [],
                         "year": year,
                         "citations": citation_count,

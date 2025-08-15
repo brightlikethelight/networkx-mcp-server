@@ -7,7 +7,7 @@ import json
 import logging
 import time
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Dict, List, Set
 
 from ..core.base import Component
 
@@ -23,15 +23,15 @@ class User:
     user_id: str
     username: str
     email: str | None = None
-    roles: set[str] = None
-    permissions: set[str] = None
-    metadata: dict[str, Any] = None
+    roles: Set[str] = None
+    permissions: Set[str] = None
+    metadata: Dict[str, Any] = None
 
     def __post_init__(self) -> None:
         if self.roles is None:
-            self.roles = set[Any]()
+            self.roles = Set[Any]()
         if self.permissions is None:
-            self.permissions = set[Any]()
+            self.permissions = Set[Any]()
         if self.metadata is None:
             self.metadata = {}
 
@@ -43,11 +43,11 @@ class User:
         """Check if user has a specific permission."""
         return permission in self.permissions
 
-    def has_any_role(self, roles: list[str]) -> bool:
+    def has_any_role(self, roles: List[str]) -> bool:
         """Check if user has any of the specified roles."""
         return any(self.has_role(role) for role in roles)
 
-    def has_all_permissions(self, permissions: list[str]) -> bool:
+    def has_all_permissions(self, permissions: List[str]) -> bool:
         """Check if user has all specified permissions."""
         return all(self.has_permission(perm) for perm in permissions)
 
@@ -61,11 +61,11 @@ class AuthToken:
     issued_at: float
     expires_at: float
     token_type: str = "bearer"
-    scopes: set[str] = None
+    scopes: Set[str] = None
 
     def __post_init__(self) -> None:
         if self.scopes is None:
-            self.scopes = set[Any]()
+            self.scopes = Set[Any]()
 
     def is_expired(self) -> bool:
         """Check if token is expired."""
@@ -83,7 +83,7 @@ class TokenValidator:
         self.secret_key = secret_key.encode("utf-8")
 
     def create_token(
-        self, user_id: str, expires_in: int = 3600, scopes: set[str] | None = None
+        self, user_id: str, expires_in: int = 3600, scopes: Set[str] | None = None
     ) -> AuthToken:
         """Create a new authentication token."""
         now = time.time()
@@ -93,7 +93,7 @@ class TokenValidator:
             "user_id": user_id,
             "iat": now,
             "exp": expires_at,
-            "scopes": list[Any](scopes or set[Any]()),
+            "scopes": List[Any](scopes or Set[Any]()),
         }
 
         # Simple HMAC-based token (in production, use JWT)
@@ -109,7 +109,7 @@ class TokenValidator:
             user_id=user_id,
             issued_at=now,
             expires_at=expires_at,
-            scopes=scopes or set[Any](),
+            scopes=scopes or Set[Any](),
         )
 
     def validate_token(self, token: str) -> AuthToken | None:
@@ -137,7 +137,7 @@ class TokenValidator:
                 user_id=payload["user_id"],
                 issued_at=payload["iat"],
                 expires_at=payload["exp"],
-                scopes=set[Any](payload.get("scopes", [])),
+                scopes=Set[Any](payload.get("scopes", [])),
             )
 
             # Check expiration
@@ -156,12 +156,12 @@ class AuthService(Component):
     def __init__(self, secret_key: str) -> None:
         super().__init__("auth_service")
         self.token_validator = TokenValidator(secret_key)
-        self.users: dict[str, User] = {}
-        self.user_credentials: dict[str, str] = {}  # username -> password_hash
-        self.active_tokens: dict[str, AuthToken] = {}
+        self.users: Dict[str, User] = {}
+        self.user_credentials: Dict[str, str] = {}  # username -> password_hash
+        self.active_tokens: Dict[str, AuthToken] = {}
 
         # Role-based permissions
-        self.role_permissions: dict[str, set[str]] = {
+        self.role_permissions: Dict[str, Set[str]] = {
             "admin": {
                 "graph:read",
                 "graph:write",
@@ -180,7 +180,7 @@ class AuthService(Component):
         username: str,
         password: str,
         email: str | None = None,
-        roles: set[str] | None = None,
+        roles: Set[str] | None = None,
     ) -> User:
         """Register a new user."""
         user_id = f"user_{len(self.users) + 1}"
@@ -190,9 +190,9 @@ class AuthService(Component):
 
         # Calculate permissions based on roles
         roles = roles or {"user"}
-        permissions = set[Any]()
+        permissions = Set[Any]()
         for role in roles:
-            permissions.update(self.role_permissions.get(role, set[Any]()))
+            permissions.update(self.role_permissions.get(role, Set[Any]()))
 
         user = User(
             user_id=user_id,
@@ -357,7 +357,7 @@ class AuthMiddleware:
         return await handler(request)
 
 
-def require_auth(permission: str | None = None, roles: list[str] | None = None) -> Any:
+def require_auth(permission: str | None = None, roles: List[str] | None = None) -> Any:
     """Decorator to require authentication and optionally specific permissions/roles."""
 
     def decorator(func: Any) -> Any:

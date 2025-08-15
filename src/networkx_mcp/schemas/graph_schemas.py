@@ -1,6 +1,6 @@
 """Pydantic schemas for graph data validation."""
 
-from typing import Any, Literal
+from typing import Any, Dict, List, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -11,7 +11,7 @@ class NodeSchema(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     id: str | int
-    attributes: dict[str, Any] = Field(default_factory=dict[str, Any])
+    attributes: Dict[str, Any] = Field(default_factory=Dict[str, Any])
 
 
 class EdgeSchema(BaseModel):
@@ -21,7 +21,7 @@ class EdgeSchema(BaseModel):
 
     source: str | int
     target: str | int
-    attributes: dict[str, Any] = Field(default_factory=dict[str, Any])
+    attributes: Dict[str, Any] = Field(default_factory=Dict[str, Any])
 
 
 class GraphSchema(BaseModel):
@@ -29,9 +29,9 @@ class GraphSchema(BaseModel):
 
     directed: bool = False
     multigraph: bool = False
-    graph_attributes: dict[str, Any] = Field(default_factory=dict[str, Any])
-    nodes: list[NodeSchema] = Field(default_factory=list[Any])
-    edges: list[EdgeSchema] = Field(default_factory=list[Any])
+    graph_attributes: Dict[str, Any] = Field(default_factory=Dict[str, Any])
+    nodes: List[NodeSchema] = Field(default_factory=List[Any])
+    edges: List[EdgeSchema] = Field(default_factory=List[Any])
 
 
 class CreateGraphRequest(BaseModel):
@@ -39,7 +39,7 @@ class CreateGraphRequest(BaseModel):
 
     graph_id: str
     graph_type: Literal["Graph", "DiGraph", "MultiGraph", "MultiDiGraph"] = "Graph"
-    attributes: dict[str, Any] = Field(default_factory=dict[str, Any])
+    attributes: Dict[str, Any] = Field(default_factory=Dict[str, Any])
 
 
 class AddNodeRequest(BaseModel):
@@ -47,14 +47,14 @@ class AddNodeRequest(BaseModel):
 
     graph_id: str
     node_id: str | int
-    attributes: dict[str, Any] = Field(default_factory=dict[str, Any])
+    attributes: Dict[str, Any] = Field(default_factory=Dict[str, Any])
 
 
 class AddNodesRequest(BaseModel):
     """Request schema for adding multiple nodes."""
 
     graph_id: str
-    nodes: list[str | int | NodeSchema]
+    nodes: List[str | int | NodeSchema]
 
 
 class AddEdgeRequest(BaseModel):
@@ -63,14 +63,14 @@ class AddEdgeRequest(BaseModel):
     graph_id: str
     source: str | int
     target: str | int
-    attributes: dict[str, Any] = Field(default_factory=dict[str, Any])
+    attributes: Dict[str, Any] = Field(default_factory=Dict[str, Any])
 
 
 class AddEdgesRequest(BaseModel):
     """Request schema for adding multiple edges."""
 
     graph_id: str
-    edges: list[EdgeSchema]
+    edges: List[EdgeSchema]
 
 
 class ShortestPathRequest(BaseModel):
@@ -87,7 +87,7 @@ class CentralityRequest(BaseModel):
     """Request schema for centrality measures."""
 
     graph_id: str
-    measures: list[
+    measures: List[
         Literal["degree", "betweenness", "closeness", "eigenvector", "pagerank"]
     ] = Field(default=["degree"])
     top_k: int | None = 10
@@ -108,7 +108,7 @@ class ExportGraphRequest(BaseModel):
         "json", "graphml", "gexf", "edgelist", "adjacency", "pickle", "dot", "pajek"
     ]
     path: str | None = None
-    options: dict[str, Any] = Field(default_factory=dict[str, Any])
+    options: Dict[str, Any] = Field(default_factory=Dict[str, Any])
 
 
 class ImportGraphRequest(BaseModel):
@@ -118,9 +118,9 @@ class ImportGraphRequest(BaseModel):
         "json", "graphml", "gexf", "edgelist", "adjacency", "pickle", "pajek"
     ]
     path: str | None = None
-    data: dict[str, Any] | None = None
+    data: Dict[str, Any] | None = None
     graph_id: str | None = None
-    options: dict[str, Any] = Field(default_factory=dict[str, Any])
+    options: Dict[str, Any] = Field(default_factory=Dict[str, Any])
 
     @field_validator("data")
     @classmethod
@@ -139,14 +139,14 @@ class LayoutRequest(BaseModel):
     algorithm: Literal[
         "spring", "circular", "random", "shell", "spectral", "kamada_kawai", "planar"
     ] = "spring"
-    options: dict[str, Any] = Field(default_factory=dict[str, Any])
+    options: Dict[str, Any] = Field(default_factory=Dict[str, Any])
 
 
 class SubgraphRequest(BaseModel):
     """Request schema for creating a subgraph."""
 
     graph_id: str
-    nodes: list[str | int]
+    nodes: List[str | int]
     create_copy: bool = True
 
 
@@ -156,7 +156,7 @@ class GraphAttributesRequest(BaseModel):
     graph_id: str
     node_id: str | int | None = None
     attribute: str | None = None
-    values: dict[str, Any] | None = None
+    values: Dict[str, Any] | None = None
 
 
 class AlgorithmResponse(BaseModel):
@@ -164,7 +164,7 @@ class AlgorithmResponse(BaseModel):
 
     algorithm: str
     success: bool
-    result: dict[str, Any]
+    result: Dict[str, Any]
     execution_time_ms: float | None = None
     error: str | None = None
 
@@ -179,14 +179,14 @@ class GraphInfoResponse(BaseModel):
     density: float
     is_directed: bool
     is_multigraph: bool
-    metadata: dict[str, Any]
-    degree_stats: dict[str, float] | None = None
+    metadata: Dict[str, Any]
+    degree_stats: Dict[str, float] | None = None
 
 
 class VisualizationData(BaseModel):
     """Schema for graph visualization data."""
 
-    nodes: list[dict[str, Any]]
-    edges: list[dict[str, Any]]
-    layout: dict[str, list[float]] | None = None
-    options: dict[str, Any] = Field(default_factory=dict[str, Any])
+    nodes: List[Dict[str, Any]]
+    edges: List[Dict[str, Any]]
+    layout: Dict[str, List[float]] | None = None
+    options: Dict[str, Any] = Field(default_factory=Dict[str, Any])

@@ -3,7 +3,7 @@
 import base64
 import logging
 from io import BytesIO
-from typing import Any
+from typing import Any, Dict, List, Set, Tuple
 
 import networkx as nx
 import numpy as np
@@ -58,19 +58,19 @@ class MatplotlibVisualizer:
     def create_static_plot(
         graph: nx.Graph | nx.DiGraph,
         layout: str = "spring",
-        node_size: int | dict[str, Any] | str = 300,
-        node_color: str | dict[str, Any] | str = "lightblue",
-        node_shape: str | dict[str, Any] = "circle",
-        edge_width: float | dict[str, Any] | str = 1.0,
-        edge_color: str | dict[str, Any] | str = "gray",
-        edge_style: str | dict[str, Any] = "solid",
+        node_size: int | Dict[str, Any] | str = 300,
+        node_color: str | Dict[str, Any] | str = "lightblue",
+        node_shape: str | Dict[str, Any] = "circle",
+        edge_width: float | Dict[str, Any] | str = 1.0,
+        edge_color: str | Dict[str, Any] | str = "gray",
+        edge_style: str | Dict[str, Any] = "solid",
         show_labels: bool = True,
         label_font_size: int = 10,
         title: str | None = None,
-        figsize: tuple[int, int] = (12, 8),
+        figsize: Tuple[int, int] = (12, 8),
         dpi: int = 100,
         **kwargs,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """
         Create a static graph visualization with extensive customization options.
 
@@ -80,17 +80,17 @@ class MatplotlibVisualizer:
             The graph to visualize
         layout : str
             Layout algorithm to use
-        node_size : int, dict[str, Any], or attribute name
+        node_size : int, Dict[str, Any], or attribute name
             Node sizes (can vary by node)
-        node_color : str, dict[str, Any], or attribute name
+        node_color : str, Dict[str, Any], or attribute name
             Node colors (can vary by node)
-        node_shape : str or dict[str, Any]
+        node_shape : str or Dict[str, Any]
             Node shapes (can vary by node)
-        edge_width : float, dict[str, Any], or attribute name
+        edge_width : float, Dict[str, Any], or attribute name
             Edge widths (can vary by edge)
-        edge_color : str, dict[str, Any], or attribute name
+        edge_color : str, Dict[str, Any], or attribute name
             Edge colors (can vary by edge)
-        edge_style : str or dict[str, Any]
+        edge_style : str or Dict[str, Any]
             Edge styles ('solid', 'dashed', 'dotted')
         show_labels : bool
             Whether to show node labels
@@ -98,7 +98,7 @@ class MatplotlibVisualizer:
             Font size for labels
         title : str
             Plot title
-        figsize : tuple[Any, ...]
+        figsize : Tuple[Any, ...]
             Figure size (width, height)
         dpi : int
             Dots per inch for resolution
@@ -256,11 +256,11 @@ class MatplotlibVisualizer:
         return results
 
     @staticmethod
-    def _hierarchical_layout(graph: nx.Graph) -> dict[Any, tuple[float, float]]:
+    def _hierarchical_layout(graph: nx.Graph) -> Dict[Any, Tuple[float, float]]:
         """Create hierarchical layout for tree-like structures."""
         if nx.is_directed_acyclic_graph(graph):
             # Use topological generations for DAGs
-            generations = list[Any](nx.topological_generations(graph))
+            generations = List[Any](nx.topological_generations(graph))
             pos = {}
 
             for i, generation in enumerate(generations):
@@ -276,9 +276,9 @@ class MatplotlibVisualizer:
 
     @staticmethod
     def _get_node_attributes(
-        graph: nx.Graph, attr: int | float | str | dict[str, Any], default: Any
-    ) -> list[Any]:
-        """Get node attributes as a list[Any]."""
+        graph: nx.Graph, attr: int | float | str | Dict[str, Any], default: Any
+    ) -> List[Any]:
+        """Get node attributes as a List[Any]."""
         if isinstance(attr, dict):
             return [attr.get(node, default) for node in graph.nodes()]
         elif isinstance(attr, str):
@@ -290,9 +290,9 @@ class MatplotlibVisualizer:
 
     @staticmethod
     def _get_edge_attributes(
-        graph: nx.Graph, attr: int | float | str | dict[str, Any], default: Any
-    ) -> list[Any]:
-        """Get edge attributes as a list[Any]."""
+        graph: nx.Graph, attr: int | float | str | Dict[str, Any], default: Any
+    ) -> List[Any]:
+        """Get edge attributes as a List[Any]."""
         if isinstance(attr, dict):
             return [attr.get(edge, default) for edge in graph.edges()]
         elif isinstance(attr, str):
@@ -304,12 +304,12 @@ class MatplotlibVisualizer:
 
     @staticmethod
     def _smart_label_placement(
-        graph: nx.Graph, pos: dict[Any, tuple[float:Any, float]], font_size: int
-    ) -> dict[Any, str]:
+        graph: nx.Graph, pos: Dict[Any, Tuple[float:Any, float]], font_size: int
+    ) -> Dict[Any, str]:
         """Smart label placement to avoid overlap."""
         # For now, show labels only for high-degree nodes
-        degrees = dict[str, Any](graph.degree())
-        threshold = np.percentile(list[Any](degrees.values()), 75)
+        degrees = Dict[str, Any](graph.degree())
+        threshold = np.percentile(List[Any](degrees.values()), 75)
 
         labels = {}
         for node, degree in degrees.items():
@@ -326,7 +326,7 @@ class MatplotlibVisualizer:
     def _add_color_legend(graph: nx.Graph, color_attr: str) -> None:
         """Add color legend for attribute-based coloring."""
         # Get unique values
-        values = set[Any]()
+        values = Set[Any]()
         for node in graph.nodes():
             val = graph.nodes[node].get(color_attr)
             if val is not None:
@@ -346,10 +346,10 @@ class MatplotlibVisualizer:
     @staticmethod
     def create_subplot_layout(
         graph: nx.Graph,
-        views: list[dict[str, Any]],
-        figsize: tuple[int, int] = (16, 8),
+        views: List[Dict[str, Any]],
+        figsize: Tuple[int, int] = (16, 8),
         dpi: int = 100,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Create multiple graph views in subplots."""
         num_views = len(views)
         fig, axes = plt.subplots(1, num_views, figsize=figsize, dpi=dpi)
