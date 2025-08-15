@@ -12,6 +12,7 @@
 [![MCP](https://img.shields.io/badge/MCP-Compatible-green.svg)](https://modelcontextprotocol.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Academic](https://img.shields.io/badge/Academic-Research-red.svg)](https://crossref.org/)
+[![Trust Score](https://archestra.ai/mcp-catalog/api/badge/quality/Bright-L01/networkx-mcp-server)](https://archestra.ai/mcp-catalog/Bright-L01__networkx-mcp-server)
 
 ## 🎓 What is this?
 
