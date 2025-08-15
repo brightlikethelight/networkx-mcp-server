@@ -52,20 +52,39 @@ NetworkX MCP Server enables Large Language Models (like Claude) to perform sophi
 pip install networkx-mcp-server
 ```
 
-## 🚀 Setup
+## 🚀 Quick Start
+
+### 1. Install the server
+
+```bash
+pip install networkx-mcp-server
+```
+
+### 2. Configure Claude Desktop
 
 Add to your `claude_desktop_config.json`:
+
+**MacOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 
 ```json
 {
   "mcpServers": {
     "networkx": {
       "command": "python",
-      "args": ["-m", "networkx_mcp.server"]
+      "args": ["-m", "networkx_mcp"]
     }
   }
 }
 ```
+
+### 3. Restart Claude Desktop
+
+The NetworkX tools will now be available in your conversations!
+
+### 🧪 Test It Works
+
+Ask Claude: "Create a graph called 'test', add nodes 1, 2, 3 with edges between them, then find the shortest path from 1 to 3"
 
 ## 📊 Available Operations
 

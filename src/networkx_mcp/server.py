@@ -65,7 +65,8 @@ from .core.basic_operations import (
 )
 
 # Global state - simple and effective
-graphs: Dict[str, nx.Graph] = {}
+# Import the new thread-safe graph cache with memory management
+from .graph_cache import graphs
 
 
 class GraphManager:
@@ -245,7 +246,7 @@ class NetworkXMCPServer:
             if req_id is None:
                 return None
             result = {}  # Just acknowledge
-        elif method == "tools/list[Any]":
+        elif method == "tools/list":
             result = {"tools": self._get_tools()}
         elif method == "tools/call":
             # Check permissions for write operations
@@ -717,20 +718,38 @@ def main() -> None:
             "Use 'python -m networkx_mcp.auth generate <name>' to create API keys"
         )
     else:
-        logging.warning("🚨 SECURITY ALERT: Authentication is DISABLED!")
-        logging.warning("This allows unrestricted access to all server functionality!")
-        logging.warning("To enable security: export NETWORKX_MCP_AUTH=true")
-        logging.warning("Or set auth_required=True in server constructor")
+        # Check if we're in production mode
+        is_production = (
+            os.environ.get("NETWORKX_MCP_ENV", "development").lower() == "production"
+        )
 
-        # Require explicit confirmation to run without auth
-        if not os.environ.get("NETWORKX_MCP_INSECURE_CONFIRM", "").lower() == "true":
-            logging.error("SECURITY: Server startup blocked for safety")
-            logging.error(
-                "To run without auth (NOT RECOMMENDED): export NETWORKX_MCP_INSECURE_CONFIRM=true"
+        if is_production:
+            logging.warning(
+                "⚠️ SECURITY WARNING: Authentication is DISABLED in production!"
             )
-            raise RuntimeError(
-                "SECURITY: Authentication disabled but not explicitly confirmed. "
-                "Set NETWORKX_MCP_INSECURE_CONFIRM=true to bypass this safety check."
+            logging.warning(
+                "This allows unrestricted access to all server functionality!"
+            )
+            logging.warning("To enable security: export NETWORKX_MCP_AUTH=true")
+
+            # Require explicit confirmation to run without auth in production
+            if (
+                not os.environ.get("NETWORKX_MCP_INSECURE_CONFIRM", "").lower()
+                == "true"
+            ):
+                logging.error("SECURITY: Production server startup blocked for safety")
+                logging.error(
+                    "To run without auth in production: export NETWORKX_MCP_INSECURE_CONFIRM=true"
+                )
+                raise RuntimeError(
+                    "SECURITY: Authentication disabled in production. "
+                    "Set NETWORKX_MCP_INSECURE_CONFIRM=true to bypass this safety check."
+                )
+        else:
+            # Development mode - just show info message
+            logging.info("ℹ️ Running in development mode without authentication")
+            logging.info(
+                "For production use, enable auth with: export NETWORKX_MCP_AUTH=true"
             )
 
     if enable_monitoring:
