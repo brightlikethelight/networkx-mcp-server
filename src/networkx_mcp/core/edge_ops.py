@@ -35,6 +35,6 @@ class EdgeOperations:
         return {
             "source": source,
             "target": target,
-            "attributes": Dict[str, Any](self.graph.edges[source, target]),
+            "attributes": dict(self.graph.edges[source, target]),
             "weight": self.graph.edges[source, target].get("weight", 1),
         }
