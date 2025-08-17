@@ -346,26 +346,26 @@ class ThreadSafeGraphManager:
 
         for measure in measures:
             if measure == "degree":
-                results["degree_centrality"] = Dict[str, Any](
+                results["degree_centrality"] = dict(
                     nx.degree_centrality(graph)
                 )
             elif measure == "betweenness":
-                results["betweenness_centrality"] = Dict[str, Any](
+                results["betweenness_centrality"] = dict(
                     nx.betweenness_centrality(graph, normalized=normalized)
                 )
             elif measure == "closeness":
-                results["closeness_centrality"] = Dict[str, Any](
+                results["closeness_centrality"] = dict(
                     nx.closeness_centrality(graph)
                 )
             elif measure == "eigenvector":
                 try:
-                    results["eigenvector_centrality"] = Dict[str, Any](
+                    results["eigenvector_centrality"] = dict(
                         nx.eigenvector_centrality(graph, max_iter=1000)
                     )
                 except Exception:
                     results["eigenvector_centrality"] = "Failed to converge"
             elif measure == "pagerank":
-                results["pagerank"] = Dict[str, Any](nx.pagerank(graph))
+                results["pagerank"] = dict(nx.pagerank(graph))
 
         return results
 

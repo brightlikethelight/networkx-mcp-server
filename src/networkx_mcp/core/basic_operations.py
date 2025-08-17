@@ -133,7 +133,7 @@ def degree_centrality(
     # Convert to serializable format and sort by centrality
     sorted_nodes = sorted(centrality.items(), key=lambda x: x[1], reverse=True)
     return {
-        "centrality": Dict[str, Any](sorted_nodes[:10]),  # Top 10 nodes
+        "centrality": dict(sorted_nodes[:10]),  # Top 10 nodes
         "most_central": sorted_nodes[0] if sorted_nodes else None,
     }
 
@@ -150,7 +150,7 @@ def betweenness_centrality(
     centrality = nx.betweenness_centrality(graph)
     sorted_nodes = sorted(centrality.items(), key=lambda x: x[1], reverse=True)
     return {
-        "centrality": Dict[str, Any](sorted_nodes[:10]),  # Top 10 nodes
+        "centrality": dict(sorted_nodes[:10]),  # Top 10 nodes
         "most_central": sorted_nodes[0] if sorted_nodes else None,
     }
 
@@ -165,12 +165,12 @@ def connected_components(
         raise ValueError(f"Graph '{graph_name}' not found")
     graph = graphs[graph_name]
     if graph.is_directed():
-        components = List[Any](nx.weakly_connected_components(graph))
+        components = list(nx.weakly_connected_components(graph))
     else:
-        components = List[Any](nx.connected_components(graph))
+        components = list(nx.connected_components(graph))
 
     # Convert sets to lists for JSON serialization
-    components_list = [List[Any](comp) for comp in components]
+    components_list = [list(comp) for comp in components]
     components_list.sort(key=len, reverse=True)  # Largest first
 
     return {
@@ -192,7 +192,7 @@ def pagerank(
     pr = nx.pagerank(graph)
     sorted_nodes = sorted(pr.items(), key=lambda x: x[1], reverse=True)
     return {
-        "pagerank": Dict[str, Any](sorted_nodes[:10]),  # Top 10 nodes
+        "pagerank": dict(sorted_nodes[:10]),  # Top 10 nodes
         "highest_rank": sorted_nodes[0] if sorted_nodes else None,
     }
 
@@ -321,7 +321,7 @@ def community_detection(
     communities = nx_comm.louvain_communities(graph)
 
     # Convert to List[Any] format
-    communities_list = [List[Any](comm) for comm in communities]
+    communities_list = [list(comm) for comm in communities]
     communities_list.sort(key=len, reverse=True)  # Largest first
 
     # Create node to community mapping
@@ -336,7 +336,7 @@ def community_detection(
         "method": "louvain",
         "community_sizes": [len(comm) for comm in communities_list],
         "largest_community": communities_list[0] if communities_list else [],
-        "node_community_map": Dict[str, Any](
-            List[Any](node_community.items())[:20]
+        "node_community_map": dict(
+            list(node_community.items())[:20]
         ),  # First 20 nodes
     }

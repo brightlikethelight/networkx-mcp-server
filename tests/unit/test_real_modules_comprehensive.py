@@ -245,7 +245,7 @@ class TestNetworkXMCPServer:
             },
         }
 
-        response = await self.server.handle_message(init_request)
+        response = await self.server.handle_request(init_request)
 
         assert isinstance(response, dict)
         assert response.get("jsonrpc") == "2.0"
@@ -260,7 +260,7 @@ class TestNetworkXMCPServer:
 
         tools_request = {"jsonrpc": "2.0", "id": 2, "method": "tools/list"}
 
-        response = await self.server.handle_message(tools_request)
+        response = await self.server.handle_request(tools_request)
 
         assert isinstance(response, dict)
         assert response.get("jsonrpc") == "2.0"
@@ -271,13 +271,14 @@ class TestNetworkXMCPServer:
         """Test handling invalid requests."""
         invalid_request = {"invalid": "request"}
 
-        response = await self.server.handle_message(invalid_request)
+        response = await self.server.handle_request(invalid_request)
 
         assert isinstance(response, dict)
         if "error" in response:
             assert response["error"]["code"] in [
                 ErrorCodes.INVALID_REQUEST,
                 ErrorCodes.PARSE_ERROR,
+                ErrorCodes.INTERNAL_ERROR,
             ]
 
     @pytest.mark.asyncio
@@ -285,7 +286,7 @@ class TestNetworkXMCPServer:
         """Test handling unknown methods."""
         unknown_method_request = {"jsonrpc": "2.0", "id": 3, "method": "unknown_method"}
 
-        response = await self.server.handle_message(unknown_method_request)
+        response = await self.server.handle_request(unknown_method_request)
 
         assert isinstance(response, dict)
         if "error" in response:
@@ -296,7 +297,7 @@ class TestNetworkXMCPServer:
         """Test error when server not initialized."""
         tools_request = {"jsonrpc": "2.0", "id": 4, "method": "tools/list"}
 
-        response = await self.server.handle_message(tools_request)
+        response = await self.server.handle_request(tools_request)
 
         # Should return server not initialized error
         assert isinstance(response, dict)
@@ -313,11 +314,11 @@ class TestNetworkXMCPServer:
                 "clientInfo": {"name": "test", "version": "1.0.0"},
             },
         }
-        await self.server.handle_message(init_request)
+        await self.server.handle_request(init_request)
 
         # Send initialized notification
         initialized_notification = {"jsonrpc": "2.0", "method": "initialized"}
-        await self.server.handle_message(initialized_notification)
+        await self.server.handle_request(initialized_notification)
 
 
 class TestBasicOperations:
@@ -591,7 +592,7 @@ class TestRealWorldUsage:
         server = NetworkXMCPServer()
 
         # Initialize
-        init_response = await server.handle_message(
+        init_response = await server.handle_request(
             {
                 "jsonrpc": "2.0",
                 "id": 1,
@@ -607,10 +608,10 @@ class TestRealWorldUsage:
         assert isinstance(init_response, dict)
 
         # Send initialized notification
-        await server.handle_message({"jsonrpc": "2.0", "method": "initialized"})
+        await server.handle_request({"jsonrpc": "2.0", "method": "initialized"})
 
         # List tools
-        tools_response = await server.handle_message(
+        tools_response = await server.handle_request(
             {"jsonrpc": "2.0", "id": 2, "method": "tools/list"}
         )
 

@@ -235,12 +235,12 @@ class GraphManager:
 
         if graph.number_of_nodes() > 0:
             info["degree_stats"] = {
-                "average": sum(Dict[str, Any](graph.degree()).values())
+                "average": sum(dict(graph.degree()).values())
                 / graph.number_of_nodes(),
-                "max": max(Dict[str, Any](graph.degree()).values())
+                "max": max(dict(graph.degree()).values())
                 if graph.degree()
                 else 0,
-                "min": min(Dict[str, Any](graph.degree()).values())
+                "min": min(dict(graph.degree()).values())
                 if graph.degree()
                 else 0,
             }
@@ -257,7 +257,7 @@ class GraphManager:
                 msg = f"Node '{node_id}' not in graph"
                 raise ValueError(msg)
 
-            return List[Any](graph.neighbors(node_id))
+            return list(graph.neighbors(node_id))
 
     def get_node_attributes(
         self,
@@ -278,7 +278,7 @@ class GraphManager:
         if attribute is not None:
             return nx.get_node_attributes(graph, attribute)
 
-        return Dict[str, Any](graph.nodes(data=True))
+        return dict(graph.nodes(data=True))
 
     def get_edge_attributes(
         self,
@@ -347,8 +347,8 @@ class GraphManager:
             return {
                 "num_nodes": subgraph.number_of_nodes(),
                 "num_edges": subgraph.number_of_edges(),
-                "nodes": List[Any](subgraph.nodes()),
-                "edges": List[Any](subgraph.edges()),
+                "nodes": list(subgraph.nodes()),
+                "edges": list(subgraph.edges()),
             }
         else:
             return graph.subgraph(nodes)

@@ -59,8 +59,8 @@ class GraphAlgorithms:
                     graph, source, weight=weight
                 )
                 result = {
-                    "paths": Dict[str, Any](paths),
-                    "lengths": Dict[str, Any](lengths),
+                    "paths": dict(paths),
+                    "lengths": dict(lengths),
                     "source": source,
                 }
         elif method == "bellman-ford":
@@ -78,8 +78,8 @@ class GraphAlgorithms:
             else:
                 pred, dist = nx.single_source_bellman_ford(graph, source, weight=weight)
                 result = {
-                    "predecessors": Dict[str, Any](pred),
-                    "distances": Dict[str, Any](dist),
+                    "predecessors": dict(pred),
+                    "distances": dict(dist),
                     "source": source,
                 }
         else:
@@ -94,13 +94,11 @@ class GraphAlgorithms:
     ) -> Dict[str, Any]:
         """Compute shortest paths between all pairs of nodes."""
         if weight:
-            lengths = Dict[str, Any](
-                nx.all_pairs_dijkstra_path_length(graph, weight=weight)
-            )
-            paths = Dict[str, Any](nx.all_pairs_dijkstra_path(graph, weight=weight))
+            lengths = dict(nx.all_pairs_dijkstra_path_length(graph, weight=weight))
+            paths = dict(nx.all_pairs_dijkstra_path(graph, weight=weight))
         else:
-            lengths = Dict[str, Any](nx.all_pairs_shortest_path_length(graph))
-            paths = Dict[str, Any](nx.all_pairs_shortest_path(graph))
+            lengths = dict(nx.all_pairs_shortest_path_length(graph))
+            paths = dict(nx.all_pairs_shortest_path(graph))
 
         # Convert to serializable format
         lengths_dict = {
@@ -132,13 +130,13 @@ class GraphAlgorithms:
             }
 
         if graph.is_directed():
-            components = List[Any](nx.weakly_connected_components(graph))
-            strong_components = List[Any](nx.strongly_connected_components(graph))
+            components = list(nx.weakly_connected_components(graph))
+            strong_components = list(nx.strongly_connected_components(graph))
 
             return {
-                "weakly_connected_components": [List[Any](comp) for comp in components],
+                "weakly_connected_components": [list(comp) for comp in components],
                 "strongly_connected_components": [
-                    List[Any](comp) for comp in strong_components
+                    list(comp) for comp in strong_components
                 ],
                 "num_weakly_connected": len(components),
                 "num_strongly_connected": len(strong_components),
@@ -154,10 +152,10 @@ class GraphAlgorithms:
                 ),
             }
         else:
-            components = List[Any](nx.connected_components(graph))
+            components = list(nx.connected_components(graph))
 
             return {
-                "connected_components": [List[Any](comp) for comp in components],
+                "connected_components": [list(comp) for comp in components],
                 "num_components": len(components),
                 "is_connected": (
                     nx.is_connected(graph) if graph.number_of_nodes() > 0 else False
@@ -247,7 +245,7 @@ class GraphAlgorithms:
         total_weight = sum(data.get(weight, 1) for _, _, data in mst.edges(data=True))
 
         return {
-            "edges": List[Any](mst.edges()),
+            "edges": list(mst.edges()),
             "total_weight": total_weight,
             "num_edges": mst.number_of_edges(),
             "algorithm": algorithm,
@@ -266,7 +264,7 @@ class GraphAlgorithms:
 
         return {
             "flow_value": flow_value,
-            "flow_dict": Dict[str, Any](flow_dict),
+            "flow_dict": dict(flow_dict),
             "source": source,
             "sink": sink,
         }
@@ -279,14 +277,14 @@ class GraphAlgorithms:
         coloring = nx.greedy_color(graph, strategy=strategy)
         num_colors = max(coloring.values()) + 1 if coloring else 0
 
-        color_classes = defaultdict(List[Any])
+        color_classes = defaultdict(list)
         for node, color in coloring.items():
             color_classes[color].append(node)
 
         return {
             "coloring": coloring,
             "num_colors": num_colors,
-            "color_classes": Dict[str, Any](color_classes),
+            "color_classes": dict(color_classes),
             "chromatic_number_upper_bound": num_colors,
         }
 
@@ -302,15 +300,15 @@ class GraphAlgorithms:
         if method == "louvain":
             communities = nx_comm.louvain_communities(graph)
         elif method == "label_propagation":
-            communities = List[Any](nx_comm.label_propagation_communities(graph))
+            communities = list(nx_comm.label_propagation_communities(graph))
         elif method == "greedy_modularity":
-            communities = List[Any](nx_comm.greedy_modularity_communities(graph))
+            communities = list(nx_comm.greedy_modularity_communities(graph))
         else:
             msg = f"Unknown method: {method}"
             raise ValueError(msg)
 
-        # Convert communities to List[Any] format
-        communities_list = [List[Any](comm) for comm in communities]
+        # Convert communities to list format
+        communities_list = [list(comm) for comm in communities]
 
         # Calculate modularity
         mod_score = modularity(graph, communities)
@@ -334,7 +332,7 @@ class GraphAlgorithms:
 
             if has_cycle:
                 try:
-                    cycles = List[Any](nx.simple_cycles(graph))
+                    cycles = list(nx.simple_cycles(graph))
                     result["cycles"] = cycles[:10]  # Limit to first 10 cycles
                     result["num_cycles_found"] = len(cycles)
                 except (RecursionError, MemoryError) as e:
@@ -364,7 +362,7 @@ class GraphAlgorithms:
         else:
             matching = nx.maximal_matching(graph)
 
-        matching_list = List[Any](matching)
+        matching_list = list(matching)
 
         return {
             "matching": matching_list,
@@ -384,26 +382,26 @@ class GraphAlgorithms:
         }
 
         if graph.number_of_nodes() > 0:
-            degrees = Dict[str, Any](graph.degree())
+            degrees = dict(graph.degree())
             stats["degree_stats"] = {
-                "mean": np.mean(List[Any](degrees.values())),
-                "std": np.std(List[Any](degrees.values())),
+                "mean": np.mean(list(degrees.values())),
+                "std": np.std(list(degrees.values())),
                 "min": min(degrees.values()),
                 "max": max(degrees.values()),
             }
 
             if graph.is_directed():
-                in_degrees = Dict[str, Any](graph.in_degree())
-                out_degrees = Dict[str, Any](graph.out_degree())
+                in_degrees = dict(graph.in_degree())
+                out_degrees = dict(graph.out_degree())
                 stats["in_degree_stats"] = {
-                    "mean": np.mean(List[Any](in_degrees.values())),
-                    "std": np.std(List[Any](in_degrees.values())),
+                    "mean": np.mean(list(in_degrees.values())),
+                    "std": np.std(list(in_degrees.values())),
                     "min": min(in_degrees.values()),
                     "max": max(in_degrees.values()),
                 }
                 stats["out_degree_stats"] = {
-                    "mean": np.mean(List[Any](out_degrees.values())),
-                    "std": np.std(List[Any](out_degrees.values())),
+                    "mean": np.mean(list(out_degrees.values())),
+                    "std": np.std(list(out_degrees.values())),
                     "min": min(out_degrees.values()),
                     "max": max(out_degrees.values()),
                 }

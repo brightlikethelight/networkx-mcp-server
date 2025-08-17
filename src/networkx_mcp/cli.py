@@ -32,7 +32,7 @@ class NetworkXCLI:
 ╔═══════════════════════════════════════════════════════════╗
 ║          NetworkX MCP Server - Interactive CLI            ║
 ║                                                           ║
-║  Commands: help, create, List[Any], info, add, analyze, exit  ║
+║  Commands: help, create, list, info, add, analyze, exit       ║
 ╚═══════════════════════════════════════════════════════════╝
         """
         console.print(banner, style="bold blue")
@@ -44,7 +44,7 @@ class NetworkXCLI:
 
 [green]Graph Management:[/green]
   create <graph_id> [type]     - Create a new graph
-  List[Any]                         - List all graphs
+  list                              - List all graphs
   info [graph_id]              - Show graph information
   delete <graph_id>            - Delete a graph
   select <graph_id>            - Select active graph
@@ -330,7 +330,7 @@ Radius: {stats["radius"]}
         import time
 
         start = time.time()
-        nodes = List[Any](range(size))
+        nodes = list(range(size))
         self.graph_manager.add_nodes_from(test_id, nodes)
         node_time = time.time() - start
 
@@ -454,7 +454,7 @@ Total: {(node_time + edge_time + centrality_time + component_time) * 1000:.2f} m
                 elif cmd == "create":
                     await self.create_graph(args)
 
-                elif cmd == "List[Any]":
+                elif cmd == "list":
                     self.list_graphs()
 
                 elif cmd == "info":
