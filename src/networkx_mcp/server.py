@@ -8,7 +8,7 @@ import asyncio
 import json
 import os
 import sys
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 
 import networkx as nx
 
@@ -171,9 +171,12 @@ class NetworkXMCPServer:
     """Minimal MCP server - no unnecessary abstraction."""
 
     def __init__(
-        self, auth_required: bool = True, enable_monitoring: bool = False
+        self,
+        auth_required: bool = False,
+        enable_monitoring: bool = False,  # Changed default to False for MCP
     ) -> None:
         self.running = True
+        self.initialized = False  # Track initialization state
         self.mcp = self  # For test compatibility
         self.graphs = graphs  # Reference to global graphs
 
@@ -184,16 +187,20 @@ class NetworkXMCPServer:
             self.auth = AuthMiddleware(self.key_manager, required=auth_required)
         else:
             self.auth = None
-            # SECURITY WARNING: Authentication is disabled
-            import warnings
+            # Only show warning if not in test mode
+            if not os.environ.get("PYTEST_CURRENT_TEST") and not os.environ.get(
+                "NETWORKX_MCP_SUPPRESS_AUTH_WARNING"
+            ):
+                # SECURITY WARNING: Authentication is disabled
+                import warnings
 
-            warnings.warn(
-                "SECURITY WARNING: Authentication is disabled! "
-                "This allows unrestricted access to all server functionality. "
-                "Enable authentication in production with auth_required=True.",
-                RuntimeWarning,
-                stacklevel=2,
-            )
+                warnings.warn(
+                    "SECURITY WARNING: Authentication is disabled! "
+                    "This allows unrestricted access to all server functionality. "
+                    "Enable authentication in production with auth_required=True.",
+                    RuntimeWarning,
+                    stacklevel=2,
+                )
 
         # Set up monitoring if enabled
         self.monitoring_enabled = enable_monitoring and HAS_MONITORING
@@ -236,10 +243,15 @@ class NetworkXMCPServer:
 
         # Route to appropriate handler
         if method == "initialize":
+            self.initialized = True  # Mark as initialized
             result = {
                 "protocolVersion": "2024-11-05",
-                "capabilities": {"tools": {}},
-                "serverInfo": {"name": "networkx-minimal"},
+                "capabilities": {
+                    "tools": {},
+                    "resources": {"listChangedSupport": False},
+                    "prompts": {},
+                },
+                "serverInfo": {"name": "networkx-mcp-server", "version": "1.0.0"},
             }
         elif method == "initialized":
             # This is a notification, no response needed
@@ -247,6 +259,13 @@ class NetworkXMCPServer:
                 return None
             result = {}  # Just acknowledge
         elif method == "tools/list":
+            # Check if initialized (except for init methods)
+            if not self.initialized:
+                return {
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "error": {"code": -32002, "message": "Server not initialized"},
+                }
             result = {"tools": self._get_tools()}
         elif method == "tools/call":
             # Check permissions for write operations
@@ -270,7 +289,34 @@ class NetworkXMCPServer:
                             "message": "Permission denied: write access required",
                         },
                     }
+            # Check if initialized
+            if not self.initialized:
+                return {
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "error": {"code": -32002, "message": "Server not initialized"},
+                }
             result = await self._call_tool(params)
+        elif method == "resources/list":
+            # MCP Resources API - return empty list for now
+            result = {"resources": []}
+        elif method == "resources/read":
+            # MCP Resources API - not implemented yet
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "error": {"code": -32601, "message": "resources/read not implemented"},
+            }
+        elif method == "prompts/list":
+            # MCP Prompts API - return empty list for now
+            result = {"prompts": []}
+        elif method == "prompts/get":
+            # MCP Prompts API - not implemented yet
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "error": {"code": -32601, "message": "prompts/get not implemented"},
+            }
         else:
             return {
                 "jsonrpc": "2.0",
@@ -547,7 +593,7 @@ class NetworkXMCPServer:
                 graph_name = args["graph"]
                 if graph_name not in graphs:
                     raise ValueError(
-                        f"Graph '{graph_name}' not found. Available graphs: {List[Any](graphs.keys())}"
+                        f"Graph '{graph_name}' not found. Available graphs: {list(graphs.keys())}"
                     )
                 graph = graphs[graph_name]
                 graph.add_nodes_from(args["nodes"])
@@ -557,10 +603,10 @@ class NetworkXMCPServer:
                 graph_name = args["graph"]
                 if graph_name not in graphs:
                     raise ValueError(
-                        f"Graph '{graph_name}' not found. Available graphs: {List[Any](graphs.keys())}"
+                        f"Graph '{graph_name}' not found. Available graphs: {list(graphs.keys())}"
                     )
                 graph = graphs[graph_name]
-                edges = [Tuple[Any, ...](e) for e in args["edges"]]
+                edges = [tuple(e) for e in args["edges"]]
                 graph.add_edges_from(edges)
                 result = {"added": len(edges), "total": graph.number_of_edges()}
 
@@ -568,7 +614,7 @@ class NetworkXMCPServer:
                 graph_name = args["graph"]
                 if graph_name not in graphs:
                     raise ValueError(
-                        f"Graph '{graph_name}' not found. Available graphs: {List[Any](graphs.keys())}"
+                        f"Graph '{graph_name}' not found. Available graphs: {list(graphs.keys())}"
                     )
                 graph = graphs[graph_name]
                 path = nx.shortest_path(graph, args["source"], args["target"])
@@ -578,7 +624,7 @@ class NetworkXMCPServer:
                 graph_name = args["graph"]
                 if graph_name not in graphs:
                     raise ValueError(
-                        f"Graph '{graph_name}' not found. Available graphs: {List[Any](graphs.keys())}"
+                        f"Graph '{graph_name}' not found. Available graphs: {list(graphs.keys())}"
                     )
                 graph = graphs[graph_name]
                 result = {
@@ -668,15 +714,16 @@ class NetworkXMCPServer:
                     result = {"status": "monitoring_disabled"}
 
             else:
-                raise ValueError(f"Unknown tool: {tool_name}")
+                # Return proper error for unknown tool
+                return {
+                    "error": {"code": -32601, "message": f"Unknown tool: {tool_name}"}
+                }
 
             return {"content": [{"type": "text", "text": json.dumps(result)}]}
 
         except Exception as e:
-            return {
-                "content": [{"type": "text", "text": f"Error: {str(e)}"}],
-                "isError": True,
-            }
+            # Return proper JSON-RPC error format
+            return {"error": {"code": -32603, "message": f"Internal error: {str(e)}"}}
 
     async def run(self) -> None:
         """Main server loop - read stdin, write stdout."""
@@ -698,13 +745,21 @@ class NetworkXMCPServer:
 
 
 # Create module-level mcp instance for test compatibility
+# Suppress auth warning for this default instance
+_original_env = os.environ.get("NETWORKX_MCP_SUPPRESS_AUTH_WARNING")
+os.environ["NETWORKX_MCP_SUPPRESS_AUTH_WARNING"] = "1"
 mcp = NetworkXMCPServer()
+# Restore original env value
+if _original_env is None:
+    del os.environ["NETWORKX_MCP_SUPPRESS_AUTH_WARNING"]
+else:
+    os.environ["NETWORKX_MCP_SUPPRESS_AUTH_WARNING"] = _original_env
 
 
 def main() -> None:
     """Main entry point for the NetworkX MCP Server."""
-    # Check environment variables
-    auth_required = os.environ.get("NETWORKX_MCP_AUTH", "true").lower() == "true"
+    # Check environment variables - default to False for MCP compatibility
+    auth_required = os.environ.get("NETWORKX_MCP_AUTH", "false").lower() == "true"
     enable_monitoring = (
         os.environ.get("NETWORKX_MCP_MONITORING", "false").lower() == "true"
     )
