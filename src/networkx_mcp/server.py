@@ -8,7 +8,7 @@ import asyncio
 import json
 import os
 import sys
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import networkx as nx
 
@@ -325,6 +325,18 @@ class NetworkXMCPServer:
             }
 
         return {"jsonrpc": "2.0", "id": req_id, "result": result}
+
+    async def handle_message(self, message: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Handle MCP message (alias for handle_request for compatibility).
+
+        Args:
+            message: The message to handle
+
+        Returns:
+            Response dictionary or None for notifications
+        """
+        # For notifications (no 'id' field), handle_request returns None
+        return await self.handle_request(message)
 
     def _get_tools(self) -> List[Dict[str, Any]]:
         """List available tools."""

@@ -33,7 +33,7 @@ class ErrorCodes:
     ALGORITHM_ERROR = -32009
     VALIDATION_ERROR = -32010
     RESOURCE_LIMIT_EXCEEDED = -32011
-    SERVER_NOT_INITIALIZED = -32002  # MCP-specific
+    SERVER_NOT_INITIALIZED = -32012  # MCP-specific
 
 
 class MCPError(Exception):

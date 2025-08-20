@@ -28,9 +28,7 @@ class APIKeyManager:
             try:
                 with open(self.storage_path, "r") as f:
                     loaded_data = json.load(f)
-                    return (
-                        loaded_data if isinstance(loaded_data, Dict[str, Any]) else {}
-                    )
+                    return loaded_data if isinstance(loaded_data, dict) else {}
             except Exception:
                 return {}
         return {}
