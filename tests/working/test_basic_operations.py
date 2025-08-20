@@ -156,6 +156,7 @@ class TestComplexScenarios:
         assert info2["is_directed"]
         assert not info3["is_directed"]
 
+    @pytest.mark.timeout(30)
     def test_large_graph(self):
         """Test with a reasonably large graph."""
         create_graph("large_graph", directed=False)

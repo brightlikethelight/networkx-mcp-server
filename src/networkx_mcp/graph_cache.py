@@ -62,6 +62,7 @@ class GraphCache:
         """
         self._cache: OrderedDict[str, CachedGraph] = OrderedDict()
         self._lock = threading.RLock()
+        self._shutdown = False
         self.max_size = max_size
         self.ttl_seconds = ttl_seconds
         self.max_memory_mb = max_memory_mb
@@ -212,12 +213,15 @@ class GraphCache:
 
     def _cleanup_loop(self) -> None:
         """Background thread for periodic cleanup."""
-        while True:
+        while not self._shutdown:
             try:
                 time.sleep(self.cleanup_interval)
-                self._cleanup()
+                if not self._shutdown:
+                    self._cleanup()
             except Exception as e:
                 logger.error(f"Cleanup error: {e}")
+                if self._shutdown:
+                    break
 
     def _cleanup(self) -> None:
         """Clean up expired graphs."""
@@ -238,6 +242,12 @@ class GraphCache:
             # Check memory limit
             if self._get_memory_usage_mb() > self.max_memory_mb:
                 self._evict_until_memory_ok()
+
+    def shutdown(self) -> None:
+        """Shutdown the cache and stop background thread."""
+        self._shutdown = True
+        if hasattr(self, "_cleanup_thread") and self._cleanup_thread.is_alive():
+            self._cleanup_thread.join(timeout=1.0)
 
 
 # Global cache instance (replaces the simple dict)
@@ -290,6 +300,10 @@ class GraphDict(dict):
 
     def clear(self) -> None:
         self._cache.clear()
+
+    def shutdown(self) -> None:
+        """Shutdown the underlying cache."""
+        self._cache.shutdown()
 
 
 # Create backward-compatible graphs dict

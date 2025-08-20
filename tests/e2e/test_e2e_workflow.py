@@ -12,6 +12,8 @@ import time
 from pathlib import Path
 from typing import Any, Dict
 
+import pytest
+
 
 class MCPTestClient:
     """Test client for end-to-end MCP workflows."""
@@ -395,6 +397,7 @@ async def test_batch_operations():
     print("\n✅ Batch operations test completed!")
 
 
+@pytest.mark.timeout(60)
 async def test_performance_under_load():
     """Test server performance under load."""
     print("\n\n⚡ Testing Performance Under Load\n")

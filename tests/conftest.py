@@ -21,3 +21,15 @@ def sample_graph() -> nx.Graph:
     G.add_edges_from([(1, 2), (2, 3), (3, 4), (4, 1), (1, 3)])
     G.add_node(5)  # Isolated node
     return G
+
+
+@pytest.fixture(scope="session", autouse=True)
+def cleanup_background_threads():
+    """Cleanup background threads after test session."""
+    yield
+    try:
+        from networkx_mcp.graph_cache import graphs
+
+        graphs.shutdown()
+    except ImportError:
+        pass
