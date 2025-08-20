@@ -10,6 +10,9 @@ jobs:
   update-dependencies:
     name: Update Dependencies
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
 
     steps:
     - uses: actions/checkout@v4
@@ -37,6 +40,8 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         commit-message: "chore: update dependencies"
         title: "chore: update dependencies"
+        committer: GitHub <noreply@github.com>
+        author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
         body: |
           ## Dependency Updates
 

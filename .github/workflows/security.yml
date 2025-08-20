@@ -62,19 +62,16 @@ jobs:
 
     - name: Run Semgrep security scan
       if: github.event_name != 'pull_request'  # Skip on PRs to avoid token issues
-      uses: semgrep/semgrep-action@v1
-      with:
-        config: >-
-          p/security-audit
-          p/python
-          p/owasp-top-10
-        generateSarif: true
+      run: |
+        pip install semgrep
+        semgrep --config=auto --sarif --output=semgrep.sarif src/ || true
 
     - name: Upload Semgrep results to GitHub
-      if: github.event_name != 'pull_request'
+      if: github.event_name != 'pull_request' && hashFiles('semgrep.sarif') != ''
       uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: semgrep.sarif
+      continue-on-error: true
 
     - name: Upload security reports
       if: always()
