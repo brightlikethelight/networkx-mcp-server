@@ -7,7 +7,12 @@ import time
 from datetime import datetime
 from typing import Any, Dict
 
-import psutil
+try:
+    import psutil
+
+    HAS_PSUTIL = True
+except ImportError:
+    HAS_PSUTIL = False
 
 
 class HealthMonitor:
@@ -19,7 +24,10 @@ class HealthMonitor:
         self.request_count = 0
         self.error_count = 0
         self.tool_usage = {}
-        self.process = psutil.Process(os.getpid())
+        if HAS_PSUTIL:
+            self.process = psutil.Process(os.getpid())
+        else:
+            self.process = None
 
     def record_request(self, method: str, success: bool = True) -> None:
         """Record a request."""
@@ -35,9 +43,14 @@ class HealthMonitor:
         """Get current health status."""
         uptime = time.time() - self.start_time
 
-        # Get system metrics
-        memory_info = self.process.memory_info()
-        cpu_percent = self.process.cpu_percent(interval=0.1)
+        # Get system metrics if psutil is available
+        if HAS_PSUTIL and self.process:
+            memory_info = self.process.memory_info()
+            cpu_percent = self.process.cpu_percent(interval=0.1)
+            memory_mb = round(memory_info.rss / 1024 / 1024, 2)
+        else:
+            memory_mb = 0
+            cpu_percent = 0
 
         return {
             "status": "healthy",
@@ -56,9 +69,10 @@ class HealthMonitor:
                     ),
                 },
                 "system": {
-                    "memory_mb": round(memory_info.rss / 1024 / 1024, 2),
+                    "memory_mb": memory_mb,
                     "cpu_percent": round(cpu_percent, 2),
                     "pid": os.getpid(),
+                    "psutil_available": HAS_PSUTIL,
                 },
                 "graphs": {
                     "count": len(getattr(self, "graphs", {})),

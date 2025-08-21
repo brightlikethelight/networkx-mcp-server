@@ -1,0 +1,243 @@
+name: Monitoring
+
+on:
+  workflow_run:
+    workflows: ["CI", "Security", "Docker Build", "CodeQL"]
+    types: [completed]
+  schedule:
+    - cron: '*/30 * * * *'  # Every 30 minutes
+  workflow_dispatch:
+
+jobs:
+  monitor-ci-health:
+    name: Monitor CI Health
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      issues: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Analyze Workflow Status
+      id: analyze
+      run: |
+        # Get recent workflow runs
+        echo "## CI/CD Health Report" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Timestamp:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        # Function to check workflow status
+        check_workflow() {
+          local workflow_name="$1"
+          local workflow_file="$2"
+
+          # Get the most recent run
+          run_info=$(gh run list --workflow="$workflow_file" --limit=1 --json status,conclusion,createdAt,durationMs 2>/dev/null)
+
+          if [ -z "$run_info" ] || [ "$run_info" = "[]" ]; then
+            echo "⚠️ **$workflow_name**: No recent runs" >> $GITHUB_STEP_SUMMARY
+            return 1
+          fi
+
+          status=$(echo "$run_info" | jq -r '.[0].status')
+          conclusion=$(echo "$run_info" | jq -r '.[0].conclusion')
+          created=$(echo "$run_info" | jq -r '.[0].createdAt')
+          duration=$(echo "$run_info" | jq -r '.[0].durationMs')
+
+          # Format duration
+          if [ "$duration" != "null" ]; then
+            duration_sec=$((duration / 1000))
+            duration_min=$((duration_sec / 60))
+            duration_sec=$((duration_sec % 60))
+            duration_str="${duration_min}m ${duration_sec}s"
+          else
+            duration_str="N/A"
+          fi
+
+          # Determine status emoji
+          if [ "$status" = "in_progress" ]; then
+            emoji="🔄"
+          elif [ "$conclusion" = "success" ]; then
+            emoji="✅"
+          elif [ "$conclusion" = "failure" ]; then
+            emoji="❌"
+            echo "failure" >> workflow_failures.txt
+          else
+            emoji="⚠️"
+          fi
+
+          echo "$emoji **$workflow_name**: $conclusion (Duration: $duration_str)" >> $GITHUB_STEP_SUMMARY
+        }
+
+        # Check each workflow
+        echo "### Workflow Status" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        check_workflow "CI" "ci.yml"
+        check_workflow "Security" "security.yml"
+        check_workflow "Docker Build" "docker-build.yml"
+        check_workflow "CodeQL" "codeql.yml"
+        check_workflow "Documentation" "docs.yml"
+        check_workflow "Benchmarks" "benchmarks.yml"
+
+        # Count failures
+        failure_count=0
+        if [ -f workflow_failures.txt ]; then
+          failure_count=$(wc -l < workflow_failures.txt)
+        fi
+
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Overall Health" >> $GITHUB_STEP_SUMMARY
+
+        if [ "$failure_count" -eq 0 ]; then
+          echo "🟢 **Status: Healthy** - All workflows passing" >> $GITHUB_STEP_SUMMARY
+          echo "health=healthy" >> $GITHUB_OUTPUT
+        elif [ "$failure_count" -le 2 ]; then
+          echo "🟡 **Status: Degraded** - $failure_count workflow(s) failing" >> $GITHUB_STEP_SUMMARY
+          echo "health=degraded" >> $GITHUB_OUTPUT
+        else
+          echo "🔴 **Status: Critical** - $failure_count workflow(s) failing" >> $GITHUB_STEP_SUMMARY
+          echo "health=critical" >> $GITHUB_OUTPUT
+        fi
+      env:
+        GH_TOKEN: ${{ github.token }}
+
+    - name: Check Test Coverage
+      continue-on-error: true
+      run: |
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Test Coverage" >> $GITHUB_STEP_SUMMARY
+
+        # Look for most recent coverage report
+        if [ -f coverage.xml ]; then
+          coverage_percent=$(python -c "import xml.etree.ElementTree as ET; tree = ET.parse('coverage.xml'); root = tree.getroot(); coverage = float(root.attrib.get('line-rate', 0)) * 100; print(f'{coverage:.1f}')" 2>/dev/null || echo "N/A")
+
+          echo "📊 **Coverage:** ${coverage_percent}%" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "📊 **Coverage:** No data available" >> $GITHUB_STEP_SUMMARY
+        fi
+
+    - name: Performance Metrics
+      continue-on-error: true
+      run: |
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Performance Metrics" >> $GITHUB_STEP_SUMMARY
+
+        # Calculate average workflow duration
+        total_duration=0
+        count=0
+
+        for workflow in ci.yml security.yml docker-build.yml; do
+          duration=$(gh run list --workflow="$workflow" --limit=5 --json durationMs | jq '.[].durationMs' | awk '{sum+=$1; count++} END {if(count>0) print int(sum/count/1000)}')
+          if [ -n "$duration" ] && [ "$duration" != "null" ]; then
+            echo "- **${workflow%.yml}**: Avg ${duration}s" >> $GITHUB_STEP_SUMMARY
+          fi
+        done
+      env:
+        GH_TOKEN: ${{ github.token }}
+
+    - name: Create Issue for Critical Failures
+      if: steps.analyze.outputs.health == 'critical'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const title = `🚨 CI/CD Health Alert: Critical Status`;
+          const body = `## Automated CI/CD Health Alert
+
+          The CI/CD pipeline health monitor has detected critical failures.
+
+          **Status:** 🔴 Critical
+          **Time:** ${new Date().toUTCString()}
+
+          Please check the [workflow summary](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}) for details.
+
+          ### Required Actions
+          - [ ] Review failing workflows
+          - [ ] Fix critical issues
+          - [ ] Verify fixes are deployed
+
+          ---
+          *This issue was automatically created by the monitoring workflow.*`;
+
+          // Check if similar issue already exists
+          const issues = await github.rest.issues.listForRepo({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            state: 'open',
+            labels: 'ci-health-alert'
+          });
+
+          if (issues.data.length === 0) {
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['ci-health-alert', 'automated']
+            });
+          }
+
+  server-health-check:
+    name: Server Health Check
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        pip install -e .
+
+    - name: Run Health Check
+      run: |
+        # Test that server can start and respond
+        cat > test_health.py << 'EOF'
+        import sys
+        import asyncio
+        from networkx_mcp.server import NetworkXMCPServer
+        from networkx_mcp.monitoring import HealthMonitor
+
+        async def test():
+            server = NetworkXMCPServer(auth_required=False)
+            monitor = HealthMonitor()
+
+            # Test basic initialization
+            init_req = {
+                'jsonrpc': '2.0',
+                'id': 1,
+                'method': 'initialize',
+                'params': {
+                    'protocolVersion': '1.0.0',
+                    'capabilities': {}
+                }
+            }
+
+            response = await server.handle_request(init_req)
+            if 'result' not in response:
+                print('❌ Server initialization failed')
+                sys.exit(1)
+
+            # Get health status
+            health = monitor.get_health_status()
+            print(f'✅ Server health check passed')
+            print(f'   Status: {health["status"]}')
+            print(f'   Version: {health["version"]}')
+
+            return 0
+
+        sys.exit(asyncio.run(test()))
+        EOF
+
+        python test_health.py
+        echo "✅ **Server Health Check:** Passed" >> $GITHUB_STEP_SUMMARY
