@@ -15,7 +15,13 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional
 
 import networkx as nx
-import psutil
+
+try:
+    import psutil
+
+    HAS_PSUTIL = True
+except ImportError:
+    HAS_PSUTIL = False
 
 logger = logging.getLogger(__name__)
 
@@ -204,6 +210,9 @@ class GraphCache:
 
     def _get_memory_usage_mb(self) -> float:
         """Get current process memory usage in MB."""
+        if not HAS_PSUTIL:
+            # If psutil is not available, return 0 to skip memory checks
+            return 0
         try:
             process = psutil.Process()
             return process.memory_info().rss / 1024 / 1024
