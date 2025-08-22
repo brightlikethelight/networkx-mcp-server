@@ -346,17 +346,13 @@ class ThreadSafeGraphManager:
 
         for measure in measures:
             if measure == "degree":
-                results["degree_centrality"] = dict(
-                    nx.degree_centrality(graph)
-                )
+                results["degree_centrality"] = dict(nx.degree_centrality(graph))
             elif measure == "betweenness":
                 results["betweenness_centrality"] = dict(
                     nx.betweenness_centrality(graph, normalized=normalized)
                 )
             elif measure == "closeness":
-                results["closeness_centrality"] = dict(
-                    nx.closeness_centrality(graph)
-                )
+                results["closeness_centrality"] = dict(nx.closeness_centrality(graph))
             elif measure == "eigenvector":
                 try:
                     results["eigenvector_centrality"] = dict(

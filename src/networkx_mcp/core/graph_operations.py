@@ -235,14 +235,9 @@ class GraphManager:
 
         if graph.number_of_nodes() > 0:
             info["degree_stats"] = {
-                "average": sum(dict(graph.degree()).values())
-                / graph.number_of_nodes(),
-                "max": max(dict(graph.degree()).values())
-                if graph.degree()
-                else 0,
-                "min": min(dict(graph.degree()).values())
-                if graph.degree()
-                else 0,
+                "average": sum(dict(graph.degree()).values()) / graph.number_of_nodes(),
+                "max": max(dict(graph.degree()).values()) if graph.degree() else 0,
+                "min": min(dict(graph.degree()).values()) if graph.degree() else 0,
             }
 
         return info

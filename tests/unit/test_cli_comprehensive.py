@@ -6,8 +6,6 @@ which currently has 0% coverage.
 
 from unittest.mock import AsyncMock, Mock, patch
 
-import pytest
-
 from networkx_mcp.cli import NetworkXCLI, main
 
 
@@ -370,7 +368,7 @@ class TestNetworkXCLI:
     # NOTE: Interactive mode tests commented out - they cause infinite loops
     # The interactive_mode() method contains a while True loop that waits for user input
     # These tests would need significant refactoring to work properly
-    
+
     # @pytest.mark.asyncio
     # async def test_run_interactive_exit(self):
     #     """Test interactive mode with exit command."""

@@ -336,7 +336,5 @@ def community_detection(
         "method": "louvain",
         "community_sizes": [len(comm) for comm in communities_list],
         "largest_community": communities_list[0] if communities_list else [],
-        "node_community_map": dict(
-            list(node_community.items())[:20]
-        ),  # First 20 nodes
+        "node_community_map": dict(list(node_community.items())[:20]),  # First 20 nodes
     }
