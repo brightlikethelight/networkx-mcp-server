@@ -98,7 +98,7 @@ except ImportError:
 
 # Optional monitoring
 try:
-    from .monitoring import HealthMonitor
+    from .monitoring_legacy import HealthMonitor
 
     HAS_MONITORING = True
 except ImportError:
