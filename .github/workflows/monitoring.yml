@@ -36,7 +36,7 @@ jobs:
           local workflow_file="$2"
 
           # Get the most recent run
-          run_info=$(gh run list --workflow="$workflow_file" --limit=1 --json status,conclusion,createdAt,durationMs 2>/dev/null)
+          run_info=$(gh run list --workflow="$workflow_file" --limit=1 --json status,conclusion,createdAt,startedAt,updatedAt 2>/dev/null)
 
           if [ -z "$run_info" ] || [ "$run_info" = "[]" ]; then
             echo "⚠️ **$workflow_name**: No recent runs" >> $GITHUB_STEP_SUMMARY
@@ -46,14 +46,23 @@ jobs:
           status=$(echo "$run_info" | jq -r '.[0].status')
           conclusion=$(echo "$run_info" | jq -r '.[0].conclusion')
           created=$(echo "$run_info" | jq -r '.[0].createdAt')
-          duration=$(echo "$run_info" | jq -r '.[0].durationMs')
+          started=$(echo "$run_info" | jq -r '.[0].startedAt')
+          updated=$(echo "$run_info" | jq -r '.[0].updatedAt')
 
-          # Format duration
-          if [ "$duration" != "null" ]; then
-            duration_sec=$((duration / 1000))
-            duration_min=$((duration_sec / 60))
-            duration_sec=$((duration_sec % 60))
-            duration_str="${duration_min}m ${duration_sec}s"
+          # Calculate duration from timestamps
+          if [ "$started" != "null" ] && [ "$updated" != "null" ]; then
+            # Convert timestamps to seconds since epoch
+            started_sec=$(date -d "$started" +%s 2>/dev/null || echo "0")
+            updated_sec=$(date -d "$updated" +%s 2>/dev/null || echo "0")
+
+            if [ "$started_sec" != "0" ] && [ "$updated_sec" != "0" ] && [ "$updated_sec" -gt "$started_sec" ]; then
+              duration_sec=$((updated_sec - started_sec))
+              duration_min=$((duration_sec / 60))
+              duration_sec=$((duration_sec % 60))
+              duration_str="${duration_min}m ${duration_sec}s"
+            else
+              duration_str="N/A"
+            fi
           else
             duration_str="N/A"
           fi
@@ -132,9 +141,15 @@ jobs:
         count=0
 
         for workflow in ci.yml security.yml docker-build.yml; do
-          duration=$(gh run list --workflow="$workflow" --limit=5 --json durationMs | jq '.[].durationMs' | awk '{sum+=$1; count++} END {if(count>0) print int(sum/count/1000)}')
-          if [ -n "$duration" ] && [ "$duration" != "null" ]; then
-            echo "- **${workflow%.yml}**: Avg ${duration}s" >> $GITHUB_STEP_SUMMARY
+          # Get average duration by calculating from timestamps
+          runs=$(gh run list --workflow="$workflow" --limit=5 --json startedAt,updatedAt 2>/dev/null)
+          if [ -n "$runs" ] && [ "$runs" != "[]" ]; then
+            avg_duration=$(echo "$runs" | jq -r '.[] | select(.startedAt != null and .updatedAt != null) | ((now - (.startedAt | strptime("%Y-%m-%dT%H:%M:%SZ") | mktime)) - (now - (.updatedAt | strptime("%Y-%m-%dT%H:%M:%SZ") | mktime))) | abs' 2>/dev/null | awk '{sum+=$1; count++} END {if(count>0) print int(sum/count)}' || echo "")
+            if [ -n "$avg_duration" ] && [ "$avg_duration" != "" ]; then
+              echo "- **${workflow%.yml}**: Avg ${avg_duration}s" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- **${workflow%.yml}**: Duration N/A" >> $GITHUB_STEP_SUMMARY
+            fi
           fi
         done
       env:

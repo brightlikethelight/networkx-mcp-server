@@ -20,19 +20,34 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pip-tools
+        pip install pip-tools uv
 
     - name: Update requirements
       run: |
-        # Update requirements.txt from pyproject.toml
-        pip-compile --upgrade --resolver=backtracking
+        # Check if requirements.in exists, if not create it from pyproject.toml
+        if [ ! -f requirements.in ]; then
+          echo "Creating requirements.in from pyproject.toml dependencies..."
+          cat > create_requirements.py << 'EOF'
+        import tomllib
+        with open('pyproject.toml', 'rb') as f:
+            data = tomllib.load(f)
+        deps = data.get('project', {}).get('dependencies', [])
+        with open('requirements.in', 'w') as f:
+            for dep in deps:
+                f.write(dep + '\n')
+        EOF
+          python create_requirements.py
+        fi
+
+        # Update requirements.txt from requirements.in
+        pip-compile --upgrade --resolver=backtracking requirements.in
 
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v5
