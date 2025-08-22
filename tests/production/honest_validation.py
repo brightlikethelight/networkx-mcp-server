@@ -275,7 +275,8 @@ class HonestProductionValidator:
         try:
             # Try to start server process
             with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
-                f.write("""
+                f.write(
+                    """
 import sys
 import subprocess
 import time
@@ -299,7 +300,8 @@ try:
 except Exception as e:
     print(f"ERROR: {e}")
     sys.exit(1)
-""")
+"""
+                )
                 test_script = f.name
 
             # Run the test

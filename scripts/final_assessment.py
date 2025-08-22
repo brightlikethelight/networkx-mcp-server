@@ -66,7 +66,8 @@ print(f"{pandas_loaded}")
 
 
 def main():
-    print("""
+    print(
+        """
 ========================================
 FINAL ARCHITECTURE ASSESSMENT
 ========================================
@@ -78,7 +79,8 @@ BEFORE (v0.1.0-alpha.1):
 - Startup: Loading entire scientific Python stack
 - Honest rating: 2/10 (false advertising)
 
-AFTER (v0.1.0-alpha.2):""")
+AFTER (v0.1.0-alpha.2):"""
+    )
 
     current_memory = get_current_memory()
     pandas_loads = check_pandas_loading()
@@ -89,7 +91,8 @@ AFTER (v0.1.0-alpha.2):""")
     print(f"- Pandas loads by default: {pandas_loads}")
     print("- Honest rating: 8/10 (actually minimal for this stack)")
 
-    print(f"""
+    print(
+        f"""
 MEMORY BREAKDOWN:
 - Python interpreter: ~16MB
 - NetworkX library: ~20MB
@@ -140,7 +143,8 @@ uses {current_memory:.0f}MB. If they want Excel support, they pay the pandas cos
 If they want everything, they get everything.
 
 The architecture is now trustworthy.
-""")
+"""
+    )
 
 
 if __name__ == "__main__":
