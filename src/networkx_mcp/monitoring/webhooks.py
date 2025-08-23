@@ -9,7 +9,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 from urllib.parse import urlparse
 
 try:
@@ -72,7 +72,7 @@ class WebhookClient:
         self.webhook_url = webhook_url
         self.provider = provider or self._detect_provider(webhook_url)
         self.enabled = True
-        self._session: Optional[aiohttp.ClientSession] = None
+        self._session = None  # Will be aiohttp.ClientSession when created
 
     def _detect_provider(self, url: str) -> WebhookProvider:
         """Auto-detect webhook provider from URL.
@@ -97,11 +97,11 @@ class WebhookClient:
         else:
             return WebhookProvider.GENERIC
 
-    async def _get_session(self) -> aiohttp.ClientSession:
+    async def _get_session(self):
         """Get or create aiohttp session.
 
         Returns:
-            Active aiohttp session
+            Active aiohttp session or None if aiohttp not available
         """
         if self._session is None or self._session.closed:
             self._session = aiohttp.ClientSession()

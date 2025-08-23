@@ -221,7 +221,7 @@ jobs:
         import sys
         import asyncio
         from networkx_mcp.server import NetworkXMCPServer
-        from networkx_mcp.monitoring import HealthMonitor
+        from networkx_mcp.monitoring_legacy import HealthMonitor
 
         async def test():
             server = NetworkXMCPServer(auth_required=False)

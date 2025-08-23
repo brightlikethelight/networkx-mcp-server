@@ -70,6 +70,11 @@ scipy = [
     "scipy>=1.7.0",
 ]
 
+# Monitoring and observability
+monitoring = [
+    "aiohttp>=3.8.0",  # For webhook notifications and dashboard
+    "sentry-sdk>=1.0.0",  # For error tracking (optional)
+]
 
 # Full installation with all optional features
 full = [
