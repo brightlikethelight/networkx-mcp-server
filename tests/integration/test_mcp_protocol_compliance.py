@@ -9,6 +9,7 @@ from typing import Any, Dict, Optional
 from unittest.mock import patch
 
 import pytest
+
 from networkx_mcp.errors import ErrorCodes
 from networkx_mcp.server import NetworkXMCPServer
 

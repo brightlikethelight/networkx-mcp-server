@@ -4,6 +4,7 @@ This test suite ensures all the security vulnerabilities we fixed are properly t
 """
 
 import pytest
+
 from networkx_mcp.security.validation import (
     RequestValidator,
     SecurityValidator,
