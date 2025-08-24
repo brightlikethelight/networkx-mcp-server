@@ -364,7 +364,7 @@ class MCPHealthMonitor:
             for percentile in [50, 95, 99]:
                 duration = self._calculate_percentile_duration(percentile)
                 lines.append(
-                    f'mcp_session_duration_seconds{{quantile="{percentile/100}"}} {duration} {timestamp}'
+                    f'mcp_session_duration_seconds{{quantile="{percentile / 100}"}} {duration} {timestamp}'
                 )
 
         return "\n".join(lines)

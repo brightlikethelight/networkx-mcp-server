@@ -80,8 +80,8 @@ class TestGraphManagerThreadSafety:
             """Add random edges in a thread."""
             random.seed(thread_id)
             for _ in range(edges_per_thread):
-                source = f"node_{random.randint(0, num_nodes-1)}"
-                target = f"node_{random.randint(0, num_nodes-1)}"
+                source = f"node_{random.randint(0, num_nodes - 1)}"
+                target = f"node_{random.randint(0, num_nodes - 1)}"
                 if source != target:
                     try:
                         manager.add_edge(graph_id, source, target, thread=thread_id)
@@ -134,7 +134,7 @@ class TestGraphManagerThreadSafety:
 
                     # Add edge
                     if i > 0:
-                        prev_node = f"writer_{thread_id}_node_{i-1}"
+                        prev_node = f"writer_{thread_id}_node_{i - 1}"
                         manager.add_edge(graph_id, prev_node, node_id)
 
                     # Get info (mixed read)

@@ -420,15 +420,15 @@ class CIDashboard:
             <div class="status-card {health}">
                 <h2>Overall Health: {health.upper()}</h2>
                 <div class="metric">
-                    <div class="metric-value">{status['metrics']['success_rate']}%</div>
+                    <div class="metric-value">{status["metrics"]["success_rate"]}%</div>
                     <div class="metric-label">Success Rate</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-value">{status['metrics']['total_runs']}</div>
+                    <div class="metric-value">{status["metrics"]["total_runs"]}</div>
                     <div class="metric-label">Total Runs</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-value">{len(status['metrics']['failed_workflows'])}</div>
+                    <div class="metric-value">{len(status["metrics"]["failed_workflows"])}</div>
                     <div class="metric-label">Failed Workflows</div>
                 </div>
             </div>
@@ -442,9 +442,9 @@ class CIDashboard:
             html += f"""
             <div class="status-card {status_class}">
                 <h3>{workflow}</h3>
-                <p>Status: {info.get('status', 'unknown')}</p>
-                <p>Success Rate: {info.get('success_rate', 0)}%</p>
-                <p>Avg Duration: {info.get('avg_duration_seconds', 0)}s</p>
+                <p>Status: {info.get("status", "unknown")}</p>
+                <p>Success Rate: {info.get("success_rate", 0)}%</p>
+                <p>Avg Duration: {info.get("avg_duration_seconds", 0)}s</p>
             </div>
             """
 
