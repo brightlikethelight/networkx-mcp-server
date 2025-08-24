@@ -3,6 +3,7 @@
 Provides comprehensive monitoring, alerting, and observability features.
 """
 
+from .ci_dashboard import CIDashboard, ci_dashboard
 from .dashboard import MonitoringDashboard, dashboard
 from .mcp_health import MCPHealthMonitor, MCPMetric, mcp_health_monitor
 from .sentry_integration import SentryIntegration, init_sentry, sentry
@@ -16,6 +17,9 @@ from .webhooks import (
 )
 
 __all__ = [
+    # CI/CD Dashboard
+    "CIDashboard",
+    "ci_dashboard",
     # Dashboard
     "MonitoringDashboard",
     "dashboard",
