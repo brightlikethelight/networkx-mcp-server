@@ -126,9 +126,9 @@ class TestAPIKeyManager:
         variance = (max_time - min_time) / min_time if min_time > 0 else 0
 
         # Allow some variance but it should be minimal
-        assert (
-            variance < 2.0
-        ), "Timing variance suggests vulnerability to timing attacks"
+        assert variance < 2.0, (
+            "Timing variance suggests vulnerability to timing attacks"
+        )
 
     def test_validate_key_injection_attacks(self):
         """Test protection against injection attacks via API keys."""
@@ -517,9 +517,9 @@ class TestSecurityIntegration:
 
         for attempt in bypass_attempts:
             result = middleware.authenticate(attempt)
-            assert (
-                result is False or result is None
-            ), f"Authentication bypass succeeded with: {attempt}"
+            assert result is False or result is None, (
+                f"Authentication bypass succeeded with: {attempt}"
+            )
 
     def test_concurrent_authentication_requests(self):
         """Test thread safety of concurrent authentication."""

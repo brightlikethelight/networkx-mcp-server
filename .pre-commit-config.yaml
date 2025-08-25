@@ -23,7 +23,7 @@ repos:
 
   # Python code formatting
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.8.6
+    rev: v0.12.10
     hooks:
       # Run the linter
       - id: ruff

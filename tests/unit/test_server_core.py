@@ -711,20 +711,20 @@ class TestGetToolsMethod:
 
             # Check required fields
             for field in required_fields:
-                assert (
-                    field in tool
-                ), f"Tool {tool.get('name', 'unknown')} missing {field}"
-                assert isinstance(
-                    tool[field], str
-                ), f"Tool {tool['name']} {field} not string"
+                assert field in tool, (
+                    f"Tool {tool.get('name', 'unknown')} missing {field}"
+                )
+                assert isinstance(tool[field], str), (
+                    f"Tool {tool['name']} {field} not string"
+                )
                 assert len(tool[field]) > 0, f"Tool {tool['name']} {field} is empty"
 
             # Check optional fields if present
             for field in optional_fields:
                 if field in tool:
-                    assert isinstance(
-                        tool[field], dict
-                    ), f"Tool {tool['name']} {field} not dict"
+                    assert isinstance(tool[field], dict), (
+                        f"Tool {tool['name']} {field} not dict"
+                    )
 
     def test_get_tools_names_unique(self):
         """Test all tool names are unique."""
@@ -761,9 +761,9 @@ class TestGetToolsMethod:
         present_tools = expected_core_tools & tool_names
 
         # We should have most of the expected tools
-        assert (
-            len(present_tools) >= len(expected_core_tools) * 0.7
-        ), f"Too few expected tools present. Missing: {missing_tools}, Present: {present_tools}"
+        assert len(present_tools) >= len(expected_core_tools) * 0.7, (
+            f"Too few expected tools present. Missing: {missing_tools}, Present: {present_tools}"
+        )
 
     def test_get_tools_input_schemas_valid(self):
         """Test input schemas are valid JSON schema format."""
@@ -778,18 +778,18 @@ class TestGetToolsMethod:
             # Basic JSON Schema structure validation
             assert isinstance(schema, dict)
             assert "type" in schema, f"Tool {tool['name']} schema missing type"
-            assert (
-                schema["type"] == "object"
-            ), f"Tool {tool['name']} schema type not object"
+            assert schema["type"] == "object", (
+                f"Tool {tool['name']} schema type not object"
+            )
 
             if "properties" in schema:
                 assert isinstance(schema["properties"], dict)
 
                 # Validate each property
                 for prop_name, prop_schema in schema["properties"].items():
-                    assert isinstance(
-                        prop_schema, dict
-                    ), f"Property {prop_name} not dict"
+                    assert isinstance(prop_schema, dict), (
+                        f"Property {prop_name} not dict"
+                    )
                     assert "type" in prop_schema, f"Property {prop_name} missing type"
 
                     # Type should be valid JSON Schema type (can be string or list of strings)
@@ -807,9 +807,9 @@ class TestGetToolsMethod:
                         for t in prop_schema["type"]:
                             assert t in valid_types, f"Invalid type in list: {t}"
                     else:
-                        assert (
-                            prop_schema["type"] in valid_types
-                        ), f"Invalid type: {prop_schema['type']}"
+                        assert prop_schema["type"] in valid_types, (
+                            f"Invalid type: {prop_schema['type']}"
+                        )
 
     def test_get_tools_graph_parameter(self):
         """Test tools that need graph parameters have them in schema."""
@@ -839,9 +839,9 @@ class TestGetToolsMethod:
                     graph_params = {"graph", "name"} & set(properties.keys())
 
                     # Should have at least one graph parameter
-                    assert (
-                        len(graph_params) > 0
-                    ), f"Tool {tool['name']} missing graph parameter. Available: {list(properties.keys())}"
+                    assert len(graph_params) > 0, (
+                        f"Tool {tool['name']} missing graph parameter. Available: {list(properties.keys())}"
+                    )
 
     def test_get_tools_descriptions_informative(self):
         """Test tool descriptions provide useful information."""
@@ -852,16 +852,16 @@ class TestGetToolsMethod:
 
             # Description should be informative
             assert len(description) >= 10, f"Tool {tool['name']} description too short"
-            assert (
-                not description.islower()
-            ), f"Tool {tool['name']} description not properly capitalized"
+            assert not description.islower(), (
+                f"Tool {tool['name']} description not properly capitalized"
+            )
 
             # Should contain relevant keywords
             tool_name = tool["name"]
             if "graph" in tool_name:
-                assert (
-                    "graph" in description.lower()
-                ), f"Tool {tool_name} description missing 'graph'"
+                assert "graph" in description.lower(), (
+                    f"Tool {tool_name} description missing 'graph'"
+                )
 
     def test_get_tools_json_serializable(self):
         """Test tools schema is JSON serializable."""
