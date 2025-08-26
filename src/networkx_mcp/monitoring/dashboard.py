@@ -4,9 +4,12 @@ Provides a web-based dashboard for real-time monitoring of the MCP server
 with metrics visualization and alert management.
 """
 
+from __future__ import annotations
+
 import asyncio
 import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 try:
     from aiohttp import web
@@ -14,6 +17,11 @@ try:
     HAS_AIOHTTP = True
 except ImportError:
     HAS_AIOHTTP = False
+    web = None  # type: ignore
+
+# Type checking imports
+if TYPE_CHECKING and HAS_AIOHTTP:
+    from aiohttp import web
 
 from .mcp_health import mcp_health_monitor
 from .webhooks import AlertSeverity, alert_manager

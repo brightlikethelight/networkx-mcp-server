@@ -201,10 +201,10 @@ class TestFunctionality:
     def test_monitoring_import_coverage(self):
         """Test monitoring module import to increase coverage."""
         try:
-            from networkx_mcp.monitoring import HealthMonitor
+            from networkx_mcp.monitoring import MCPHealthMonitor
 
             # Try to instantiate if possible
-            monitor = HealthMonitor()
+            monitor = MCPHealthMonitor()
             assert hasattr(monitor, "__class__")
         except ImportError:
             pytest.skip("Monitoring module not available")

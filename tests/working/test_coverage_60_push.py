@@ -572,10 +572,10 @@ class TestCoverage60Push:
     def test_monitoring_comprehensive_coverage(self):
         """Comprehensive monitoring testing."""
         try:
-            from networkx_mcp.monitoring import HealthMonitor
+            from networkx_mcp.monitoring import MCPHealthMonitor
 
             # Test health monitor
-            monitor = HealthMonitor()
+            monitor = MCPHealthMonitor()
             assert hasattr(monitor, "__class__")
 
             # Test monitoring methods

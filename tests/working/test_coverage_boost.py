@@ -386,16 +386,24 @@ class TestFunctionalCoverage:
 
     def test_server_functionality_coverage(self):
         """Test server functionality to increase coverage."""
+        import networkx as nx
+
         from networkx_mcp.server import GraphManager, graphs
 
         # Test GraphManager functionality
         manager = GraphManager()
         assert manager.graphs is graphs
 
-        # Test graph operations through manager
-        graphs["test_manager"] = {"test": "data"}
+        # Test graph operations through manager - use actual NetworkX graph
+        G = nx.Graph()
+        G.add_nodes_from([1, 2, 3])
+        G.add_edges_from([(1, 2), (2, 3)])
+        graphs["test_manager"] = G
+
         result = manager.get_graph("test_manager")
-        assert result == {"test": "data"}
+        assert result is not None
+        assert result.number_of_nodes() == 3
+        assert result.number_of_edges() == 2
 
         # Test delete functionality
         manager.delete_graph("test_manager")
@@ -434,10 +442,10 @@ class TestFunctionalCoverage:
     def test_monitoring_functionality_coverage(self):
         """Test monitoring functionality if available."""
         try:
-            from networkx_mcp.monitoring import HealthMonitor
+            from networkx_mcp.monitoring import MCPHealthMonitor
 
             # Test basic monitoring functionality
-            monitor = HealthMonitor()
+            monitor = MCPHealthMonitor()
             assert hasattr(monitor, "__class__")
 
             # Test with graphs if method exists

@@ -32,13 +32,20 @@ class TestAggressiveCoverage:
         assert server2.running is True
 
         # Test graph manager functionality
+        import networkx as nx
+
         from networkx_mcp.server import graph_manager
 
-        # Add test data
-        graphs["test_advanced"] = {"nodes": [1, 2, 3], "edges": [(1, 2), (2, 3)]}
+        # Add test data - use actual NetworkX graph
+        G = nx.Graph()
+        G.add_nodes_from([1, 2, 3])
+        G.add_edges_from([(1, 2), (2, 3)])
+        graphs["test_advanced"] = G
 
         result = graph_manager.get_graph("test_advanced")
         assert result is not None
+        assert result.number_of_nodes() == 3
+        assert result.number_of_edges() == 2
 
         # Test deletion
         graph_manager.delete_graph("test_advanced")
@@ -410,10 +417,10 @@ class TestAggressiveCoverage:
     def test_monitoring_functionality(self):
         """Test monitoring module functionality."""
         try:
-            from networkx_mcp.monitoring import HealthMonitor
+            from networkx_mcp.monitoring import MCPHealthMonitor
 
             # Test health monitor
-            monitor = HealthMonitor()
+            monitor = MCPHealthMonitor()
             assert hasattr(monitor, "__class__")
 
             # Test monitoring methods if available
