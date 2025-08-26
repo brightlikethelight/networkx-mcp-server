@@ -8,7 +8,7 @@ import unittest
 from http.client import HTTPConnection
 from unittest.mock import Mock, patch
 
-from networkx_mcp.monitoring import HealthMonitor, create_health_endpoint
+from networkx_mcp.monitoring_legacy import HealthMonitor, create_health_endpoint
 
 
 class TestHealthMonitor(unittest.TestCase):

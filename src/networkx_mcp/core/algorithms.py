@@ -407,11 +407,20 @@ class GraphAlgorithms:
                 }
 
         # Connectivity
-        if graph.is_directed():
-            stats["is_weakly_connected"] = nx.is_weakly_connected(graph)
-            stats["is_strongly_connected"] = nx.is_strongly_connected(graph)
+        # Check connectivity only for non-empty graphs
+        if graph.number_of_nodes() > 0:
+            if graph.is_directed():
+                stats["is_weakly_connected"] = nx.is_weakly_connected(graph)
+                stats["is_strongly_connected"] = nx.is_strongly_connected(graph)
+            else:
+                stats["is_connected"] = nx.is_connected(graph)
         else:
-            stats["is_connected"] = nx.is_connected(graph)
+            # For empty graphs, connectivity is undefined
+            if graph.is_directed():
+                stats["is_weakly_connected"] = False
+                stats["is_strongly_connected"] = False
+            else:
+                stats["is_connected"] = False
 
         # Diameter and radius (only for connected graphs)
         if graph.number_of_nodes() > 0:

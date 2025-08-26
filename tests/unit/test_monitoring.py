@@ -12,13 +12,13 @@ from unittest.mock import Mock, patch
 class TestHealthMonitor:
     """Test the HealthMonitor class."""
 
-    @patch("networkx_mcp.monitoring.psutil.Process")
+    @patch("networkx_mcp.monitoring_legacy.psutil.Process")
     def test_init(self, mock_process_class):
         """Test HealthMonitor initialization."""
         mock_process = Mock()
         mock_process_class.return_value = mock_process
 
-        from networkx_mcp.monitoring import HealthMonitor
+        from networkx_mcp.monitoring_legacy import HealthMonitor
 
         monitor = HealthMonitor()
 
@@ -32,12 +32,12 @@ class TestHealthMonitor:
         # Verify psutil.Process was called with current PID
         mock_process_class.assert_called_once_with(os.getpid())
 
-    @patch("networkx_mcp.monitoring.psutil.Process")
+    @patch("networkx_mcp.monitoring_legacy.psutil.Process")
     def test_record_request_success(self, mock_process_class):
         """Test recording successful requests."""
         mock_process_class.return_value = Mock()
 
-        from networkx_mcp.monitoring import HealthMonitor
+        from networkx_mcp.monitoring_legacy import HealthMonitor
 
         monitor = HealthMonitor()
 
@@ -48,12 +48,12 @@ class TestHealthMonitor:
         assert monitor.request_count == 2
         assert monitor.error_count == 0
 
-    @patch("networkx_mcp.monitoring.psutil.Process")
+    @patch("networkx_mcp.monitoring_legacy.psutil.Process")
     def test_record_request_error(self, mock_process_class):
         """Test recording failed requests."""
         mock_process_class.return_value = Mock()
 
-        from networkx_mcp.monitoring import HealthMonitor
+        from networkx_mcp.monitoring_legacy import HealthMonitor
 
         monitor = HealthMonitor()
 
@@ -65,12 +65,12 @@ class TestHealthMonitor:
         assert monitor.request_count == 3
         assert monitor.error_count == 2
 
-    @patch("networkx_mcp.monitoring.psutil.Process")
+    @patch("networkx_mcp.monitoring_legacy.psutil.Process")
     def test_record_request_tool_usage(self, mock_process_class):
         """Test tool usage tracking."""
         mock_process_class.return_value = Mock()
 
-        from networkx_mcp.monitoring import HealthMonitor
+        from networkx_mcp.monitoring_legacy import HealthMonitor
 
         monitor = HealthMonitor()
 
@@ -82,12 +82,12 @@ class TestHealthMonitor:
         assert monitor.tool_usage == {"tools/call": 2}
         assert monitor.request_count == 3
 
-    @patch("networkx_mcp.monitoring.psutil.Process")
+    @patch("networkx_mcp.monitoring_legacy.psutil.Process")
     def test_record_request_default_success(self, mock_process_class):
         """Test that requests default to successful."""
         mock_process_class.return_value = Mock()
 
-        from networkx_mcp.monitoring import HealthMonitor
+        from networkx_mcp.monitoring_legacy import HealthMonitor
 
         monitor = HealthMonitor()
 
@@ -97,9 +97,9 @@ class TestHealthMonitor:
         assert monitor.request_count == 1
         assert monitor.error_count == 0
 
-    @patch("networkx_mcp.monitoring.datetime")
-    @patch("networkx_mcp.monitoring.time")
-    @patch("networkx_mcp.monitoring.psutil.Process")
+    @patch("networkx_mcp.monitoring_legacy.datetime")
+    @patch("networkx_mcp.monitoring_legacy.time")
+    @patch("networkx_mcp.monitoring_legacy.psutil.Process")
     def test_get_health_status_basic(
         self, mock_process_class, mock_time, mock_datetime
     ):
@@ -118,7 +118,7 @@ class TestHealthMonitor:
         mock_process.cpu_percent.return_value = 15.5
         mock_process_class.return_value = mock_process
 
-        from networkx_mcp.monitoring import HealthMonitor
+        from networkx_mcp.monitoring_legacy import HealthMonitor
 
         monitor = HealthMonitor()
 
@@ -160,7 +160,7 @@ class TestHealthMonitor:
         assert system["cpu_percent"] == 15.5
         assert system["pid"] == os.getpid()
 
-    @patch("networkx_mcp.monitoring.psutil.Process")
+    @patch("networkx_mcp.monitoring_legacy.psutil.Process")
     def test_get_health_status_no_requests(self, mock_process_class):
         """Test health status with no requests (avoid division by zero)."""
         mock_process = Mock()
@@ -170,7 +170,7 @@ class TestHealthMonitor:
         mock_process.cpu_percent.return_value = 5.0
         mock_process_class.return_value = mock_process
 
-        from networkx_mcp.monitoring import HealthMonitor
+        from networkx_mcp.monitoring_legacy import HealthMonitor
 
         monitor = HealthMonitor()
         status = monitor.get_health_status()
@@ -181,7 +181,7 @@ class TestHealthMonitor:
         assert requests["errors"] == 0
         assert requests["success_rate"] == 0.0  # 0/1 * 100 = 0
 
-    @patch("networkx_mcp.monitoring.psutil.Process")
+    @patch("networkx_mcp.monitoring_legacy.psutil.Process")
     def test_get_health_status_with_graphs(self, mock_process_class):
         """Test health status with graph metrics."""
         mock_process = Mock()
@@ -191,7 +191,7 @@ class TestHealthMonitor:
         mock_process.cpu_percent.return_value = 0.0
         mock_process_class.return_value = mock_process
 
-        from networkx_mcp.monitoring import HealthMonitor
+        from networkx_mcp.monitoring_legacy import HealthMonitor
 
         monitor = HealthMonitor()
 
@@ -213,12 +213,12 @@ class TestHealthMonitor:
         assert graphs["total_nodes"] == 8  # 5 + 3
         assert graphs["total_edges"] == 9  # 7 + 2
 
-    @patch("networkx_mcp.monitoring.psutil.Process")
+    @patch("networkx_mcp.monitoring_legacy.psutil.Process")
     def test_format_uptime_various_periods(self, mock_process_class):
         """Test uptime formatting for various time periods."""
         mock_process_class.return_value = Mock()
 
-        from networkx_mcp.monitoring import HealthMonitor
+        from networkx_mcp.monitoring_legacy import HealthMonitor
 
         monitor = HealthMonitor()
 
@@ -231,12 +231,12 @@ class TestHealthMonitor:
         assert monitor._format_uptime(86400) == "1d"  # 1 day
         assert monitor._format_uptime(90061) == "1d 1h 1m"  # 1 day 1 hour 1 minute
 
-    @patch("networkx_mcp.monitoring.psutil.Process")
+    @patch("networkx_mcp.monitoring_legacy.psutil.Process")
     def test_format_uptime_edge_cases(self, mock_process_class):
         """Test uptime formatting edge cases."""
         mock_process_class.return_value = Mock()
 
-        from networkx_mcp.monitoring import HealthMonitor
+        from networkx_mcp.monitoring_legacy import HealthMonitor
 
         monitor = HealthMonitor()
 
@@ -246,12 +246,12 @@ class TestHealthMonitor:
         assert monitor._format_uptime(3599) == "59m"  # 59 minutes 59 seconds
         assert monitor._format_uptime(86399) == "23h 59m"  # 23 hours 59 minutes
 
-    @patch("networkx_mcp.monitoring.psutil.Process")
+    @patch("networkx_mcp.monitoring_legacy.psutil.Process")
     def test_format_uptime_large_values(self, mock_process_class):
         """Test uptime formatting with large values."""
         mock_process_class.return_value = Mock()
 
-        from networkx_mcp.monitoring import HealthMonitor
+        from networkx_mcp.monitoring_legacy import HealthMonitor
 
         monitor = HealthMonitor()
 
@@ -266,18 +266,18 @@ class TestHealthEndpoint:
 
     def test_create_health_endpoint_import(self):
         """Test that create_health_endpoint can be imported."""
-        from networkx_mcp.monitoring import create_health_endpoint
+        from networkx_mcp.monitoring_legacy import create_health_endpoint
 
         assert callable(create_health_endpoint)
 
     @patch("threading.Thread")
     @patch("http.server.HTTPServer")
-    @patch("networkx_mcp.monitoring.psutil.Process")
+    @patch("networkx_mcp.monitoring_legacy.psutil.Process")
     def test_create_health_endpoint_basic(
         self, mock_process_class, mock_http_server, mock_thread
     ):
         """Test basic health endpoint creation."""
-        from networkx_mcp.monitoring import HealthMonitor, create_health_endpoint
+        from networkx_mcp.monitoring_legacy import HealthMonitor, create_health_endpoint
 
         mock_process_class.return_value = Mock()
         mock_server = Mock()
@@ -304,10 +304,10 @@ class TestHealthEndpoint:
         assert result == mock_server
 
     @patch("http.server.HTTPServer")
-    @patch("networkx_mcp.monitoring.psutil.Process")
+    @patch("networkx_mcp.monitoring_legacy.psutil.Process")
     def test_health_handler_health_endpoint(self, mock_process_class, mock_http_server):
         """Test the health endpoint HTTP handler."""
-        from networkx_mcp.monitoring import HealthMonitor, create_health_endpoint
+        from networkx_mcp.monitoring_legacy import HealthMonitor, create_health_endpoint
 
         mock_process = Mock()
         mock_memory_info = Mock()
@@ -353,10 +353,10 @@ class TestHealthEndpoint:
         assert "metrics" in health_data
 
     @patch("http.server.HTTPServer")
-    @patch("networkx_mcp.monitoring.psutil.Process")
+    @patch("networkx_mcp.monitoring_legacy.psutil.Process")
     def test_health_handler_404(self, mock_process_class, mock_http_server):
         """Test the health endpoint returns 404 for other paths."""
-        from networkx_mcp.monitoring import HealthMonitor, create_health_endpoint
+        from networkx_mcp.monitoring_legacy import HealthMonitor, create_health_endpoint
 
         mock_process_class.return_value = Mock()
         monitor = HealthMonitor()
@@ -379,10 +379,10 @@ class TestHealthEndpoint:
         handler.end_headers.assert_called_once()
 
     @patch("http.server.HTTPServer")
-    @patch("networkx_mcp.monitoring.psutil.Process")
+    @patch("networkx_mcp.monitoring_legacy.psutil.Process")
     def test_health_handler_log_suppression(self, mock_process_class, mock_http_server):
         """Test that health handler suppresses HTTP logging."""
-        from networkx_mcp.monitoring import HealthMonitor, create_health_endpoint
+        from networkx_mcp.monitoring_legacy import HealthMonitor, create_health_endpoint
 
         mock_process_class.return_value = Mock()
         monitor = HealthMonitor()
@@ -401,12 +401,12 @@ class TestHealthEndpoint:
 
     @patch("threading.Thread")
     @patch("http.server.HTTPServer")
-    @patch("networkx_mcp.monitoring.psutil.Process")
+    @patch("networkx_mcp.monitoring_legacy.psutil.Process")
     def test_create_health_endpoint_custom_port(
         self, mock_process_class, mock_http_server, mock_thread
     ):
         """Test health endpoint creation with custom port."""
-        from networkx_mcp.monitoring import HealthMonitor, create_health_endpoint
+        from networkx_mcp.monitoring_legacy import HealthMonitor, create_health_endpoint
 
         mock_process_class.return_value = Mock()
         mock_server = Mock()

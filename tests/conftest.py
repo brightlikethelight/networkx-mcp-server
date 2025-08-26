@@ -20,6 +20,14 @@ def sample_graph() -> nx.Graph:
     G = nx.Graph()
     G.add_edges_from([(1, 2), (2, 3), (3, 4), (4, 1), (1, 3)])
     G.add_node(5)  # Isolated node
+
+    # Add node attributes for testing
+    G.nodes[1]["color"] = "red"
+    G.nodes[2]["color"] = "blue"
+    G.nodes[3]["color"] = "green"
+    G.nodes[4]["color"] = "yellow"
+    G.nodes[5]["color"] = "purple"
+
     return G
 
 
