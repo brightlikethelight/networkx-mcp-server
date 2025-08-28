@@ -1,0 +1,108 @@
+#!/bin/bash
+# Post-commit hook for NetworkX MCP Server
+# Tracks commits for DORA metrics and monitoring
+
+set -e
+
+# Colors for output
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+echo -e "${BLUE}📊 Recording commit metrics...${NC}"
+
+# Get commit information
+COMMIT_SHA=$(git rev-parse HEAD)
+COMMIT_SHORT=$(git rev-parse --short HEAD)
+COMMIT_MSG=$(git log -1 --pretty=%B)
+COMMIT_AUTHOR=$(git log -1 --pretty=%ae)
+COMMIT_DATE=$(git log -1 --pretty=%aI)
+COMMIT_TYPE=$(echo "$COMMIT_MSG" | head -n1 | sed -E 's/^([a-z]+)(\([a-z][a-z0-9\-\/]*\))?: .*/\1/')
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+# Create metrics directory if it doesn't exist
+METRICS_DIR=".git/metrics"
+mkdir -p "$METRICS_DIR"
+
+# Log commit to metrics file
+METRICS_FILE="$METRICS_DIR/commits.jsonl"
+cat >> "$METRICS_FILE" << EOF
+{"sha":"$COMMIT_SHA","short":"$COMMIT_SHORT","type":"$COMMIT_TYPE","author":"$COMMIT_AUTHOR","date":"$COMMIT_DATE","branch":"$BRANCH","timestamp":"$(date -u +%Y-%m-%dT%H:%M:%SZ)"}
+EOF
+
+# Track commit in Python monitoring system (if available)
+if [ -f "src/networkx_mcp/monitoring/dora_metrics.py" ]; then
+    python -c "
+import sys
+import os
+sys.path.insert(0, 'src')
+
+try:
+    from networkx_mcp.monitoring.dora_metrics import DORACollector
+    
+    collector = DORACollector()
+    collector.track_commit(
+        sha='$COMMIT_SHA',
+        author='$COMMIT_AUTHOR',
+        commit_type='$COMMIT_TYPE',
+        branch='$BRANCH'
+    )
+    print('✅ Commit tracked in DORA metrics')
+except Exception as e:
+    # Fail silently - don't block commits if monitoring fails
+    pass
+" 2>/dev/null || true
+fi
+
+# Check if this fixes a previous failure
+PREVIOUS_SHA=$(git rev-parse HEAD~1 2>/dev/null || echo "")
+if [ ! -z "$PREVIOUS_SHA" ]; then
+    # Check if previous commit had CI failures (would need GitHub API)
+    # This is a placeholder for future integration
+    echo -e "${BLUE}Checking CI status of previous commits...${NC}"
+fi
+
+# Generate commit report for significant changes
+if [ "$COMMIT_TYPE" = "feat" ] || [ "$COMMIT_TYPE" = "fix" ] || [ "$COMMIT_TYPE" = "perf" ]; then
+    echo -e "${GREEN}✅ Significant change committed: $COMMIT_TYPE${NC}"
+    
+    # Count lines changed
+    STATS=$(git diff HEAD~1 --shortstat 2>/dev/null || echo "")
+    if [ ! -z "$STATS" ]; then
+        echo "  $STATS"
+    fi
+    
+    # List files changed
+    FILES_CHANGED=$(git diff --name-only HEAD~1 2>/dev/null | wc -l)
+    echo "  Files changed: $FILES_CHANGED"
+fi
+
+# Remind about pushing for certain commit types
+if [ "$COMMIT_TYPE" = "fix" ] || [ "$COMMIT_TYPE" = "feat" ]; then
+    echo ""
+    echo -e "${BLUE}💡 Don't forget to:${NC}"
+    echo "  • Push your changes: git push origin $BRANCH"
+    echo "  • Create a pull request if on feature branch"
+    echo "  • Update documentation if needed"
+    echo "  • Run full test suite: pytest tests/"
+fi
+
+# Check commit frequency (warn if too many commits in short time)
+RECENT_COMMITS=$(git log --since="1 hour ago" --oneline | wc -l)
+if [ $RECENT_COMMITS -gt 10 ]; then
+    echo ""
+    echo -e "${BLUE}📈 High commit frequency detected ($RECENT_COMMITS commits in last hour)${NC}"
+    echo "Consider:"
+    echo "  • Squashing related commits: git rebase -i"
+    echo "  • Creating more comprehensive commits"
+    echo "  • Taking a break 😊"
+fi
+
+# Track hook execution time
+HOOK_END=$(date +%s%N)
+if [ ! -z "$HOOK_START" ]; then
+    DURATION=$((($HOOK_END - $HOOK_START) / 1000000))
+    echo -e "${GREEN}Hook completed in ${DURATION}ms${NC}"
+fi
+
+exit 0

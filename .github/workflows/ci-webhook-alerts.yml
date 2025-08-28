@@ -1,0 +1,353 @@
+name: CI/CD Webhook Alerts
+
+on:
+  workflow_run:
+    workflows: ["CI", "Security", "Docker Build", "CodeQL", "Continuous CI/CD Monitoring"]
+    types:
+      - completed
+      - in_progress
+      - requested
+
+env:
+  # Webhook URLs (configure as secrets)
+  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+  DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+  TEAMS_WEBHOOK: ${{ secrets.TEAMS_WEBHOOK_URL }}
+  CUSTOM_WEBHOOK: ${{ secrets.CUSTOM_WEBHOOK_URL }}
+
+jobs:
+  analyze-and-alert:
+    name: Analyze Workflow and Send Alerts
+    runs-on: ubuntu-latest
+    if: |
+      github.event.workflow_run.conclusion == 'failure' ||
+      github.event.workflow_run.conclusion == 'cancelled' ||
+      github.event.workflow_run.conclusion == 'timed_out'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install requests aiohttp pyyaml jinja2
+    
+    - name: Analyze Workflow Failure
+      id: analyze
+      run: |
+        python -c "
+        import os
+        import json
+        import subprocess
+        from datetime import datetime
+        
+        # Get workflow details
+        workflow_name = '${{ github.event.workflow_run.name }}'
+        workflow_id = '${{ github.event.workflow_run.id }}'
+        workflow_url = '${{ github.event.workflow_run.html_url }}'
+        conclusion = '${{ github.event.workflow_run.conclusion }}'
+        actor = '${{ github.event.workflow_run.actor.login }}'
+        branch = '${{ github.event.workflow_run.head_branch }}'
+        commit_sha = '${{ github.event.workflow_run.head_sha }}'[:8]
+        
+        # Determine severity
+        severity = 'high' if workflow_name == 'CI' else 'medium'
+        if 'Security' in workflow_name:
+            severity = 'critical'
+        elif 'Docker' in workflow_name:
+            severity = 'high'
+        
+        # Get failure details (if available)
+        try:
+            result = subprocess.run(
+                ['gh', 'run', 'view', str(workflow_id), '--json', 'jobs'],
+                capture_output=True, text=True
+            )
+            
+            failed_jobs = []
+            if result.stdout:
+                jobs_data = json.loads(result.stdout)
+                for job in jobs_data.get('jobs', []):
+                    if job.get('conclusion') == 'failure':
+                        failed_jobs.append({
+                            'name': job.get('name', 'Unknown'),
+                            'steps': [s for s in job.get('steps', []) if s.get('conclusion') == 'failure']
+                        })
+            
+            # Extract error patterns
+            error_patterns = []
+            for job in failed_jobs:
+                for step in job.get('steps', []):
+                    if 'error' in step.get('name', '').lower():
+                        error_patterns.append(step.get('name'))
+            
+        except Exception as e:
+            failed_jobs = []
+            error_patterns = []
+        
+        # Set outputs for notification
+        print(f'::set-output name=severity::{severity}')
+        print(f'::set-output name=failed_job_count::{len(failed_jobs)}')
+        print(f'::set-output name=error_patterns::{json.dumps(error_patterns)}')
+        
+        # Generate alert payload
+        alert = {
+            'severity': severity,
+            'workflow': workflow_name,
+            'conclusion': conclusion,
+            'url': workflow_url,
+            'branch': branch,
+            'commit': commit_sha,
+            'actor': actor,
+            'timestamp': datetime.utcnow().isoformat(),
+            'failed_jobs': len(failed_jobs),
+            'error_patterns': error_patterns
+        }
+        
+        with open('alert_payload.json', 'w') as f:
+            json.dump(alert, f, indent=2)
+        "
+    
+    - name: Send Slack Alert
+      if: env.SLACK_WEBHOOK != ''
+      continue-on-error: true
+      run: |
+        python -c "
+        import json
+        import requests
+        import os
+        
+        with open('alert_payload.json') as f:
+            alert = json.load(f)
+        
+        # Format Slack message
+        color = '#FF0000' if alert['severity'] == 'critical' else '#FFA500' if alert['severity'] == 'high' else '#FFFF00'
+        
+        slack_payload = {
+            'attachments': [{
+                'color': color,
+                'title': f'🚨 CI/CD Alert: {alert[\"workflow\"]} Failed',
+                'title_link': alert['url'],
+                'text': f'Workflow failed on branch {alert[\"branch\"]}',
+                'fields': [
+                    {'title': 'Severity', 'value': alert['severity'].upper(), 'short': True},
+                    {'title': 'Branch', 'value': alert['branch'], 'short': True},
+                    {'title': 'Commit', 'value': alert['commit'], 'short': True},
+                    {'title': 'Actor', 'value': alert['actor'], 'short': True},
+                    {'title': 'Failed Jobs', 'value': str(alert['failed_jobs']), 'short': True},
+                    {'title': 'Status', 'value': alert['conclusion'], 'short': True}
+                ],
+                'footer': 'NetworkX MCP Server CI/CD',
+                'ts': alert['timestamp']
+            }]
+        }
+        
+        response = requests.post(os.environ['SLACK_WEBHOOK'], json=slack_payload)
+        print(f'Slack alert sent: {response.status_code}')
+        "
+    
+    - name: Send Discord Alert
+      if: env.DISCORD_WEBHOOK != ''
+      continue-on-error: true
+      run: |
+        python -c "
+        import json
+        import requests
+        import os
+        
+        with open('alert_payload.json') as f:
+            alert = json.load(f)
+        
+        # Format Discord embed
+        color = 0xFF0000 if alert['severity'] == 'critical' else 0xFFA500 if alert['severity'] == 'high' else 0xFFFF00
+        
+        discord_payload = {
+            'embeds': [{
+                'title': f'🚨 CI/CD Alert: {alert[\"workflow\"]} Failed',
+                'url': alert['url'],
+                'color': color,
+                'description': f'Workflow failed on branch **{alert[\"branch\"]}**',
+                'fields': [
+                    {'name': 'Severity', 'value': alert['severity'].upper(), 'inline': True},
+                    {'name': 'Branch', 'value': alert['branch'], 'inline': True},
+                    {'name': 'Commit', 'value': f'`{alert[\"commit\"]}`', 'inline': True},
+                    {'name': 'Actor', 'value': alert['actor'], 'inline': True},
+                    {'name': 'Failed Jobs', 'value': str(alert['failed_jobs']), 'inline': True},
+                    {'name': 'Status', 'value': alert['conclusion'], 'inline': True}
+                ],
+                'footer': {
+                    'text': 'NetworkX MCP Server CI/CD'
+                },
+                'timestamp': alert['timestamp']
+            }]
+        }
+        
+        response = requests.post(os.environ['DISCORD_WEBHOOK'], json=discord_payload)
+        print(f'Discord alert sent: {response.status_code}')
+        "
+    
+    - name: Send Teams Alert
+      if: env.TEAMS_WEBHOOK != ''
+      continue-on-error: true
+      run: |
+        python -c "
+        import json
+        import requests
+        import os
+        
+        with open('alert_payload.json') as f:
+            alert = json.load(f)
+        
+        # Format Teams card
+        teams_payload = {
+            '@type': 'MessageCard',
+            '@context': 'http://schema.org/extensions',
+            'themeColor': 'FF0000' if alert['severity'] == 'critical' else 'FFA500',
+            'summary': f'CI/CD Alert: {alert[\"workflow\"]} Failed',
+            'sections': [{
+                'activityTitle': f'🚨 {alert[\"workflow\"]} Failed',
+                'facts': [
+                    {'name': 'Severity', 'value': alert['severity'].upper()},
+                    {'name': 'Branch', 'value': alert['branch']},
+                    {'name': 'Commit', 'value': alert['commit']},
+                    {'name': 'Actor', 'value': alert['actor']},
+                    {'name': 'Failed Jobs', 'value': str(alert['failed_jobs'])},
+                    {'name': 'Status', 'value': alert['conclusion']}
+                ]
+            }],
+            'potentialAction': [{
+                '@type': 'OpenUri',
+                'name': 'View Workflow',
+                'targets': [{
+                    'os': 'default',
+                    'uri': alert['url']
+                }]
+            }]
+        }
+        
+        response = requests.post(os.environ['TEAMS_WEBHOOK'], json=teams_payload)
+        print(f'Teams alert sent: {response.status_code}')
+        "
+    
+    - name: Send Custom Webhook
+      if: env.CUSTOM_WEBHOOK != ''
+      continue-on-error: true
+      run: |
+        python -c "
+        import json
+        import requests
+        import os
+        
+        with open('alert_payload.json') as f:
+            alert = json.load(f)
+        
+        # Send raw alert payload to custom webhook
+        response = requests.post(
+            os.environ['CUSTOM_WEBHOOK'],
+            json=alert,
+            headers={'Content-Type': 'application/json'}
+        )
+        print(f'Custom webhook sent: {response.status_code}')
+        "
+    
+    - name: Create GitHub Issue (Critical Failures)
+      if: steps.analyze.outputs.severity == 'critical'
+      run: |
+        gh issue create \
+          --title "🚨 Critical CI/CD Failure: ${{ github.event.workflow_run.name }}" \
+          --body "## Critical CI/CD Failure
+        
+        **Workflow:** ${{ github.event.workflow_run.name }}
+        **Branch:** ${{ github.event.workflow_run.head_branch }}
+        **Commit:** ${{ github.event.workflow_run.head_sha }}
+        **Actor:** ${{ github.event.workflow_run.actor.login }}
+        **Conclusion:** ${{ github.event.workflow_run.conclusion }}
+        
+        ### Action Required
+        This is a critical failure that requires immediate attention.
+        
+        [View Failed Workflow](${{ github.event.workflow_run.html_url }})
+        
+        ### Failed Jobs Count: ${{ steps.analyze.outputs.failed_job_count }}
+        
+        ---
+        *Automatically created by CI/CD monitoring*" \
+          --label "ci-failure" \
+          --label "critical" \
+          --label "automated"
+
+  success-notification:
+    name: Success Recovery Notification
+    runs-on: ubuntu-latest
+    if: |
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.previous_run.conclusion == 'failure'
+    
+    steps:
+    - name: Send Recovery Notification
+      continue-on-error: true
+      run: |
+        echo "✅ Workflow ${{ github.event.workflow_run.name }} has recovered!"
+        
+        # Would send recovery notifications here
+        python -c "
+        import json
+        from datetime import datetime
+        
+        recovery = {
+            'type': 'recovery',
+            'workflow': '${{ github.event.workflow_run.name }}',
+            'branch': '${{ github.event.workflow_run.head_branch }}',
+            'url': '${{ github.event.workflow_run.html_url }}',
+            'timestamp': datetime.utcnow().isoformat()
+        }
+        
+        print('Recovery notification:', json.dumps(recovery, indent=2))
+        "
+
+  performance-alert:
+    name: Performance Degradation Alert
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+    
+    steps:
+    - name: Check Performance Metrics
+      run: |
+        python -c "
+        import subprocess
+        import json
+        from datetime import datetime, timedelta
+        
+        # Get recent workflow runs
+        result = subprocess.run(
+            ['gh', 'run', 'list', '--workflow', '${{ github.event.workflow_run.name }}', '--limit', '10', '--json', 'createdAt,updatedAt'],
+            capture_output=True, text=True
+        )
+        
+        if result.stdout:
+            runs = json.loads(result.stdout)
+            
+            # Calculate average duration
+            durations = []
+            for run in runs:
+                if run.get('createdAt') and run.get('updatedAt'):
+                    start = datetime.fromisoformat(run['createdAt'].replace('Z', '+00:00'))
+                    end = datetime.fromisoformat(run['updatedAt'].replace('Z', '+00:00'))
+                    duration = (end - start).total_seconds()
+                    durations.append(duration)
+            
+            if durations:
+                avg_duration = sum(durations) / len(durations)
+                current_duration = durations[0] if durations else 0
+                
+                # Alert if current run is 50% slower than average
+                if current_duration > avg_duration * 1.5:
+                    print(f'::warning::Performance degradation detected!')
+                    print(f'Current: {current_duration:.1f}s, Average: {avg_duration:.1f}s')
+                    print(f'Slowdown: {(current_duration/avg_duration - 1)*100:.1f}%')
+        "
