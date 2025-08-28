@@ -5,6 +5,12 @@ Provides comprehensive monitoring, alerting, and observability features.
 
 from .ci_dashboard import CIDashboard, ci_dashboard
 from .dashboard import MonitoringDashboard, dashboard
+from .dora_metrics import (
+    DORAMetricsCollector,
+    dora_collector,
+    generate_dora_report,
+    get_dora_metrics,
+)
 from .mcp_health import MCPHealthMonitor, MCPMetric, mcp_health_monitor
 from .sentry_integration import SentryIntegration, init_sentry, sentry
 from .webhooks import (
@@ -23,6 +29,11 @@ __all__ = [
     # Dashboard
     "MonitoringDashboard",
     "dashboard",
+    # DORA Metrics
+    "DORAMetricsCollector",
+    "dora_collector",
+    "get_dora_metrics",
+    "generate_dora_report",
     # MCP Health
     "MCPHealthMonitor",
     "MCPMetric",

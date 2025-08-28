@@ -584,6 +584,90 @@ class NetworkXMCPServer:
                 }
             )
 
+        # Add CI/CD control tools
+        cicd_tools = [
+            {
+                "name": "trigger_workflow",
+                "description": "Trigger a GitHub Actions workflow",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "workflow": {
+                            "type": "string",
+                            "description": "Workflow file name",
+                        },
+                        "branch": {"type": "string", "default": "main"},
+                        "inputs": {
+                            "type": "string",
+                            "description": "JSON string of inputs",
+                        },
+                    },
+                    "required": ["workflow"],
+                },
+            },
+            {
+                "name": "get_workflow_status",
+                "description": "Get CI/CD workflow status",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "run_id": {"type": "string", "description": "Optional run ID"},
+                    },
+                },
+            },
+            {
+                "name": "cancel_workflow",
+                "description": "Cancel a running workflow",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "run_id": {"type": "string"},
+                    },
+                    "required": ["run_id"],
+                },
+            },
+            {
+                "name": "rerun_failed_jobs",
+                "description": "Rerun failed jobs in a workflow",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "run_id": {"type": "string"},
+                    },
+                    "required": ["run_id"],
+                },
+            },
+            {
+                "name": "get_dora_metrics",
+                "description": "Get DORA metrics for CI/CD performance",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {},
+                },
+            },
+            {
+                "name": "analyze_workflow_failures",
+                "description": "Analyze workflow failures with AI-powered insights",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "run_id": {"type": "string"},
+                    },
+                    "required": ["run_id"],
+                },
+            },
+        ]
+
+        # Add CI/CD tools if available
+        try:
+            # Test if tools module is available
+            import importlib.util
+
+            if importlib.util.find_spec("networkx_mcp.tools") is not None:
+                tools.extend(cicd_tools)
+        except ImportError:
+            pass  # CI/CD tools not available
+
         return tools
 
     async def _call_tool(self, params: Dict[str, Any]) -> Dict[str, Any]:
@@ -724,6 +808,57 @@ class NetworkXMCPServer:
                     result = self.monitor.get_health_status()
                 else:
                     result = {"status": "monitoring_disabled"}
+
+            # CI/CD Control Tools
+            elif tool_name == "trigger_workflow":
+                try:
+                    from .tools import mcp_trigger_workflow
+
+                    result = await mcp_trigger_workflow(
+                        args["workflow"], args.get("branch", "main"), args.get("inputs")
+                    )
+                except ImportError:
+                    result = {"error": "CI/CD tools not available"}
+
+            elif tool_name == "get_workflow_status":
+                try:
+                    from .tools import mcp_get_workflow_status
+
+                    result = await mcp_get_workflow_status(args.get("run_id"))
+                except ImportError:
+                    result = {"error": "CI/CD tools not available"}
+
+            elif tool_name == "cancel_workflow":
+                try:
+                    from .tools import mcp_cancel_workflow
+
+                    result = await mcp_cancel_workflow(args["run_id"])
+                except ImportError:
+                    result = {"error": "CI/CD tools not available"}
+
+            elif tool_name == "rerun_failed_jobs":
+                try:
+                    from .tools import mcp_rerun_failed_jobs
+
+                    result = await mcp_rerun_failed_jobs(args["run_id"])
+                except ImportError:
+                    result = {"error": "CI/CD tools not available"}
+
+            elif tool_name == "get_dora_metrics":
+                try:
+                    from .tools import mcp_get_dora_metrics
+
+                    result = await mcp_get_dora_metrics()
+                except ImportError:
+                    result = {"error": "CI/CD tools not available"}
+
+            elif tool_name == "analyze_workflow_failures":
+                try:
+                    from .tools import mcp_analyze_failures
+
+                    result = await mcp_analyze_failures(args["run_id"])
+                except ImportError:
+                    result = {"error": "CI/CD tools not available"}
 
             else:
                 # Return proper error for unknown tool
