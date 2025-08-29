@@ -24,7 +24,7 @@ def create_graph(
         graphs = {}
     graphs[name] = nx.DiGraph() if directed else nx.Graph()
     return {
-        "created": name,
+        "created": True,
         "graph_id": name,
         "metadata": {"attributes": {"directed": directed}},
     }
@@ -49,8 +49,7 @@ def add_nodes(
     graph.add_nodes_from(nodes)
     return {
         "success": True,
-        "added": len(nodes),  # Total nodes requested (for benchmark compatibility)
-        "nodes_added": len(new_nodes),  # Actual new nodes added
+        "nodes_added": len(new_nodes),
         "total": graph.number_of_nodes(),
     }
 
@@ -70,7 +69,6 @@ def add_edges(
     graph.add_edges_from(edge_tuples)
     return {
         "success": True,
-        "added": len(edge_tuples),
         "edges_added": len(edge_tuples),
         "total": graph.number_of_edges(),
     }
