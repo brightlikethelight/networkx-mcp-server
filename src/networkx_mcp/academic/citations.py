@@ -6,7 +6,7 @@ import logging
 import time
 from collections import deque
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import bibtexparser
 import networkx as nx
@@ -312,11 +312,7 @@ def recommend_papers(
                 score += min(citation_count / 100, 2.0)  # Max boost of 2.0
 
                 # Boost score based on recency
-                year = (
-                    paper_data.get("year")
-                    if isinstance(paper_data, dict)
-                    else None
-                )
+                year = paper_data.get("year") if isinstance(paper_data, dict) else None
                 if year:
                     current_year = datetime.now().year
                     recency_score = max(0, (year - (current_year - 10)) / 10)

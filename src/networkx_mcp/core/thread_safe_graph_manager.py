@@ -310,7 +310,10 @@ class ThreadSafeGraphManager:
             }
 
     async def centrality_measures(
-        self, graph_name: str, measures: Optional[List[str]] = None, normalized: bool = True
+        self,
+        graph_name: str,
+        measures: Optional[List[str]] = None,
+        normalized: bool = True,
     ) -> Dict[str, Any]:
         """Calculate centrality measures (thread-safe).
 
