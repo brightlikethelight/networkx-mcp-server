@@ -260,7 +260,7 @@ class MatplotlibVisualizer:
         """Create hierarchical layout for tree-like structures."""
         if nx.is_directed_acyclic_graph(graph):
             # Use topological generations for DAGs
-            generations = List[Any](nx.topological_generations(graph))
+            generations = list(nx.topological_generations(graph))
             pos = {}
 
             for i, generation in enumerate(generations):
@@ -304,12 +304,12 @@ class MatplotlibVisualizer:
 
     @staticmethod
     def _smart_label_placement(
-        graph: nx.Graph, pos: Dict[Any, Tuple[float:Any, float]], font_size: int
+        graph: nx.Graph, pos: Dict[Any, Tuple[float, float]], font_size: int
     ) -> Dict[Any, str]:
         """Smart label placement to avoid overlap."""
         # For now, show labels only for high-degree nodes
-        degrees = Dict[str, Any](graph.degree())
-        threshold = np.percentile(List[Any](degrees.values()), 75)
+        degrees = dict(graph.degree())
+        threshold = np.percentile(list(degrees.values()), 75)
 
         labels = {}
         for node, degree in degrees.items():
@@ -326,7 +326,7 @@ class MatplotlibVisualizer:
     def _add_color_legend(graph: nx.Graph, color_attr: str) -> None:
         """Add color legend for attribute-based coloring."""
         # Get unique values
-        values = Set[Any]()
+        values = set()
         for node in graph.nodes():
             val = graph.nodes[node].get(color_attr)
             if val is not None:

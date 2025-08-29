@@ -4,6 +4,7 @@ Citation analysis and DOI resolution functions for academic networks.
 
 import logging
 import time
+from collections import deque
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Set, Tuple
 
@@ -149,9 +150,9 @@ def build_citation_network(
         raise ValueError(f"Graph '{graph_name}' already exists")
 
     # Create directed graph for citations
-    citation_graph: nx.DiGraph[Any] = nx.DiGraph()
-    processed = Set[Any]()
-    to_process = [(doi, 0) for doi in seed_dois]
+    citation_graph: nx.DiGraph = nx.DiGraph()
+    processed = set()
+    to_process = deque([(doi, 0) for doi in seed_dois])
 
     nodes_added = 0
     edges_added = 0
@@ -159,7 +160,7 @@ def build_citation_network(
     resolution_failures = 0
 
     while to_process and nodes_added < 1000:  # Limit to prevent overload
-        current_doi, depth = to_process.pop(0)
+        current_doi, depth = to_process.popleft()
 
         if current_doi in processed or depth > max_depth:
             continue
@@ -176,18 +177,19 @@ def build_citation_network(
                 continue
 
         # Add node with metadata
-        citation_graph.add_node(current_doi, **paper)
-        nodes_added += 1
+        if paper:
+            citation_graph.add_node(current_doi, **paper)
+            nodes_added += 1
 
-        # Add citation edges (this paper cites others)
-        for ref in paper.get("references", []):
-            ref_doi = ref.get("DOI")
-            if ref_doi and ref_doi not in processed:
-                citation_graph.add_edge(current_doi, ref_doi)
-                edges_added += 1
+            # Add citation edges (this paper cites others)
+            for ref in paper.get("references", []):
+                ref_doi = ref.get("DOI")
+                if ref_doi and ref_doi not in processed:
+                    citation_graph.add_edge(current_doi, ref_doi)
+                    edges_added += 1
 
-                if depth < max_depth:
-                    to_process.append((ref_doi, depth + 1))
+                    if depth < max_depth:
+                        to_process.append((ref_doi, depth + 1))
 
     graphs[graph_name] = citation_graph
 
@@ -283,10 +285,10 @@ def recommend_papers(
         }
 
     # Find papers cited by seed paper
-    cited_papers = List[Any](graph.successors(seed_doi))
+    cited_papers = list(graph.successors(seed_doi))
 
     # Find papers that cite the seed paper
-    citing_papers = List[Any](graph.predecessors(seed_doi))
+    citing_papers = list(graph.predecessors(seed_doi))
 
     # Calculate recommendation scores based on citation patterns
     recommendations = []
@@ -294,7 +296,7 @@ def recommend_papers(
     # Score papers that are co-cited with seed paper
     for cited in cited_papers:
         # Find other papers that also cite this paper
-        co_citing = List[Any](graph.predecessors(cited))
+        co_citing = list(graph.predecessors(cited))
 
         for paper in co_citing:
             if paper != seed_doi and paper not in cited_papers:
@@ -304,7 +306,7 @@ def recommend_papers(
                 paper_data = graph.nodes.get(paper, {})
                 citation_count = (
                     paper_data.get("citations", 0)
-                    if isinstance(paper_data, Dict[str, Any])
+                    if isinstance(paper_data, dict)
                     else 0
                 )
                 score += min(citation_count / 100, 2.0)  # Max boost of 2.0
@@ -312,7 +314,7 @@ def recommend_papers(
                 # Boost score based on recency
                 year = (
                     paper_data.get("year")
-                    if isinstance(paper_data, Dict[str, Any])
+                    if isinstance(paper_data, dict)
                     else None
                 )
                 if year:
@@ -325,10 +327,10 @@ def recommend_papers(
                         "paper": paper,  # Use 'paper' for compatibility
                         "doi": paper,
                         "title": paper_data.get("title", paper)
-                        if isinstance(paper_data, Dict[str, Any])
+                        if isinstance(paper_data, dict)
                         else paper,
                         "authors": paper_data.get("authors", [])
-                        if isinstance(paper_data, Dict[str, Any])
+                        if isinstance(paper_data, dict)
                         else [],
                         "year": year,
                         "citations": citation_count,

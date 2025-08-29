@@ -12,7 +12,7 @@ import threading
 import time
 from collections import OrderedDict
 from dataclasses import dataclass
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import networkx as nx
 
@@ -175,7 +175,7 @@ class GraphCache:
         with self._lock:
             return list(self._cache.keys())
 
-    def get_stats(self) -> Dict[str, any]:
+    def get_stats(self) -> Dict[str, Any]:
         """Get cache statistics."""
         with self._lock:
             total_requests = self.hits + self.misses
