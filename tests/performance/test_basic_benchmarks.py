@@ -19,40 +19,40 @@ def test_graph_creation_benchmark(benchmark):
         return result, graphs
 
     result, graphs = benchmark(create_test_graph)
-    assert result["created"] == "test_graph"
+    assert result["created"] is True
     assert "test_graph" in graphs
 
 
 def test_node_addition_benchmark(benchmark):
     """Benchmark node addition performance."""
-    graphs = {}
-    create_graph("bench_graph", directed=False, graphs=graphs)
-    nodes = [f"node_{i}" for i in range(100)]
 
     def add_test_nodes():
+        graphs = {}
+        create_graph("bench_graph", directed=False, graphs=graphs)
+        nodes = [f"node_{i}" for i in range(100)]
         return add_nodes("bench_graph", nodes, graphs=graphs)
 
     result = benchmark(add_test_nodes)
-    assert result["added"] == 100
+    assert result["nodes_added"] == 100
 
 
 def test_edge_addition_benchmark(benchmark):
     """Benchmark edge addition performance."""
-    graphs = {}
-    create_graph("edge_graph", directed=False, graphs=graphs)
-
-    # Create test nodes first
-    nodes = [f"node_{i}" for i in range(50)]
-    add_nodes("edge_graph", nodes, graphs=graphs)
-
-    # Create edges between consecutive nodes
-    edges = [[f"node_{i}", f"node_{i + 1}"] for i in range(49)]
 
     def add_test_edges():
+        graphs = {}
+        create_graph("edge_graph", directed=False, graphs=graphs)
+
+        # Create test nodes first
+        nodes = [f"node_{i}" for i in range(50)]
+        add_nodes("edge_graph", nodes, graphs=graphs)
+
+        # Create edges between consecutive nodes
+        edges = [[f"node_{i}", f"node_{i + 1}"] for i in range(49)]
         return add_edges("edge_graph", edges, graphs=graphs)
 
     result = benchmark(add_test_edges)
-    assert result["added"] == 49
+    assert result["edges_added"] == 49
 
 
 def test_networkx_algorithms_benchmark(benchmark):

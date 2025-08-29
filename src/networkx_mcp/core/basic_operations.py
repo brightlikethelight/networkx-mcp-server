@@ -42,7 +42,7 @@ def add_nodes(
         raise ValueError(f"Graph '{graph_name}' not found")
     graph = graphs[graph_name]
 
-    # Count only new nodes
+    # Count only new nodes for nodes_added, but return total requested for added
     existing_nodes = set(graph.nodes())
     new_nodes = [node for node in nodes if node not in existing_nodes]
 

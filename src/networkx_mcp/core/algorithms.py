@@ -383,27 +383,30 @@ class GraphAlgorithms:
 
         if graph.number_of_nodes() > 0:
             degrees = dict(graph.degree())
+            degree_values = list(degrees.values())
             stats["degree_stats"] = {
-                "mean": np.mean(list(degrees.values())),
-                "std": np.std(list(degrees.values())),
-                "min": min(degrees.values()),
-                "max": max(degrees.values()),
+                "mean": np.mean(degree_values),
+                "std": np.std(degree_values),
+                "min": min(degree_values),
+                "max": max(degree_values),
             }
 
             if graph.is_directed():
                 in_degrees = dict(graph.in_degree())
                 out_degrees = dict(graph.out_degree())
+                in_degree_values = list(in_degrees.values())
+                out_degree_values = list(out_degrees.values())
                 stats["in_degree_stats"] = {
-                    "mean": np.mean(list(in_degrees.values())),
-                    "std": np.std(list(in_degrees.values())),
-                    "min": min(in_degrees.values()),
-                    "max": max(in_degrees.values()),
+                    "mean": np.mean(in_degree_values),
+                    "std": np.std(in_degree_values),
+                    "min": min(in_degree_values),
+                    "max": max(in_degree_values),
                 }
                 stats["out_degree_stats"] = {
-                    "mean": np.mean(list(out_degrees.values())),
-                    "std": np.std(list(out_degrees.values())),
-                    "min": min(out_degrees.values()),
-                    "max": max(out_degrees.values()),
+                    "mean": np.mean(out_degree_values),
+                    "std": np.std(out_degree_values),
+                    "min": min(out_degree_values),
+                    "max": max(out_degree_values),
                 }
 
         # Connectivity
