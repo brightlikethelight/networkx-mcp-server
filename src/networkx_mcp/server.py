@@ -6,11 +6,16 @@ Core server functionality with plugin-based architecture.
 
 import asyncio
 import json
+import logging
 import os
 import sys
 from typing import Any, Dict, List, Optional
 
 import networkx as nx
+
+from .errors import MCPError, ErrorCodes
+
+logger = logging.getLogger(__name__)
 
 # Import academic functions from plugin
 from .academic import (
@@ -868,9 +873,47 @@ class NetworkXMCPServer:
 
             return {"content": [{"type": "text", "text": json.dumps(result)}]}
 
+        except MCPError as e:
+            # Return proper JSON-RPC error for MCP-specific errors
+            return {"error": e.to_dict()}
+
+        except nx.NetworkXError as e:
+            # NetworkX algorithm errors
+            logger.warning(f"NetworkX error in tool {tool_name}: {e}")
+            return {
+                "error": {
+                    "code": ErrorCodes.ALGORITHM_ERROR,
+                    "message": f"Graph operation failed: {str(e)}",
+                }
+            }
+
+        except KeyError as e:
+            # Missing required parameters
+            return {
+                "error": {
+                    "code": ErrorCodes.INVALID_PARAMS,
+                    "message": f"Missing required parameter: {str(e)}",
+                }
+            }
+
+        except (TypeError, ValueError) as e:
+            # Invalid parameter types or values
+            return {
+                "error": {
+                    "code": ErrorCodes.INVALID_PARAMS,
+                    "message": f"Invalid parameter: {str(e)}",
+                }
+            }
+
         except Exception as e:
-            # Return proper JSON-RPC error format
-            return {"error": {"code": -32603, "message": f"Internal error: {str(e)}"}}
+            # Unexpected errors - log for debugging
+            logger.exception(f"Unexpected error in tool {tool_name}")
+            return {
+                "error": {
+                    "code": ErrorCodes.INTERNAL_ERROR,
+                    "message": f"Internal error: {str(e)}",
+                }
+            }
 
     async def run(self) -> None:
         """Main server loop - read stdin, write stdout."""
@@ -887,7 +930,27 @@ class NetworkXMCPServer:
                 if response is not None:
                     print(json.dumps(response), flush=True)
 
+            except json.JSONDecodeError as e:
+                # Invalid JSON input
+                logger.error(f"Invalid JSON input: {e}")
+                error_response = {
+                    "jsonrpc": "2.0",
+                    "error": {
+                        "code": ErrorCodes.PARSE_ERROR,
+                        "message": f"Parse error: {str(e)}",
+                    },
+                    "id": None,
+                }
+                print(json.dumps(error_response), file=sys.stderr, flush=True)
+
+            except (IOError, OSError) as e:
+                # IO errors (stdin/stdout issues)
+                logger.error(f"IO error in main loop: {e}")
+                break  # Exit the loop on IO errors
+
             except Exception as e:
+                # Unexpected errors - log and continue
+                logger.exception("Unexpected error in main loop")
                 print(json.dumps({"error": str(e)}), file=sys.stderr, flush=True)
 
 
