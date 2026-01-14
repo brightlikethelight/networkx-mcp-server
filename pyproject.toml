@@ -154,6 +154,8 @@ mypy_path = "src"
 namespace_packages = true
 explicit_package_bases = true
 # Disable the most problematic error codes
+# NOTE: Gradually re-enable these as codebase is improved
+# Phase 1 enabled: empty-body, dict-item, index, operator (low count, easy fixes)
 disable_error_code = [
     "misc",  # Parameterized generics in isinstance (88 errors)
     "attr-defined",  # Dynamic attribute access (62 errors)
@@ -171,13 +173,14 @@ disable_error_code = [
     "abstract",  # Abstract method issues (2 errors)
     "no-redef",  # Redefinition issues (2 errors)
     "safe-super",  # Super() call issues (2 errors)
-    "operator",  # Operator issues (1 error)
     "call-overload",  # Overload matching issues (1 error)
-    "index",  # Indexing issues (1 error)
-    "empty-body",  # Missing return statement (1 error)
-    "dict-item",  # Dict type issues (1 error)
     "type-arg",  # Type argument issues (2 errors)
     "import-untyped",  # Untyped imports
+    # Phase 1 ENABLED (removed from list):
+    # "operator",  # Operator issues (1 error) - ENABLED
+    # "index",  # Indexing issues (1 error) - ENABLED
+    # "empty-body",  # Missing return statement (1 error) - ENABLED
+    # "dict-item",  # Dict type issues (1 error) - ENABLED
 ]
 
 # Per-module options for gradual typing
