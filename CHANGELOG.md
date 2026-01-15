@@ -5,6 +5,42 @@ All notable changes to NetworkX MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2025-01-14
+
+### Added
+
+- Protocol-based dependency injection system (`core/protocols.py`)
+- Async component lifecycle management (`core/lifecycle.py`)
+- Structured JSON logging for production (`logging_config.py`)
+- Custom CodeQL security queries for MCP-specific vulnerabilities
+- Consolidated CI/CD pipelines (reduced from 19 to 8 workflows)
+
+### Changed
+
+- Improved exception handling with specific error types
+- Enabled additional mypy type checking rules
+- Reduced CI scheduled runs for better resource usage
+
+### Fixed
+
+- Broad exception handlers replaced with specific NetworkX error handling
+- Version consistency across all configuration files
+
+## [2.0.0] - 2025-08-01
+
+### Added
+
+- Advanced graph algorithms and analysis tools
+- Security hardening with rate limiting and input validation
+- Multi-format graph I/O (GraphML, CSV, JSON, edge lists)
+- Performance monitoring and benchmarking infrastructure
+- Enterprise deployment documentation
+
+### Changed
+
+- Modular architecture with handler separation
+- Enhanced error codes following JSON-RPC 2.0 specification
+
 ## [1.0.0] - 2025-07-15
 
 ### Added
@@ -54,6 +90,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+[3.0.0]: https://github.com/Bright-L01/networkx-mcp-server/releases/tag/v3.0.0
+[2.0.0]: https://github.com/Bright-L01/networkx-mcp-server/releases/tag/v2.0.0
 [1.0.0]: https://github.com/Bright-L01/networkx-mcp-server/releases/tag/v1.0.0
 [0.1.0-alpha.2]: https://github.com/Bright-L01/networkx-mcp-server/releases/tag/v0.1.0-alpha.2
 [0.1.0-alpha.1]: https://github.com/Bright-L01/networkx-mcp-server/releases/tag/v0.1.0-alpha.1

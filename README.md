@@ -230,14 +230,14 @@ See the [demos/](demos/) folder for complete examples.
 
 ```bash
 # Clone the repository
-git clone https://github.com/brightlikethelight/networkx-mcp-server
+git clone https://github.com/Bright-L01/networkx-mcp-server
 cd networkx-mcp-server
 
 # Install dependencies
-pip install -e .
+pip install -e ".[dev]"
 
 # Run the server
-python -m networkx_mcp.server_minimal
+python -m networkx_mcp
 ```
 
 ### Running Tests

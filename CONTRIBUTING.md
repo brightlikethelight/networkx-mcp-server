@@ -2,7 +2,7 @@
 
 First off, thank you for considering contributing to NetworkX MCP Server! It's people like you that make this project such a great tool. We welcome contributions from everyone, regardless of their experience level.
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Code of Conduct](#code-of-conduct)
 - [Getting Started](#getting-started)
@@ -17,7 +17,7 @@ First off, thank you for considering contributing to NetworkX MCP Server! It's p
 
 ## Code of Conduct
 
-This project and everyone participating in it is governed by our Code of Conduct. By participating, you are expected to uphold this code. Please report unacceptable behavior to [conduct@networkx-mcp.org](mailto:conduct@networkx-mcp.org).
+This project and everyone participating in it is governed by our Code of Conduct. By participating, you are expected to uphold this code. Please report unacceptable behavior to [brightliu@college.harvard.edu](mailto:brightliu@college.harvard.edu).
 
 ### Our Standards
 
@@ -30,9 +30,8 @@ This project and everyone participating in it is governed by our Code of Conduct
 
 ### Prerequisites
 
-- Python 3.8 or higher
+- Python 3.11 or higher
 - Git
-- Redis (for persistence features)
 - Basic knowledge of graph theory concepts
 
 ### Setting Up Your Development Environment
@@ -53,7 +52,7 @@ This project and everyone participating in it is governed by our Code of Conduct
 3. **Add upstream remote**
 
    ```bash
-   git remote add upstream https://github.com/yourusername/networkx-mcp-server.git
+   git remote add upstream https://github.com/Bright-L01/networkx-mcp-server.git
    ```
 
 4. **Create a virtual environment**
@@ -83,7 +82,7 @@ This project and everyone participating in it is governed by our Code of Conduct
 
 ## How Can I Contribute?
 
-### 🐛 Reporting Bugs
+### Reporting Bugs
 
 Before creating bug reports, please check existing issues to avoid duplicates. When creating a bug report, include:
 
@@ -110,7 +109,7 @@ Before creating bug reports, please check existing issues to avoid duplicates. W
 **System:** macOS 13.5, Python 3.11.5
 ```
 
-### 💡 Suggesting Enhancements
+### Suggesting Enhancements
 
 Enhancement suggestions are tracked as GitHub issues. When creating an enhancement suggestion, include:
 
@@ -119,7 +118,7 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
 - **Alternatives considered**: What other solutions did you consider?
 - **Additional context**: Mockups, examples, etc.
 
-### 🔧 Submitting Pull Requests
+### Submitting Pull Requests
 
 1. **Check existing PRs and issues** first
 2. **Discuss major changes** in an issue before starting
@@ -323,7 +322,7 @@ git commit -m "feat(algorithms): add A* pathfinding algorithm
 
 Closes #123"
 
-git commit -m "fix(persistence): handle empty graphs in Redis backend
+git commit -m "fix(storage): handle empty graphs in save operations
 
 Empty NetworkX graphs are falsy, causing save failures.
 Changed condition from 'if graph:' to 'if graph is not None:'
@@ -412,7 +411,7 @@ Describe the tests you ran. Include OS and Python version.
 2. **Code review** by at least one maintainer
 3. **Address feedback** promptly and politely
 4. **Squash commits** if requested
-5. **Celebrate** when merged! 🎉
+5. **Celebrate** when merged!
 
 ## Testing
 
@@ -445,7 +444,7 @@ pytest -v
 3. **Test method naming**: `test_<specific_scenario>`
 4. **Use fixtures** for common setup
 5. **Test edge cases** and error conditions
-6. **Mock external dependencies** (Redis, network calls)
+6. **Mock external dependencies** when needed
 
 ### Test Categories
 
@@ -516,27 +515,21 @@ def complex_function(
 
 ### Getting Help
 
-- 💬 [GitHub Discussions](https://github.com/yourusername/networkx-mcp-server/discussions) - Ask questions
-- 🐛 [Issue Tracker](https://github.com/yourusername/networkx-mcp-server/issues) - Report bugs
-- 📧 Email: <support@networkx-mcp.org>
+- [GitHub Discussions](https://github.com/Bright-L01/networkx-mcp-server/discussions) - Ask questions
+- [Issue Tracker](https://github.com/Bright-L01/networkx-mcp-server/issues) - Report bugs
+- Email: brightliu@college.harvard.edu
 
 ### Communication Channels
 
 - **Discussions**: General questions and ideas
 - **Issues**: Bug reports and feature requests
 - **Pull Requests**: Code contributions
-- **Security**: <security@networkx-mcp.org> for vulnerabilities
+- **Security**: See [SECURITY.md](SECURITY.md) for vulnerability reporting
 
 ### Recognition
 
-Contributors are recognized in:
+Contributors are recognized in release notes and project documentation.
 
-- [CONTRIBUTORS.md](CONTRIBUTORS.md) file
-- Release notes
-- Project documentation
-
-## 🙏 Thank You
+## Thank You
 
 Your contributions make this project better for everyone. Whether it's fixing a typo, adding a test, or implementing a new feature, every contribution is valued.
-
-Happy coding! 🚀

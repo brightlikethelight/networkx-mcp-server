@@ -1,15 +1,17 @@
 # Security Policy
 
-## 🔒 Supported Versions
+## Supported Versions
 
 We provide security updates for the following versions:
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.0.x   | ✅ Yes             |
-| < 1.0   | ❌ No              |
+| Version | Supported |
+| ------- | --------- |
+| 3.0.x   | Yes       |
+| 2.0.x   | Yes       |
+| 1.0.x   | Limited   |
+| < 1.0   | No        |
 
-## 🛡️ Security Features
+## Security Features
 
 NetworkX MCP Server includes several built-in security features:
 
@@ -39,30 +41,17 @@ NetworkX MCP Server includes several built-in security features:
 - Secure error messages (no stack traces)
 - No code execution (eval/exec disabled)
 
-## 🚨 Reporting a Vulnerability
+## Reporting a Vulnerability
 
 **Please do NOT report security vulnerabilities through public GitHub issues.**
 
-Instead, please report security issues responsibly:
+### Contact
 
-### 📧 Email
+Send security reports to: **brightliu@college.harvard.edu**
 
-Send security reports to: **<security@networkx-mcp.org>**
+Please include the following information:
 
-### 🔐 Encrypted Communication
-
-For sensitive reports, use our PGP key:
-
-```
-Key ID: [TO BE ADDED]
-Fingerprint: [TO BE ADDED]
-```
-
-### 📋 What to Include
-
-Please include the following information in your report:
-
-1. **Type of issue** (e.g., buffer overflow, SQL injection, cross-site scripting)
+1. **Type of issue** (e.g., buffer overflow, injection, cross-site scripting)
 2. **Full paths** of source file(s) related to the issue
 3. **Location** of the affected source code (tag/branch/commit or direct URL)
 4. **Special configuration** required to reproduce the issue
@@ -70,14 +59,14 @@ Please include the following information in your report:
 6. **Proof-of-concept or exploit code** (if possible)
 7. **Impact** of the issue, including how an attacker might exploit it
 
-### ⏱️ Response Timeline
+### Response Timeline
 
 - **Initial Response**: Within 48 hours
 - **Investigation**: Within 7 days
 - **Fix Development**: Depends on severity
 - **Public Disclosure**: After fix is available
 
-## 🔍 Security Assessment Process
+## Security Assessment Process
 
 When you report a vulnerability:
 
@@ -88,29 +77,20 @@ When you report a vulnerability:
 5. **Coordinated Disclosure**: We'll work with you on disclosure timing
 6. **Public Disclosure**: After fixes are deployed
 
-## 🏆 Security Recognition
-
-We believe in recognizing security researchers who help keep our users safe:
-
-### Hall of Fame
+## Security Recognition
 
 Contributors who responsibly disclose security issues will be:
 
-- Listed in our security hall of fame (with permission)
+- Listed in our security acknowledgments (with permission)
 - Credited in release notes
 - Thanked publicly (if desired)
 
-### Bug Bounty
-
-While we don't currently offer monetary rewards, we're considering a bug bounty program for the future.
-
-## 🛠️ Security Best Practices for Users
+## Security Best Practices for Users
 
 ### For Developers
 
 - Always validate input from untrusted sources
 - Use the latest version of NetworkX MCP Server
-- Enable Redis authentication if using persistence
 - Monitor server logs for suspicious activity
 - Run the server with minimal required privileges
 
@@ -119,8 +99,8 @@ While we don't currently offer monetary rewards, we're considering a bug bounty 
 - Use Docker containers for isolation
 - Set up proper network security (firewalls, VPNs)
 - Enable logging and monitoring
-- Regular security updates
-- Backup and recovery procedures
+- Apply regular security updates
+- Implement backup and recovery procedures
 
 ### For Data
 
@@ -129,26 +109,27 @@ While we don't currently offer monetary rewards, we're considering a bug bounty 
 - Use secure channels for data transmission
 - Implement access controls for multi-user environments
 
-## 📚 Security Resources
+## Security Tools
 
-### Documentation
+Security scanning is included in our CI/CD pipeline:
 
-- [Security Best Practices](docs/security-best-practices.md)
-- [Deployment Security Guide](docs/deployment-security.md)
-- [API Security Reference](docs/api-security.md)
-
-### Tools
-
-- Security scanning is included in our CI/CD pipeline
-- Use `bandit` for additional security analysis
+- Use `bandit` for Python security analysis
 - Run `safety` to check for vulnerable dependencies
+- CodeQL analysis for code security issues
 
-### Community
+## Security Changelog
 
-- Join our [Security Discussions](https://github.com/brightliu/networkx-mcp-server/discussions/categories/security)
-- Follow [@NetworkXMCP](https://twitter.com/NetworkXMCP) for security announcements
+### Version 3.0.0
 
-## 📝 Security Changelog
+- Added protocol-based dependency injection for better isolation
+- Enhanced exception handling with specific error types
+- Custom CodeQL security queries for MCP-specific vulnerabilities
+
+### Version 2.0.0
+
+- Added rate limiting and input validation middleware
+- Security audit logging improvements
+- Enhanced file security sandboxing
 
 ### Version 1.0.0
 
@@ -160,13 +141,6 @@ While we don't currently offer monetary rewards, we're considering a bug bounty 
 
 ---
 
-## 🤝 Thank You
-
-We appreciate the security research community's efforts to responsibly disclose vulnerabilities. Your work helps keep NetworkX MCP Server secure for everyone.
-
-**Contact**: <security@networkx-mcp.org>
-**PGP Key**: [TO BE ADDED]
-
----
+**Contact**: brightliu@college.harvard.edu
 
 *This security policy is based on security best practices and will be updated as needed.*

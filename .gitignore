@@ -46,6 +46,7 @@ htmlcov/
 dmypy.json
 .ruff_cache/
 coverage.xml
+coverage*.json
 
 # Development
 *.log

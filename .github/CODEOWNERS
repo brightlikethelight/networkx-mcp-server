@@ -1,0 +1,19 @@
+# CODEOWNERS for NetworkX MCP Server
+# These owners will be automatically requested for review on pull requests
+
+# Default owner for all files
+* @Bright-L01
+
+# Core server implementation
+/src/networkx_mcp/server.py @Bright-L01
+/src/networkx_mcp/core/ @Bright-L01
+
+# Security-sensitive code requires explicit review
+/src/networkx_mcp/security/ @Bright-L01
+
+# CI/CD configuration
+/.github/workflows/ @Bright-L01
+
+# Documentation
+/docs/ @Bright-L01
+/*.md @Bright-L01
