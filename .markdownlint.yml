@@ -16,3 +16,4 @@ MD046: false  # Code block style - allow both fenced and indented
 MD051: false  # Link fragments - may not always match exactly
 MD060: false  # Table column style - auto-generated tables may not follow strict formatting
 MD022: false  # Blanks around headings - too strict for our docs
+MD032: false  # Blanks around lists - too strict for our docs
