@@ -296,8 +296,8 @@ def export_json(
         raise ValueError(f"Graph '{graph_name}' not found")
     graph = graphs[graph_name]
 
-    # Convert to node-link format
-    data = nx.node_link_data(graph)
+    # Convert to node-link format (explicit edges="links" for NX 3.6+ compatibility)
+    data = nx.node_link_data(graph, edges="links")
 
     return {
         "graph_data": data,

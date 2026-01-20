@@ -256,13 +256,13 @@ class SecureFileHandler:
             # Node-link format
             return self._json_node_link_to_graph(data)
         else:
-            # Try networkx JSON format
-            return nx.node_link_graph(data)
+            # Try networkx JSON format (edges="links" for NX 3.6+ compatibility)
+            return nx.node_link_graph(data, edges="links")
 
     def _write_json_graph(self, graph: nx.Graph, filepath: Path) -> None:
         """Write graph to JSON safely."""
-        # Convert to node-link format
-        data = nx.node_link_data(graph)
+        # Convert to node-link format (edges="links" for NX 3.6+ compatibility)
+        data = nx.node_link_data(graph, edges="links")
 
         # Sanitize all attributes
         if "nodes" in data:

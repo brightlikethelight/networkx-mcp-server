@@ -202,7 +202,8 @@ class GraphIOHandler:
         graph: nx.Graph, pretty_print: bool = True, **kwargs
     ) -> Dict[str, Any]:
         """Export graph to JSON format with metadata preservation."""
-        data = nx.node_link_data(graph)
+        # Use edges="links" for NetworkX 3.6+ backward compatibility
+        data = nx.node_link_data(graph, edges="links")
 
         # Add comprehensive metadata
         data["graph"]["directed"] = graph.is_directed()
@@ -236,7 +237,8 @@ class GraphIOHandler:
             msg = "JSON data must be a dictionary"
             raise ValueError(msg)
 
-        return nx.node_link_graph(data)
+        # Use edges="links" for NetworkX 3.6+ backward compatibility
+        return nx.node_link_graph(data, edges="links")
 
     @staticmethod
     def _export_yaml(graph: nx.Graph, path: str | Path, **kwargs) -> str:
@@ -259,7 +261,8 @@ class GraphIOHandler:
         elif isinstance(data, str):
             data = yaml.safe_load(data)
 
-        return nx.node_link_graph(data)
+        # Use edges="links" for NetworkX 3.6+ backward compatibility
+        return nx.node_link_graph(data, edges="links")
 
     @staticmethod
     def _export_csv(graph: nx.Graph, path: str | Path, **kwargs) -> str:
