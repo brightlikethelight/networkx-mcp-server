@@ -47,7 +47,7 @@ NetworkX MCP Server includes several built-in security features:
 
 ### Contact
 
-Send security reports to: **brightliu@college.harvard.edu**
+Send security reports to: **<brightliu@college.harvard.edu>**
 
 Please include the following information:
 
@@ -141,6 +141,6 @@ Security scanning is included in our CI/CD pipeline:
 
 ---
 
-**Contact**: brightliu@college.harvard.edu
+**Contact**: <brightliu@college.harvard.edu>
 
 *This security policy is based on security best practices and will be updated as needed.*

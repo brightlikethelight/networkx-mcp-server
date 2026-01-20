@@ -51,6 +51,7 @@ All commits MUST follow the Conventional Commits specification v1.0.0:
 ## Version Control Workflow
 
 ### 1. Pre-Commit Checks
+
 ```bash
 # Before every commit, ensure:
 1. All tests pass: pytest tests/
@@ -61,6 +62,7 @@ All commits MUST follow the Conventional Commits specification v1.0.0:
 ```
 
 ### 2. Commit Process
+
 ```bash
 # Stage changes selectively
 git add -p
@@ -102,6 +104,7 @@ Format: `MAJOR.MINOR.PATCH`
 - **PATCH**: Bug fixes
 
 ### Version Bumping Rules
+
 ```python
 # Automated version bumping based on commits
 if "BREAKING CHANGE" in commit_message:
@@ -115,6 +118,7 @@ elif commit_type == "fix":
 ## Git Hooks
 
 ### Pre-commit Hook
+
 ```bash
 #!/bin/sh
 # .git/hooks/pre-commit
@@ -135,6 +139,7 @@ fi
 ```
 
 ### Commit-msg Hook
+
 ```bash
 #!/bin/sh
 # .git/hooks/commit-msg
@@ -150,6 +155,7 @@ fi
 ```
 
 ### Post-commit Hook
+
 ```bash
 #!/bin/sh
 # .git/hooks/post-commit
@@ -170,6 +176,7 @@ dora_collector.track_commit(commit, author)
 ## Release Process
 
 ### 1. Release Preparation
+
 ```bash
 # Create release branch
 git checkout -b release/v1.2.0
@@ -192,6 +199,7 @@ git commit -m "chore(release): prepare v1.2.0"
 - [ ] Migration guide prepared (if needed)
 
 ### 3. Release Tagging
+
 ```bash
 # Tag release
 git tag -a v1.2.0 -m "Release v1.2.0
@@ -213,6 +221,7 @@ git push origin v1.2.0
 ## History Management
 
 ### Commit Squashing
+
 ```bash
 # Interactive rebase for clean history
 git rebase -i HEAD~3
@@ -231,6 +240,7 @@ squash ghi9012 docs: update feature docs
 ## Backup and Recovery
 
 ### Regular Backups
+
 ```bash
 # Daily backup script
 #!/bin/bash
@@ -240,6 +250,7 @@ aws s3 cp backups/repo-$DATE.bundle s3://backups/
 ```
 
 ### Recovery Process
+
 ```bash
 # Restore from bundle
 git clone backups/repo-20240826.bundle restored-repo
@@ -250,6 +261,7 @@ git remote set-url origin https://github.com/user/repo.git
 ## CI/CD Integration
 
 ### Automated Version Control Checks
+
 ```yaml
 # .github/workflows/version-control.yml
 name: Version Control Enforcement
@@ -304,6 +316,7 @@ jobs:
 ## Monitoring and Metrics
 
 ### Track Version Control Health
+
 ```python
 # Monitor commit quality
 metrics = {
@@ -324,6 +337,7 @@ if metrics["branch_lifetime"] > 7:
 ## Emergency Procedures
 
 ### Rollback Process
+
 ```bash
 # Quick rollback to previous version
 git revert HEAD
@@ -335,6 +349,7 @@ git push --force-with-lease origin main
 ```
 
 ### Conflict Resolution
+
 ```bash
 # Standard conflict resolution
 git checkout develop
@@ -357,6 +372,7 @@ git rebase --continue
 - [ ] Complete git training module
 
 ### Git Aliases for Productivity
+
 ```bash
 git config --global alias.co checkout
 git config --global alias.br branch
