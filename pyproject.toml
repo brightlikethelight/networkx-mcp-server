@@ -181,6 +181,7 @@ disable_error_code = [
     "index",  # Indexing issues (varies - type narrowing issues)
     "empty-body",  # Missing return statement (1 error)
     "dict-item",  # Dict type issues (1 error)
+    "list-item",  # List item type issues (MCP type compatibility)
 ]
 
 # Per-module options for gradual typing
