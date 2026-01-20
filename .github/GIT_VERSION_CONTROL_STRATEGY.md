@@ -261,10 +261,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Check commit messages
         uses: wagoid/commitlint-github-action@v5
-        
+
       - name: Check branch naming
         run: |
           branch=$(echo ${GITHUB_REF#refs/heads/})
@@ -272,7 +272,7 @@ jobs:
             echo "Invalid branch name: $branch"
             exit 1
           fi
-          
+
       - name: Generate commit report
         run: |
           git log --format="%h %s" --since="1 week ago" > commit-report.txt
@@ -316,7 +316,7 @@ metrics = {
 
 if metrics["pr_size_average"] > 500:
     alert("PRs too large - consider splitting")
-    
+
 if metrics["branch_lifetime"] > 7:
     alert("Long-lived branches detected")
 ```

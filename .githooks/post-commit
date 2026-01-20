@@ -39,7 +39,7 @@ sys.path.insert(0, 'src')
 
 try:
     from networkx_mcp.monitoring.dora_metrics import DORACollector
-    
+
     collector = DORACollector()
     collector.track_commit(
         sha='$COMMIT_SHA',
@@ -65,13 +65,13 @@ fi
 # Generate commit report for significant changes
 if [ "$COMMIT_TYPE" = "feat" ] || [ "$COMMIT_TYPE" = "fix" ] || [ "$COMMIT_TYPE" = "perf" ]; then
     echo -e "${GREEN}✅ Significant change committed: $COMMIT_TYPE${NC}"
-    
+
     # Count lines changed
     STATS=$(git diff HEAD~1 --shortstat 2>/dev/null || echo "")
     if [ ! -z "$STATS" ]; then
         echo "  $STATS"
     fi
-    
+
     # List files changed
     FILES_CHANGED=$(git diff --name-only HEAD~1 2>/dev/null | wc -l)
     echo "  Files changed: $FILES_CHANGED"

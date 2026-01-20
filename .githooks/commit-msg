@@ -129,7 +129,7 @@ if [ ! -z "$BODY_LINES" ] && [ "$BODY_LINES" != "" ]; then
     if [ ! -z "$SECOND_LINE" ]; then
         echo -e "${YELLOW}⚠️  Warning: Missing blank line between subject and body${NC}"
     fi
-    
+
     # Check body line length (should wrap at 72 characters)
     echo "$BODY_LINES" | while IFS= read -r line; do
         if [ ${#line} -gt 72 ] && ! echo "$line" | grep -qE "^(https?://|Closes|Fixes|Resolves|BREAKING CHANGE:)"; then

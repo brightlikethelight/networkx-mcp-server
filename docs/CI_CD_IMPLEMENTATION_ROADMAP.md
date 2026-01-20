@@ -1,6 +1,6 @@
 # CI/CD Implementation Roadmap - NetworkX MCP Server
 
-*Generated: 2025-08-28*  
+*Generated: 2025-08-28*
 *Status: Active Development*
 
 ## 🎯 Executive Summary
@@ -314,8 +314,8 @@ gantt
 
 *This roadmap is a living document and will be updated quarterly based on progress and changing requirements.*
 
-**Document Owner**: DevOps Team  
-**Last Review**: 2025-08-28  
+**Document Owner**: DevOps Team
+**Last Review**: 2025-08-28
 **Next Review**: 2025-09-28
 
 **Approval Chain**:

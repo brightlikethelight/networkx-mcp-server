@@ -53,7 +53,7 @@ echo "Checking code formatting with ruff..."
 if command -v ruff &> /dev/null; then
     ruff format --check . &>/dev/null
     print_status $? "Code formatting (ruff)"
-    
+
     if [ $? -ne 0 ]; then
         echo "Run 'ruff format .' to fix formatting issues"
     fi
@@ -66,7 +66,7 @@ echo "Running linter checks..."
 if command -v ruff &> /dev/null; then
     ruff check . --quiet
     print_status $? "Linting (ruff)"
-    
+
     if [ $? -ne 0 ]; then
         echo "Run 'ruff check . --fix' to fix some issues automatically"
     fi
@@ -124,7 +124,7 @@ if [ ! -z "$CHANGED_PY_FILES" ]; then
                 TEST_FILES="$TEST_FILES $test_file"
             fi
         done
-        
+
         if [ ! -z "$TEST_FILES" ]; then
             pytest $TEST_FILES --quiet --tb=no
             print_status $? "Related tests"

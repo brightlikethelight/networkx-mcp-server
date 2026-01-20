@@ -108,7 +108,7 @@ select = [
     "F",  # pyflakes
     "I",  # isort
 ]
-ignore = ["E501"]  # line too long
+ignore = ["E501", "E402"]  # line too long, module level import not at top
 
 [tool.pytest.ini_options]
 minversion = "7.0"

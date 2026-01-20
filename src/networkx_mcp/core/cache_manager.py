@@ -206,7 +206,7 @@ class CacheManager:
         """Estimate memory size of a value"""
         try:
             return len(pickle.dumps(value))
-        except:
+        except Exception:
             # Fallback estimation
             return 1000
 
@@ -557,6 +557,9 @@ async def test_cache_manager():
     # Second call - cache hit
     result2 = await cache.get("pagerank_karate", expensive_computation, G)
 
+    # Verify both results match (cache consistency)
+    assert result1 == result2, "Cache should return same result"
+
     # Test with tags
     await cache.set("test_entry", {"data": "value"}, tags={"graph_analysis", "test"})
 
@@ -565,7 +568,7 @@ async def test_cache_manager():
 
     # Get statistics
     stats = cache.get_stats()
-    print(f"Cache stats: {stats}")
+    logger.info(f"Cache stats: {stats}")
 
     # Stop background cleanup
     cache.stop_background_cleanup()

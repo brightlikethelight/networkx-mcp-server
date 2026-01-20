@@ -42,23 +42,23 @@ install_hook() {
     local hook_name=$1
     local source_file=".githooks/$hook_name"
     local target_file=".git/hooks/$hook_name"
-    
+
     if [ ! -f "$source_file" ]; then
         echo -e "${YELLOW}⚠️  Warning: $source_file not found${NC}"
         return 1
     fi
-    
+
     echo -n "Installing $hook_name hook... "
-    
+
     # Create hooks directory if it doesn't exist
     mkdir -p .git/hooks
-    
+
     # Copy hook file
     cp "$source_file" "$target_file"
-    
+
     # Make executable
     chmod +x "$target_file"
-    
+
     echo -e "${GREEN}✅${NC}"
     return 0
 }
@@ -68,7 +68,7 @@ check_dependency() {
     local cmd=$1
     local name=$2
     local install_cmd=$3
-    
+
     if command -v $cmd &> /dev/null; then
         echo -e "  ${GREEN}✅ $name installed${NC}"
         return 0
