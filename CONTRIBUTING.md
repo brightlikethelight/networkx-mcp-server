@@ -517,7 +517,7 @@ def complex_function(
 
 - [GitHub Discussions](https://github.com/Bright-L01/networkx-mcp-server/discussions) - Ask questions
 - [Issue Tracker](https://github.com/Bright-L01/networkx-mcp-server/issues) - Report bugs
-- Email: brightliu@college.harvard.edu
+- Email: <brightliu@college.harvard.edu>
 
 ### Communication Channels
 
