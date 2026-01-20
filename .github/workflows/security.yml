@@ -286,8 +286,8 @@ jobs:
           pip install cyclonedx-bom pip-licenses
           pip install -e ".[dev]"
 
-          # CycloneDX SBOM
-          cyclonedx-py environment -o sbom-cyclonedx.json --format json
+          # CycloneDX SBOM (v7.x syntax)
+          cyclonedx-py environment --output-format JSON -o sbom-cyclonedx.json
 
           # License information
           pip-licenses --format=json --output-file=licenses.json
