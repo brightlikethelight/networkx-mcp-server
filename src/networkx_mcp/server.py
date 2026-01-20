@@ -13,7 +13,7 @@ from typing import Any, Dict, List, Optional
 
 import networkx as nx
 
-from .errors import MCPError, ErrorCodes
+from .errors import ErrorCodes, MCPError
 
 logger = logging.getLogger(__name__)
 
@@ -280,6 +280,7 @@ class NetworkXMCPServer:
                     "create_graph",
                     "add_nodes",
                     "add_edges",
+                    "delete_graph",
                     "import_csv",
                     "build_citation_network",
                 ]
@@ -490,6 +491,15 @@ class NetworkXMCPServer:
             {
                 "name": "export_json",
                 "description": "Export graph as JSON in node-link format",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {"graph": {"type": "string"}},
+                    "required": ["graph"],
+                },
+            },
+            {
+                "name": "delete_graph",
+                "description": "Delete a graph from storage",
                 "inputSchema": {
                     "type": "object",
                     "properties": {"graph": {"type": "string"}},
@@ -766,6 +776,9 @@ class NetworkXMCPServer:
 
             elif tool_name == "export_json":
                 result = export_json(args["graph"])
+
+            elif tool_name == "delete_graph":
+                result = delete_graph(args["graph"])
 
             elif tool_name == "build_citation_network":
                 result = build_citation_network(
