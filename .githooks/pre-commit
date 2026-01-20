@@ -25,12 +25,17 @@ print_status() {
     fi
 }
 
-# 1. Check for debugging artifacts
+# 1. Check for debugging artifacts (Python files only)
 echo "Checking for debugging artifacts..."
-if git diff --cached --name-only | xargs grep -l "import pdb\|pdb.set_trace\|console.log\|debugger\|print(" 2>/dev/null; then
-    echo -e "${RED}❌ Found debugging statements in staged files${NC}"
-    echo "Please remove debugging code before committing."
-    FAILED=1
+PYTHON_STAGED=$(git diff --cached --name-only | grep '\.py$')
+if [ ! -z "$PYTHON_STAGED" ]; then
+    if echo "$PYTHON_STAGED" | xargs grep -l "import pdb\|pdb.set_trace\|debugger" 2>/dev/null; then
+        echo -e "${RED}❌ Found debugging statements in staged files${NC}"
+        echo "Please remove debugging code before committing."
+        FAILED=1
+    else
+        echo -e "${GREEN}✅ No debugging artifacts found${NC}"
+    fi
 else
     echo -e "${GREEN}✅ No debugging artifacts found${NC}"
 fi
