@@ -5,12 +5,14 @@
 name: Monitoring
 
 on:
+  # Note: workflow_run triggers are handled by GitHub but may show as "failure"
+  # when all jobs are skipped due to conditions. This is expected behavior.
   workflow_run:
     workflows: ["CI", "Security", "Docker Build"]
     types: [completed]
     branches: [main]
   schedule:
-    - cron: '0 * * * *'  # Hourly health check (reduced from 30 min)
+    - cron: '0 * * * *'  # Hourly health check
   workflow_dispatch:
 
 env:
@@ -376,3 +378,22 @@ jobs:
           echo "**${{ github.event.workflow_run.name }}** workflow has recovered and is now passing!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "[View Successful Run](${{ github.event.workflow_run.html_url }})" >> $GITHUB_STEP_SUMMARY
+
+  # Job 4: Status (always runs to prevent workflow from failing when all jobs are skipped)
+  status:
+    name: Monitoring Status
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Report Status
+        run: |
+          echo "## Monitoring Workflow Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Event:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            echo "**Triggered by:** ${{ github.event.workflow_run.name }}" >> $GITHUB_STEP_SUMMARY
+            echo "**Conclusion:** ${{ github.event.workflow_run.conclusion }}" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Monitoring workflow completed" >> $GITHUB_STEP_SUMMARY
