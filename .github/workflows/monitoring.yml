@@ -1,29 +1,21 @@
 # Consolidated Monitoring and Alerting Pipeline
-# Replaces: monitoring.yml, ci-alerts.yml, ci-webhook-alerts.yml, continuous-monitoring.yml
-# Provides unified CI health monitoring and failure notifications
+# Provides unified CI health monitoring via scheduled checks
 
 name: Monitoring
 
 on:
-  # Note: workflow_run triggers are handled by GitHub but may show as "failure"
-  # when all jobs are skipped due to conditions. This is expected behavior.
-  workflow_run:
-    workflows: ["CI", "Security", "Docker Build"]
-    types: [completed]
-    branches: [main]
   schedule:
-    - cron: '0 * * * *'  # Hourly health check
+    - cron: '0 */6 * * *'  # Every 6 hours
   workflow_dispatch:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  # Job 1: CI Health Dashboard (on schedule)
+  # CI Health Dashboard
   health-dashboard:
     name: CI Health Dashboard
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     permissions:
       contents: read
       actions: read
@@ -109,291 +101,20 @@ jobs:
                 title: '🚨 CI/CD Health Alert: Critical Status',
                 body: `## Automated CI/CD Health Alert
 
-                The CI/CD pipeline health monitor has detected critical failures.
+            The CI/CD pipeline health monitor has detected critical failures.
 
-                **Status:** 🔴 Critical
-                **Time:** ${new Date().toUTCString()}
+            **Status:** 🔴 Critical
+            **Time:** ${new Date().toUTCString()}
 
-                Please check the [workflow summary](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}) for details.
+            Please check the [workflow summary](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}) for details.
 
-                ### Required Actions
-                - [ ] Review failing workflows
-                - [ ] Fix critical issues
-                - [ ] Verify fixes are deployed
+            ### Required Actions
+            - [ ] Review failing workflows
+            - [ ] Fix critical issues
+            - [ ] Verify fixes are deployed
 
-                ---
-                *This issue was automatically created by the monitoring workflow.*`,
+            ---
+            *This issue was automatically created by the monitoring workflow.*`,
                 labels: ['ci-health-alert', 'automated']
               });
             }
-
-  # Job 2: Failure Alerts (on workflow completion)
-  failure-alert:
-    name: Failure Alert
-    runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure'
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Get failure details
-        id: details
-        run: |
-          WORKFLOW_NAME="${{ github.event.workflow_run.name }}"
-          WORKFLOW_URL="${{ github.event.workflow_run.html_url }}"
-          WORKFLOW_ID="${{ github.event.workflow_run.id }}"
-          RUN_NUMBER="${{ github.event.workflow_run.run_number }}"
-          ACTOR="${{ github.event.workflow_run.actor.login }}"
-          BRANCH="${{ github.event.workflow_run.head_branch }}"
-          COMMIT_SHA="${{ github.event.workflow_run.head_sha }}"
-          REPO="${{ github.repository }}"
-
-          COMMIT_MESSAGE=$(git log --format=%s -n 1 $COMMIT_SHA 2>/dev/null || echo "Unable to fetch")
-
-          # Get failed jobs
-          JOBS_URL="https://api.github.com/repos/$REPO/actions/runs/$WORKFLOW_ID/jobs"
-          FAILED_JOBS=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "$JOBS_URL" | \
-            jq -r '.jobs[] | select(.conclusion == "failure") | .name' | \
-            paste -sd ", " - || echo "Unknown")
-
-          # Determine priority
-          case "$WORKFLOW_NAME" in
-            "CI"|"Security")
-              PRIORITY="Critical"
-              ;;
-            "Docker Build")
-              PRIORITY="High"
-              ;;
-            *)
-              PRIORITY="Medium"
-              ;;
-          esac
-
-          echo "workflow_name=$WORKFLOW_NAME" >> $GITHUB_OUTPUT
-          echo "workflow_url=$WORKFLOW_URL" >> $GITHUB_OUTPUT
-          echo "run_number=$RUN_NUMBER" >> $GITHUB_OUTPUT
-          echo "actor=$ACTOR" >> $GITHUB_OUTPUT
-          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
-          echo "commit_sha=${COMMIT_SHA:0:8}" >> $GITHUB_OUTPUT
-          echo "commit_message=$COMMIT_MESSAGE" >> $GITHUB_OUTPUT
-          echo "failed_jobs=$FAILED_JOBS" >> $GITHUB_OUTPUT
-          echo "priority=$PRIORITY" >> $GITHUB_OUTPUT
-          echo "repo=$REPO" >> $GITHUB_OUTPUT
-
-      - name: Post Failure Summary
-        run: |
-          cat >> $GITHUB_STEP_SUMMARY << EOF
-          ## 🚨 CI/CD Failure Alert
-
-          | Field | Value |
-          |-------|-------|
-          | Workflow | ${{ steps.details.outputs.workflow_name }} |
-          | Priority | ${{ steps.details.outputs.priority }} |
-          | Branch | \`${{ steps.details.outputs.branch }}\` |
-          | Run | #${{ steps.details.outputs.run_number }} |
-          | Failed Jobs | ${{ steps.details.outputs.failed_jobs }} |
-          | Triggered by | ${{ steps.details.outputs.actor }} |
-
-          **Commit:** \`${{ steps.details.outputs.commit_message }}\`
-
-          [View Workflow Run](${{ steps.details.outputs.workflow_url }})
-          EOF
-
-      - name: Send Slack notification
-        if: secrets.SLACK_WEBHOOK_URL != ''
-        run: |
-          cat > slack_payload.json << EOF
-          {
-            "blocks": [
-              {
-                "type": "header",
-                "text": {
-                  "type": "plain_text",
-                  "text": "🚨 NetworkX MCP Server - CI/CD Failure"
-                }
-              },
-              {
-                "type": "section",
-                "fields": [
-                  {"type": "mrkdwn", "text": "*Workflow:* ${{ steps.details.outputs.workflow_name }}"},
-                  {"type": "mrkdwn", "text": "*Priority:* ${{ steps.details.outputs.priority }}"},
-                  {"type": "mrkdwn", "text": "*Branch:* \`${{ steps.details.outputs.branch }}\`"},
-                  {"type": "mrkdwn", "text": "*Run:* #${{ steps.details.outputs.run_number }}"}
-                ]
-              },
-              {
-                "type": "section",
-                "text": {"type": "mrkdwn", "text": "*Failed Jobs:* ${{ steps.details.outputs.failed_jobs }}"}
-              },
-              {
-                "type": "actions",
-                "elements": [
-                  {
-                    "type": "button",
-                    "text": {"type": "plain_text", "text": "🔍 View Logs"},
-                    "url": "${{ steps.details.outputs.workflow_url }}",
-                    "style": "danger"
-                  }
-                ]
-              }
-            ]
-          }
-          EOF
-          curl -X POST -H 'Content-type: application/json' --data @slack_payload.json "${{ secrets.SLACK_WEBHOOK_URL }}"
-
-      - name: Send Discord notification
-        if: secrets.DISCORD_WEBHOOK_URL != ''
-        run: |
-          cat > discord_payload.json << EOF
-          {
-            "embeds": [{
-              "title": "🚨 CI/CD Failure - NetworkX MCP Server",
-              "description": "**${{ steps.details.outputs.workflow_name }}** failed on **${{ steps.details.outputs.branch }}**",
-              "color": 15158332,
-              "fields": [
-                {"name": "Workflow", "value": "${{ steps.details.outputs.workflow_name }}", "inline": true},
-                {"name": "Priority", "value": "${{ steps.details.outputs.priority }}", "inline": true},
-                {"name": "Run", "value": "#${{ steps.details.outputs.run_number }}", "inline": true},
-                {"name": "Failed Jobs", "value": "${{ steps.details.outputs.failed_jobs }}", "inline": false}
-              ],
-              "footer": {"text": "NetworkX MCP Server CI/CD Monitor"}
-            }]
-          }
-          EOF
-          curl -X POST -H 'Content-type: application/json' --data @discord_payload.json "${{ secrets.DISCORD_WEBHOOK_URL }}"
-
-      - name: Create GitHub issue for critical failures
-        if: steps.details.outputs.priority == 'Critical'
-        run: |
-          # Check for existing recent issue
-          existing=$(gh issue list --label "ci,automated" --state open --json number,createdAt \
-            --jq '[.[] | select((now - (.createdAt | strptime("%Y-%m-%dT%H:%M:%SZ") | mktime)) < 86400)] | length')
-
-          if [ "$existing" = "0" ]; then
-            gh issue create \
-              --title "🚨 Critical CI/CD Failure: ${{ steps.details.outputs.workflow_name }} (#${{ steps.details.outputs.run_number }})" \
-              --body "## Critical Workflow Failure
-
-          **Workflow:** ${{ steps.details.outputs.workflow_name }}
-          **Branch:** \`${{ steps.details.outputs.branch }}\`
-          **Run:** #${{ steps.details.outputs.run_number }}
-          **Failed Jobs:** ${{ steps.details.outputs.failed_jobs }}
-
-          [View Workflow Run](${{ steps.details.outputs.workflow_url }})
-
-          ### Action Required
-          - [ ] Investigate failure
-          - [ ] Fix issue
-          - [ ] Verify fix
-
-          ---
-          *Auto-generated by CI/CD Monitoring*" \
-              --label "ci,automated,bug"
-          fi
-
-  # Job 3: Recovery Alerts
-  recovery-alert:
-    name: Recovery Alert
-    runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
-
-    steps:
-      - name: Check if recovery
-        id: check
-        run: |
-          WORKFLOW_ID="${{ github.event.workflow_run.id }}"
-          REPO="${{ github.repository }}"
-          BRANCH="${{ github.event.workflow_run.head_branch }}"
-
-          # Get previous run
-          PREV_CONCLUSION=$(gh api "repos/$REPO/actions/workflows/${{ github.event.workflow_run.workflow_id }}/runs?branch=$BRANCH&per_page=2" \
-            --jq '.workflow_runs | map(select(.id != '$WORKFLOW_ID')) | .[0].conclusion // "unknown"')
-
-          if [ "$PREV_CONCLUSION" = "failure" ]; then
-            echo "is_recovery=true" >> $GITHUB_OUTPUT
-            echo "🎉 Recovery detected!"
-          else
-            echo "is_recovery=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Send recovery notification to Slack
-        if: steps.check.outputs.is_recovery == 'true' && secrets.SLACK_WEBHOOK_URL != ''
-        run: |
-          cat > slack_recovery.json << EOF
-          {
-            "blocks": [
-              {
-                "type": "header",
-                "text": {"type": "plain_text", "text": "🎉 RECOVERY - CI/CD Fixed"}
-              },
-              {
-                "type": "section",
-                "fields": [
-                  {"type": "mrkdwn", "text": "*Workflow:* ${{ github.event.workflow_run.name }}"},
-                  {"type": "mrkdwn", "text": "*Status:* ✅ Passing"},
-                  {"type": "mrkdwn", "text": "*Branch:* \`${{ github.event.workflow_run.head_branch }}\`"}
-                ]
-              },
-              {
-                "type": "actions",
-                "elements": [
-                  {
-                    "type": "button",
-                    "text": {"type": "plain_text", "text": "🎉 View Run"},
-                    "url": "${{ github.event.workflow_run.html_url }}",
-                    "style": "primary"
-                  }
-                ]
-              }
-            ]
-          }
-          EOF
-          curl -X POST -H 'Content-type: application/json' --data @slack_recovery.json "${{ secrets.SLACK_WEBHOOK_URL }}"
-
-      - name: Send recovery notification to Discord
-        if: steps.check.outputs.is_recovery == 'true' && secrets.DISCORD_WEBHOOK_URL != ''
-        run: |
-          cat > discord_recovery.json << EOF
-          {
-            "embeds": [{
-              "title": "🎉 RECOVERY - CI/CD Fixed",
-              "description": "**${{ github.event.workflow_run.name }}** is now passing",
-              "color": 5763719,
-              "fields": [
-                {"name": "Workflow", "value": "${{ github.event.workflow_run.name }}", "inline": true},
-                {"name": "Branch", "value": "${{ github.event.workflow_run.head_branch }}", "inline": true}
-              ],
-              "footer": {"text": "NetworkX MCP Server CI/CD Monitor"}
-            }]
-          }
-          EOF
-          curl -X POST -H 'Content-type: application/json' --data @discord_recovery.json "${{ secrets.DISCORD_WEBHOOK_URL }}"
-
-      - name: Recovery Summary
-        if: steps.check.outputs.is_recovery == 'true'
-        run: |
-          echo "## 🎉 Recovery Alert" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**${{ github.event.workflow_run.name }}** workflow has recovered and is now passing!" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "[View Successful Run](${{ github.event.workflow_run.html_url }})" >> $GITHUB_STEP_SUMMARY
-
-  # Job 4: Status (always runs to prevent workflow from failing when all jobs are skipped)
-  status:
-    name: Monitoring Status
-    runs-on: ubuntu-latest
-    if: always()
-
-    steps:
-      - name: Report Status
-        run: |
-          echo "## Monitoring Workflow Status" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Event:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ github.event_name }}" = "workflow_run" ]; then
-            echo "**Triggered by:** ${{ github.event.workflow_run.name }}" >> $GITHUB_STEP_SUMMARY
-            echo "**Conclusion:** ${{ github.event.workflow_run.conclusion }}" >> $GITHUB_STEP_SUMMARY
-          fi
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Monitoring workflow completed" >> $GITHUB_STEP_SUMMARY
