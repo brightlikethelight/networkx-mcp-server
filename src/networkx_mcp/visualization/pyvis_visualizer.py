@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import tempfile
+from collections import deque
 from typing import Any, Dict, List
 
 import networkx as nx
@@ -302,10 +303,10 @@ class PyvisVisualizer:
 
         # Calculate levels using BFS
         levels = {root: 0}
-        queue = [root]
+        queue = deque([root])
 
         while queue:
-            current = queue.pop(0)
+            current = queue.popleft()
             for child in tree.successors(current):
                 if child not in levels:
                     levels[child] = levels[current] + 1
