@@ -3,13 +3,13 @@ Academic analytics functions for author impact and collaboration analysis.
 """
 
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 import networkx as nx
 
 
-def calculate_h_index(author_citations: List[int]) -> int:
-    """Calculate h-index from List[Any] of citation counts."""
+def calculate_h_index(author_citations: list[int]) -> int:
+    """Calculate h-index from list of citation counts."""
     citations = sorted(author_citations, reverse=True)
     h_index = 0
 
@@ -23,8 +23,8 @@ def calculate_h_index(author_citations: List[int]) -> int:
 
 
 def analyze_author_impact(
-    graph_name: str, author_name: str, graphs: Optional[Dict[str, Any]] = None
-) -> Dict[str, Any]:
+    graph_name: str, author_name: str, graphs: Optional[dict[str, Any]] = None
+) -> dict[str, Any]:
     """Analyze author impact in citation network."""
     if graphs is None:
         graphs = {}
@@ -72,8 +72,8 @@ def analyze_author_impact(
 
 
 def find_collaboration_patterns(
-    graph_name: str, graphs: Optional[Dict[str, Any]] = None
-) -> Dict[str, Any]:
+    graph_name: str, graphs: Optional[dict[str, Any]] = None
+) -> dict[str, Any]:
     """Find collaboration patterns in citation network."""
     if graphs is None:
         graphs = {}
@@ -84,13 +84,12 @@ def find_collaboration_patterns(
     graph = graphs[graph_name]
 
     # Build co-authorship network
-    coauthor_graph: nx.Graph[Any] = nx.Graph()
-    collaboration_counts: Dict[Tuple[str, str], int] = defaultdict(int)
+    coauthor_graph: nx.Graph = nx.Graph()
+    collaboration_counts: dict[tuple[str, str], int] = defaultdict(int)
 
     for node in graph.nodes(data=True):
         node_id, data = node
-        # Handle both Dict[str, Any] and non-Dict[str, Any] node data
-        if not isinstance(data, Dict[str, Any]):
+        if not isinstance(data, dict):
             data = {}
         authors = data.get("authors", [])
 
@@ -117,7 +116,7 @@ def find_collaboration_patterns(
     # If no authors found, analyze graph structure as collaboration
     if coauthor_graph.number_of_nodes() == 0:
         # Treat graph connections as collaborations
-        collaboration_clusters = List[Any](
+        collaboration_clusters = list(
             nx.connected_components(
                 graph.to_undirected() if graph.is_directed() else graph
             )
@@ -131,7 +130,7 @@ def find_collaboration_patterns(
                     "edges": 0,
                 },
                 "collaboration_clusters": [
-                    List[Any](cluster)[:10] for cluster in collaboration_clusters[:10]
+                    list(cluster)[:10] for cluster in collaboration_clusters[:10]
                 ],  # Limit size
                 "num_clusters": len(collaboration_clusters),
             },
@@ -142,7 +141,7 @@ def find_collaboration_patterns(
             "top_collaborations": [],
             "most_central_authors": [],
             "collaboration_clusters": [
-                List[Any](cluster)[:10] for cluster in collaboration_clusters[:10]
+                list(cluster)[:10] for cluster in collaboration_clusters[:10]
             ],
             "note": "No author data found; showing graph structure as collaboration patterns",
         }
@@ -154,7 +153,7 @@ def find_collaboration_patterns(
                 "edges": coauthor_graph.number_of_edges(),
             },
             "top_collaborations": [
-                {"authors": List[Any](authors), "collaborations": count}
+                {"authors": list(authors), "collaborations": count}
                 for authors, count in top_collaborations
             ],
             "most_central_authors": [
@@ -167,7 +166,7 @@ def find_collaboration_patterns(
             "edges": coauthor_graph.number_of_edges(),
         },
         "top_collaborations": [
-            {"authors": List[Any](authors), "collaborations": count}
+            {"authors": list(authors), "collaborations": count}
             for authors, count in top_collaborations
         ],
         "most_central_authors": [
@@ -179,8 +178,8 @@ def find_collaboration_patterns(
 
 
 def detect_research_trends(
-    graph_name: str, time_window: int = 5, graphs: Optional[Dict[str, Any]] = None
-) -> Dict[str, Any]:
+    graph_name: str, time_window: int = 5, graphs: Optional[dict[str, Any]] = None
+) -> dict[str, Any]:
     """Detect research trends in citation network over time."""
     if graphs is None:
         graphs = {}
@@ -191,13 +190,12 @@ def detect_research_trends(
     graph = graphs[graph_name]
 
     # Group papers by year
-    year_counts: Dict[int, int] = defaultdict(int)
-    yearly_citations: Dict[int, List[int]] = defaultdict(List[Any])
+    year_counts: dict[int, int] = defaultdict(int)
+    yearly_citations: dict[int, list[int]] = defaultdict(list)
 
     for node in graph.nodes(data=True):
         node_id, data = node
-        # Handle both Dict[str, Any] and non-Dict[str, Any] node data
-        if not isinstance(data, Dict[str, Any]):
+        if not isinstance(data, dict):
             data = {}
         year = data.get("year")
         citations = data.get("citations", 0)
@@ -210,7 +208,7 @@ def detect_research_trends(
     years = sorted(year_counts.keys())
     if len(years) < 2:
         # If no year data, analyze graph growth patterns
-        components = List[Any](
+        components = list(
             nx.connected_components(
                 graph.to_undirected() if graph.is_directed() else graph
             )

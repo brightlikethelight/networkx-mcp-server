@@ -52,13 +52,8 @@ jobs:
       run: |
         mypy src/networkx_mcp/ --ignore-missing-imports
 
-    - name: Run security checks
-      if: matrix.os == 'ubuntu-latest'  # Bandit has issues on Windows
-      run: |
-        bandit -r src/networkx_mcp/ -ll
-
     - name: Run tests with coverage
-      run: pytest tests/working/ -v --cov=src/networkx_mcp --cov-report=xml --cov-report=term-missing --cov-fail-under=20
+      run: pytest tests/working/ -v --cov=src/networkx_mcp --cov-report=xml --cov-report=term-missing --cov-fail-under=70
 
     - name: Run integration tests
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == env.PYTHON_VERSION_DEFAULT

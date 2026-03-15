@@ -1,245 +1,81 @@
-"""
-Tests to ensure key modules import successfully and improve coverage.
-
-This file imports and exercises key modules to boost coverage for CI.
-"""
-
-import sys
-from pathlib import Path
-
-import pytest
-
-# Add src to path for imports
-src_path = Path(__file__).parent.parent.parent / "src"
-sys.path.insert(0, str(src_path))
+"""Tests to ensure all live modules import successfully."""
 
 
 class TestModuleImports:
-    """Test that key modules import successfully and basic functionality works."""
+    """Test that all live modules import without errors."""
 
     def test_version_module(self):
-        """Test version module import and usage."""
         from networkx_mcp.__version__ import __version__
 
         assert isinstance(__version__, str)
         assert len(__version__) > 0
 
     def test_main_init_module(self):
-        """Test main __init__ module imports."""
         import networkx_mcp
 
-        # Should have basic attributes
         assert hasattr(networkx_mcp, "__version__")
 
-    def test_core_init_import(self):
-        """Test core module __init__ import."""
-        try:
-            import networkx_mcp.core
+    def test_server_module(self):
+        from networkx_mcp import server
 
-            assert hasattr(networkx_mcp.core, "__file__")
-        except ImportError:
-            # Module may not have exportable content, that's OK
-            pass
+        assert hasattr(server, "NetworkXMCPServer")
+        assert hasattr(server, "main")
+        assert hasattr(server, "graphs")
 
-    def test_errors_module_import(self):
-        """Test errors module imports and basic classes."""
-        try:
-            from networkx_mcp.errors import NetworkXMCPError
+    def test_errors_module(self):
+        from networkx_mcp.errors import (
+            ErrorCodes,
+            GraphNotFoundError,
+            InvalidGraphIdError,
+            InvalidNodeIdError,
+            MCPError,
+        )
 
-            # Test basic error creation
-            base_error = NetworkXMCPError("test message")
-            assert str(base_error) == "test message"
-        except ImportError:
-            # Some error classes may not be available
-            from networkx_mcp import errors
+        assert ErrorCodes.PARSE_ERROR == -32700
+        assert issubclass(GraphNotFoundError, MCPError)
+        assert issubclass(InvalidGraphIdError, MCPError)
+        assert issubclass(InvalidNodeIdError, MCPError)
 
-            assert hasattr(errors, "__file__")
+    def test_graph_cache_module(self):
+        from networkx_mcp.graph_cache import GraphCache, GraphDict
 
-    def test_basic_operations_import(self):
-        """Test basic operations module import."""
+        assert callable(GraphCache)
+        assert callable(GraphDict)
+
+    def test_auth_module(self):
+        from networkx_mcp.auth import APIKeyManager, AuthMiddleware
+
+        assert callable(APIKeyManager)
+        assert callable(AuthMiddleware)
+
+    def test_core_modules(self):
+        from networkx_mcp.core.algorithms import GraphAlgorithms
         from networkx_mcp.core.basic_operations import create_graph
+        from networkx_mcp.core.graph_operations import GraphManager
 
-        # Test with isolated graphs dict
-        test_graphs = {}
-        result = create_graph("test", directed=False, graphs=test_graphs)
-        assert result["created"] is True
-        assert "test" in test_graphs
+        assert callable(GraphAlgorithms)
+        assert callable(GraphManager)
+        assert callable(create_graph)
 
-    def test_academic_module_import(self):
-        """Test academic module imports."""
-        try:
-            from networkx_mcp.academic import analytics, citations
+    def test_academic_modules(self):
+        from networkx_mcp.academic.analytics import (
+            calculate_h_index,
+            detect_research_trends,
+            find_collaboration_patterns,
+        )
+        from networkx_mcp.academic.citations import resolve_doi
 
-            # These modules exist but may have complex dependencies
-            assert hasattr(analytics, "__file__")
-            assert hasattr(citations, "__file__")
-        except ImportError:
-            # May have missing dependencies, that's acceptable
-            pytest.skip("Academic modules have missing dependencies")
+        assert callable(calculate_h_index)
+        assert callable(find_collaboration_patterns)
+        assert callable(detect_research_trends)
+        assert callable(resolve_doi)
 
-    def test_handlers_import(self):
-        """Test handlers module import."""
-        try:
-            from networkx_mcp.handlers import algorithms, graph_ops
+    def test_monitoring_module(self):
+        from networkx_mcp.monitoring.dora_metrics import get_dora_metrics
 
-            # Test basic module attributes
-            assert hasattr(algorithms, "__file__")
-            assert hasattr(graph_ops, "__file__")
-        except ImportError:
-            # May have import issues, skip if needed
-            pytest.skip("Handlers have import issues")
+        assert callable(get_dora_metrics)
 
-    def test_security_init_import(self):
-        """Test security module __init__ import."""
-        try:
-            import networkx_mcp.security
+    def test_tools_module(self):
+        from networkx_mcp.tools.cicd_control import CICDController
 
-            assert hasattr(networkx_mcp.security, "__file__")
-        except ImportError:
-            # Module may not have exportable content
-            pass
-
-    def test_utils_modules_import(self):
-        """Test utils modules import."""
-        try:
-            from networkx_mcp.utils import error_handler, formatters
-
-            # Test basic module presence
-            assert hasattr(formatters, "__file__")
-            assert hasattr(error_handler, "__file__")
-        except ImportError:
-            pytest.skip("Utils modules have import issues")
-
-    def test_storage_modules_import(self):
-        """Test storage modules import."""
-        try:
-            from networkx_mcp.storage import base, factory
-
-            assert hasattr(base, "__file__")
-            assert hasattr(factory, "__file__")
-        except ImportError:
-            pytest.skip("Storage modules have import issues")
-
-    def test_visualization_modules_import(self):
-        """Test visualization modules import."""
-        try:
-            from networkx_mcp.visualization import base
-
-            assert hasattr(base, "__file__")
-        except ImportError:
-            pytest.skip("Visualization modules have import issues")
-
-    def test_io_modules_import(self):
-        """Test I/O modules import."""
-        try:
-            from networkx_mcp.io import base, graphml
-
-            assert hasattr(base, "__file__")
-            assert hasattr(graphml, "__file__")
-        except ImportError:
-            pytest.skip("I/O modules have import issues")
-
-    def test_schemas_import(self):
-        """Test schemas module import."""
-        try:
-            from networkx_mcp.schemas import graph_schemas
-
-            assert hasattr(graph_schemas, "__file__")
-        except ImportError:
-            pytest.skip("Schemas module has import issues")
-
-    def test_validators_import(self):
-        """Test validators module import."""
-        try:
-            from networkx_mcp.validators import graph_validator
-
-            assert hasattr(graph_validator, "__file__")
-        except ImportError:
-            pytest.skip("Validators module has import issues")
-
-
-class TestFunctionality:
-    """Test actual functionality of key modules to increase coverage."""
-
-    def test_graph_operations_coverage(self):
-        """Test graph operations to increase coverage."""
-        from networkx_mcp.server import add_edges, add_nodes, create_graph, graphs
-
-        # Clear graphs for isolated test
-        graphs.clear()
-
-        # Create and populate graph
-        create_graph("coverage_test", directed=False)
-        add_nodes("coverage_test", [1, 2, 3, 4, 5])
-        add_edges("coverage_test", [[1, 2], [2, 3], [3, 4]])
-
-        # Verify graph exists and has expected structure
-        assert "coverage_test" in graphs
-        graph = graphs["coverage_test"]
-        assert len(graph.nodes()) == 5
-        assert len(graph.edges()) == 3
-
-    def test_error_handling_coverage(self):
-        """Test error handling to increase coverage in errors module."""
-        from networkx_mcp.server import get_graph_info
-
-        # Test error handling in operations
-        result = get_graph_info("nonexistent_graph")
-        assert result["success"] is False
-        assert "not found" in result["error"]
-
-        # Try to import and test error classes if available
-        try:
-            from networkx_mcp.errors import NetworkXMCPError
-
-            error1 = NetworkXMCPError("base error")
-            assert "base error" in str(error1)
-        except ImportError:
-            # Error classes may not be available, skip
-            pass
-
-    def test_monitoring_import_coverage(self):
-        """Test monitoring module import to increase coverage."""
-        try:
-            from networkx_mcp.monitoring import MCPHealthMonitor
-
-            # Try to instantiate if possible
-            monitor = MCPHealthMonitor()
-            assert hasattr(monitor, "__class__")
-        except ImportError:
-            pytest.skip("Monitoring module not available")
-        except Exception:
-            # Module may have complex dependencies, just check import worked
-            pass
-
-    def test_auth_import_coverage(self):
-        """Test auth module import to increase coverage."""
-        try:
-            from networkx_mcp.auth import APIKeyManager
-
-            # Try basic instantiation
-            manager = APIKeyManager()
-            assert hasattr(manager, "__class__")
-        except ImportError:
-            pytest.skip("Auth module not available")
-        except Exception:
-            # Module may have complex dependencies
-            pass
-
-    def test_features_import_coverage(self):
-        """Test features module import to increase coverage."""
-        try:
-            from networkx_mcp import features
-
-            assert hasattr(features, "__file__")
-        except ImportError:
-            pytest.skip("Features module not available")
-
-    def test_cli_import_coverage(self):
-        """Test CLI module import to increase coverage."""
-        try:
-            from networkx_mcp import cli
-
-            assert hasattr(cli, "__file__")
-        except ImportError:
-            pytest.skip("CLI module not available")
+        assert callable(CICDController)

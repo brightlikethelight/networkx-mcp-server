@@ -82,13 +82,8 @@ fi
 # 5. Run type checking with mypy
 echo "Running type checks..."
 if command -v mypy &> /dev/null; then
-    mypy src/networkx_mcp/ --ignore-missing-imports --no-error-summary 2>&1 | grep -E "error:" > /dev/null
-    if [ $? -eq 0 ]; then
-        print_status 1 "Type checking (mypy)"
-        echo "Run 'mypy src/networkx_mcp/' to see type errors"
-    else
-        print_status 0 "Type checking (mypy)"
-    fi
+    mypy src/networkx_mcp/ --ignore-missing-imports --no-error-summary > /dev/null 2>&1
+    print_status $? "Type checking (mypy)"
 else
     echo -e "${YELLOW}⚠️  mypy not installed - skipping type check${NC}"
 fi

@@ -477,7 +477,7 @@ class NetworkXMCPServer:
             },
             {
                 "name": "import_csv",
-                "description": "Import graph from CSV edge List[Any] (format: source,target per line)",
+                "description": "Import graph from CSV edge list (format: source,target per line)",
                 "inputSchema": {
                     "type": "object",
                     "properties": {
@@ -689,6 +689,7 @@ class NetworkXMCPServer:
         """Execute a tool."""
         tool_name = params.get("name")
         args = params.get("arguments", {})
+        logger.debug(f"Executing tool: {tool_name}")
 
         try:
             if tool_name == "create_graph":
@@ -884,6 +885,7 @@ class NetworkXMCPServer:
                     "error": {"code": -32601, "message": f"Unknown tool: {tool_name}"}
                 }
 
+            logger.debug(f"Tool {tool_name} completed successfully")
             return {"content": [{"type": "text", "text": json.dumps(result)}]}
 
         except MCPError as e:

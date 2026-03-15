@@ -3,6 +3,7 @@ Simple API key authentication for NetworkX MCP server.
 """
 
 import hashlib
+import hmac
 import json
 import secrets
 from datetime import datetime, timedelta
@@ -60,19 +61,27 @@ class APIKeyManager:
         return key
 
     def validate_key(self, api_key: str) -> Optional[Dict[str, Any]]:
-        """Validate an API key and return its metadata."""
+        """Validate an API key and return its metadata.
+
+        Uses constant-time comparison to prevent timing attacks.
+        """
         if not api_key or not api_key.startswith("nxmcp_"):
             return None
 
         key_hash = hashlib.sha256(api_key.encode()).hexdigest()
-        key_data = self.keys.get(key_hash)
 
-        if key_data and key_data.get("active", True):
+        # Constant-time scan to prevent timing attacks
+        matched_data = None
+        for stored_hash, key_data in self.keys.items():
+            if hmac.compare_digest(key_hash, stored_hash):
+                matched_data = key_data
+
+        if matched_data and matched_data.get("active", True):
             # Update usage stats
-            key_data["last_used"] = datetime.now().isoformat()
-            key_data["request_count"] = key_data.get("request_count", 0) + 1
+            matched_data["last_used"] = datetime.now().isoformat()
+            matched_data["request_count"] = matched_data.get("request_count", 0) + 1
             self._save_keys()
-            return key_data
+            return matched_data
 
         return None
 

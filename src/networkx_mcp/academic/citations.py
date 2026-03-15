@@ -14,6 +14,8 @@ import requests
 from bibtexparser.bwriter import BibTexWriter
 from requests.exceptions import HTTPError, RequestException, Timeout
 
+from networkx_mcp.__version__ import __version__
+
 logger = logging.getLogger(__name__)
 
 
@@ -52,7 +54,7 @@ def resolve_doi(
     url = f"https://api.crossref.org/works/{doi}"
     headers = {
         "Accept": "application/json",
-        "User-Agent": "NetworkX-MCP-Server/3.0.0 (mailto:support@networkx-mcp.org)",
+        "User-Agent": f"NetworkX-MCP-Server/{__version__} (mailto:support@networkx-mcp.org)",
     }
 
     last_error = None

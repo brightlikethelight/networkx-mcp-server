@@ -294,7 +294,7 @@ class GraphManager:
         if attribute is not None:
             return nx.get_edge_attributes(graph, attribute)
 
-        return {edge: data for *edge, data in graph.edges(data=True)}
+        return {(u, v): data for u, v, data in graph.edges(data=True)}
 
     def set_node_attributes(
         self,
