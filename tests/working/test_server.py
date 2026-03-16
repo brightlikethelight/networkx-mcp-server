@@ -400,8 +400,7 @@ class TestToolDispatchBasic:
         assert "g" in graphs
         resp = await server.handle_request(_tool_call("delete_graph", {"graph": "g"}))
         content = json.loads(resp["result"]["content"][0]["text"])
-        assert content["success"] is True
-        assert content["deleted"] is True
+        assert content["deleted"] == "g"
         assert "g" not in graphs
 
 
@@ -603,8 +602,7 @@ class TestToolErrorHandling:
         resp = await server.handle_request(
             _tool_call("delete_graph", {"graph": "nope"})
         )
-        content = json.loads(resp["result"]["content"][0]["text"])
-        assert content["success"] is False
+        assert "error" in resp
 
     @pytest.mark.asyncio
     async def test_error_response_is_jsonrpc_compliant(self, server):

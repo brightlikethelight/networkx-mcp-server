@@ -100,13 +100,11 @@ class TestSyncHandlers:
     def test_delete_graph_success(self):
         handle_create_graph({"name": "g"})
         result = handle_delete_graph({"graph": "g"})
-        assert result["success"] is True
-        assert result["deleted"] is True
+        assert result["deleted"] == "g"
 
     def test_delete_graph_missing(self):
-        result = handle_delete_graph({"graph": "nope"})
-        assert result["success"] is False
-        assert "error" in result
+        with pytest.raises(ValueError, match="not found"):
+            handle_delete_graph({"graph": "nope"})
 
     def test_shortest_path(self):
         handle_create_graph({"name": "g"})

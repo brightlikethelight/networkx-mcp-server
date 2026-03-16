@@ -112,9 +112,9 @@ def handle_list_graphs(args: Dict[str, Any]) -> Dict[str, Any]:
 def handle_delete_graph(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
     if graph_name not in graphs:
-        return {"success": False, "error": f"Graph '{graph_name}' not found"}
+        raise ValueError(f"Graph '{graph_name}' not found")
     del graphs[graph_name]
-    return {"success": True, "graph_id": graph_name, "deleted": True}
+    return {"deleted": graph_name}
 
 
 def handle_remove_nodes(args: Dict[str, Any]) -> Dict[str, Any]:

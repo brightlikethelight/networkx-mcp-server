@@ -101,18 +101,28 @@ Ask Claude: "Create a graph called 'test', add nodes 1, 2, 3 with edges between 
 ### 📊 Core Graph Operations
 
 - `create_graph` - Create directed or undirected graphs
-- `add_nodes` - Add nodes to your graph
-- `add_edges` - Connect nodes with edges
+- `add_nodes` / `remove_nodes` - Add or remove nodes
+- `add_edges` / `remove_edges` - Add or remove edges
 - `get_info` - Get basic graph statistics
+- `list_graphs` - List all stored graphs
+- `delete_graph` - Delete a graph from storage
 - `shortest_path` - Find optimal paths between nodes
 
 ### 🔍 Analysis Operations
 
 - `degree_centrality` - Find the most connected nodes
 - `betweenness_centrality` - Identify bridges and key connectors
+- `centrality_measures` - Multiple centrality metrics at once
 - `pagerank` - Google's PageRank algorithm for node importance
 - `connected_components` - Find isolated subgraphs
 - `community_detection` - Discover natural groupings
+- `clustering_coefficients` - Measure local clustering
+- `graph_statistics` - Comprehensive graph statistics
+- `minimum_spanning_tree` - Find minimum spanning tree
+- `cycles_detection` - Detect cycles in a graph
+- `graph_coloring` - Greedy vertex coloring
+- `matching` - Maximum weight matching
+- `maximum_flow` - Maximum flow in directed graphs
 
 ### 🎨 Visualization & I/O
 

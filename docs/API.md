@@ -5,8 +5,8 @@ Parameters are passed as `arguments` inside the request.
 
 ## Table of Contents
 
-1. [Graph Management](#graph-management) -- create_graph, add_nodes, add_edges, get_info, delete_graph
-2. [Algorithms](#algorithms) -- shortest_path, degree_centrality, betweenness_centrality, connected_components, pagerank, community_detection
+1. [Graph Management](#graph-management) -- create_graph, add_nodes, add_edges, get_info, list_graphs, delete_graph, remove_nodes, remove_edges
+2. [Algorithms](#algorithms) -- shortest_path, degree_centrality, betweenness_centrality, connected_components, pagerank, community_detection, clustering_coefficients, graph_statistics, minimum_spanning_tree, cycles_detection, graph_coloring, centrality_measures, matching, maximum_flow
 3. [I/O and Visualization](#io-and-visualization) -- import_csv, export_json, visualize_graph
 4. [Academic / Citation](#academic--citation) -- build_citation_network, analyze_author_impact, find_collaboration_patterns, detect_research_trends, export_bibtex, recommend_papers, resolve_doi
 5. [CI/CD Control](#cicd-control) -- trigger_workflow, get_workflow_status, cancel_workflow, rerun_failed_jobs, get_dora_metrics, analyze_workflow_failures
@@ -69,6 +69,16 @@ Get graph information (node count, edge count, directedness).
 
 Returns: `{"nodes": 3, "edges": 2, "directed": false}`
 
+### list_graphs
+
+List all stored graphs with summary info. Takes no parameters.
+
+```json
+{}
+```
+
+Returns: `{"graphs": [{"name": "my_graph", "nodes": 3, "edges": 2, "directed": false}], "total": 1}`
+
 ### delete_graph
 
 Delete a graph from storage.
@@ -80,6 +90,36 @@ Delete a graph from storage.
 ```json
 {"graph": "my_graph"}
 ```
+
+### remove_nodes
+
+Remove nodes from a graph.
+
+| Parameter | Type            | Required | Description                  |
+|-----------|-----------------|----------|------------------------------|
+| `graph`   | string          | yes      | Name of the target graph     |
+| `nodes`   | array of string/number | yes | Node identifiers to remove |
+
+```json
+{"graph": "my_graph", "nodes": ["A", "B"]}
+```
+
+Returns: `{"removed": 2, "total_nodes": 1}`
+
+### remove_edges
+
+Remove edges from a graph.
+
+| Parameter | Type                       | Required | Description                  |
+|-----------|----------------------------|----------|------------------------------|
+| `graph`   | string                     | yes      | Name of the target graph     |
+| `edges`   | array of [source, target]  | yes      | Pairs of node identifiers    |
+
+```json
+{"graph": "my_graph", "edges": [["A", "B"]]}
+```
+
+Returns: `{"removed": 1, "total_edges": 1}`
 
 ---
 
@@ -159,6 +199,112 @@ Detect communities using the Louvain method.
 
 ```json
 {"graph": "my_graph"}
+```
+
+### clustering_coefficients
+
+Calculate clustering coefficients for all nodes.
+
+| Parameter | Type   | Required | Description |
+|-----------|--------|----------|-------------|
+| `graph`   | string | yes      | Graph name  |
+
+```json
+{"graph": "my_graph"}
+```
+
+Returns: `{"node_clustering": {"A": 0.5, ...}, "average_clustering": 0.42}`
+
+### graph_statistics
+
+Calculate comprehensive graph statistics (density, diameter, degree distribution).
+
+| Parameter | Type   | Required | Description |
+|-----------|--------|----------|-------------|
+| `graph`   | string | yes      | Graph name  |
+
+```json
+{"graph": "my_graph"}
+```
+
+### minimum_spanning_tree
+
+Find minimum spanning tree of an undirected graph.
+
+| Parameter   | Type   | Required | Default    | Description                    |
+|-------------|--------|----------|------------|--------------------------------|
+| `graph`     | string | yes      | --         | Graph name                     |
+| `weight`    | string | no       | "weight"   | Edge weight attribute          |
+| `algorithm` | string | no       | "kruskal"  | Algorithm: `kruskal` or `prim` |
+
+```json
+{"graph": "my_graph", "algorithm": "prim"}
+```
+
+### cycles_detection
+
+Detect cycles in a graph (cycle basis for undirected, DAG check for directed).
+
+| Parameter | Type   | Required | Description |
+|-----------|--------|----------|-------------|
+| `graph`   | string | yes      | Graph name  |
+
+```json
+{"graph": "my_graph"}
+```
+
+### graph_coloring
+
+Color graph vertices using greedy algorithm.
+
+| Parameter  | Type   | Required | Default         | Description              |
+|------------|--------|----------|-----------------|--------------------------|
+| `graph`    | string | yes      | --              | Graph name               |
+| `strategy` | string | no       | "largest_first" | Greedy coloring strategy |
+
+```json
+{"graph": "my_graph", "strategy": "smallest_last"}
+```
+
+### centrality_measures
+
+Calculate multiple centrality measures (degree, betweenness, closeness, eigenvector).
+
+| Parameter  | Type            | Required | Description                                                    |
+|------------|-----------------|----------|----------------------------------------------------------------|
+| `graph`    | string          | yes      | Graph name                                                     |
+| `measures` | array of string | no       | Measures to compute: degree, betweenness, closeness, eigenvector |
+
+```json
+{"graph": "my_graph", "measures": ["closeness", "eigenvector"]}
+```
+
+### matching
+
+Find maximum weight matching in a graph.
+
+| Parameter         | Type    | Required | Default | Description                         |
+|-------------------|---------|----------|---------|-------------------------------------|
+| `graph`           | string  | yes      | --      | Graph name                          |
+| `max_cardinality` | boolean | no       | true    | Whether to maximize cardinality     |
+
+```json
+{"graph": "my_graph", "max_cardinality": true}
+```
+
+### maximum_flow
+
+Calculate maximum flow in a directed graph.
+
+| Parameter  | Type          | Required | Default    | Description               |
+|------------|---------------|----------|------------|---------------------------|
+| `graph`    | string        | yes      | --         | Graph name (must be directed) |
+| `source`   | string/number | yes      | --         | Source node               |
+| `sink`     | string/number | yes      | --         | Sink node                 |
+| `capacity` | string        | no       | "capacity" | Edge capacity attribute   |
+
+```json
+{"graph": "flow_net", "source": "s", "sink": "t", "capacity": "capacity"}
 ```
 
 ---

@@ -5,10 +5,13 @@ Simple API key authentication for NetworkX MCP server.
 import hashlib
 import hmac
 import json
+import logging
 import secrets
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
+
+logger = logging.getLogger(__name__)
 
 
 class APIKeyManager:
@@ -30,7 +33,10 @@ class APIKeyManager:
                 with open(self.storage_path, "r") as f:
                     loaded_data = json.load(f)
                     return loaded_data if isinstance(loaded_data, dict) else {}
-            except Exception:
+            except (json.JSONDecodeError, OSError) as e:
+                logger.warning(
+                    "Failed to load API keys from %s: %s", self.storage_path, e
+                )
                 return {}
         return {}
 
