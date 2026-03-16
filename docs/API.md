@@ -5,7 +5,7 @@ Parameters are passed as `arguments` inside the request.
 
 ## Table of Contents
 
-1. [Graph Management](#graph-management) -- create_graph, add_nodes, add_edges, get_info, list_graphs, delete_graph, remove_nodes, remove_edges
+1. [Graph Management](#graph-management) -- create_graph, add_nodes, add_edges, get_info, list_graphs, delete_graph, remove_nodes, remove_edges, get_neighbors, set_node_attributes, get_node_attributes, set_edge_attributes, get_edge_attributes
 2. [Algorithms](#algorithms) -- shortest_path, degree_centrality, betweenness_centrality, connected_components, pagerank, community_detection, clustering_coefficients, graph_statistics, minimum_spanning_tree, cycles_detection, graph_coloring, centrality_measures, matching, maximum_flow
 3. [I/O and Visualization](#io-and-visualization) -- import_csv, export_json, visualize_graph
 4. [Academic / Citation](#academic--citation) -- build_citation_network, analyze_author_impact, find_collaboration_patterns, detect_research_trends, export_bibtex, recommend_papers, resolve_doi
@@ -120,6 +120,82 @@ Remove edges from a graph.
 ```
 
 Returns: `{"removed": 1, "total_edges": 1}`
+
+### get_neighbors
+
+Get all neighbors of a node.
+
+| Parameter | Type          | Required | Description |
+|-----------|---------------|----------|-------------|
+| `graph`   | string        | yes      | Graph name  |
+| `node`    | string/number | yes      | Node to query |
+
+```json
+{"graph": "my_graph", "node": "A"}
+```
+
+Returns: `{"node": "A", "neighbors": ["B", "C"], "count": 2}`
+
+### set_node_attributes
+
+Set attributes on one or more nodes.
+
+| Parameter    | Type   | Required | Description                          |
+|--------------|--------|----------|--------------------------------------|
+| `graph`      | string | yes      | Graph name                           |
+| `attributes` | object | yes      | Map of node -> {attr: value}         |
+
+```json
+{"graph": "my_graph", "attributes": {"A": {"color": "red", "weight": 5}}}
+```
+
+Returns: `{"updated": 1}`
+
+### get_node_attributes
+
+Get all attributes of a node.
+
+| Parameter | Type          | Required | Description |
+|-----------|---------------|----------|-------------|
+| `graph`   | string        | yes      | Graph name  |
+| `node`    | string/number | yes      | Node to query |
+
+```json
+{"graph": "my_graph", "node": "A"}
+```
+
+Returns: `{"node": "A", "attributes": {"color": "red", "weight": 5}}`
+
+### set_edge_attributes
+
+Set attributes on one or more edges.
+
+| Parameter    | Type  | Required | Description                                    |
+|--------------|-------|----------|------------------------------------------------|
+| `graph`      | string | yes     | Graph name                                     |
+| `attributes` | array  | yes     | List of {source, target, attr, value} objects  |
+
+```json
+{"graph": "my_graph", "attributes": [{"source": "A", "target": "B", "attr": "weight", "value": 3.5}]}
+```
+
+Returns: `{"updated": 1}`
+
+### get_edge_attributes
+
+Get all attributes of an edge.
+
+| Parameter | Type          | Required | Description |
+|-----------|---------------|----------|-------------|
+| `graph`   | string        | yes      | Graph name  |
+| `source`  | string/number | yes      | Source node |
+| `target`  | string/number | yes      | Target node |
+
+```json
+{"graph": "my_graph", "source": "A", "target": "B"}
+```
+
+Returns: `{"source": "A", "target": "B", "attributes": {"weight": 3.5}}`
 
 ---
 

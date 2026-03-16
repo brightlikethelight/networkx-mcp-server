@@ -138,6 +138,76 @@ def handle_shortest_path(args: Dict[str, Any]) -> Dict[str, Any]:
     return {"path": path, "length": len(path) - 1}
 
 
+def handle_get_neighbors(args: Dict[str, Any]) -> Dict[str, Any]:
+    graph_name = args["graph"]
+    if graph_name not in graphs:
+        raise ValueError(f"Graph '{graph_name}' not found")
+    node = args["node"]
+    graph = graphs[graph_name]
+    if node not in graph:
+        raise ValueError(f"Node '{node}' not found in graph '{graph_name}'")
+    neighbors = list(graph.neighbors(node))
+    return {"node": node, "neighbors": neighbors, "count": len(neighbors)}
+
+
+def handle_set_node_attributes(args: Dict[str, Any]) -> Dict[str, Any]:
+    graph_name = args["graph"]
+    if graph_name not in graphs:
+        raise ValueError(f"Graph '{graph_name}' not found")
+    graph = graphs[graph_name]
+    attributes = args["attributes"]  # {node: {attr: value}}
+    for node, attrs in attributes.items():
+        if node not in graph:
+            raise ValueError(f"Node '{node}' not found")
+        for key, val in attrs.items():
+            graph.nodes[node][key] = val
+    return {"updated": len(attributes)}
+
+
+def handle_get_node_attributes(args: Dict[str, Any]) -> Dict[str, Any]:
+    graph_name = args["graph"]
+    if graph_name not in graphs:
+        raise ValueError(f"Graph '{graph_name}' not found")
+    node = args["node"]
+    graph = graphs[graph_name]
+    if node not in graph:
+        raise ValueError(f"Node '{node}' not found in graph '{graph_name}'")
+    return {"node": node, "attributes": dict(graph.nodes[node])}
+
+
+def handle_set_edge_attributes(args: Dict[str, Any]) -> Dict[str, Any]:
+    graph_name = args["graph"]
+    if graph_name not in graphs:
+        raise ValueError(f"Graph '{graph_name}' not found")
+    graph = graphs[graph_name]
+    attributes = args[
+        "attributes"
+    ]  # [{"source": s, "target": t, "attr": k, "value": v}]
+    count = 0
+    for entry in attributes:
+        s, t = entry["source"], entry["target"]
+        if not graph.has_edge(s, t):
+            raise ValueError(f"Edge '{s}'->'{t}' not found")
+        graph[s][t][entry["attr"]] = entry["value"]
+        count += 1
+    return {"updated": count}
+
+
+def handle_get_edge_attributes(args: Dict[str, Any]) -> Dict[str, Any]:
+    graph_name = args["graph"]
+    if graph_name not in graphs:
+        raise ValueError(f"Graph '{graph_name}' not found")
+    source, target = args["source"], args["target"]
+    graph = graphs[graph_name]
+    if not graph.has_edge(source, target):
+        raise ValueError(f"Edge '{source}'->'{target}' not found")
+    return {
+        "source": source,
+        "target": target,
+        "attributes": dict(graph[source][target]),
+    }
+
+
 # ═══════════════════════════════════════════════════════════════════════
 # Algorithms
 # ═══════════════════════════════════════════════════════════════════════

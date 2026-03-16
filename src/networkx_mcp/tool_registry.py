@@ -228,6 +228,105 @@ def build_registry(
             graph_param="graph",
         )
     )
+    registry.register(
+        ToolDef(
+            name="get_neighbors",
+            description="Get all neighbors of a node",
+            input_schema={
+                "type": "object",
+                "properties": {
+                    "graph": {"type": "string"},
+                    "node": {"type": ["string", "number"]},
+                },
+                "required": ["graph", "node"],
+            },
+            handler=h.handle_get_neighbors,
+            graph_param="graph",
+        )
+    )
+    registry.register(
+        ToolDef(
+            name="set_node_attributes",
+            description="Set attributes on one or more nodes",
+            input_schema={
+                "type": "object",
+                "properties": {
+                    "graph": {"type": "string"},
+                    "attributes": {
+                        "type": "object",
+                        "description": "Map of node -> {attr: value}",
+                    },
+                },
+                "required": ["graph", "attributes"],
+            },
+            handler=h.handle_set_node_attributes,
+            is_write=True,
+            graph_param="graph",
+        )
+    )
+    registry.register(
+        ToolDef(
+            name="get_node_attributes",
+            description="Get all attributes of a node",
+            input_schema={
+                "type": "object",
+                "properties": {
+                    "graph": {"type": "string"},
+                    "node": {"type": ["string", "number"]},
+                },
+                "required": ["graph", "node"],
+            },
+            handler=h.handle_get_node_attributes,
+            graph_param="graph",
+        )
+    )
+    registry.register(
+        ToolDef(
+            name="set_edge_attributes",
+            description="Set attributes on one or more edges",
+            input_schema={
+                "type": "object",
+                "properties": {
+                    "graph": {"type": "string"},
+                    "attributes": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "source": {"type": ["string", "number"]},
+                                "target": {"type": ["string", "number"]},
+                                "attr": {"type": "string"},
+                                "value": {},
+                            },
+                            "required": ["source", "target", "attr", "value"],
+                        },
+                        "description": "List of {source, target, attr, value}",
+                    },
+                },
+                "required": ["graph", "attributes"],
+            },
+            handler=h.handle_set_edge_attributes,
+            is_write=True,
+            graph_param="graph",
+        )
+    )
+    registry.register(
+        ToolDef(
+            name="get_edge_attributes",
+            description="Get all attributes of an edge",
+            input_schema={
+                "type": "object",
+                "properties": {
+                    "graph": {"type": "string"},
+                    "source": {"type": ["string", "number"]},
+                    "target": {"type": ["string", "number"]},
+                },
+                "required": ["graph", "source", "target"],
+            },
+            handler=h.handle_get_edge_attributes,
+            graph_param="graph",
+        )
+    )
 
     # ── Algorithms ────────────────────────────────────────────────────
     for algo_name, algo_handler in [

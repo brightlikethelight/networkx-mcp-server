@@ -107,6 +107,9 @@ Ask Claude: "Create a graph called 'test', add nodes 1, 2, 3 with edges between 
 - `list_graphs` - List all stored graphs
 - `delete_graph` - Delete a graph from storage
 - `shortest_path` - Find optimal paths between nodes
+- `get_neighbors` - Get all neighbors of a node
+- `set_node_attributes` / `get_node_attributes` - Manage node metadata
+- `set_edge_attributes` / `get_edge_attributes` - Manage edge weights and metadata
 
 ### 🔍 Analysis Operations
 

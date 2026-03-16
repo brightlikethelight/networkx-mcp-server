@@ -15,7 +15,10 @@ from networkx_mcp.handlers import (
     handle_cycles_detection,
     handle_delete_graph,
     handle_export_json,
+    handle_get_edge_attributes,
     handle_get_info,
+    handle_get_neighbors,
+    handle_get_node_attributes,
     handle_graph_coloring,
     handle_graph_statistics,
     handle_import_csv,
@@ -25,6 +28,8 @@ from networkx_mcp.handlers import (
     handle_minimum_spanning_tree,
     handle_remove_edges,
     handle_remove_nodes,
+    handle_set_edge_attributes,
+    handle_set_node_attributes,
     handle_shortest_path,
     handle_degree_centrality,
     handle_betweenness_centrality,
@@ -499,3 +504,154 @@ class TestBulkLimits:
         handle_add_edges({"graph": "g", "edges": [[1, 2], [2, 3]]})
         result = handle_visualize_graph({"graph": "g"})
         assert "visualization" in result
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# get_neighbors
+# ═══════════════════════════════════════════════════════════════════════
+
+
+class TestGetNeighbors:
+    @pytest.fixture(autouse=True)
+    def _setup(self):
+        handle_create_graph({"name": "g"})
+        handle_add_nodes({"graph": "g", "nodes": ["a", "b", "c"]})
+        handle_add_edges({"graph": "g", "edges": [["a", "b"], ["a", "c"]]})
+
+    def test_happy_path(self):
+        result = handle_get_neighbors({"graph": "g", "node": "a"})
+        assert set(result["neighbors"]) == {"b", "c"}
+        assert result["count"] == 2
+
+    def test_leaf_node(self):
+        result = handle_get_neighbors({"graph": "g", "node": "b"})
+        assert result["neighbors"] == ["a"]
+
+    def test_missing_graph(self):
+        with pytest.raises(ValueError, match="not found"):
+            handle_get_neighbors({"graph": "nope", "node": "a"})
+
+    def test_missing_node(self):
+        with pytest.raises(ValueError, match="Node.*not found"):
+            handle_get_neighbors({"graph": "g", "node": "z"})
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# set/get node attributes
+# ═══════════════════════════════════════════════════════════════════════
+
+
+class TestNodeAttributes:
+    @pytest.fixture(autouse=True)
+    def _setup(self):
+        handle_create_graph({"name": "g"})
+        handle_add_nodes({"graph": "g", "nodes": ["a", "b"]})
+
+    def test_set_and_get(self):
+        handle_set_node_attributes(
+            {"graph": "g", "attributes": {"a": {"color": "red", "weight": 5}}}
+        )
+        result = handle_get_node_attributes({"graph": "g", "node": "a"})
+        assert result["attributes"]["color"] == "red"
+        assert result["attributes"]["weight"] == 5
+
+    def test_set_multiple_nodes(self):
+        result = handle_set_node_attributes(
+            {"graph": "g", "attributes": {"a": {"x": 1}, "b": {"x": 2}}}
+        )
+        assert result["updated"] == 2
+
+    def test_get_empty_attributes(self):
+        result = handle_get_node_attributes({"graph": "g", "node": "a"})
+        assert result["attributes"] == {}
+
+    def test_set_missing_graph(self):
+        with pytest.raises(ValueError, match="not found"):
+            handle_set_node_attributes({"graph": "nope", "attributes": {"a": {"x": 1}}})
+
+    def test_set_missing_node(self):
+        with pytest.raises(ValueError, match="Node.*not found"):
+            handle_set_node_attributes({"graph": "g", "attributes": {"z": {"x": 1}}})
+
+    def test_get_missing_graph(self):
+        with pytest.raises(ValueError, match="not found"):
+            handle_get_node_attributes({"graph": "nope", "node": "a"})
+
+    def test_get_missing_node(self):
+        with pytest.raises(ValueError, match="Node.*not found"):
+            handle_get_node_attributes({"graph": "g", "node": "z"})
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# set/get edge attributes
+# ═══════════════════════════════════════════════════════════════════════
+
+
+class TestEdgeAttributes:
+    @pytest.fixture(autouse=True)
+    def _setup(self):
+        handle_create_graph({"name": "g"})
+        handle_add_nodes({"graph": "g", "nodes": ["a", "b", "c"]})
+        handle_add_edges({"graph": "g", "edges": [["a", "b"], ["b", "c"]]})
+
+    def test_set_and_get(self):
+        handle_set_edge_attributes(
+            {
+                "graph": "g",
+                "attributes": [
+                    {"source": "a", "target": "b", "attr": "weight", "value": 3.5}
+                ],
+            }
+        )
+        result = handle_get_edge_attributes(
+            {"graph": "g", "source": "a", "target": "b"}
+        )
+        assert result["attributes"]["weight"] == 3.5
+
+    def test_set_multiple_edges(self):
+        result = handle_set_edge_attributes(
+            {
+                "graph": "g",
+                "attributes": [
+                    {"source": "a", "target": "b", "attr": "w", "value": 1},
+                    {"source": "b", "target": "c", "attr": "w", "value": 2},
+                ],
+            }
+        )
+        assert result["updated"] == 2
+
+    def test_get_empty_attributes(self):
+        result = handle_get_edge_attributes(
+            {"graph": "g", "source": "a", "target": "b"}
+        )
+        assert result["attributes"] == {}
+
+    def test_set_missing_graph(self):
+        with pytest.raises(ValueError, match="not found"):
+            handle_set_edge_attributes(
+                {
+                    "graph": "nope",
+                    "attributes": [
+                        {"source": "a", "target": "b", "attr": "w", "value": 1}
+                    ],
+                }
+            )
+
+    def test_set_missing_edge(self):
+        with pytest.raises(ValueError, match="Edge.*not found"):
+            handle_set_edge_attributes(
+                {
+                    "graph": "g",
+                    "attributes": [
+                        {"source": "a", "target": "c", "attr": "w", "value": 1}
+                    ],
+                }
+            )
+
+    def test_get_missing_graph(self):
+        with pytest.raises(ValueError, match="not found"):
+            handle_get_edge_attributes({"graph": "nope", "source": "a", "target": "b"})
+
+    def test_get_missing_edge(self):
+        with pytest.raises(ValueError, match="Edge.*not found"):
+            handle_get_edge_attributes({"graph": "g", "source": "a", "target": "c"})

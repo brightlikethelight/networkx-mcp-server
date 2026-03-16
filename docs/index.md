@@ -8,10 +8,11 @@ Desktop and other MCP clients access to graph algorithms without writing Python.
 
 ## Capabilities
 
-**38 tools** across 4 categories:
+**43 tools** across 4 categories:
 
-- **Core graph operations (25)** -- create/delete graphs, list graphs,
-  add/remove nodes and edges, graph statistics, shortest path,
+- **Core graph operations (30)** -- create/delete graphs, list graphs,
+  add/remove nodes and edges, get/set node/edge attributes,
+  get neighbors, graph statistics, shortest path,
   centrality (degree, betweenness, multi-centrality), PageRank,
   community detection, clustering coefficients, minimum spanning tree,
   cycle detection, graph coloring, matching, maximum flow,
