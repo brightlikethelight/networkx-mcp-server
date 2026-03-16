@@ -156,6 +156,14 @@ class TestMCPLifecycle:
         assert result["serverInfo"]["name"] == "networkx-mcp-server"
 
     @pytest.mark.asyncio
+    async def test_initialize_returns_correct_version(self, server):
+        """Version in initialize response matches __version__, not hardcoded."""
+        from networkx_mcp.__version__ import __version__
+
+        resp = await server.handle_request(_init_request())
+        assert resp["result"]["serverInfo"]["version"] == __version__
+
+    @pytest.mark.asyncio
     async def test_initialize_marks_server_initialized(self, server):
         await server.handle_request(_init_request())
         assert server.initialized is True
@@ -181,13 +189,13 @@ class TestMCPLifecycle:
     async def test_tools_list_before_init_returns_error(self, server):
         resp = await server.handle_request(_tools_list_request())
         assert "error" in resp
-        assert resp["error"]["code"] == -32002
+        assert resp["error"]["code"] == ErrorCodes.SERVER_NOT_INITIALIZED
 
     @pytest.mark.asyncio
     async def test_tools_call_before_init_returns_error(self, server):
         resp = await server.handle_request(_tool_call("create_graph", {"name": "g"}))
         assert "error" in resp
-        assert resp["error"]["code"] == -32002
+        assert resp["error"]["code"] == ErrorCodes.SERVER_NOT_INITIALIZED
 
     @pytest.mark.asyncio
     async def test_tools_list_after_init_returns_tools(self, server):
@@ -218,12 +226,12 @@ class TestMCPLifecycle:
         assert resp["result"]["resources"] == []
 
     @pytest.mark.asyncio
-    async def test_resources_read_not_implemented(self, server):
+    async def test_resources_read_invalid_uri(self, server):
         await _init_server(server)
         resp = await server.handle_request(
             {"jsonrpc": "2.0", "id": 7, "method": "resources/read", "params": {}}
         )
-        assert resp["error"]["code"] == -32601
+        assert resp["error"]["code"] == -32602
 
     @pytest.mark.asyncio
     async def test_prompts_list(self, server):
@@ -470,9 +478,9 @@ class TestToolDispatchIO:
     async def test_unknown_tool_returns_error(self, server):
         await _init_server(server)
         resp = await server.handle_request(_tool_call("totally_fake_tool", {}))
-        assert "error" in resp["result"]
-        assert resp["result"]["error"]["code"] == -32601
-        assert "Unknown tool" in resp["result"]["error"]["message"]
+        assert "error" in resp
+        assert resp["error"]["code"] == -32601
+        assert "Unknown tool" in resp["error"]["message"]
 
 
 # ===========================================================================
@@ -487,28 +495,21 @@ class TestToolErrorHandling:
         resp = await server.handle_request(
             _tool_call("add_nodes", {"graph": "nonexistent", "nodes": [1]})
         )
-        result = resp["result"]
-        assert "error" in result
-        assert result["error"]["code"] == ErrorCodes.INVALID_PARAMS
-        assert "not found" in result["error"]["message"].lower()
+        assert "error" in resp
+        assert resp["error"]["code"] == ErrorCodes.INVALID_PARAMS
+        assert "not found" in resp["error"]["message"].lower()
 
     @pytest.mark.asyncio
     async def test_missing_required_param_returns_error(self, server):
         """Omitting 'name' from create_graph triggers KeyError handling."""
         await _init_server(server)
         resp = await server.handle_request(_tool_call("create_graph", {}))
-        result = resp["result"]
-        assert "error" in result
-        assert result["error"]["code"] == ErrorCodes.INVALID_PARAMS
+        assert "error" in resp
+        assert resp["error"]["code"] == ErrorCodes.INVALID_PARAMS
 
     @pytest.mark.asyncio
     async def test_networkx_error_shortest_path_no_path(self, server):
-        """Disconnected graph -> NetworkXNoPath caught as error.
-
-        nx.NetworkXNoPath inherits from NetworkXException (not NetworkXError),
-        so it falls through to the generic Exception handler in _call_tool
-        and returns INTERNAL_ERROR (-32603).
-        """
+        """Disconnected graph -> NetworkXNoPath now correctly caught as ALGORITHM_ERROR."""
         await _init_server(server)
         await server.handle_request(_tool_call("create_graph", {"name": "dis"}))
         await server.handle_request(
@@ -517,9 +518,8 @@ class TestToolErrorHandling:
         resp = await server.handle_request(
             _tool_call("shortest_path", {"graph": "dis", "source": 1, "target": 2})
         )
-        result = resp["result"]
-        assert "error" in result
-        assert result["error"]["code"] == ErrorCodes.INTERNAL_ERROR
+        assert "error" in resp
+        assert resp["error"]["code"] == ErrorCodes.ALGORITHM_ERROR
 
     @pytest.mark.asyncio
     async def test_add_edges_missing_graph(self, server):
@@ -527,16 +527,14 @@ class TestToolErrorHandling:
         resp = await server.handle_request(
             _tool_call("add_edges", {"graph": "no_such", "edges": [[1, 2]]})
         )
-        result = resp["result"]
-        assert "error" in result
-        assert "not found" in result["error"]["message"].lower()
+        assert "error" in resp
+        assert "not found" in resp["error"]["message"].lower()
 
     @pytest.mark.asyncio
     async def test_get_info_missing_graph(self, server):
         await _init_server(server)
         resp = await server.handle_request(_tool_call("get_info", {"graph": "missing"}))
-        result = resp["result"]
-        assert "error" in result
+        assert "error" in resp
 
     @pytest.mark.asyncio
     async def test_delete_nonexistent_graph(self, server):
@@ -546,6 +544,49 @@ class TestToolErrorHandling:
         )
         content = json.loads(resp["result"]["content"][0]["text"])
         assert content["success"] is False
+
+    @pytest.mark.asyncio
+    async def test_error_response_is_jsonrpc_compliant(self, server):
+        """Errors from _call_tool appear in resp['error'], not resp['result']['error']."""
+        await _init_server(server)
+        resp = await server.handle_request(
+            _tool_call("add_nodes", {"graph": "no_such", "nodes": [1]})
+        )
+        # Must be a top-level error, not nested in result
+        assert "error" in resp
+        assert "result" not in resp
+        assert resp["jsonrpc"] == "2.0"
+        assert resp["id"] is not None
+
+    @pytest.mark.asyncio
+    async def test_cicd_tool_unavailable_returns_error(self, server):
+        """CI/CD tools return proper JSON-RPC error when tools module unavailable."""
+        import sys
+        from unittest.mock import patch
+
+        await _init_server(server)
+        # Temporarily make the tools module unimportable
+        with patch.dict(sys.modules, {"networkx_mcp.tools": None}):
+            resp = await server.handle_request(
+                _tool_call("trigger_workflow", {"workflow": "ci.yml"})
+            )
+        assert "error" in resp
+        assert resp["error"]["code"] == ErrorCodes.METHOD_NOT_FOUND
+        assert "CI/CD" in resp["error"]["message"]
+
+    @pytest.mark.asyncio
+    async def test_graph_not_found_no_key_leak(self, server):
+        """Error message for missing graph does NOT enumerate all graph names."""
+        await _init_server(server)
+        # Create a graph to ensure there are keys to potentially leak
+        await server.handle_request(
+            _tool_call("create_graph", {"name": "secret_graph"})
+        )
+        resp = await server.handle_request(
+            _tool_call("add_nodes", {"graph": "no_such", "nodes": [1]})
+        )
+        assert "error" in resp
+        assert "secret_graph" not in resp["error"]["message"]
 
 
 # ===========================================================================
@@ -746,11 +787,10 @@ class TestAcademicTools:
         resp = await server.handle_request(
             _tool_call("recommend_papers", {"graph": "cite"})
         )
-        result = resp["result"]
-        assert "error" in result
+        assert "error" in resp
         assert (
-            "seed_doi" in result["error"]["message"]
-            or "seed_paper" in result["error"]["message"]
+            "seed_doi" in resp["error"]["message"]
+            or "seed_paper" in resp["error"]["message"]
         )
 
     @pytest.mark.asyncio
@@ -766,8 +806,7 @@ class TestAcademicTools:
                 },
             )
         )
-        result = resp["result"]
-        assert "error" in result
+        assert "error" in resp
 
 
 # ===========================================================================
@@ -1047,3 +1086,73 @@ class TestAuthenticationFlow:
         assert "tools" in resp["result"]
         # The api_key should have been deleted from params
         assert "api_key" not in req["params"]
+
+
+# ===========================================================================
+# 9. JSON-RPC 2.0 Validation
+# ===========================================================================
+
+
+class TestJsonRpcValidation:
+    @pytest.mark.asyncio
+    async def test_missing_jsonrpc_field(self, server):
+        resp = await server.handle_request(
+            {"id": 1, "method": "initialize", "params": {}}
+        )
+        assert "error" in resp
+        assert resp["error"]["code"] == ErrorCodes.INVALID_REQUEST
+
+    @pytest.mark.asyncio
+    async def test_wrong_jsonrpc_version(self, server):
+        resp = await server.handle_request(
+            {"jsonrpc": "1.0", "id": 1, "method": "initialize", "params": {}}
+        )
+        assert "error" in resp
+        assert resp["error"]["code"] == ErrorCodes.INVALID_REQUEST
+
+
+# ===========================================================================
+# 10. Graph ID Validation (Security)
+# ===========================================================================
+
+
+class TestGraphIdValidation:
+    @pytest.mark.asyncio
+    async def test_path_traversal_rejected(self, server):
+        await _init_server(server)
+        resp = await server.handle_request(
+            _tool_call("create_graph", {"name": "../../../etc/passwd"})
+        )
+        assert "error" in resp
+
+    @pytest.mark.asyncio
+    async def test_special_chars_rejected(self, server):
+        await _init_server(server)
+        resp = await server.handle_request(
+            _tool_call("create_graph", {"name": "graph;rm -rf /"})
+        )
+        assert "error" in resp
+
+    @pytest.mark.asyncio
+    async def test_empty_graph_name_rejected(self, server):
+        await _init_server(server)
+        resp = await server.handle_request(_tool_call("create_graph", {"name": ""}))
+        assert "error" in resp
+
+    @pytest.mark.asyncio
+    async def test_valid_graph_name_accepted(self, server):
+        await _init_server(server)
+        resp = await server.handle_request(
+            _tool_call("create_graph", {"name": "my-graph_123"})
+        )
+        content = json.loads(resp["result"]["content"][0]["text"])
+        assert content["created"] == "my-graph_123"
+
+    @pytest.mark.asyncio
+    async def test_graph_id_validation_on_read_tools(self, server):
+        """validate_graph_id is called for read tools too, not just create."""
+        await _init_server(server)
+        resp = await server.handle_request(
+            _tool_call("add_nodes", {"graph": "../../bad", "nodes": [1]})
+        )
+        assert "error" in resp

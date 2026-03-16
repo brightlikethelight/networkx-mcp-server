@@ -7,6 +7,8 @@ import time
 from datetime import datetime
 from typing import Any, Dict
 
+from .__version__ import __version__
+
 try:
     import psutil
 
@@ -86,7 +88,7 @@ class HealthMonitor:
                     ),
                 },
             },
-            "version": "1.0.0",
+            "version": __version__,
         }
 
     def _format_uptime(self, seconds: float) -> str:
@@ -107,7 +109,7 @@ class HealthMonitor:
 
 
 # Optional HTTP health endpoint
-def create_health_endpoint(monitor: HealthMonitor, port: int = 8080) -> None:
+def create_health_endpoint(monitor: HealthMonitor, port: int = 8080) -> Any:
     """Create a simple HTTP health endpoint."""
     import json
     import threading

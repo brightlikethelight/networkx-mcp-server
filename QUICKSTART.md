@@ -1,81 +1,58 @@
-# 🚀 NetworkX MCP Server - Quick Start
+# NetworkX MCP Server - Quick Start
 
-## CRITICAL FIX: Making it Run NOW
+Python 3.11+ required.
 
-### Option 1: Minimal Server (Guaranteed to Work)
-
-```bash
-# 1. Install minimal dependencies
-pip install networkx mcp
-
-# 2. Run the minimal server
-python -m networkx_mcp --minimal
-```
-
-### Option 2: Full Installation
+## Install
 
 ```bash
-# 1. Install without conflicts
+# Standard install
 pip install -e .
 
-# 2. Try running the full server (will fall back to minimal if needed)
+# With dev/test dependencies
+pip install -e ".[dev]"
+```
+
+## Run the Server
+
+```bash
 python -m networkx_mcp
 ```
 
-### Option 3: With Optional Features
+The server uses stdio transport (JSON-RPC 2.0 over stdin/stdout).
+
+## Run Tests
 
 ```bash
-# Install with additional features (Excel support, etc.)
-pip install -e ".[full]"
-
-# Run the server
-python -m networkx_mcp
+pytest tests/working/ -v
 ```
 
-## Testing the Server
+## Claude Desktop Integration
 
-```bash
-# Run the test script
-python test_minimal_server.py
+Add the following to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "networkx": {
+      "command": "python",
+      "args": ["-m", "networkx_mcp"]
+    }
+  }
+}
 ```
 
-## What's Working
+## Features
 
-The minimal server provides these core features:
-
-- ✅ Create/delete graphs
-- ✅ Add/remove nodes and edges
-- ✅ Basic graph info and statistics
-- ✅ Shortest path algorithms
-- ✅ Node degree analysis
+- **Graph CRUD** -- create, read, update, delete graphs, nodes, and edges
+- **Centrality algorithms** -- betweenness, closeness, eigenvector, degree
+- **Community detection** -- Louvain, label propagation
+- **PageRank**
+- **Visualization** -- graph rendering and export
+- **Citation network analysis**
+- **CI/CD tools** -- DORA metrics, deployment tracking
 
 ## Troubleshooting
 
-### Pydantic Conflict
+**Import errors:** Make sure you installed with `pip install -e .` from the project root.
 
-If you see Pydantic version conflicts:
-
-```bash
-# Use the minimal server
-python -m networkx_mcp --minimal
-```
-
-### Import Errors
-
-The compatibility layer handles different MCP versions automatically.
-
-### Can't Connect
-
-Make sure you're using the correct MCP client configuration for stdio transport.
-
-## Next Steps
-
-Once the minimal server is running, you can:
-
-1. Add more algorithms
-2. Enable the full feature set
-3. Configure enterprise features
-
----
-
-**The server is designed to ALWAYS work** - if the full version fails, it automatically falls back to the minimal version.
+**Can't connect from Claude Desktop:** Verify the `claude_desktop_config.json` path and that `python -m networkx_mcp` runs without errors in your terminal first.

@@ -18,6 +18,21 @@ from networkx_mcp.__version__ import __version__
 
 logger = logging.getLogger(__name__)
 
+# Module-level session for connection pooling across CrossRef API calls
+_session = requests.Session()
+
+
+def _safe_extract_year(work: Dict[str, Any]) -> Optional[int]:
+    """Safely extract publication year from CrossRef work metadata."""
+    for field in ("published-print", "published-online"):
+        try:
+            year = work.get(field, {}).get("date-parts", [[None]])[0][0]
+            if year is not None:
+                return int(year)
+        except (IndexError, TypeError, ValueError):
+            continue
+    return None
+
 
 def resolve_doi(
     doi: str, retry_count: int = 3, retry_delay: float = 1.0
@@ -61,7 +76,7 @@ def resolve_doi(
 
     for attempt in range(retry_count):
         try:
-            response = requests.get(url, headers=headers, timeout=10)
+            response = _session.get(url, headers=headers, timeout=10)
 
             if response.status_code == 404:
                 return None, f"DOI not found: {doi}"
@@ -90,10 +105,7 @@ def resolve_doi(
                 "journal": work.get("container-title", [""])[0]
                 if work.get("container-title")
                 else "",
-                "year": work.get("published-print", {}).get("date-parts", [[None]])[0][
-                    0
-                ]
-                or work.get("published-online", {}).get("date-parts", [[None]])[0][0],
+                "year": _safe_extract_year(work),
                 "citations": work.get("is-referenced-by-count", 0),
                 "references": work.get("reference", []),
             }

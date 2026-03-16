@@ -44,8 +44,29 @@ class CICDController:
             cmd = ["gh", "workflow", "run", workflow_name, "--ref", branch]
 
             if inputs:
+                import re
+
                 for key, value in inputs.items():
-                    cmd.extend(["-f", f"{key}={value}"])
+                    # Validate key: alphanumeric, underscore, hyphen only
+                    if not re.match(r"^[a-zA-Z0-9_-]+$", str(key)):
+                        return {
+                            "success": False,
+                            "error": "Invalid input key: keys must be alphanumeric/underscore/hyphen only",
+                        }
+                    value_str = str(value)
+                    # Reject values starting with '-' (flag injection)
+                    if value_str.startswith("-"):
+                        return {
+                            "success": False,
+                            "error": f"Invalid input value for '{key}': values cannot start with '-'",
+                        }
+                    # Enforce max length
+                    if len(value_str) > 1000:
+                        return {
+                            "success": False,
+                            "error": f"Input value for '{key}' exceeds maximum length of 1000 characters",
+                        }
+                    cmd.extend(["-f", f"{key}={value_str}"])
 
             # Trigger workflow
             result = await asyncio.create_subprocess_exec(
@@ -442,7 +463,13 @@ async def mcp_trigger_workflow(
     Returns:
         Workflow trigger result
     """
-    workflow_inputs = json.loads(inputs) if inputs else None
+    if inputs:
+        try:
+            workflow_inputs = json.loads(inputs)
+        except json.JSONDecodeError as e:
+            return {"success": False, "error": f"Invalid JSON in inputs: {e}"}
+    else:
+        workflow_inputs = None
     return await cicd_controller.trigger_workflow(workflow, branch, workflow_inputs)
 
 

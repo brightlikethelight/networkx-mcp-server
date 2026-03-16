@@ -6,7 +6,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: networkx-mcp:0.1.0
+    image: networkx-mcp:3.0.0
     container_name: networkx-mcp-server
     stdin_open: true      # Keep stdin open (-i flag)
     tty: true             # Allocate pseudo-TTY (-t flag)

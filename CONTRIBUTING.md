@@ -174,14 +174,27 @@ Follow the existing project structure:
 
 ```
 src/networkx_mcp/
-├── core/              # Core functionality
-├── advanced/          # Advanced analytics
-│   ├── community/     # Community detection
-│   └── ml/           # Machine learning
-├── visualization/     # Visualization backends
-├── io/               # I/O operations
-├── interfaces/       # Public APIs
-└── utils/            # Utilities
+├── __init__.py          # Package init
+├── __main__.py          # CLI entry point (--version, --debug)
+├── __version__.py       # Version string
+├── server.py            # MCP server (request handling, tool dispatch)
+├── handlers.py          # Tool handler functions (args → result dicts)
+├── tool_registry.py     # Tool schemas, handler mapping, build_registry()
+├── errors.py            # Error codes, validation, MCPError hierarchy
+├── auth.py              # API key auth (opt-in)
+├── graph_cache.py       # Thread-safe graph storage with LRU/TTL
+├── monitoring_legacy.py # Health monitoring
+├── core/
+│   ├── basic_operations.py   # Compatibility functions for graphs
+│   ├── algorithms.py         # GraphAlgorithms class (advanced)
+│   └── graph_operations.py   # GraphManager class (thread-safe ops)
+├── academic/
+│   ├── citations.py     # DOI resolution, BibTeX, recommendations
+│   └── analytics.py     # Author impact, trends, collaboration
+├── monitoring/
+│   └── dora_metrics.py  # DORA CI/CD metrics collection
+└── tools/
+    └── cicd_control.py  # GitHub Actions workflow control
 ```
 
 When adding new features:

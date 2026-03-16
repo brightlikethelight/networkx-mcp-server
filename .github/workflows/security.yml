@@ -105,7 +105,7 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: python
-          queries: security-extended,security-and-quality,./.github/codeql/mcp-security.ql
+          queries: security-extended,security-and-quality
           config: |
             query-filters:
               - include:

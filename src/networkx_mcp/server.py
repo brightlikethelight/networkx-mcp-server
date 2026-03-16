@@ -5,6 +5,7 @@ Core server functionality with plugin-based architecture.
 """
 
 import asyncio
+import inspect
 import json
 import logging
 import os
@@ -13,20 +14,11 @@ from typing import Any, Dict, List, Optional
 
 import networkx as nx
 
-from .errors import ErrorCodes, MCPError
+from .__version__ import __version__
+from .errors import ErrorCodes, MCPError, validate_graph_id
+from .tool_registry import build_registry
 
 logger = logging.getLogger(__name__)
-
-# Import academic functions from plugin
-from .academic import (
-    analyze_author_impact,
-    build_citation_network,
-    detect_research_trends,
-    export_bibtex,
-    find_collaboration_patterns,
-    recommend_papers,
-    resolve_doi,
-)
 
 # Import basic operations
 from .core.basic_operations import (
@@ -215,12 +207,29 @@ class NetworkXMCPServer:
         else:
             self.monitor = None
 
+        # Build tool registry (single source of truth for tools)
+        self._registry = build_registry(
+            monitoring_enabled=self.monitoring_enabled,
+            monitor=self.monitor,
+        )
+
     def tool(self, func: Any) -> Any:
         """Mock tool decorator for test compatibility."""
         return func
 
     async def handle_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
         """Route requests to handlers."""
+        # JSON-RPC 2.0 validation
+        if request.get("jsonrpc") != "2.0":
+            return {
+                "jsonrpc": "2.0",
+                "id": request.get("id"),
+                "error": {
+                    "code": ErrorCodes.INVALID_REQUEST,
+                    "message": "Invalid Request: missing or wrong 'jsonrpc' version (must be '2.0')",
+                },
+            }
+
         method = request.get("method", "")
         params = request.get("params", {})
         req_id = request.get("id")
@@ -256,7 +265,7 @@ class NetworkXMCPServer:
                     "resources": {"listChangedSupport": False},
                     "prompts": {},
                 },
-                "serverInfo": {"name": "networkx-mcp-server", "version": "1.0.0"},
+                "serverInfo": {"name": "networkx-mcp-server", "version": __version__},
             }
         elif method == "initialized":
             # This is a notification, no response needed
@@ -269,23 +278,19 @@ class NetworkXMCPServer:
                 return {
                     "jsonrpc": "2.0",
                     "id": req_id,
-                    "error": {"code": -32002, "message": "Server not initialized"},
+                    "error": {
+                        "code": ErrorCodes.SERVER_NOT_INITIALIZED,
+                        "message": "Server not initialized",
+                    },
                 }
-            result = {"tools": self._get_tools()}
+            result = {"tools": self._registry.list_schemas()}
         elif method == "tools/call":
             # Check permissions for write operations
             if auth_data and self.auth:
                 tool_name = params.get("name", "")
-                write_tools = [
-                    "create_graph",
-                    "add_nodes",
-                    "add_edges",
-                    "delete_graph",
-                    "import_csv",
-                    "build_citation_network",
-                ]
-                if tool_name in write_tools and not self.auth.check_permission(
-                    auth_data, "write"
+                if (
+                    tool_name in self._registry.write_tool_names()
+                    and not self.auth.check_permission(auth_data, "write")
                 ):
                     return {
                         "jsonrpc": "2.0",
@@ -300,18 +305,66 @@ class NetworkXMCPServer:
                 return {
                     "jsonrpc": "2.0",
                     "id": req_id,
-                    "error": {"code": -32002, "message": "Server not initialized"},
+                    "error": {
+                        "code": ErrorCodes.SERVER_NOT_INITIALIZED,
+                        "message": "Server not initialized",
+                    },
                 }
             result = await self._call_tool(params)
+            # If _call_tool returned an error dict, promote it to a JSON-RPC error
+            if (
+                isinstance(result, dict)
+                and "error" in result
+                and "content" not in result
+            ):
+                return {"jsonrpc": "2.0", "id": req_id, "error": result["error"]}
         elif method == "resources/list":
-            # MCP Resources API - return empty list for now
-            result = {"resources": []}
+            resources = []
+            for graph_id in graphs:
+                graph = graphs[graph_id]
+                resources.append(
+                    {
+                        "uri": f"graph://{graph_id}",
+                        "name": graph_id,
+                        "description": (
+                            f"Graph with {graph.number_of_nodes()} nodes "
+                            f"and {graph.number_of_edges()} edges"
+                        ),
+                        "mimeType": "application/json",
+                    }
+                )
+            result = {"resources": resources}
         elif method == "resources/read":
-            # MCP Resources API - not implemented yet
-            return {
-                "jsonrpc": "2.0",
-                "id": req_id,
-                "error": {"code": -32601, "message": "resources/read not implemented"},
+            uri = params.get("uri", "")
+            if not uri.startswith("graph://"):
+                return {
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "error": {
+                        "code": -32602,
+                        "message": f"Invalid resource URI: {uri}",
+                    },
+                }
+            graph_id = uri[len("graph://") :]
+            if graph_id not in graphs:
+                return {
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "error": {
+                        "code": -32602,
+                        "message": f"Graph '{graph_id}' not found",
+                    },
+                }
+            graph = graphs[graph_id]
+            data = nx.node_link_data(graph, edges="links")
+            result = {
+                "contents": [
+                    {
+                        "uri": uri,
+                        "mimeType": "application/json",
+                        "text": json.dumps(data),
+                    }
+                ]
             }
         elif method == "prompts/list":
             # MCP Prompts API - return empty list for now
@@ -344,546 +397,30 @@ class NetworkXMCPServer:
         # For notifications (no 'id' field), handle_request returns None
         return await self.handle_request(message)
 
-    def _get_tools(self) -> List[Dict[str, Any]]:
-        """List available tools."""
-        tools = [
-            {
-                "name": "create_graph",
-                "description": "Create a new graph",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                        "name": {"type": "string"},
-                        "directed": {"type": "boolean", "default": False},
-                    },
-                    "required": ["name"],
-                },
-            },
-            {
-                "name": "add_nodes",
-                "description": "Add nodes to a graph",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                        "graph": {"type": "string"},
-                        "nodes": {
-                            "type": "array",
-                            "items": {"type": ["string", "number"]},
-                        },
-                    },
-                    "required": ["graph", "nodes"],
-                },
-            },
-            {
-                "name": "add_edges",
-                "description": "Add edges to a graph",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                        "graph": {"type": "string"},
-                        "edges": {
-                            "type": "array",
-                            "items": {
-                                "type": "array",
-                                "items": {"type": ["string", "number"]},
-                            },
-                        },
-                    },
-                    "required": ["graph", "edges"],
-                },
-            },
-            {
-                "name": "shortest_path",
-                "description": "Find shortest path between nodes",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                        "graph": {"type": "string"},
-                        "source": {"type": ["string", "number"]},
-                        "target": {"type": ["string", "number"]},
-                    },
-                    "required": ["graph", "source", "target"],
-                },
-            },
-            {
-                "name": "get_info",
-                "description": "Get graph information",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {"graph": {"type": "string"}},
-                    "required": ["graph"],
-                },
-            },
-            {
-                "name": "degree_centrality",
-                "description": "Calculate degree centrality for all nodes",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {"graph": {"type": "string"}},
-                    "required": ["graph"],
-                },
-            },
-            {
-                "name": "betweenness_centrality",
-                "description": "Calculate betweenness centrality for all nodes",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {"graph": {"type": "string"}},
-                    "required": ["graph"],
-                },
-            },
-            {
-                "name": "connected_components",
-                "description": "Find connected components in the graph",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {"graph": {"type": "string"}},
-                    "required": ["graph"],
-                },
-            },
-            {
-                "name": "pagerank",
-                "description": "Calculate PageRank for all nodes",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {"graph": {"type": "string"}},
-                    "required": ["graph"],
-                },
-            },
-            {
-                "name": "community_detection",
-                "description": "Detect communities in the graph using Louvain method",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {"graph": {"type": "string"}},
-                    "required": ["graph"],
-                },
-            },
-            {
-                "name": "visualize_graph",
-                "description": "Create a visualization of the graph",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                        "graph": {"type": "string"},
-                        "layout": {
-                            "type": "string",
-                            "enum": ["spring", "circular", "kamada_kawai"],
-                            "default": "spring",
-                        },
-                    },
-                    "required": ["graph"],
-                },
-            },
-            {
-                "name": "import_csv",
-                "description": "Import graph from CSV edge list (format: source,target per line)",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                        "graph": {"type": "string"},
-                        "csv_data": {"type": "string"},
-                        "directed": {"type": "boolean", "default": False},
-                    },
-                    "required": ["graph", "csv_data"],
-                },
-            },
-            {
-                "name": "export_json",
-                "description": "Export graph as JSON in node-link format",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {"graph": {"type": "string"}},
-                    "required": ["graph"],
-                },
-            },
-            {
-                "name": "delete_graph",
-                "description": "Delete a graph from storage",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {"graph": {"type": "string"}},
-                    "required": ["graph"],
-                },
-            },
-            {
-                "name": "build_citation_network",
-                "description": "Build citation network from DOIs using CrossRef API",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                        "graph": {"type": "string"},
-                        "seed_dois": {"type": "array", "items": {"type": "string"}},
-                        "max_depth": {"type": "integer", "default": 2},
-                    },
-                    "required": ["graph", "seed_dois"],
-                },
-            },
-            {
-                "name": "analyze_author_impact",
-                "description": "Analyze author impact metrics including h-index",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                        "graph": {"type": "string"},
-                        "author_name": {"type": "string"},
-                    },
-                    "required": ["graph", "author_name"],
-                },
-            },
-            {
-                "name": "find_collaboration_patterns",
-                "description": "Find collaboration patterns in citation network",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {"graph": {"type": "string"}},
-                    "required": ["graph"],
-                },
-            },
-            {
-                "name": "detect_research_trends",
-                "description": "Detect research trends over time",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                        "graph": {"type": "string"},
-                        "time_window": {"type": "integer", "default": 5},
-                    },
-                    "required": ["graph"],
-                },
-            },
-            {
-                "name": "export_bibtex",
-                "description": "Export citation network as BibTeX format",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {"graph": {"type": "string"}},
-                    "required": ["graph"],
-                },
-            },
-            {
-                "name": "recommend_papers",
-                "description": "Recommend papers based on citation network analysis",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                        "graph": {"type": "string"},
-                        "seed_doi": {"type": "string"},
-                        "max_recommendations": {"type": "integer", "default": 10},
-                    },
-                    "required": ["graph", "seed_doi"],
-                },
-            },
-            {
-                "name": "resolve_doi",
-                "description": "Resolve DOI to publication metadata using CrossRef API",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {"doi": {"type": "string"}},
-                    "required": ["doi"],
-                },
-            },
-        ]
-
-        # Add health endpoint if monitoring is enabled
-        if self.monitoring_enabled and self.monitor:
-            tools.append(
-                {
-                    "name": "health_status",
-                    "description": "Get server health and performance metrics",
-                    "inputSchema": {
-                        "type": "object",
-                        "properties": {},
-                        "required": [],
-                    },
-                }
-            )
-
-        # Add CI/CD control tools
-        cicd_tools = [
-            {
-                "name": "trigger_workflow",
-                "description": "Trigger a GitHub Actions workflow",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                        "workflow": {
-                            "type": "string",
-                            "description": "Workflow file name",
-                        },
-                        "branch": {"type": "string", "default": "main"},
-                        "inputs": {
-                            "type": "string",
-                            "description": "JSON string of inputs",
-                        },
-                    },
-                    "required": ["workflow"],
-                },
-            },
-            {
-                "name": "get_workflow_status",
-                "description": "Get CI/CD workflow status",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                        "run_id": {"type": "string", "description": "Optional run ID"},
-                    },
-                },
-            },
-            {
-                "name": "cancel_workflow",
-                "description": "Cancel a running workflow",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                        "run_id": {"type": "string"},
-                    },
-                    "required": ["run_id"],
-                },
-            },
-            {
-                "name": "rerun_failed_jobs",
-                "description": "Rerun failed jobs in a workflow",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                        "run_id": {"type": "string"},
-                    },
-                    "required": ["run_id"],
-                },
-            },
-            {
-                "name": "get_dora_metrics",
-                "description": "Get DORA metrics for CI/CD performance",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {},
-                },
-            },
-            {
-                "name": "analyze_workflow_failures",
-                "description": "Analyze workflow failures with AI-powered insights",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                        "run_id": {"type": "string"},
-                    },
-                    "required": ["run_id"],
-                },
-            },
-        ]
-
-        # Add CI/CD tools if available
-        try:
-            # Test if tools module is available
-            import importlib.util
-
-            if importlib.util.find_spec("networkx_mcp.tools") is not None:
-                tools.extend(cicd_tools)
-        except ImportError:
-            pass  # CI/CD tools not available
-
-        return tools
-
     async def _call_tool(self, params: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute a tool."""
-        tool_name = params.get("name")
+        """Execute a tool via registry lookup."""
+        tool_name: str = params.get("name", "")
         args = params.get("arguments", {})
         logger.debug(f"Executing tool: {tool_name}")
 
         try:
-            if tool_name == "create_graph":
-                name = args["name"]
-                directed = args.get("directed", False)
-                graphs[name] = nx.DiGraph() if directed else nx.Graph()
-                result = {
-                    "created": name,
-                    "type": "directed" if directed else "undirected",
-                }
-
-            elif tool_name == "add_nodes":
-                graph_name = args["graph"]
-                if graph_name not in graphs:
-                    raise ValueError(
-                        f"Graph '{graph_name}' not found. Available graphs: {list(graphs.keys())}"
-                    )
-                graph = graphs[graph_name]
-                graph.add_nodes_from(args["nodes"])
-                result = {"added": len(args["nodes"]), "total": graph.number_of_nodes()}
-
-            elif tool_name == "add_edges":
-                graph_name = args["graph"]
-                if graph_name not in graphs:
-                    raise ValueError(
-                        f"Graph '{graph_name}' not found. Available graphs: {list(graphs.keys())}"
-                    )
-                graph = graphs[graph_name]
-                edges = [tuple(e) for e in args["edges"]]
-                graph.add_edges_from(edges)
-                result = {"added": len(edges), "total": graph.number_of_edges()}
-
-            elif tool_name == "shortest_path":
-                graph_name = args["graph"]
-                if graph_name not in graphs:
-                    raise ValueError(
-                        f"Graph '{graph_name}' not found. Available graphs: {list(graphs.keys())}"
-                    )
-                graph = graphs[graph_name]
-                path = nx.shortest_path(graph, args["source"], args["target"])
-                result = {"path": path, "length": len(path) - 1}
-
-            elif tool_name == "get_info":
-                graph_name = args["graph"]
-                if graph_name not in graphs:
-                    raise ValueError(
-                        f"Graph '{graph_name}' not found. Available graphs: {list(graphs.keys())}"
-                    )
-                graph = graphs[graph_name]
-                result = {
-                    "nodes": graph.number_of_nodes(),
-                    "edges": graph.number_of_edges(),
-                    "directed": graph.is_directed(),
-                }
-
-            elif tool_name == "degree_centrality":
-                result = degree_centrality(args["graph"])
-
-            elif tool_name == "betweenness_centrality":
-                result = betweenness_centrality(args["graph"])
-
-            elif tool_name == "connected_components":
-                result = connected_components(args["graph"])
-
-            elif tool_name == "pagerank":
-                result = pagerank(args["graph"])
-
-            elif tool_name == "community_detection":
-                result = community_detection(args["graph"])
-
-            elif tool_name == "visualize_graph":
-                layout = args.get("layout", "spring")
-                viz_result = visualize_graph(args["graph"], layout)
-                # Rename 'image' key to 'visualization' for backward compatibility
-                result = {
-                    "visualization": viz_result["image"],
-                    "format": viz_result["format"],
-                    "layout": viz_result["layout"],
-                }
-
-            elif tool_name == "import_csv":
-                result = import_csv(
-                    args["graph"], args["csv_data"], args.get("directed", False)
-                )
-
-            elif tool_name == "export_json":
-                result = export_json(args["graph"])
-
-            elif tool_name == "delete_graph":
-                result = delete_graph(args["graph"])
-
-            elif tool_name == "build_citation_network":
-                result = build_citation_network(
-                    args["graph"], args["seed_dois"], args.get("max_depth", 2), graphs
-                )
-
-            elif tool_name == "analyze_author_impact":
-                result = analyze_author_impact(
-                    args["graph"], args["author_name"], graphs
-                )
-
-            elif tool_name == "find_collaboration_patterns":
-                result = find_collaboration_patterns(args["graph"], graphs)
-
-            elif tool_name == "detect_research_trends":
-                result = detect_research_trends(
-                    args["graph"], args.get("time_window", 5), graphs
-                )
-
-            elif tool_name == "export_bibtex":
-                result = export_bibtex(args["graph"], graphs)
-
-            elif tool_name == "recommend_papers":
-                # Handle alternative parameter names for backward compatibility
-                seed = args.get("seed_doi") or args.get("seed_paper")
-                max_recs = args.get("max_recommendations") or args.get("top_n", 10)
-
-                if not seed:
-                    raise ValueError(
-                        "Missing required parameter: seed_doi or seed_paper"
-                    )
-
-                result = recommend_papers(args["graph"], seed, max_recs, graphs)
-
-            elif tool_name == "resolve_doi":
-                result, error = resolve_doi(args["doi"])
-                if result is None:
-                    error_msg = error or "Unknown error"
-                    raise ValueError(
-                        f"Could not resolve DOI: {args['doi']} - {error_msg}"
-                    )
-
-            elif tool_name == "health_status":
-                if self.monitor:
-                    result = self.monitor.get_health_status()
-                else:
-                    result = {"status": "monitoring_disabled"}
-
-            # CI/CD Control Tools
-            elif tool_name == "trigger_workflow":
-                try:
-                    from .tools import mcp_trigger_workflow
-
-                    result = await mcp_trigger_workflow(
-                        args["workflow"], args.get("branch", "main"), args.get("inputs")
-                    )
-                except ImportError:
-                    result = {"error": "CI/CD tools not available"}
-
-            elif tool_name == "get_workflow_status":
-                try:
-                    from .tools import mcp_get_workflow_status
-
-                    result = await mcp_get_workflow_status(args.get("run_id"))
-                except ImportError:
-                    result = {"error": "CI/CD tools not available"}
-
-            elif tool_name == "cancel_workflow":
-                try:
-                    from .tools import mcp_cancel_workflow
-
-                    result = await mcp_cancel_workflow(args["run_id"])
-                except ImportError:
-                    result = {"error": "CI/CD tools not available"}
-
-            elif tool_name == "rerun_failed_jobs":
-                try:
-                    from .tools import mcp_rerun_failed_jobs
-
-                    result = await mcp_rerun_failed_jobs(args["run_id"])
-                except ImportError:
-                    result = {"error": "CI/CD tools not available"}
-
-            elif tool_name == "get_dora_metrics":
-                try:
-                    from .tools import mcp_get_dora_metrics
-
-                    result = await mcp_get_dora_metrics()
-                except ImportError:
-                    result = {"error": "CI/CD tools not available"}
-
-            elif tool_name == "analyze_workflow_failures":
-                try:
-                    from .tools import mcp_analyze_failures
-
-                    result = await mcp_analyze_failures(args["run_id"])
-                except ImportError:
-                    result = {"error": "CI/CD tools not available"}
-
-            else:
-                # Return proper error for unknown tool
+            # Look up tool in registry
+            tool_def = self._registry.get(tool_name)
+            if tool_def is None:
                 return {
                     "error": {"code": -32601, "message": f"Unknown tool: {tool_name}"}
                 }
+
+            # Validate graph ID if this tool accepts a graph parameter
+            if tool_def.graph_param:
+                graph_id = args.get(tool_def.graph_param)
+                if graph_id is not None:
+                    validate_graph_id(graph_id)
+
+            # Call the handler (sync or async)
+            result = tool_def.handler(args)
+            if inspect.isawaitable(result):
+                result = await result
 
             logger.debug(f"Tool {tool_name} completed successfully")
             return {"content": [{"type": "text", "text": json.dumps(result)}]}
@@ -892,8 +429,8 @@ class NetworkXMCPServer:
             # Return proper JSON-RPC error for MCP-specific errors
             return {"error": e.to_dict()}
 
-        except nx.NetworkXError as e:
-            # NetworkX algorithm errors
+        except nx.NetworkXException as e:
+            # NetworkX errors (NetworkXError + algorithm errors like NetworkXNoPath)
             logger.warning(f"NetworkX error in tool {tool_name}: {e}")
             return {
                 "error": {
@@ -1016,10 +553,7 @@ def main() -> None:
             logging.warning("To enable security: export NETWORKX_MCP_AUTH=true")
 
             # Require explicit confirmation to run without auth in production
-            if (
-                not os.environ.get("NETWORKX_MCP_INSECURE_CONFIRM", "").lower()
-                == "true"
-            ):
+            if os.environ.get("NETWORKX_MCP_INSECURE_CONFIRM", "").lower() != "true":
                 logging.error("SECURITY: Production server startup blocked for safety")
                 logging.error(
                     "To run without auth in production: export NETWORKX_MCP_INSECURE_CONFIRM=true"

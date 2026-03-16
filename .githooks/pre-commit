@@ -57,9 +57,10 @@ fi
 echo "Checking code formatting with ruff..."
 if command -v ruff &> /dev/null; then
     ruff format --check . &>/dev/null
-    print_status $? "Code formatting (ruff)"
+    RUFF_FMT_RESULT=$?
+    print_status $RUFF_FMT_RESULT "Code formatting (ruff)"
 
-    if [ $? -ne 0 ]; then
+    if [ $RUFF_FMT_RESULT -ne 0 ]; then
         echo "Run 'ruff format .' to fix formatting issues"
     fi
 else
@@ -70,9 +71,10 @@ fi
 echo "Running linter checks..."
 if command -v ruff &> /dev/null; then
     ruff check . --quiet
-    print_status $? "Linting (ruff)"
+    RUFF_LINT_RESULT=$?
+    print_status $RUFF_LINT_RESULT "Linting (ruff)"
 
-    if [ $? -ne 0 ]; then
+    if [ $RUFF_LINT_RESULT -ne 0 ]; then
         echo "Run 'ruff check . --fix' to fix some issues automatically"
     fi
 else
@@ -83,7 +85,8 @@ fi
 echo "Running type checks..."
 if command -v mypy &> /dev/null; then
     mypy src/networkx_mcp/ --ignore-missing-imports --no-error-summary > /dev/null 2>&1
-    print_status $? "Type checking (mypy)"
+    MYPY_RESULT=$?
+    print_status $MYPY_RESULT "Type checking (mypy)"
 else
     echo -e "${YELLOW}⚠️  mypy not installed - skipping type check${NC}"
 fi
@@ -118,8 +121,8 @@ if [ ! -z "$CHANGED_PY_FILES" ]; then
         # Run only tests related to changed files
         TEST_FILES=""
         for file in $CHANGED_PY_FILES; do
-            # Find corresponding test file
-            test_file=$(echo $file | sed 's/src\/networkx_mcp/tests/' | sed 's/\.py$/_test.py/')
+            base=$(basename "$file" .py)
+            test_file="tests/working/test_${base}.py"
             if [ -f "$test_file" ]; then
                 TEST_FILES="$TEST_FILES $test_file"
             fi

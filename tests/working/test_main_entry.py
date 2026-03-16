@@ -46,6 +46,14 @@ class TestMainEntry:
             except SystemExit as e:
                 assert e.code == 1
 
+    def test_main_version_flag(self):
+        """Test --version prints version and exits 0."""
+        with patch("sys.argv", ["networkx-mcp", "--version"]):
+            try:
+                main()
+            except SystemExit as e:
+                assert e.code == 0
+
     def test_main_debug_flag(self):
         """Test --debug flag sets logging level."""
         import logging

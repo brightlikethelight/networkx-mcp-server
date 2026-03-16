@@ -12,6 +12,7 @@ from networkx_mcp.server import (
     create_graph,
     get_graph_info,
     graphs,
+    import_csv,
     shortest_path,
 )
 
@@ -100,6 +101,13 @@ class TestErrorHandling:
         with pytest.raises(ValueError, match="Graph 'nonexistent' not found"):
             add_nodes("nonexistent", [1, 2, 3])
 
+    def test_add_edges_malformed_raises(self):
+        """Test that malformed edges raise ValueError instead of silently dropping."""
+        create_graph("test_malformed", directed=False)
+        add_nodes("test_malformed", [1, 2])
+        with pytest.raises(ValueError, match="at least 2 elements"):
+            add_edges("test_malformed", [[1]])  # Too few elements
+
     def test_add_edges_nonexistent_graph(self):
         """Test adding edges to a non-existent graph."""
         with pytest.raises(ValueError, match="Graph 'nonexistent' not found"):
@@ -126,6 +134,12 @@ class TestErrorHandling:
         result = shortest_path("test_no_path", 1, 3)
         assert not result["success"]
         assert "No path found" in result["error"]
+
+    def test_import_csv_rejects_oversized_data(self):
+        """Test that CSV import rejects data exceeding 10MB limit."""
+        oversized = "a,b\n" * 5_000_001  # > 10MB
+        with pytest.raises(ValueError, match="exceeds 10MB limit"):
+            import_csv("csv_g", oversized)
 
 
 class TestComplexScenarios:

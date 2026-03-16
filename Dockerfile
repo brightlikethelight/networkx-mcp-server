@@ -69,14 +69,12 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV MCP_MODE=stdio
 
-# Health check
+# Health check — verify package is importable (stdio server can't serve HTTP probes)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | \
-        python -m networkx_mcp.server | \
-        jq -e '.result.protocolVersion' || exit 1
+    CMD python -c "from networkx_mcp import __version__; print(__version__)" || exit 1
 
 # Default to stdio mode
-ENTRYPOINT ["python", "-m", "networkx_mcp.server"]
+ENTRYPOINT ["python", "-m", "networkx_mcp"]
 
 # Allow passing additional arguments
 CMD []

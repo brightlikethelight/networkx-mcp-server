@@ -3,6 +3,8 @@
 import logging
 import sys
 
+from .__version__ import __version__
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -24,6 +26,11 @@ def main() -> None:
 
     parser = argparse.ArgumentParser(
         description="NetworkX MCP Server - Graph operations via Model Context Protocol"
+    )
+
+    # Version
+    parser.add_argument(
+        "--version", action="version", version=f"%(prog)s {__version__}"
     )
 
     # Logging

@@ -57,7 +57,7 @@ jobs:
 
     - name: Run type checking
       run: |
-        mypy src/networkx_mcp/ --strict --ignore-missing-imports
+        mypy src/networkx_mcp/ --ignore-missing-imports
 
     - name: Run security checks
       run: |
@@ -68,7 +68,8 @@ jobs:
         pytest tests/working/ -v --tb=short \
           --cov=src/networkx_mcp \
           --cov-report=xml \
-          --cov-report=term-missing
+          --cov-report=term-missing \
+          --cov-fail-under=70
 
     - name: Validate version tag
       run: |

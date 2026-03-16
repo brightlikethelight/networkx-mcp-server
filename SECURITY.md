@@ -1,191 +1,120 @@
-# Security Policy and Vulnerability Report
+# Security Policy
 
-## Current Security Status
+## Overview
 
-This document outlines the security measures implemented in NetworkX MCP Server v2.0.0 and known limitations.
+This document describes the actual security posture of NetworkX MCP Server.
+It distinguishes between what is implemented and what is not.
 
-## 🔒 Implemented Security Measures
+## Implemented
 
-### 1. Input Validation (COMPLETED)
+### Input Validation
 
-- **Pattern**: All IDs validated against `^[a-zA-Z0-9_-]{1,100}$`
-- **Size Limits**: Max 1000 nodes, 10000 edges per request
-- **Injection Prevention**: Blocks SQL injection, path traversal, XSS, command injection
-- **Implementation**: `/src/networkx_mcp/security/input_validation.py`
+Graph IDs are validated by `validate_graph_id()` in `src/networkx_mcp/errors.py`:
 
-### 2. Resource Limits (COMPLETED)
+- Pattern: alphanumeric, underscore, and hyphen only
+- Max length: 100 characters
+- Path traversal blocked (`..`, `/`, `\` rejected)
+- Node IDs and edge specs are also validated
 
-- **Memory Protection**: 1GB process limit, 100MB per graph
-- **Timeout Protection**: 30-second operation timeout
-- **Concurrency Limits**: Max 10 concurrent requests
-- **Rate Limiting**: 60 requests per minute
-- **Implementation**: `/src/networkx_mcp/security/resource_limits.py`
+Error messages are sanitized -- malicious input is not echoed back in responses,
+and stack traces are not exposed to callers.
 
-### 3. Credential Management (COMPLETED)
+### API Key Authentication
 
-- **Environment Variables**: All secrets moved to environment variables
-- **No Hardcoded Secrets**: Removed base64 passwords from k8s manifests
-- **Safe Defaults**: `.env.example` with dummy values
-- **Implementation**: Updated k8s/deployment.yaml to use `${VAR}` placeholders
+Opt-in authentication system, disabled by default for MCP stdio compatibility.
 
-### 4. Dangerous Functions (COMPLETED)
+- Enable: `export NETWORKX_MCP_AUTH=true`
+- Generate keys: `python -m networkx_mcp.auth generate <name>`
+- Keys support read/write permission scoping
+- Production mode requires auth to be enabled, or explicit opt-out
+  via `export NETWORKX_MCP_INSECURE_CONFIRM=true`
 
-- **eval() Removed**: Replaced with safe string parsing in feature_flags.py
-- **pickle Warnings**: Added security warnings and size limits
-- **Safe Error Messages**: No stack traces exposed to users
+### Code Safety
 
-## ⚠️ Known Limitations
+- No `eval()` or `exec()` usage
+- No `pickle` deserialization of untrusted data
+- No dynamic code generation from user input
 
-### 1. Authentication & Authorization
+### CI/CD Input Sanitization
 
-- **Status**: ⚠️ IMPLEMENTED BUT DISABLED BY DEFAULT
-- **Risk**: Medium - Auth disabled by default for MCP stdio compatibility
-- **Features**:
-  - API key authentication with secure key generation
-  - Authentication middleware with request validation
-  - Safety mechanisms prevent insecure startup in production without confirmation
-  - Clear security warnings when authentication is disabled
-- **Usage**:
-  - Enable auth (RECOMMENDED for production): `export NETWORKX_MCP_AUTH=true`
-  - Generate API keys: `python -m networkx_mcp.auth generate <name>`
-  - Production without auth requires: `export NETWORKX_MCP_INSECURE_CONFIRM=true`
+- Key name validation in CI workflows
+- Flag injection prevention
+- Maximum value length enforcement
 
-### 2. Network Security
+## NOT Implemented
 
-- **Status**: PARTIAL
-- **Risk**: Medium - No built-in TLS/HTTPS support
-- **Recommendation**: Deploy behind HTTPS proxy (nginx, traefik)
+These are known gaps, listed here so users can make informed decisions.
 
-### 3. Audit Logging
+### Resource Limits
 
-- **Status**: BASIC
-- **Risk**: Medium - Limited security event logging
-- **Recommendation**: Implement comprehensive audit trail
+There are no limits on graph size (nodes, edges), operation duration,
+or memory consumption. A single request can create an arbitrarily large graph
+or trigger an expensive algorithm. This is tracked as future work.
 
-### 4. Data Persistence Security
+### Rate Limiting
 
-- **Status**: NOT APPLICABLE
-- **Risk**: Low - In-memory only, no persistent storage
-- **Note**: Graphs are lost on restart
+No rate limiting on incoming requests. Every request is processed immediately.
 
-## 🚨 Vulnerability Disclosure
+### Network Security / TLS
 
-### Reporting Security Issues
+The server uses MCP stdio transport (stdin/stdout). There is no HTTP listener,
+so TLS is not applicable in the default configuration. If you expose the server
+over a network, you are responsible for transport security.
 
-1. **DO NOT** open public issues for security vulnerabilities
-2. Email security concerns to: <security@networkx-mcp.example.com>
-3. Include:
-   - Description of the vulnerability
-   - Steps to reproduce
-   - Potential impact
-   - Suggested fix (if any)
+### Audit Logging
 
-### Response Timeline
+Basic Python logging only. There is no structured security audit trail,
+no tamper-evident log storage, and no alerting on suspicious activity.
 
-- **Acknowledgment**: Within 48 hours
-- **Initial Assessment**: Within 7 days
-- **Fix Timeline**: Based on severity
-  - Critical: 24-48 hours
-  - High: 7 days
-  - Medium: 30 days
-  - Low: Next release
+## Transport Model
 
-## 🛡️ Security Best Practices
+NetworkX MCP Server communicates over stdio, not HTTP. This means:
 
-### For Deployment
+- No network ports are opened by default
+- No cookies, CORS, or HTTP headers to configure
+- Attack surface is limited to the MCP client sending requests over stdin
+- Authentication, when enabled, validates API keys in the MCP request metadata
 
-1. Always use environment variables for secrets
-2. Deploy behind HTTPS proxy
-3. Enable firewall rules
-4. Use Kubernetes network policies
-5. Regular security updates
+## Data Persistence
 
-### For Development
+All graphs are in-memory only. Data is lost on server restart.
+There is no persistent storage, no database, and no filesystem writes
+beyond standard log output.
 
-1. Never commit secrets
-2. Use input validation for all user inputs
-3. Implement proper error handling
-4. Follow principle of least privilege
-5. Regular dependency updates
+## Vulnerability Reporting
 
-## 📊 Security Scorecard
+**Do not** open public GitHub issues for security vulnerabilities.
 
-| Category | Status | Notes |
-|----------|---------|-------|
-| Input Validation | ✅ SECURE | Comprehensive validation implemented |
-| Resource Limits | ✅ SECURE | DoS protection active |
-| Secrets Management | ✅ SECURE | Environment variables only |
-| Code Injection | ✅ SECURE | eval() removed, safe parsing |
-| Authentication | ❌ MISSING | No auth implemented |
-| Authorization | ❌ MISSING | No access control |
-| Audit Logging | ⚠️ BASIC | Minimal security logging |
-| Network Security | ⚠️ PARTIAL | Requires HTTPS proxy |
-| Data Encryption | ➖ N/A | In-memory only |
+Email: brightliu@college.harvard.edu
 
-## 🔄 Recent Security Fixes
+Include:
 
-### Version 2.0.0 (Current)
+1. Description of the vulnerability
+2. Steps to reproduce
+3. Potential impact
+4. Suggested fix (if any)
 
-1. **Input Validation**: Prevents injection attacks
-2. **Resource Limits**: Prevents DoS attacks
-3. **Secret Management**: Removed hardcoded credentials
-4. **Code Security**: Removed eval(), added pickle warnings
+Response target: acknowledgment within 7 days. Fix timeline depends on severity.
 
-## 📅 Security Roadmap
+## Security Summary
 
-### Phase 1 (Completed)
+| Category | Status | Detail |
+|---|---|---|
+| Input Validation | Implemented | Graph/node/edge ID validation, path traversal prevention |
+| Authentication | Implemented (opt-in) | API key auth, disabled by default |
+| Code Injection | Mitigated | No eval/exec/pickle, safe error messages |
+| Resource Limits | Not implemented | No max nodes, edges, timeout, or memory cap |
+| Rate Limiting | Not implemented | All requests processed without throttling |
+| Network Security | N/A | stdio transport, no HTTP listener |
+| Audit Logging | Minimal | Basic Python logging only |
+| Data Encryption | N/A | In-memory only, no persistent storage |
 
-- ✅ Input validation
-- ✅ Resource limits
-- ✅ Secret management
-- ✅ Remove dangerous functions
+## Compliance
 
-### Phase 2 (Planned)
-
-- ⏳ JWT authentication
-- ⏳ Role-based access control
-- ⏳ Comprehensive audit logging
-- ⏳ Security headers
-
-### Phase 3 (Future)
-
-- ⏳ End-to-end encryption
-- ⏳ Security scanning integration
-- ⏳ Compliance certifications
-- ⏳ Penetration testing
-
-## 🔍 Security Testing
-
-Run security tests:
-
-```bash
-# Input validation tests
-python -m pytest tests/security/test_input_validation.py -v
-
-# Resource limit tests
-python -m pytest tests/security/test_resource_limits.py -v
-
-# Security demonstrations
-python tests/security/test_malicious_demo.py
-python tests/security/test_dos_prevention_demo.py
-```
-
-## 📝 Compliance Notes
-
-This server implements security best practices but has NOT been:
-
-- Penetration tested
-- Formally audited
-- Certified for any compliance standards
-
-Use in production at your own risk. Additional security measures required for:
-
-- HIPAA compliance
-- PCI-DSS compliance
-- SOC 2 compliance
-- GDPR compliance
+This server has not been penetration tested, formally audited, or certified
+for any compliance standard (SOC 2, HIPAA, PCI-DSS, GDPR, etc.).
 
 ---
 
-**Last Updated**: 2024-01-09
-**Security Contact**: <security@networkx-mcp.example.com>
+Last updated: 2026-03-15
+Contact: brightliu@college.harvard.edu

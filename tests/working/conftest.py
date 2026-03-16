@@ -1,18 +1,11 @@
 """
-Test configuration that actually works.
-
-This forces the use of the minimal server implementation
-and sets up proper test isolation.
+Test configuration with proper test isolation.
 """
 
-import os
 import sys
 from pathlib import Path
 
 import pytest
-
-# Force minimal server for all tests
-os.environ["USE_MINIMAL_SERVER"] = "true"
 
 # Add src to path for imports
 src_path = Path(__file__).parent.parent.parent / "src"

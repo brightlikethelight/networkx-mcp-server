@@ -70,9 +70,9 @@ jobs:
           jq -e '.result.protocolVersion' || (echo "::error::MCP protocol test failed" && exit 1)
 
         # Test basic graph operation
-        echo '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"create_graph","arguments":{"graph_type":"path","num_nodes":3}}}' | \
+        echo '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"create_graph","arguments":{"name":"test","directed":false}}}' | \
           docker run -i --rm ${{ env.IMAGE_NAME }}:test | \
-          jq -e '.result' || echo "Graph creation test skipped"
+          jq -e '.result' || echo "::warning::Graph creation test failed"
 
     - name: Push Docker image
       if: github.event_name != 'pull_request'

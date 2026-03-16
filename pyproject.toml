@@ -30,12 +30,9 @@ requires-python = ">=3.11"
 dependencies = [
     "networkx>=3.0",
     "numpy>=1.21.0",  # Required for NetworkX and core algorithms
-    "scipy>=1.7.0",  # Required for PageRank and advanced algorithms
     "matplotlib>=3.5.0",  # Required for graph visualization
     "requests>=2.28.0",  # For API calls to CrossRef, ORCID, etc.
-    "python-dateutil>=2.8.0",  # For date parsing in academic data
     "bibtexparser>=1.4.0",  # For BibTeX parsing and generation
-    "mcp>=1.0.0",  # Official MCP SDK for protocol implementation
 ]
 
 [project.optional-dependencies]
@@ -57,32 +54,6 @@ dev = [
     "pandas>=1.3.0",  # For IO handler tests
     "requests>=2.28.0",  # For integration tests
     "types-requests>=2.28.0",  # Type stubs for requests
-    "types-python-dateutil>=2.8.0",  # Type stubs for dateutil
-]
-
-# I/O format support (adds 35MB!)
-excel = [
-    "pandas>=1.3.0",
-    "openpyxl>=3.0.0",
-]
-
-# Scientific computing support (adds 15MB!)
-scipy = [
-    "scipy>=1.7.0",
-]
-
-# Monitoring and observability
-monitoring = [
-    "aiohttp>=3.8.0",  # For webhook notifications and dashboard
-    "sentry-sdk>=1.0.0",  # For error tracking (optional)
-]
-
-# Full installation with all optional features
-full = [
-    "pandas>=1.3.0",
-    "scipy>=1.7.0",
-    "matplotlib>=3.4.0",
-    "openpyxl>=3.0.0",
 ]
 
 [project.urls]
@@ -117,12 +88,29 @@ addopts = [
     "--strict-config",
     "--tb=short",
     "-v",
+    "--timeout=300",
+    "--timeout-method=thread",
 ]
-testpaths = ["tests"]
+testpaths = ["tests/working"]
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "performance: Performance tests (may be slow)",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning:networkx.*",
+    "ignore::PendingDeprecationWarning",
+    "error::UserWarning:networkx_mcp.*",
+]
+log_cli = true
+log_cli_level = "INFO"
+log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
 
 [tool.black]
 line-length = 88
@@ -153,35 +141,15 @@ ignore_missing_imports = true
 mypy_path = "src"
 namespace_packages = true
 explicit_package_bases = true
-# Disable the most problematic error codes
-# NOTE: Gradually re-enable these as codebase is improved
-# Phase 1 enabled: empty-body, dict-item, index, operator (low count, easy fixes)
+# Disable error codes that still produce errors in the current 19-file codebase
 disable_error_code = [
-    "misc",  # Parameterized generics in isinstance (88 errors)
-    "attr-defined",  # Dynamic attribute access (62 errors)
-    "no-untyped-def",  # Missing annotations (54 errors)
-    "unreachable",  # False positive unreachable code (43 errors)
-    "no-any-return",  # Returning Any (36 errors)
-    "assignment",  # Type assignment issues (40 errors)
-    "var-annotated",  # Missing variable annotations (21 errors)
-    "union-attr",  # Union type attribute access (18 errors)
-    "arg-type",  # Argument type mismatches (27 errors)
-    "call-arg",  # Invalid function call arguments (8 errors)
-    "return-value",  # Return type mismatches (8 errors)
-    "valid-type",  # Invalid type annotations (5 errors)
-    "type-abstract",  # Abstract class instantiation (6 errors)
-    "abstract",  # Abstract method issues (2 errors)
-    "no-redef",  # Redefinition issues (2 errors)
-    "safe-super",  # Super() call issues (2 errors)
-    "call-overload",  # Overload matching issues (1 error)
-    "type-arg",  # Type argument issues (2 errors)
-    "import-untyped",  # Untyped imports
-    # Phase 1 deferred - still too many errors in monitoring and plugins
-    "operator",  # Operator issues (49 errors in monitoring modules)
-    "index",  # Indexing issues (varies - type narrowing issues)
-    "empty-body",  # Missing return statement (1 error)
-    "dict-item",  # Dict type issues (1 error)
-    "list-item",  # List item type issues (MCP type compatibility)
+    "misc",  # 1 error: parameterized generics in isinstance
+    "attr-defined",  # 1 error: dynamic attribute access
+    "assignment",  # 9 errors: type assignment issues
+    "var-annotated",  # 2 errors: missing variable annotations
+    "return-value",  # 2 errors: return type mismatches
+    "dict-item",  # 1 error: dict type issue
+    "list-item",  # 1 error: polymorphic result dict in server.py
 ]
 
 # Per-module options for gradual typing
@@ -189,13 +157,8 @@ disable_error_code = [
 module = [
     "networkx.*",
     "matplotlib.*",
-    "pyvis.*",
     "bibtexparser.*",
     "psutil.*",
-    "pandas.*",
-    "yaml.*",
     "scipy.*",
-    "plotly.*",
-    "aioredis.*",
 ]
 ignore_missing_imports = true

@@ -8,12 +8,8 @@ import csv
 import io
 from typing import Any, Dict, List, Optional, Union
 
-import matplotlib
-import matplotlib.pyplot as plt
 import networkx as nx
 import networkx.algorithms.community as nx_comm
-
-matplotlib.use("Agg")  # Use non-interactive backend
 
 
 def create_graph(
@@ -65,7 +61,10 @@ def add_edges(
     if graph_name not in graphs:
         raise ValueError(f"Graph '{graph_name}' not found")
     graph = graphs[graph_name]
-    edge_tuples = [(e[0], e[1]) for e in edges if len(e) >= 2]
+    for e in edges:
+        if len(e) < 2:
+            raise ValueError(f"Edge must have at least 2 elements, got {len(e)}: {e}")
+    edge_tuples = [(e[0], e[1]) for e in edges]
     graph.add_edges_from(edge_tuples)
     return {
         "success": True,
@@ -201,6 +200,11 @@ def visualize_graph(
     graph_name: str, layout: str = "spring", graphs: Optional[Dict[str, Any]] = None
 ) -> Dict[str, str]:
     """Visualize graph and return as base64 image - compatibility function."""
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
     if graphs is None:
         graphs = {}
     if graph_name not in graphs:
@@ -255,6 +259,8 @@ def import_csv(
     """Import graph from CSV edge List[Any] - compatibility function."""
     if graphs is None:
         graphs = {}
+    if len(csv_data) > 10_000_000:
+        raise ValueError("CSV data exceeds 10MB limit")
     # Parse CSV data
     reader = csv.reader(io.StringIO(csv_data))
     edges = []
