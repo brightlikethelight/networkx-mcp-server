@@ -24,15 +24,6 @@ from .core.basic_operations import (
     pagerank as _pagerank,
     visualize_graph as _visualize_graph,
 )
-from .academic import (
-    analyze_author_impact as _analyze_author_impact,
-    build_citation_network as _build_citation_network,
-    detect_research_trends as _detect_research_trends,
-    export_bibtex as _export_bibtex,
-    find_collaboration_patterns as _find_collaboration_patterns,
-    recommend_papers as _recommend_papers,
-    resolve_doi as _resolve_doi,
-)
 from .errors import ErrorCodes, MCPError
 
 # ── Bulk operation limits (DoS protection) ────────────────────────────
@@ -287,28 +278,40 @@ def handle_export_json(args: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def handle_build_citation_network(args: Dict[str, Any]) -> Dict[str, Any]:
+    from .academic import build_citation_network as _build_citation_network
+
     return _build_citation_network(
         args["graph"], args["seed_dois"], args.get("max_depth", 2), graphs
     )
 
 
 def handle_analyze_author_impact(args: Dict[str, Any]) -> Dict[str, Any]:
+    from .academic import analyze_author_impact as _analyze_author_impact
+
     return _analyze_author_impact(args["graph"], args["author_name"], graphs)
 
 
 def handle_find_collaboration_patterns(args: Dict[str, Any]) -> Dict[str, Any]:
+    from .academic import find_collaboration_patterns as _find_collaboration_patterns
+
     return _find_collaboration_patterns(args["graph"], graphs)
 
 
 def handle_detect_research_trends(args: Dict[str, Any]) -> Dict[str, Any]:
+    from .academic import detect_research_trends as _detect_research_trends
+
     return _detect_research_trends(args["graph"], args.get("time_window", 5), graphs)
 
 
 def handle_export_bibtex(args: Dict[str, Any]) -> Dict[str, Any]:
+    from .academic import export_bibtex as _export_bibtex
+
     return _export_bibtex(args["graph"], graphs)
 
 
 def handle_recommend_papers(args: Dict[str, Any]) -> Dict[str, Any]:
+    from .academic import recommend_papers as _recommend_papers
+
     # Backward-compatible parameter handling
     seed = args.get("seed_doi") or args.get("seed_paper")
     max_recs = args.get("max_recommendations") or args.get("top_n", 10)
@@ -318,6 +321,8 @@ def handle_recommend_papers(args: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def handle_resolve_doi(args: Dict[str, Any]) -> Dict[str, Any]:
+    from .academic import resolve_doi as _resolve_doi
+
     result, error = _resolve_doi(args["doi"])
     if result is None:
         error_msg = error or "Unknown error"

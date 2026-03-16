@@ -368,3 +368,85 @@ class TestAuthMiddleware:
     def test_empty_permissions(self, middleware: AuthMiddleware) -> None:
         assert middleware.check_permission({}, "read") is False
         assert middleware.check_permission({"permissions": []}, "read") is False
+
+
+# ---------------------------------------------------------------------------
+# CLI entry point (main)
+# ---------------------------------------------------------------------------
+
+
+class TestAuthCLI:
+    """Cover auth.py main() — lines 180-239."""
+
+    @pytest.fixture
+    def _patch_manager(self, tmp_path, monkeypatch):
+        """Redirect APIKeyManager() in main() to use tmp_path storage."""
+        storage = tmp_path / "keys.json"
+        original_init = APIKeyManager.__init__
+
+        def patched_init(self, storage_path=None):
+            original_init(self, storage_path=storage)
+
+        monkeypatch.setattr(APIKeyManager, "__init__", patched_init)
+        return storage
+
+    def test_cli_generate(self, _patch_manager, monkeypatch, capsys):
+        monkeypatch.setattr(
+            "sys.argv", ["auth", "generate", "test-key", "--permissions", "read"]
+        )
+        from networkx_mcp.auth import main
+
+        main()
+        captured = capsys.readouterr()
+        assert "nxmcp_" in captured.out
+        assert "test-key" in captured.out
+
+    def test_cli_list_empty(self, _patch_manager, monkeypatch, capsys):
+        monkeypatch.setattr("sys.argv", ["auth", "list"])
+        from networkx_mcp.auth import main
+
+        main()
+        captured = capsys.readouterr()
+        assert "No API keys found" in captured.out
+
+    def test_cli_list_with_keys(self, _patch_manager, monkeypatch, capsys):
+        # Pre-populate keys via the patched path
+        mgr = APIKeyManager()
+        mgr.generate_key("alpha")
+        mgr.generate_key("beta")
+
+        monkeypatch.setattr("sys.argv", ["auth", "list"])
+        from networkx_mcp.auth import main
+
+        main()
+        captured = capsys.readouterr()
+        assert "alpha" in captured.out
+        assert "beta" in captured.out
+
+    def test_cli_revoke(self, _patch_manager, monkeypatch, capsys):
+        mgr = APIKeyManager()
+        key = mgr.generate_key("revoke-me")
+
+        monkeypatch.setattr("sys.argv", ["auth", "revoke", key])
+        from networkx_mcp.auth import main
+
+        main()
+        captured = capsys.readouterr()
+        assert "revoked successfully" in captured.out
+
+    def test_cli_revoke_not_found(self, _patch_manager, monkeypatch, capsys):
+        monkeypatch.setattr("sys.argv", ["auth", "revoke", "nxmcp_bogus"])
+        from networkx_mcp.auth import main
+
+        main()
+        captured = capsys.readouterr()
+        assert "not found" in captured.out
+
+    def test_cli_no_args(self, _patch_manager, monkeypatch, capsys):
+        monkeypatch.setattr("sys.argv", ["auth"])
+        from networkx_mcp.auth import main
+
+        main()
+        captured = capsys.readouterr()
+        # Should print help/usage
+        assert "usage" in captured.out.lower() or "Manage" in captured.out

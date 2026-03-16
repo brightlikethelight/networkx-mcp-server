@@ -1197,3 +1197,78 @@ class TestGraphIdValidation:
             _tool_call("add_nodes", {"graph": "../../bad", "nodes": [1]})
         )
         assert "error" in resp
+
+
+# ===========================================================================
+# 11. main() entry point
+# ===========================================================================
+
+
+class TestMainEntryPoint:
+    """Cover server.py main() — lines 503-561."""
+
+    def test_main_development_mode(self, monkeypatch):
+        """Default dev mode: no auth, no monitoring, server created and run."""
+        monkeypatch.delenv("NETWORKX_MCP_AUTH", raising=False)
+        monkeypatch.delenv("NETWORKX_MCP_MONITORING", raising=False)
+        monkeypatch.delenv("NETWORKX_MCP_ENV", raising=False)
+
+        from unittest.mock import patch
+
+        with patch("networkx_mcp.server.asyncio.run") as mock_run:
+            from networkx_mcp.server import main
+
+            main()
+            mock_run.assert_called_once()
+
+    def test_main_auth_enabled(self, monkeypatch):
+        """NETWORKX_MCP_AUTH=true creates server with auth."""
+        monkeypatch.setenv("NETWORKX_MCP_AUTH", "true")
+        monkeypatch.delenv("NETWORKX_MCP_MONITORING", raising=False)
+
+        from unittest.mock import patch
+
+        with patch("networkx_mcp.server.asyncio.run") as mock_run:
+            from networkx_mcp.server import main
+
+            main()
+            mock_run.assert_called_once()
+
+    def test_main_production_no_auth_blocked(self, monkeypatch):
+        """Production mode without auth raises RuntimeError."""
+        monkeypatch.setenv("NETWORKX_MCP_ENV", "production")
+        monkeypatch.delenv("NETWORKX_MCP_AUTH", raising=False)
+        monkeypatch.delenv("NETWORKX_MCP_INSECURE_CONFIRM", raising=False)
+
+        from networkx_mcp.server import main
+
+        with pytest.raises(RuntimeError, match="Authentication disabled in production"):
+            main()
+
+    def test_main_production_insecure_confirm(self, monkeypatch):
+        """Production + INSECURE_CONFIRM bypasses the safety check."""
+        monkeypatch.setenv("NETWORKX_MCP_ENV", "production")
+        monkeypatch.delenv("NETWORKX_MCP_AUTH", raising=False)
+        monkeypatch.setenv("NETWORKX_MCP_INSECURE_CONFIRM", "true")
+
+        from unittest.mock import patch
+
+        with patch("networkx_mcp.server.asyncio.run") as mock_run:
+            from networkx_mcp.server import main
+
+            main()
+            mock_run.assert_called_once()
+
+    def test_main_monitoring_enabled(self, monkeypatch):
+        """NETWORKX_MCP_MONITORING=true enables monitoring."""
+        monkeypatch.delenv("NETWORKX_MCP_AUTH", raising=False)
+        monkeypatch.delenv("NETWORKX_MCP_ENV", raising=False)
+        monkeypatch.setenv("NETWORKX_MCP_MONITORING", "true")
+
+        from unittest.mock import patch
+
+        with patch("networkx_mcp.server.asyncio.run") as mock_run:
+            from networkx_mcp.server import main
+
+            main()
+            mock_run.assert_called_once()
