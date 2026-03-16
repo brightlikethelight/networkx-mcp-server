@@ -9,11 +9,22 @@ from networkx_mcp.graph_cache import graphs
 from networkx_mcp.handlers import (
     handle_add_edges,
     handle_add_nodes,
+    handle_centrality_measures,
+    handle_clustering_coefficients,
     handle_create_graph,
+    handle_cycles_detection,
     handle_delete_graph,
     handle_export_json,
     handle_get_info,
+    handle_graph_coloring,
+    handle_graph_statistics,
     handle_import_csv,
+    handle_list_graphs,
+    handle_matching,
+    handle_maximum_flow,
+    handle_minimum_spanning_tree,
+    handle_remove_edges,
+    handle_remove_nodes,
     handle_shortest_path,
     handle_degree_centrality,
     handle_betweenness_centrality,
@@ -147,6 +158,92 @@ class TestAlgorithmHandlers:
 
 
 # ═══════════════════════════════════════════════════════════════════════
+# Advanced algorithm handlers
+# ═══════════════════════════════════════════════════════════════════════
+
+
+class TestAdvancedAlgorithmHandlers:
+    """Tests for the 5 advanced algorithm handlers wired in 4e6e025."""
+
+    @pytest.fixture(autouse=True)
+    def _ring_graph(self):
+        """Create a 5-node ring graph for algorithm tests."""
+        handle_create_graph({"name": "ring"})
+        handle_add_nodes({"graph": "ring", "nodes": [1, 2, 3, 4, 5]})
+        handle_add_edges(
+            {"graph": "ring", "edges": [[1, 2], [2, 3], [3, 4], [4, 5], [5, 1]]}
+        )
+
+    # ── clustering_coefficients ──────────────────────────────────────
+
+    def test_clustering_coefficients(self):
+        result = handle_clustering_coefficients({"graph": "ring"})
+        assert "node_clustering" in result
+        assert "average_clustering" in result
+        assert isinstance(result["average_clustering"], float)
+
+    def test_clustering_coefficients_missing_graph(self):
+        with pytest.raises(ValueError, match="not found"):
+            handle_clustering_coefficients({"graph": "nope"})
+
+    # ── graph_statistics ─────────────────────────────────────────────
+
+    def test_graph_statistics(self):
+        result = handle_graph_statistics({"graph": "ring"})
+        assert result["num_nodes"] == 5
+        assert result["density"] > 0
+        # Verify numpy conversion — all degree_stats values must be float
+        for v in result["degree_stats"].values():
+            assert isinstance(v, float)
+
+    def test_graph_statistics_missing_graph(self):
+        with pytest.raises(ValueError, match="not found"):
+            handle_graph_statistics({"graph": "nope"})
+
+    # ── minimum_spanning_tree ────────────────────────────────────────
+
+    def test_minimum_spanning_tree_kruskal(self):
+        result = handle_minimum_spanning_tree({"graph": "ring"})
+        assert "edges" in result
+        assert result["algorithm"] == "kruskal"
+        assert result["num_edges"] == 4  # MST of 5-node graph has 4 edges
+
+    def test_minimum_spanning_tree_prim(self):
+        result = handle_minimum_spanning_tree({"graph": "ring", "algorithm": "prim"})
+        assert result["algorithm"] == "prim"
+        assert result["num_edges"] == 4
+
+    def test_minimum_spanning_tree_missing_graph(self):
+        with pytest.raises(ValueError, match="not found"):
+            handle_minimum_spanning_tree({"graph": "nope"})
+
+    # ── cycles_detection ─────────────────────────────────────────────
+
+    def test_cycles_detection(self):
+        result = handle_cycles_detection({"graph": "ring"})
+        assert result["has_cycle"] is True
+
+    def test_cycles_detection_missing_graph(self):
+        with pytest.raises(ValueError, match="not found"):
+            handle_cycles_detection({"graph": "nope"})
+
+    # ── graph_coloring ───────────────────────────────────────────────
+
+    def test_graph_coloring(self):
+        result = handle_graph_coloring({"graph": "ring"})
+        assert result["num_colors"] >= 1
+        assert "coloring" in result
+
+    def test_graph_coloring_strategy(self):
+        result = handle_graph_coloring({"graph": "ring", "strategy": "smallest_last"})
+        assert result["num_colors"] >= 1
+
+    def test_graph_coloring_missing_graph(self):
+        with pytest.raises(ValueError, match="not found"):
+            handle_graph_coloring({"graph": "nope"})
+
+
+# ═══════════════════════════════════════════════════════════════════════
 # I/O handlers
 # ═══════════════════════════════════════════════════════════════════════
 
@@ -245,6 +342,131 @@ class TestMakeHealthHandler:
         handler = make_health_handler(None)
         result = handler({})
         assert result["status"] == "monitoring_disabled"
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# B1: list_graphs
+# ═══════════════════════════════════════════════════════════════════════
+
+
+class TestListGraphs:
+    def test_empty(self):
+        result = handle_list_graphs({})
+        assert result["graphs"] == []
+        assert result["total"] == 0
+
+    def test_with_graphs(self):
+        handle_create_graph({"name": "a"})
+        handle_create_graph({"name": "b", "directed": True})
+        handle_add_nodes({"graph": "a", "nodes": [1, 2]})
+        result = handle_list_graphs({})
+        assert result["total"] == 2
+        names = {g["name"] for g in result["graphs"]}
+        assert names == {"a", "b"}
+        a_entry = next(g for g in result["graphs"] if g["name"] == "a")
+        assert a_entry["nodes"] == 2
+        assert a_entry["directed"] is False
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# B2: remove_nodes / remove_edges
+# ═══════════════════════════════════════════════════════════════════════
+
+
+class TestRemoveOperations:
+    @pytest.fixture(autouse=True)
+    def _setup(self):
+        handle_create_graph({"name": "r"})
+        handle_add_nodes({"graph": "r", "nodes": [1, 2, 3, 4]})
+        handle_add_edges({"graph": "r", "edges": [[1, 2], [2, 3], [3, 4]]})
+
+    def test_remove_nodes(self):
+        result = handle_remove_nodes({"graph": "r", "nodes": [4]})
+        assert result["removed"] == 1
+        assert result["total_nodes"] == 3
+
+    def test_remove_nodes_missing_graph(self):
+        with pytest.raises(ValueError, match="not found"):
+            handle_remove_nodes({"graph": "nope", "nodes": [1]})
+
+    def test_remove_nonexistent_node(self):
+        # NetworkX silently ignores nonexistent nodes in remove_nodes_from
+        result = handle_remove_nodes({"graph": "r", "nodes": [99]})
+        assert result["total_nodes"] == 4
+
+    def test_remove_edges(self):
+        result = handle_remove_edges({"graph": "r", "edges": [[1, 2]]})
+        assert result["removed"] == 1
+        assert result["total_edges"] == 2
+
+    def test_remove_edges_missing_graph(self):
+        with pytest.raises(ValueError, match="not found"):
+            handle_remove_edges({"graph": "nope", "edges": [[1, 2]]})
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# B3: centrality_measures / matching / maximum_flow
+# ═══════════════════════════════════════════════════════════════════════
+
+
+class TestNewAlgorithmHandlers:
+    @pytest.fixture(autouse=True)
+    def _setup(self):
+        handle_create_graph({"name": "g"})
+        handle_add_nodes({"graph": "g", "nodes": [1, 2, 3, 4]})
+        handle_add_edges({"graph": "g", "edges": [[1, 2], [2, 3], [3, 4], [1, 4]]})
+
+    # ── centrality_measures ──────────────────────────────────────────
+
+    def test_centrality_measures_default(self):
+        result = handle_centrality_measures({"graph": "g"})
+        assert "degree_centrality" in result
+        assert "betweenness_centrality" in result
+
+    def test_centrality_measures_subset(self):
+        result = handle_centrality_measures({"graph": "g", "measures": ["closeness"]})
+        assert "closeness_centrality" in result
+        assert "degree_centrality" not in result
+
+    def test_centrality_measures_missing_graph(self):
+        with pytest.raises(ValueError, match="not found"):
+            handle_centrality_measures({"graph": "nope"})
+
+    # ── matching ─────────────────────────────────────────────────────
+
+    def test_matching(self):
+        result = handle_matching({"graph": "g"})
+        assert "matching" in result
+        assert result["matching_size"] >= 1
+
+    def test_matching_missing_graph(self):
+        with pytest.raises(ValueError, match="not found"):
+            handle_matching({"graph": "nope"})
+
+    # ── maximum_flow ─────────────────────────────────────────────────
+
+    def test_maximum_flow(self):
+        handle_create_graph({"name": "flow", "directed": True})
+        handle_add_edges(
+            {"graph": "flow", "edges": [["s", "a"], ["a", "t"], ["s", "t"]]}
+        )
+        # Add capacity attributes
+        from networkx_mcp.graph_cache import graphs as g_cache
+
+        for u, v in g_cache["flow"].edges():
+            g_cache["flow"][u][v]["capacity"] = 10
+        result = handle_maximum_flow({"graph": "flow", "source": "s", "sink": "t"})
+        assert result["flow_value"] == 20
+        assert result["source"] == "s"
+        assert result["sink"] == "t"
+
+    def test_maximum_flow_missing_graph(self):
+        with pytest.raises(ValueError, match="not found"):
+            handle_maximum_flow({"graph": "nope", "source": "s", "sink": "t"})
+
+    def test_maximum_flow_undirected_raises(self):
+        with pytest.raises(ValueError, match="directed"):
+            handle_maximum_flow({"graph": "g", "source": 1, "sink": 4})
 
 
 # ═══════════════════════════════════════════════════════════════════════

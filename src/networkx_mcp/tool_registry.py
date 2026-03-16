@@ -145,6 +145,17 @@ def build_registry(
     )
     registry.register(
         ToolDef(
+            name="list_graphs",
+            description="List all stored graphs with summary info",
+            input_schema={
+                "type": "object",
+                "properties": {},
+            },
+            handler=h.handle_list_graphs,
+        )
+    )
+    registry.register(
+        ToolDef(
             name="delete_graph",
             description="Delete a graph from storage",
             input_schema={
@@ -153,6 +164,49 @@ def build_registry(
                 "required": ["graph"],
             },
             handler=h.handle_delete_graph,
+            is_write=True,
+            graph_param="graph",
+        )
+    )
+    registry.register(
+        ToolDef(
+            name="remove_nodes",
+            description="Remove nodes from a graph",
+            input_schema={
+                "type": "object",
+                "properties": {
+                    "graph": {"type": "string"},
+                    "nodes": {
+                        "type": "array",
+                        "items": {"type": ["string", "number"]},
+                    },
+                },
+                "required": ["graph", "nodes"],
+            },
+            handler=h.handle_remove_nodes,
+            is_write=True,
+            graph_param="graph",
+        )
+    )
+    registry.register(
+        ToolDef(
+            name="remove_edges",
+            description="Remove edges from a graph",
+            input_schema={
+                "type": "object",
+                "properties": {
+                    "graph": {"type": "string"},
+                    "edges": {
+                        "type": "array",
+                        "items": {
+                            "type": "array",
+                            "items": {"type": ["string", "number"]},
+                        },
+                    },
+                },
+                "required": ["graph", "edges"],
+            },
+            handler=h.handle_remove_edges,
             is_write=True,
             graph_param="graph",
         )
@@ -281,6 +335,60 @@ def build_registry(
                 "required": ["graph"],
             },
             handler=h.handle_graph_coloring,
+            graph_param="graph",
+        )
+    )
+    registry.register(
+        ToolDef(
+            name="centrality_measures",
+            description="Calculate multiple centrality measures (degree, betweenness, closeness, eigenvector)",
+            input_schema={
+                "type": "object",
+                "properties": {
+                    "graph": {"type": "string"},
+                    "measures": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "List of measures: degree, betweenness, closeness, eigenvector",
+                    },
+                },
+                "required": ["graph"],
+            },
+            handler=h.handle_centrality_measures,
+            graph_param="graph",
+        )
+    )
+    registry.register(
+        ToolDef(
+            name="matching",
+            description="Find maximum weight matching in a graph",
+            input_schema={
+                "type": "object",
+                "properties": {
+                    "graph": {"type": "string"},
+                    "max_cardinality": {"type": "boolean", "default": True},
+                },
+                "required": ["graph"],
+            },
+            handler=h.handle_matching,
+            graph_param="graph",
+        )
+    )
+    registry.register(
+        ToolDef(
+            name="maximum_flow",
+            description="Calculate maximum flow in a directed graph",
+            input_schema={
+                "type": "object",
+                "properties": {
+                    "graph": {"type": "string"},
+                    "source": {"type": ["string", "number"]},
+                    "sink": {"type": ["string", "number"]},
+                    "capacity": {"type": "string", "default": "capacity"},
+                },
+                "required": ["graph", "source", "sink"],
+            },
+            handler=h.handle_maximum_flow,
             graph_param="graph",
         )
     )

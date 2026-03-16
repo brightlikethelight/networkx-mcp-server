@@ -94,12 +94,48 @@ def handle_get_info(args: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+def handle_list_graphs(args: Dict[str, Any]) -> Dict[str, Any]:
+    graph_list = []
+    for name in graphs:
+        g = graphs[name]
+        graph_list.append(
+            {
+                "name": name,
+                "nodes": g.number_of_nodes(),
+                "edges": g.number_of_edges(),
+                "directed": g.is_directed(),
+            }
+        )
+    return {"graphs": graph_list, "total": len(graph_list)}
+
+
 def handle_delete_graph(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
     if graph_name not in graphs:
         return {"success": False, "error": f"Graph '{graph_name}' not found"}
     del graphs[graph_name]
     return {"success": True, "graph_id": graph_name, "deleted": True}
+
+
+def handle_remove_nodes(args: Dict[str, Any]) -> Dict[str, Any]:
+    graph_name = args["graph"]
+    if graph_name not in graphs:
+        raise ValueError(f"Graph '{graph_name}' not found")
+    nodes = args["nodes"]
+    graph = graphs[graph_name]
+    graph.remove_nodes_from(nodes)
+    return {"removed": len(nodes), "total_nodes": graph.number_of_nodes()}
+
+
+def handle_remove_edges(args: Dict[str, Any]) -> Dict[str, Any]:
+    graph_name = args["graph"]
+    if graph_name not in graphs:
+        raise ValueError(f"Graph '{graph_name}' not found")
+    raw_edges = args["edges"]
+    graph = graphs[graph_name]
+    edges = [tuple(e) for e in raw_edges]
+    graph.remove_edges_from(edges)
+    return {"removed": len(edges), "total_edges": graph.number_of_edges()}
 
 
 def handle_shortest_path(args: Dict[str, Any]) -> Dict[str, Any]:
@@ -182,6 +218,32 @@ def handle_graph_coloring(args: Dict[str, Any]) -> Dict[str, Any]:
         raise ValueError(f"Graph '{graph_name}' not found")
     strategy = args.get("strategy", "largest_first")
     return GraphAlgorithms.graph_coloring(graphs[graph_name], strategy)
+
+
+def handle_centrality_measures(args: Dict[str, Any]) -> Dict[str, Any]:
+    graph_name = args["graph"]
+    if graph_name not in graphs:
+        raise ValueError(f"Graph '{graph_name}' not found")
+    measures = args.get("measures")
+    return GraphAlgorithms.centrality_measures(graphs[graph_name], measures)
+
+
+def handle_matching(args: Dict[str, Any]) -> Dict[str, Any]:
+    graph_name = args["graph"]
+    if graph_name not in graphs:
+        raise ValueError(f"Graph '{graph_name}' not found")
+    max_cardinality = args.get("max_cardinality", True)
+    return GraphAlgorithms.matching(graphs[graph_name], max_cardinality)
+
+
+def handle_maximum_flow(args: Dict[str, Any]) -> Dict[str, Any]:
+    graph_name = args["graph"]
+    if graph_name not in graphs:
+        raise ValueError(f"Graph '{graph_name}' not found")
+    source = args["source"]
+    sink = args["sink"]
+    capacity = args.get("capacity", "capacity")
+    return GraphAlgorithms.maximum_flow(graphs[graph_name], source, sink, capacity)
 
 
 # ═══════════════════════════════════════════════════════════════════════

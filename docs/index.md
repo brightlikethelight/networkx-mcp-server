@@ -8,13 +8,14 @@ Desktop and other MCP clients access to graph algorithms without writing Python.
 
 ## Capabilities
 
-**33 tools** across 4 categories:
+**39 tools** across 4 categories:
 
-- **Core graph operations (19)** -- create/delete graphs, add/remove nodes and
-  edges, graph statistics, shortest path, centrality (degree, betweenness),
-  PageRank, community detection, clustering coefficients, minimum spanning tree,
-  cycle detection, graph coloring, visualization (PNG), CSV import/export,
-  JSON export
+- **Core graph operations (25)** -- create/delete graphs, list graphs,
+  add/remove nodes and edges, graph statistics, shortest path,
+  centrality (degree, betweenness, multi-centrality), PageRank,
+  community detection, clustering coefficients, minimum spanning tree,
+  cycle detection, graph coloring, matching, maximum flow,
+  visualization (PNG), CSV import/export, JSON export
 - **Academic / citation tools (7)** -- build citation networks from the CrossRef
   API, BibTeX export, author impact analysis, plus `resolve_doi`
 - **CI/CD tools (6)** -- dependency graph analysis for build pipelines
