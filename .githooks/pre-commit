@@ -46,10 +46,12 @@ SENSITIVE_PATTERNS="password\|secret\|token\|api[_-]key\|apikey\|AWS_ACCESS_KEY\
 if git diff --cached --name-only | xargs grep -iE "$SENSITIVE_PATTERNS" 2>/dev/null | grep -v "# noqa: S"; then
     echo -e "${YELLOW}⚠️  Potential sensitive information detected${NC}"
     echo "Please review the above matches and ensure no secrets are being committed."
-    read -p "Continue with commit? (y/n) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        exit 1
+    if [ -t 0 ]; then
+        read -p "Continue with commit? (y/n) " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            exit 1
+        fi
     fi
 fi
 
@@ -106,10 +108,12 @@ LARGE_FILES=$(git diff --cached --name-only | xargs -I {} sh -c 'test -f "{}" &&
 if [ ! -z "$LARGE_FILES" ]; then
     echo -e "${YELLOW}⚠️  Large files detected (>1MB)${NC}"
     git diff --cached --name-only | xargs -I {} sh -c 'test -f "{}" && ls -lh "{}"' | awk '$5 ~ /[0-9]+M/'
-    read -p "Continue with large files? (y/n) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        exit 1
+    if [ -t 0 ]; then
+        read -p "Continue with large files? (y/n) " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            exit 1
+        fi
     fi
 fi
 

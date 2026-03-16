@@ -172,14 +172,18 @@ jobs:
         build-args: |
           VERSION=${{ github.ref_name }}
 
+    - name: Extract version
+      id: version
+      run: echo "tag=$(echo '${{ steps.meta.outputs.tags }}' | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)" >> $GITHUB_OUTPUT
+
     - name: Test Docker image
       run: |
         # Test that the image runs
-        docker run --rm ghcr.io/${{ github.repository }}:${{ steps.meta.outputs.version }} --version
+        docker run --rm ghcr.io/${{ github.repository }}:${{ steps.version.outputs.tag }} --version
 
         # Test MCP protocol response
         echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"1.0.0","capabilities":{}}}' | \
-          docker run -i --rm ghcr.io/${{ github.repository }}:${{ steps.meta.outputs.version }} | \
+          docker run -i --rm ghcr.io/${{ github.repository }}:${{ steps.version.outputs.tag }} | \
           jq -e '.result.protocolVersion' || (echo "::error::MCP protocol test failed" && exit 1)
 
   # Publish to PyPI

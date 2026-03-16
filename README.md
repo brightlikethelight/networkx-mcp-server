@@ -31,7 +31,7 @@ NetworkX MCP Server enables Large Language Models (like Claude) to perform sophi
 
 #### 📊 Core Graph Operations
 
-- **20+ Graph Functions**: From basic operations to advanced algorithms like PageRank
+- **35+ Graph Functions**: From basic operations to advanced algorithms like PageRank
 - **BibTeX Export**: Export citation networks in academic-standard BibTeX format
 - **CrossRef Integration**: Access 156+ million academic papers via DOI resolution
 - **Visualization**: Generate publication-ready network visualizations
@@ -120,28 +120,6 @@ Ask Claude: "Create a graph called 'test', add nodes 1, 2, 3 with edges between 
 - `import_csv` - Load graphs from edge lists
 - `export_json` - Export graphs in standard formats
 
-## 🚦 Quick Start
-
-### Community Edition
-
-```bash
-# Install community edition
-pip install networkx-mcp-server
-```
-
-Add to your `claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "networkx": {
-      "command": "networkx-mcp",
-      "args": []
-    }
-  }
-}
-```
-
 ### Academic Research Example
 
 ```
@@ -215,8 +193,6 @@ Generated BibTeX file with 847 entries ready for LaTeX integration
 - Analyze journal and conference impact patterns
 - Study citation half-life and research longevity
 
-See the [demos/](demos/) folder for complete examples.
-
 ## 📈 Performance
 
 - **Memory**: ~70MB (including Python, NetworkX, and visualization)
@@ -248,8 +224,7 @@ pytest tests/working/
 
 ## 📚 Documentation
 
-- [API Reference](docs/api.md) - Detailed operation descriptions
-- [Examples](demos/) - Real-world use cases
+- [API Reference](docs/API.md) - Detailed operation descriptions
 - [Contributing](CONTRIBUTING.md) - How to contribute
 
 ## 🤝 Contributing

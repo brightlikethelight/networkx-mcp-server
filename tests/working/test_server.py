@@ -26,7 +26,6 @@ from networkx_mcp.server import (
     delete_graph,
     export_json,
     get_graph_info,
-    graph_manager,
     graphs,
     import_csv,
     mcp,
@@ -230,6 +229,68 @@ class TestMCPLifecycle:
         await _init_server(server)
         resp = await server.handle_request(
             {"jsonrpc": "2.0", "id": 7, "method": "resources/read", "params": {}}
+        )
+        assert resp["error"]["code"] == -32602
+
+    @pytest.mark.asyncio
+    async def test_resources_list_with_graphs(self, server):
+        """resources/list returns entries for stored graphs."""
+        await _init_server(server)
+        # Create a graph first
+        await server.handle_request(_tool_call("create_graph", {"name": "res_g"}))
+        await server.handle_request(
+            _tool_call("add_nodes", {"graph": "res_g", "nodes": ["a", "b"]})
+        )
+        await server.handle_request(
+            _tool_call("add_edges", {"graph": "res_g", "edges": [["a", "b"]]})
+        )
+        resp = await server.handle_request(
+            {"jsonrpc": "2.0", "id": 20, "method": "resources/list", "params": {}}
+        )
+        resources = resp["result"]["resources"]
+        assert len(resources) == 1
+        entry = resources[0]
+        assert entry["uri"] == "graph://res_g"
+        assert entry["name"] == "res_g"
+        assert "description" in entry
+        assert entry["mimeType"] == "application/json"
+
+    @pytest.mark.asyncio
+    async def test_resources_read_valid_graph(self, server):
+        """resources/read returns node-link JSON for an existing graph."""
+        await _init_server(server)
+        await server.handle_request(_tool_call("create_graph", {"name": "res_r"}))
+        await server.handle_request(
+            _tool_call("add_nodes", {"graph": "res_r", "nodes": ["x", "y"]})
+        )
+        await server.handle_request(
+            _tool_call("add_edges", {"graph": "res_r", "edges": [["x", "y"]]})
+        )
+        resp = await server.handle_request(
+            {
+                "jsonrpc": "2.0",
+                "id": 21,
+                "method": "resources/read",
+                "params": {"uri": "graph://res_r"},
+            }
+        )
+        contents = resp["result"]["contents"]
+        assert len(contents) == 1
+        data = json.loads(contents[0]["text"])
+        assert "nodes" in data
+        assert "links" in data
+
+    @pytest.mark.asyncio
+    async def test_resources_read_missing_graph(self, server):
+        """resources/read returns -32602 for a missing graph."""
+        await _init_server(server)
+        resp = await server.handle_request(
+            {
+                "jsonrpc": "2.0",
+                "id": 22,
+                "method": "resources/read",
+                "params": {"uri": "graph://does_not_exist"},
+            }
         )
         assert resp["error"]["code"] == -32602
 
@@ -819,10 +880,6 @@ class TestModuleLevelExports:
         assert mcp is not None
         assert isinstance(mcp, NetworkXMCPServer)
 
-    def test_graph_manager_exists(self):
-        assert graph_manager is not None
-        assert graph_manager.graphs is graphs
-
     def test_graphs_exists(self):
         assert graphs is not None
 
@@ -915,20 +972,6 @@ class TestModuleLevelExports:
     def test_wrapper_delete_nonexistent(self):
         result = delete_graph("doesnt_exist")
         assert result["success"] is False
-
-    def test_graph_manager_get_graph(self):
-        create_graph("gm_test")
-        g = graph_manager.get_graph("gm_test")
-        assert g is not None
-        assert isinstance(g, nx.Graph)
-
-    def test_graph_manager_get_missing(self):
-        assert graph_manager.get_graph("not_here") is None
-
-    def test_graph_manager_delete_graph(self):
-        create_graph("gm_del")
-        graph_manager.delete_graph("gm_del")
-        assert "gm_del" not in graphs
 
 
 # ===========================================================================

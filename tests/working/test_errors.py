@@ -18,7 +18,6 @@ from networkx_mcp.errors import (
     ServerNotInitializedError,
     ValidationError,
     handle_error,
-    validate_centrality_measures,
     validate_edge,
     validate_graph_id,
     validate_node_id,
@@ -524,54 +523,6 @@ class TestValidateRequiredParams:
         validate_required_params(
             {"flag": False, "count": 0, "name": ""}, ["flag", "count", "name"]
         )
-
-
-# ---------------------------------------------------------------------------
-# validate_centrality_measures
-# ---------------------------------------------------------------------------
-
-
-class TestValidateCentralityMeasures:
-    def test_single_valid(self):
-        assert validate_centrality_measures(["degree"]) == ["degree"]
-
-    def test_all_valid(self):
-        result = validate_centrality_measures(
-            ["degree", "betweenness", "closeness", "eigenvector"]
-        )
-        assert len(result) == 4
-
-    def test_returns_same_list(self):
-        inp = ["degree", "closeness"]
-        assert validate_centrality_measures(inp) is inp
-
-    def test_not_a_list_rejected(self):
-        with pytest.raises(ValidationError, match="must be a list"):
-            validate_centrality_measures("degree")
-
-    def test_tuple_rejected(self):
-        with pytest.raises(ValidationError, match="must be a list"):
-            validate_centrality_measures(("degree",))
-
-    def test_empty_list_rejected(self):
-        with pytest.raises(ValidationError, match="cannot be empty"):
-            validate_centrality_measures([])
-
-    def test_invalid_measure_rejected(self):
-        with pytest.raises(ValidationError, match="Invalid measure 'pagerank'"):
-            validate_centrality_measures(["pagerank"])
-
-    def test_non_string_element_rejected(self):
-        with pytest.raises(ValidationError, match="must be string"):
-            validate_centrality_measures([42])
-
-    def test_mixed_valid_invalid_rejected(self):
-        with pytest.raises(ValidationError, match="Invalid measure"):
-            validate_centrality_measures(["degree", "fake"])
-
-    def test_none_rejected(self):
-        with pytest.raises(ValidationError, match="must be a list"):
-            validate_centrality_measures(None)
 
 
 # ---------------------------------------------------------------------------

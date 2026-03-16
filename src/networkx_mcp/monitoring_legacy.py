@@ -106,33 +106,3 @@ class HealthMonitor:
             parts.append(f"{minutes}m")
 
         return " ".join(parts) if parts else "< 1m"
-
-
-# Optional HTTP health endpoint
-def create_health_endpoint(monitor: HealthMonitor, port: int = 8080) -> Any:
-    """Create a simple HTTP health endpoint."""
-    import json
-    import threading
-    from http.server import BaseHTTPRequestHandler, HTTPServer
-
-    class HealthHandler(BaseHTTPRequestHandler):
-        def do_GET(self) -> None:
-            if self.path == "/health":
-                self.send_response(200)
-                self.send_header("Content-Type", "application/json")
-                self.end_headers()
-
-                health_data = monitor.get_health_status()
-                self.wfile.write(json.dumps(health_data, indent=2).encode())
-            else:
-                self.send_response(404)
-                self.end_headers()
-
-        def log_message(self, format: str, *args: Any) -> None:
-            pass  # Suppress logging
-
-    server = HTTPServer(("", port), HealthHandler)
-    thread = threading.Thread(target=server.serve_forever, daemon=True)
-    thread.start()
-
-    return server

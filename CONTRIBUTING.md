@@ -153,7 +153,7 @@ git checkout -b feature/your-feature-name
 # ... edit files ...
 
 # 4. Run tests frequently
-pytest tests/test_relevant_module.py
+pytest tests/working/test_relevant_module.py
 
 # 5. Check code quality
 black src/ tests/

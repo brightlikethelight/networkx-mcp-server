@@ -66,25 +66,6 @@ from .core.basic_operations import (
 from .graph_cache import graphs
 
 
-class GraphManager:
-    """Simple graph manager for test compatibility."""
-
-    def __init__(self) -> None:
-        self.graphs = graphs
-
-    def get_graph(self, graph_id: str) -> nx.Graph | None:
-        """Get a graph by ID."""
-        return graphs.get(graph_id)
-
-    def delete_graph(self, graph_id: str) -> None:
-        """Delete a graph by ID."""
-        if graph_id in graphs:
-            del graphs[graph_id]
-
-
-# Create global graph manager instance
-graph_manager = GraphManager()
-
 # Optional authentication
 try:
     from .auth import APIKeyManager, AuthMiddleware
@@ -102,6 +83,7 @@ except ImportError:
     HAS_MONITORING = False
 
 
+# DEPRECATED: use handlers.py directly. Will be removed in v4.0.
 # Re-export functions with graphs parameter bound
 def create_graph(name: str, directed: bool = False) -> Any:
     return _create_graph(name, directed, graphs)
