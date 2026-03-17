@@ -49,6 +49,11 @@ jobs:
         # Update requirements.txt from requirements.in
         pip-compile --upgrade --resolver=backtracking requirements.in
 
+    - name: Run tests after update
+      run: |
+        pip install -e ".[dev]"
+        pytest tests/working/ -v --tb=short
+
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v5
       with:

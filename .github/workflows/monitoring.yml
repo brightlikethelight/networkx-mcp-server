@@ -56,6 +56,7 @@ jobs:
           }
 
           echo "### Workflow Status" >> $GITHUB_STEP_SUMMARY
+          # SYNC: update if workflow files are renamed
           check_workflow "CI" "ci.yml"
           check_workflow "Security" "security.yml"
           check_workflow "Docker Build" "docker-build.yml"

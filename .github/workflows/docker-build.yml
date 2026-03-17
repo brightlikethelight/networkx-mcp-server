@@ -72,7 +72,7 @@ jobs:
         # Test basic graph operation
         echo '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"create_graph","arguments":{"name":"test","directed":false}}}' | \
           docker run -i --rm ${{ env.IMAGE_NAME }}:test | \
-          jq -e '.result' || echo "::warning::Graph creation test failed"
+          jq -e '.result' || (echo "::error::Graph creation test failed" && exit 1)
 
     - name: Push Docker image
       if: github.event_name != 'pull_request'

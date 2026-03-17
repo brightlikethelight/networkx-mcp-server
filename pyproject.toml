@@ -44,7 +44,7 @@ dev = [
     "pytest-benchmark>=4.0.0",  # For performance benchmarking
     "coverage>=7.0.0",  # For coverage reporting
     "black>=24.0.0",  # Code formatting
-    "ruff>=0.8.0",  # Fast linting and formatting
+    "ruff==0.12.10",  # Pinned to match .pre-commit-config.yaml
     "mypy>=1.13.0",  # Type checking
     "bandit>=1.8.0",  # Security scanning
     "pre-commit>=4.0.0",  # Git hooks
