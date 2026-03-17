@@ -21,7 +21,6 @@ This was architectural malpractice. We were forcing every user to load the entir
 
 ```python
 server.py
-  → from .core.graph_operations import GraphManager
   → triggers core/__init__.py loading
   → from .io import GraphIOHandler  # Line 5 - THE KILLER
   → loads io_handlers.py

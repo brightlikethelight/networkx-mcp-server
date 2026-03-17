@@ -51,10 +51,8 @@ class TestModuleImports:
     def test_core_modules(self):
         from networkx_mcp.core.algorithms import GraphAlgorithms
         from networkx_mcp.core.basic_operations import create_graph
-        from networkx_mcp.core.graph_operations import GraphManager
 
         assert callable(GraphAlgorithms)
-        assert callable(GraphManager)
         assert callable(create_graph)
 
     def test_academic_modules(self):

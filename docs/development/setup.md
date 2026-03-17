@@ -458,15 +458,13 @@ py-spy record -o profile.svg -- python script.py
 python -c "
 import psutil
 import networkx as nx
-from networkx_mcp.core.graph_operations import GraphManager
+from networkx_mcp.graph_cache import graphs
 
 process = psutil.Process()
 print(f'Memory before: {process.memory_info().rss / 1024 / 1024:.1f} MB')
 
-gm = GraphManager()
 G = nx.erdos_renyi_graph(10000, 0.1)
-gm.create_graph('test')
-gm.graphs['test'] = G
+graphs['test'] = G
 
 print(f'Memory after: {process.memory_info().rss / 1024 / 1024:.1f} MB')
 "
@@ -489,10 +487,9 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root / "src"))
 
 # Your development code here
-from networkx_mcp.core.graph_operations import GraphManager
+from networkx_mcp.graph_cache import graphs
 
 def main():
-    gm = GraphManager()
     # Development tasks...
 
 if __name__ == "__main__":

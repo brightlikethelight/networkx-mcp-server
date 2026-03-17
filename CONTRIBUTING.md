@@ -186,8 +186,7 @@ src/networkx_mcp/
 ├── monitoring_legacy.py # Health monitoring
 ├── core/
 │   ├── basic_operations.py   # Compatibility functions for graphs
-│   ├── algorithms.py         # GraphAlgorithms class (advanced)
-│   └── graph_operations.py   # GraphManager class (thread-safe ops)
+│   └── algorithms.py         # GraphAlgorithms class (advanced)
 ├── academic/
 │   ├── citations.py     # DOI resolution, BibTeX, recommendations
 │   └── analytics.py     # Author impact, trends, collaboration
