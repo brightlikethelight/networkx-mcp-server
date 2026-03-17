@@ -89,7 +89,7 @@ community_detection(graph="social")
 
 ## Test coverage
 
-630 tests, ~86% line coverage.
+650+ tests, 95% line coverage.
 
 ```bash
 pytest tests/ -v
