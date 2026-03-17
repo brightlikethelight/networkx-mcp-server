@@ -307,7 +307,8 @@ def recommend_papers(
     citing_papers = list(graph.predecessors(seed_doi))
 
     # Calculate recommendation scores based on citation patterns
-    recommendations = []
+    # Use dict to deduplicate — keep highest score per paper
+    recommendations_map: dict[str, dict] = {}
 
     # Score papers that are co-cited with seed paper
     for cited in cited_papers:
@@ -334,9 +335,12 @@ def recommend_papers(
                     recency_score = max(0, (year - (current_year - 10)) / 10)
                     score += recency_score
 
-                recommendations.append(
-                    {
-                        "paper": paper,  # Use 'paper' for compatibility
+                if (
+                    paper not in recommendations_map
+                    or score > recommendations_map[paper]["score"]
+                ):
+                    recommendations_map[paper] = {
+                        "paper": paper,
                         "doi": paper,
                         "title": paper_data.get("title", paper)
                         if isinstance(paper_data, dict)
@@ -349,10 +353,11 @@ def recommend_papers(
                         "score": score,
                         "reason": "co-citation",
                     }
-                )
 
     # Sort by score and return top recommendations
-    recommendations.sort(key=lambda x: x["score"], reverse=True)
+    recommendations = sorted(
+        recommendations_map.values(), key=lambda x: x["score"], reverse=True
+    )
 
     return {
         "seed_paper": seed_doi,
