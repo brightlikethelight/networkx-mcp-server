@@ -30,29 +30,9 @@ cat >> "$METRICS_FILE" << EOF
 {"sha":"$COMMIT_SHA","short":"$COMMIT_SHORT","type":"$COMMIT_TYPE","author":"$COMMIT_AUTHOR","date":"$COMMIT_DATE","branch":"$BRANCH","timestamp":"$(date -u +%Y-%m-%dT%H:%M:%SZ)"}
 EOF
 
-# Track commit in Python monitoring system (if available)
-if [ -f "src/networkx_mcp/monitoring/dora_metrics.py" ]; then
-    python -c "
-import sys
-import os
-sys.path.insert(0, 'src')
-
-try:
-    from networkx_mcp.monitoring.dora_metrics import DORACollector
-
-    collector = DORACollector()
-    collector.track_commit(
-        sha='$COMMIT_SHA',
-        author='$COMMIT_AUTHOR',
-        commit_type='$COMMIT_TYPE',
-        branch='$BRANCH'
-    )
-    print('✅ Commit tracked in DORA metrics')
-except Exception as e:
-    # Fail silently - don't block commits if monitoring fails
-    pass
-" 2>/dev/null || true
-fi
+# Note: Python DORA tracking removed — the JSONL logging above already
+# captures commit data. The previous Python block referenced a nonexistent
+# DORACollector class and track_commit() method, so it always failed silently.
 
 # Check if this fixes a previous failure
 PREVIOUS_SHA=$(git rev-parse HEAD~1 2>/dev/null || echo "")
