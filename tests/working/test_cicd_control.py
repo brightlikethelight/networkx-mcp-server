@@ -339,3 +339,171 @@ class TestInputSanitization:
         )
         assert result["success"] is False
         assert "exceeds maximum length" in result["error"]
+
+
+# ===========================================================================
+# Exception path tests — OSError from create_subprocess_exec
+# ===========================================================================
+
+
+class TestExceptionPaths:
+    """Ensure OSError from create_subprocess_exec is caught gracefully."""
+
+    @pytest.mark.asyncio
+    async def test_get_workflow_status_oserror(self, controller):
+        with patch(
+            "networkx_mcp.tools.cicd_control.asyncio.create_subprocess_exec",
+            side_effect=OSError("gh not found"),
+        ):
+            result = await controller.get_workflow_status("123")
+            assert result["success"] is False
+            assert "gh not found" in result["error"]
+
+    @pytest.mark.asyncio
+    async def test_cancel_workflow_oserror(self, controller):
+        with patch(
+            "networkx_mcp.tools.cicd_control.asyncio.create_subprocess_exec",
+            side_effect=OSError("gh not found"),
+        ):
+            result = await controller.cancel_workflow("42")
+            assert result["success"] is False
+            assert "gh not found" in result["error"]
+
+    @pytest.mark.asyncio
+    async def test_rerun_failed_jobs_oserror(self, controller):
+        with patch(
+            "networkx_mcp.tools.cicd_control.asyncio.create_subprocess_exec",
+            side_effect=OSError("command failed"),
+        ):
+            result = await controller.rerun_failed_jobs("42")
+            assert result["success"] is False
+            assert "command failed" in result["error"]
+
+    @pytest.mark.asyncio
+    async def test_analyze_test_failures_oserror(self, controller):
+        with patch(
+            "networkx_mcp.tools.cicd_control.asyncio.create_subprocess_exec",
+            side_effect=OSError("subprocess error"),
+        ):
+            result = await controller.analyze_test_failures("42")
+            assert result["success"] is False
+            assert "subprocess error" in result["error"]
+
+
+# ===========================================================================
+# DORA metrics — ValueError from get_dora_metrics / generate_dora_report
+# ===========================================================================
+
+
+class TestDORAMetricsException:
+    """Ensure ValueError in get_dora_metrics_mcp is caught."""
+
+    @pytest.mark.asyncio
+    @patch("networkx_mcp.tools.cicd_control.generate_dora_report")
+    @patch("networkx_mcp.tools.cicd_control.get_dora_metrics")
+    async def test_get_dora_metrics_mcp_valueerror(
+        self, mock_metrics, mock_report, controller
+    ):
+        mock_metrics.side_effect = ValueError("no deployment data")
+        result = await controller.get_dora_metrics_mcp()
+        assert result["success"] is False
+        assert "no deployment data" in result["error"]
+
+    @pytest.mark.asyncio
+    @patch("networkx_mcp.tools.cicd_control.generate_dora_report")
+    @patch("networkx_mcp.tools.cicd_control.get_dora_metrics")
+    async def test_get_dora_metrics_mcp_report_valueerror(
+        self, mock_metrics, mock_report, controller
+    ):
+        mock_metrics.return_value = {"deployment_frequency": 5.0}
+        mock_report.side_effect = ValueError("report generation failed")
+        result = await controller.get_dora_metrics_mcp()
+        assert result["success"] is False
+        assert "report generation failed" in result["error"]
+
+
+# ===========================================================================
+# DORA recommendation edge cases
+# ===========================================================================
+
+
+class TestDORARecommendations:
+    """Test _generate_recommendations with threshold-boundary metrics."""
+
+    def test_low_deployment_frequency(self, controller):
+        metrics = {
+            "deployment_frequency": 0.5,
+            "lead_time_hours": 1.0,
+            "change_failure_rate": 1.0,
+            "mttr_minutes": 5.0,
+        }
+        recs = controller._generate_recommendations(metrics)
+        assert any("deployment frequency" in r.lower() for r in recs)
+        assert len(recs) == 1
+
+    def test_high_lead_time(self, controller):
+        metrics = {
+            "deployment_frequency": 5.0,
+            "lead_time_hours": 48.0,
+            "change_failure_rate": 1.0,
+            "mttr_minutes": 5.0,
+        }
+        recs = controller._generate_recommendations(metrics)
+        assert any("lead time" in r.lower() for r in recs)
+        assert len(recs) == 1
+
+    def test_high_failure_rate(self, controller):
+        metrics = {
+            "deployment_frequency": 5.0,
+            "lead_time_hours": 1.0,
+            "change_failure_rate": 20.0,
+            "mttr_minutes": 5.0,
+        }
+        recs = controller._generate_recommendations(metrics)
+        assert any("test coverage" in r.lower() for r in recs)
+        assert len(recs) == 1
+
+    def test_high_mttr(self, controller):
+        metrics = {
+            "deployment_frequency": 5.0,
+            "lead_time_hours": 1.0,
+            "change_failure_rate": 1.0,
+            "mttr_minutes": 120.0,
+        }
+        recs = controller._generate_recommendations(metrics)
+        assert any("monitoring" in r.lower() for r in recs)
+        assert len(recs) == 1
+
+    def test_all_bad_metrics(self, controller):
+        """All thresholds breached produces 4 recommendations."""
+        metrics = {
+            "deployment_frequency": 0.1,
+            "lead_time_hours": 72.0,
+            "change_failure_rate": 50.0,
+            "mttr_minutes": 180.0,
+        }
+        recs = controller._generate_recommendations(metrics)
+        assert len(recs) == 4
+
+
+# ===========================================================================
+# Unknown failure category
+# ===========================================================================
+
+
+class TestUnknownFailureCategory:
+    """Job names not matching 'test' or 'build' go to unknown_errors."""
+
+    @pytest.mark.asyncio
+    @patch("networkx_mcp.tools.cicd_control.asyncio.create_subprocess_exec")
+    async def test_deploy_job_goes_to_unknown(self, mock_exec, controller):
+        data = {
+            "jobs": [
+                {"name": "deploy-staging", "conclusion": "failure"},
+            ]
+        }
+        mock_exec.return_value = _mock_process(stdout=json.dumps(data).encode())
+        result = await controller.analyze_test_failures("42")
+        assert result["success"] is True
+        assert "deploy-staging" in result["failure_patterns"]["unknown_errors"]
+        assert result["total_failures"] == 1

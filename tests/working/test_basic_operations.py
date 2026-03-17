@@ -6,6 +6,21 @@ These tests actually run and verify that the core functionality works.
 
 import pytest
 
+from networkx_mcp.core.basic_operations import (
+    add_edges as _add_edges,
+    add_nodes as _add_nodes,
+    betweenness_centrality as _betweenness_centrality,
+    community_detection as _community_detection,
+    connected_components as _connected_components,
+    create_graph as _create_graph,
+    degree_centrality as _degree_centrality,
+    export_json as _export_json,
+    get_graph_info as _get_graph_info,
+    import_csv as _import_csv,
+    pagerank as _pagerank,
+    shortest_path as _shortest_path,
+    visualize_graph as _visualize_graph,
+)
 from networkx_mcp.server import (
     add_edges,
     add_nodes,
@@ -14,6 +29,7 @@ from networkx_mcp.server import (
     graphs,
     import_csv,
     shortest_path,
+    visualize_graph,
 )
 
 
@@ -191,3 +207,84 @@ class TestComplexScenarios:
         result = shortest_path("large_graph", 0, 99)
         assert result["length"] == 99
         assert len(result["path"]) == 100
+
+
+# ===========================================================================
+# None-graphs parametrized tests
+# ===========================================================================
+
+# All 13 compatibility functions from basic_operations.py that accept graphs=
+_FUNCS_REQUIRING_GRAPH_NAME = [
+    ("create_graph", _create_graph, {"name": "g", "directed": False}),
+    ("add_nodes", _add_nodes, {"graph_name": "missing", "nodes": [1]}),
+    ("add_edges", _add_edges, {"graph_name": "missing", "edges": [[1, 2]]}),
+    ("get_graph_info", _get_graph_info, {"graph_name": "missing"}),
+    (
+        "shortest_path",
+        _shortest_path,
+        {"graph_name": "missing", "source": 1, "target": 2},
+    ),
+    ("degree_centrality", _degree_centrality, {"graph_name": "missing"}),
+    ("betweenness_centrality", _betweenness_centrality, {"graph_name": "missing"}),
+    ("connected_components", _connected_components, {"graph_name": "missing"}),
+    ("pagerank", _pagerank, {"graph_name": "missing"}),
+    ("visualize_graph", _visualize_graph, {"graph_name": "missing"}),
+    ("import_csv", _import_csv, {"graph_name": "g", "csv_data": "a,b\n1,2"}),
+    ("export_json", _export_json, {"graph_name": "missing"}),
+    ("community_detection", _community_detection, {"graph_name": "missing"}),
+]
+
+
+@pytest.mark.parametrize(
+    "name,func,kwargs",
+    _FUNCS_REQUIRING_GRAPH_NAME,
+    ids=[t[0] for t in _FUNCS_REQUIRING_GRAPH_NAME],
+)
+def test_functions_with_none_graphs(name, func, kwargs):
+    """Passing graphs=None (the default) should not crash — it either
+    succeeds (create_graph, import_csv) or raises/returns an error dict."""
+    try:
+        result = func(**kwargs, graphs=None)
+        # Functions that create graphs (create_graph, import_csv) should succeed
+        # Functions that look up a graph should return error dict or raise
+        if isinstance(result, dict) and "success" in result:
+            # get_graph_info and shortest_path return {"success": False, ...}
+            assert not result["success"] or name in ("create_graph", "import_csv")
+    except ValueError:
+        # add_nodes, add_edges, degree_centrality, etc. raise ValueError
+        pass
+
+
+# ===========================================================================
+# Kamada-Kawai layout
+# ===========================================================================
+
+
+class TestVisualizeKamadaKwai:
+    def test_visualize_kamada_kawai_layout(self):
+        """Kamada-Kawai layout option produces a valid result."""
+        create_graph("kk_graph", directed=False)
+        add_nodes("kk_graph", [1, 2, 3])
+        add_edges("kk_graph", [[1, 2], [2, 3]])
+
+        result = visualize_graph("kk_graph", layout="kamada_kawai")
+        assert result["layout"] == "kamada_kwai" or result["layout"] == "kamada_kawai"
+        assert result["format"] == "png"
+        assert result["image"].startswith("data:image/png;base64,")
+
+
+# ===========================================================================
+# Shortest path — node not found
+# ===========================================================================
+
+
+class TestShortestPathNodeNotFound:
+    def test_shortest_path_node_not_found(self):
+        """Requesting a path with a non-existent node returns an error."""
+        create_graph("sp_missing", directed=False)
+        add_nodes("sp_missing", [1, 2, 3])
+        add_edges("sp_missing", [[1, 2], [2, 3]])
+
+        result = shortest_path("sp_missing", 1, 999)
+        assert result["success"] is False
+        assert "not found" in result["error"].lower() or "No path" in result["error"]

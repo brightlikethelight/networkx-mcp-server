@@ -27,7 +27,7 @@ print_status() {
 
 # 1. Check for debugging artifacts (Python files only)
 echo "Checking for debugging artifacts..."
-PYTHON_STAGED=$(git diff --cached --name-only | grep '\.py$')
+PYTHON_STAGED=$(git diff --cached --name-only | grep '\.py$' || true)
 if [ ! -z "$PYTHON_STAGED" ]; then
     if echo "$PYTHON_STAGED" | xargs grep -l "import pdb\|pdb.set_trace\|debugger" 2>/dev/null; then
         echo -e "${RED}❌ Found debugging statements in staged files${NC}"
@@ -119,7 +119,7 @@ fi
 
 # 8. Run tests for changed files
 echo "Running tests for changed files..."
-CHANGED_PY_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.py$' | grep -v '__pycache__')
+CHANGED_PY_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.py$' | grep -v '__pycache__' || true)
 if [ ! -z "$CHANGED_PY_FILES" ]; then
     if command -v pytest &> /dev/null; then
         # Run only tests related to changed files
@@ -143,7 +143,7 @@ fi
 
 # 9. Check Python syntax
 echo "Checking Python syntax..."
-PYTHON_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.py$')
+PYTHON_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.py$' || true)
 if [ ! -z "$PYTHON_FILES" ]; then
     for file in $PYTHON_FILES; do
         python -m py_compile "$file" 2>/dev/null

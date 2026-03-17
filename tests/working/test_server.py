@@ -1288,3 +1288,105 @@ class TestMainEntryPoint:
 
             main()
             mock_run.assert_called_once()
+
+
+# ===========================================================================
+# Server run loop tests
+# ===========================================================================
+
+
+class TestServerRunLoop:
+    """Tests for NetworkXMCPServer.run() — the stdin/stdout JSON-RPC loop."""
+
+    @pytest.mark.asyncio
+    async def test_run_exits_on_empty_stdin(self, server):
+        """EOF (empty string from readline) causes the loop to exit."""
+        from unittest.mock import AsyncMock, patch
+
+        # run_in_executor returns "" to simulate EOF
+        with patch("asyncio.get_event_loop") as mock_loop:
+            mock_loop.return_value.run_in_executor = AsyncMock(return_value="")
+            await server.run()
+        # If we reach here, the loop exited cleanly on EOF
+
+    @pytest.mark.asyncio
+    async def test_run_handles_json_parse_error(self, server):
+        """Malformed JSON line produces a parse-error response on stderr."""
+        from unittest.mock import AsyncMock, patch
+
+        call_count = 0
+
+        async def fake_executor(*args):
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                return "{not valid json}\n"
+            return ""  # EOF on second call
+
+        with (
+            patch("asyncio.get_event_loop") as mock_loop,
+            patch("builtins.print") as mock_print,
+        ):
+            mock_loop.return_value.run_in_executor = AsyncMock(
+                side_effect=fake_executor
+            )
+            await server.run()
+
+            # The error response should have been printed to stderr
+            mock_print.assert_called()
+            error_call = mock_print.call_args
+            parsed = json.loads(error_call[0][0])
+            assert parsed["error"]["code"] == ErrorCodes.PARSE_ERROR
+
+    @pytest.mark.asyncio
+    async def test_run_handles_ioerror(self, server):
+        """IOError during readline breaks the loop."""
+        from unittest.mock import AsyncMock, patch
+
+        async def raise_ioerror(*args):
+            raise IOError("stdin pipe broken")
+
+        with patch("asyncio.get_event_loop") as mock_loop:
+            mock_loop.return_value.run_in_executor = AsyncMock(
+                side_effect=raise_ioerror
+            )
+            await server.run()
+        # Loop should have broken out on IOError without propagating
+
+    @pytest.mark.asyncio
+    async def test_run_processes_valid_request(self, server):
+        """A valid JSON-RPC initialize request gets a response on stdout."""
+        from unittest.mock import AsyncMock, patch
+
+        init_req = json.dumps(_init_request()) + "\n"
+        call_count = 0
+
+        async def fake_executor(*args):
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                return init_req
+            return ""  # EOF
+
+        with (
+            patch("asyncio.get_event_loop") as mock_loop,
+            patch("builtins.print") as mock_print,
+        ):
+            mock_loop.return_value.run_in_executor = AsyncMock(
+                side_effect=fake_executor
+            )
+            await server.run()
+
+            # The initialize response should have been printed to stdout
+            mock_print.assert_called()
+            # Find the stdout call (no file= kwarg or file=sys.stdout)
+            for call in mock_print.call_args_list:
+                kwargs = call[1]
+                if "file" not in kwargs or kwargs.get("file") is None:
+                    parsed = json.loads(call[0][0])
+                    assert "result" in parsed
+                    assert parsed["result"]["protocolVersion"] == "2024-11-05"
+                    break
+            else:
+                # If all calls had file=sys.stderr, fail
+                pytest.fail("No stdout response found for valid initialize request")
