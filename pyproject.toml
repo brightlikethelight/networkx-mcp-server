@@ -33,6 +33,7 @@ dependencies = [
     "matplotlib>=3.5.0",  # Required for graph visualization
     "requests>=2.28.0",  # For API calls to CrossRef, ORCID, etc.
     "bibtexparser>=1.4.0",  # For BibTeX parsing and generation
+    "psutil>=5.9.0",  # For memory monitoring in graph cache and health checks
 ]
 
 [project.optional-dependencies]
@@ -49,7 +50,7 @@ dev = [
     "bandit>=1.8.0",  # Security scanning
     "pre-commit>=4.0.0",  # Git hooks
     "uv>=0.5.0",  # Fast package manager
-    "psutil>=5.9.0",  # For memory testing
+    "psutil>=5.9.0",  # Also in core deps; kept here for explicit dev tooling
     "hypothesis>=6.0.0",  # For property-based testing
     "types-requests>=2.28.0",  # Type stubs for requests
 ]
