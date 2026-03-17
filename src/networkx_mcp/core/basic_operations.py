@@ -279,6 +279,11 @@ def import_csv(
         if len(row) >= 2:
             edges.append((row[0].strip(), row[1].strip()))
 
+    if len(edges) > 500_000:
+        raise ValueError(
+            f"CSV contains too many edges ({len(edges)}). Maximum is 500,000."
+        )
+
     # Create graph
     graph: Any = nx.DiGraph() if directed else nx.Graph()
     graph.add_edges_from(edges)

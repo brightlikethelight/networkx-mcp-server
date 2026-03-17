@@ -216,23 +216,63 @@ def handle_get_edge_attributes(args: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def handle_degree_centrality(args: Dict[str, Any]) -> Dict[str, Any]:
-    return _degree_centrality(args["graph"], graphs)
+    graph_name = args["graph"]
+    if graph_name not in graphs:
+        raise ValueError(f"Graph '{graph_name}' not found")
+    if graphs[graph_name].number_of_nodes() > MAX_ALGORITHM_NODES:
+        raise ValueError(
+            f"Graph too large ({graphs[graph_name].number_of_nodes()} nodes). "
+            f"Maximum for this algorithm is {MAX_ALGORITHM_NODES}."
+        )
+    return _degree_centrality(graph_name, graphs)
 
 
 def handle_betweenness_centrality(args: Dict[str, Any]) -> Dict[str, Any]:
-    return _betweenness_centrality(args["graph"], graphs)
+    graph_name = args["graph"]
+    if graph_name not in graphs:
+        raise ValueError(f"Graph '{graph_name}' not found")
+    if graphs[graph_name].number_of_nodes() > MAX_ALGORITHM_NODES:
+        raise ValueError(
+            f"Graph too large ({graphs[graph_name].number_of_nodes()} nodes). "
+            f"Maximum for this algorithm is {MAX_ALGORITHM_NODES}."
+        )
+    return _betweenness_centrality(graph_name, graphs)
 
 
 def handle_connected_components(args: Dict[str, Any]) -> Dict[str, Any]:
-    return _connected_components(args["graph"], graphs)
+    graph_name = args["graph"]
+    if graph_name not in graphs:
+        raise ValueError(f"Graph '{graph_name}' not found")
+    if graphs[graph_name].number_of_nodes() > MAX_ALGORITHM_NODES:
+        raise ValueError(
+            f"Graph too large ({graphs[graph_name].number_of_nodes()} nodes). "
+            f"Maximum for this algorithm is {MAX_ALGORITHM_NODES}."
+        )
+    return _connected_components(graph_name, graphs)
 
 
 def handle_pagerank(args: Dict[str, Any]) -> Dict[str, Any]:
-    return _pagerank(args["graph"], graphs)
+    graph_name = args["graph"]
+    if graph_name not in graphs:
+        raise ValueError(f"Graph '{graph_name}' not found")
+    if graphs[graph_name].number_of_nodes() > MAX_ALGORITHM_NODES:
+        raise ValueError(
+            f"Graph too large ({graphs[graph_name].number_of_nodes()} nodes). "
+            f"Maximum for this algorithm is {MAX_ALGORITHM_NODES}."
+        )
+    return _pagerank(graph_name, graphs)
 
 
 def handle_community_detection(args: Dict[str, Any]) -> Dict[str, Any]:
-    return _community_detection(args["graph"], graphs)
+    graph_name = args["graph"]
+    if graph_name not in graphs:
+        raise ValueError(f"Graph '{graph_name}' not found")
+    if graphs[graph_name].number_of_nodes() > MAX_ALGORITHM_NODES:
+        raise ValueError(
+            f"Graph too large ({graphs[graph_name].number_of_nodes()} nodes). "
+            f"Maximum for this algorithm is {MAX_ALGORITHM_NODES}."
+        )
+    return _community_detection(graph_name, graphs)
 
 
 # ═══════════════════════════════════════════════════════════════════════
