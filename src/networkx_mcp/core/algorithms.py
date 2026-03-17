@@ -2,6 +2,7 @@
 
 import logging
 from collections import defaultdict
+from itertools import islice
 from typing import Any, Dict, List
 
 import networkx as nx
@@ -332,9 +333,16 @@ class GraphAlgorithms:
 
             if has_cycle:
                 try:
-                    cycles = list(nx.simple_cycles(graph))
-                    result["cycles"] = cycles[:10]  # Limit to first 10 cycles
+                    MAX_CYCLES = 100
+                    cycles = list(islice(nx.simple_cycles(graph), MAX_CYCLES + 1))
+                    truncated = len(cycles) > MAX_CYCLES
+                    if truncated:
+                        cycles = cycles[:MAX_CYCLES]
+                    result["cycles"] = cycles[:10]  # Show first 10
                     result["num_cycles_found"] = len(cycles)
+                    if truncated:
+                        result["cycles_truncated"] = True
+                        result["note"] = f"Enumeration stopped at {MAX_CYCLES} cycles"
                 except (RecursionError, MemoryError) as e:
                     logger.debug(f"Failed to enumerate cycles: {e}")
                     result["cycles"] = []

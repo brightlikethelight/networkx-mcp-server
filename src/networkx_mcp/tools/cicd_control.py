@@ -9,11 +9,22 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import re
 from typing import Any, Dict, List, Optional
 
 from ..monitoring.dora_metrics import generate_dora_report, get_dora_metrics
 
 logger = logging.getLogger(__name__)
+
+_RE_WORKFLOW = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9._-]*$")
+_RE_BRANCH = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9/_.-]*$")
+_RE_RUN_ID = re.compile(r"^[0-9]+$")
+
+
+def _validate_cicd_param(value: str, pattern: re.Pattern, name: str) -> str:
+    if not pattern.match(value):
+        raise ValueError(f"Invalid {name}: {value!r}")
+    return value
 
 
 class CICDController:
@@ -41,13 +52,13 @@ class CICDController:
             Workflow run information
         """
         try:
+            _validate_cicd_param(workflow_name, _RE_WORKFLOW, "workflow_name")
+            _validate_cicd_param(branch, _RE_BRANCH, "branch")
+
             cmd = ["gh", "workflow", "run", workflow_name, "--ref", branch]
 
             if inputs:
-                import re
-
                 for key, value in inputs.items():
-                    # Validate key: alphanumeric, underscore, hyphen only
                     if not re.match(r"^[a-zA-Z0-9_-]+$", str(key)):
                         return {
                             "success": False,
@@ -144,6 +155,7 @@ class CICDController:
         """
         try:
             if run_id:
+                _validate_cicd_param(run_id, _RE_RUN_ID, "run_id")
                 # Get specific run
                 cmd = [
                     "gh",
@@ -228,6 +240,7 @@ class CICDController:
             Cancellation result
         """
         try:
+            _validate_cicd_param(run_id, _RE_RUN_ID, "run_id")
             cmd = ["gh", "run", "cancel", run_id]
 
             result = await asyncio.create_subprocess_exec(
@@ -269,6 +282,7 @@ class CICDController:
             Rerun result
         """
         try:
+            _validate_cicd_param(run_id, _RE_RUN_ID, "run_id")
             cmd = ["gh", "run", "rerun", run_id, "--failed"]
 
             result = await asyncio.create_subprocess_exec(
@@ -365,6 +379,7 @@ class CICDController:
             Analysis results with recommendations
         """
         try:
+            _validate_cicd_param(run_id, _RE_RUN_ID, "run_id")
             # Get workflow logs
             cmd = [
                 "gh",
