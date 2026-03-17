@@ -882,93 +882,109 @@ class TestModuleLevelExports:
         assert graphs is not None
 
     def test_wrapper_create_graph(self):
-        result = create_graph("wrap_g")
+        with pytest.warns(DeprecationWarning, match="create_graph"):
+            result = create_graph("wrap_g")
         assert result["created"] is True
         assert "wrap_g" in graphs
 
     def test_wrapper_add_nodes(self):
-        create_graph("wn")
-        result = add_nodes("wn", [10, 20])
+        with pytest.warns(DeprecationWarning):
+            create_graph("wn")
+            result = add_nodes("wn", [10, 20])
         assert result["success"] is True
         assert result["total"] == 2
 
     def test_wrapper_add_edges(self):
-        create_graph("we")
-        add_nodes("we", [1, 2, 3])
-        result = add_edges("we", [[1, 2], [2, 3]])
+        with pytest.warns(DeprecationWarning):
+            create_graph("we")
+            add_nodes("we", [1, 2, 3])
+            result = add_edges("we", [[1, 2], [2, 3]])
         assert result["success"] is True
         assert result["edges_added"] == 2
 
     def test_wrapper_get_graph_info(self):
-        create_graph("wi")
-        add_nodes("wi", [1, 2])
-        result = get_graph_info("wi")
+        with pytest.warns(DeprecationWarning):
+            create_graph("wi")
+            add_nodes("wi", [1, 2])
+            result = get_graph_info("wi")
         assert result["num_nodes"] == 2
 
     def test_wrapper_shortest_path(self):
-        create_graph("wsp")
-        add_edges("wsp", [[1, 2], [2, 3]])
-        result = shortest_path("wsp", 1, 3)
+        with pytest.warns(DeprecationWarning):
+            create_graph("wsp")
+            add_edges("wsp", [[1, 2], [2, 3]])
+            result = shortest_path("wsp", 1, 3)
         assert result["success"] is True
         assert result["path"] == [1, 2, 3]
 
     def test_wrapper_degree_centrality(self):
-        create_graph("wdc")
-        add_edges("wdc", [[1, 2], [2, 3]])
-        result = degree_centrality("wdc")
+        with pytest.warns(DeprecationWarning):
+            create_graph("wdc")
+            add_edges("wdc", [[1, 2], [2, 3]])
+            result = degree_centrality("wdc")
         assert "centrality" in result
 
     def test_wrapper_betweenness_centrality(self):
-        create_graph("wbc")
-        add_edges("wbc", [[1, 2], [2, 3], [3, 4]])
-        result = betweenness_centrality("wbc")
+        with pytest.warns(DeprecationWarning):
+            create_graph("wbc")
+            add_edges("wbc", [[1, 2], [2, 3], [3, 4]])
+            result = betweenness_centrality("wbc")
         assert "centrality" in result
 
     def test_wrapper_connected_components(self):
-        create_graph("wcc")
-        add_edges("wcc", [[1, 2], [3, 4]])
-        result = connected_components("wcc")
+        with pytest.warns(DeprecationWarning):
+            create_graph("wcc")
+            add_edges("wcc", [[1, 2], [3, 4]])
+            result = connected_components("wcc")
         assert result["num_components"] == 2
 
     def test_wrapper_pagerank(self):
-        create_graph("wpr")
-        add_edges("wpr", [[1, 2], [2, 3]])
-        result = pagerank("wpr")
+        with pytest.warns(DeprecationWarning):
+            create_graph("wpr")
+            add_edges("wpr", [[1, 2], [2, 3]])
+            result = pagerank("wpr")
         assert "pagerank" in result
 
     def test_wrapper_community_detection(self):
-        create_graph("wcm")
-        add_edges("wcm", [[1, 2], [2, 3], [3, 1], [4, 5], [5, 6], [6, 4]])
-        result = community_detection("wcm")
+        with pytest.warns(DeprecationWarning):
+            create_graph("wcm")
+            add_edges("wcm", [[1, 2], [2, 3], [3, 1], [4, 5], [5, 6], [6, 4]])
+            result = community_detection("wcm")
         assert result["num_communities"] >= 1
 
     def test_wrapper_visualize_graph(self):
-        create_graph("wviz")
-        add_edges("wviz", [[1, 2]])
-        result = visualize_graph("wviz", "spring")
+        with pytest.warns(DeprecationWarning):
+            create_graph("wviz")
+            add_edges("wviz", [[1, 2]])
+            result = visualize_graph("wviz", "spring")
         assert result["format"] == "png"
         assert result["image"].startswith("data:image/png;base64,")
 
     def test_wrapper_import_csv(self):
-        result = import_csv("wcsv", "a,b\nb,c")
+        with pytest.warns(DeprecationWarning, match="import_csv"):
+            result = import_csv("wcsv", "a,b\nb,c")
         assert result["imported"] == "wcsv"
         assert "wcsv" in graphs
 
     def test_wrapper_export_json(self):
-        create_graph("wej")
-        add_edges("wej", [[1, 2]])
-        result = export_json("wej")
+        with pytest.warns(DeprecationWarning):
+            create_graph("wej")
+            add_edges("wej", [[1, 2]])
+            result = export_json("wej")
         assert result["format"] == "node-link"
 
     def test_wrapper_delete_graph(self):
-        create_graph("wdel")
+        with pytest.warns(DeprecationWarning):
+            create_graph("wdel")
         assert "wdel" in graphs
-        result = delete_graph("wdel")
+        with pytest.warns(DeprecationWarning, match="delete_graph"):
+            result = delete_graph("wdel")
         assert result["success"] is True
         assert "wdel" not in graphs
 
     def test_wrapper_delete_nonexistent(self):
-        result = delete_graph("doesnt_exist")
+        with pytest.warns(DeprecationWarning, match="delete_graph"):
+            result = delete_graph("doesnt_exist")
         assert result["success"] is False
 
 

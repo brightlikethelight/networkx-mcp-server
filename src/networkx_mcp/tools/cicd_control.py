@@ -126,7 +126,7 @@ class CICDController:
                 "message": "Workflow triggered but run ID not available yet",
             }
 
-        except Exception as e:
+        except (OSError, asyncio.TimeoutError, json.JSONDecodeError) as e:
             logger.error(f"Error triggering workflow: {e}")
             return {
                 "success": False,
@@ -211,7 +211,7 @@ class CICDController:
                     "recent_runs": data[:5],  # Top 5 most recent
                 }
 
-        except Exception as e:
+        except (OSError, asyncio.TimeoutError, json.JSONDecodeError) as e:
             logger.error(f"Error getting workflow status: {e}")
             return {
                 "success": False,
@@ -252,7 +252,7 @@ class CICDController:
                 "message": "Workflow cancelled successfully",
             }
 
-        except Exception as e:
+        except (OSError, asyncio.TimeoutError) as e:
             logger.error(f"Error cancelling workflow: {e}")
             return {
                 "success": False,
@@ -290,7 +290,7 @@ class CICDController:
                 "message": "Failed jobs rerun initiated",
             }
 
-        except Exception as e:
+        except (OSError, asyncio.TimeoutError) as e:
             logger.error(f"Error rerunning failed jobs: {e}")
             return {
                 "success": False,
@@ -315,7 +315,7 @@ class CICDController:
                 "recommendations": self._generate_recommendations(metrics),
             }
 
-        except Exception as e:
+        except (ValueError, KeyError, TypeError) as e:
             logger.error(f"Error getting DORA metrics: {e}")
             return {
                 "success": False,
@@ -435,7 +435,7 @@ class CICDController:
                 "total_failures": sum(len(v) for v in failure_patterns.values()),
             }
 
-        except Exception as e:
+        except (OSError, asyncio.TimeoutError, json.JSONDecodeError) as e:
             logger.error(f"Error analyzing test failures: {e}")
             return {
                 "success": False,

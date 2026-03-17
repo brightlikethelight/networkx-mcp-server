@@ -85,56 +85,110 @@ except ImportError:
 
 # DEPRECATED: use handlers.py directly. Will be removed in v4.0.
 # Re-export functions with graphs parameter bound
+import warnings
+
+_DEPRECATION_MSG = (
+    "{name}() is deprecated, use handlers.py directly. Will be removed in v4.0."
+)
+
+
 def create_graph(name: str, directed: bool = False) -> Any:
+    warnings.warn(
+        _DEPRECATION_MSG.format(name="create_graph"), DeprecationWarning, stacklevel=2
+    )
     return _create_graph(name, directed, graphs)
 
 
 def add_nodes(graph_name: str, nodes: List) -> Any:
+    warnings.warn(
+        _DEPRECATION_MSG.format(name="add_nodes"), DeprecationWarning, stacklevel=2
+    )
     return _add_nodes(graph_name, nodes, graphs)
 
 
 def add_edges(graph_name: str, edges: List) -> Any:
+    warnings.warn(
+        _DEPRECATION_MSG.format(name="add_edges"), DeprecationWarning, stacklevel=2
+    )
     return _add_edges(graph_name, edges, graphs)
 
 
 def get_graph_info(graph_name: str) -> Any:
+    warnings.warn(
+        _DEPRECATION_MSG.format(name="get_graph_info"), DeprecationWarning, stacklevel=2
+    )
     return _get_graph_info(graph_name, graphs)
 
 
 def shortest_path(graph_name: str, source: Any, target: Any) -> Any:
+    warnings.warn(
+        _DEPRECATION_MSG.format(name="shortest_path"), DeprecationWarning, stacklevel=2
+    )
     return _shortest_path(graph_name, source, target, graphs)
 
 
 def degree_centrality(graph_name: str) -> Any:
+    warnings.warn(
+        _DEPRECATION_MSG.format(name="degree_centrality"),
+        DeprecationWarning,
+        stacklevel=2,
+    )
     return _degree_centrality(graph_name, graphs)
 
 
 def betweenness_centrality(graph_name: str) -> Any:
+    warnings.warn(
+        _DEPRECATION_MSG.format(name="betweenness_centrality"),
+        DeprecationWarning,
+        stacklevel=2,
+    )
     return _betweenness_centrality(graph_name, graphs)
 
 
 def connected_components(graph_name: str) -> Any:
+    warnings.warn(
+        _DEPRECATION_MSG.format(name="connected_components"),
+        DeprecationWarning,
+        stacklevel=2,
+    )
     return _connected_components(graph_name, graphs)
 
 
 def pagerank(graph_name: str) -> Any:
+    warnings.warn(
+        _DEPRECATION_MSG.format(name="pagerank"), DeprecationWarning, stacklevel=2
+    )
     return _pagerank(graph_name, graphs)
 
 
 def visualize_graph(graph_name: str, layout: str = "spring") -> Any:
+    warnings.warn(
+        _DEPRECATION_MSG.format(name="visualize_graph"),
+        DeprecationWarning,
+        stacklevel=2,
+    )
     return _visualize_graph(graph_name, layout, graphs)
 
 
 def import_csv(graph_name: str, csv_data: str, directed: bool = False) -> Any:
+    warnings.warn(
+        _DEPRECATION_MSG.format(name="import_csv"), DeprecationWarning, stacklevel=2
+    )
     return _import_csv(graph_name, csv_data, directed, graphs)
 
 
 def export_json(graph_name: str) -> Any:
+    warnings.warn(
+        _DEPRECATION_MSG.format(name="export_json"), DeprecationWarning, stacklevel=2
+    )
     return _export_json(graph_name, graphs)
 
 
 def delete_graph(graph_name: str) -> Any:
     """Delete a graph - compatibility function."""
+    warnings.warn(
+        _DEPRECATION_MSG.format(name="delete_graph"), DeprecationWarning, stacklevel=2
+    )
     if graph_name not in graphs:
         return {"success": False, "error": f"Graph '{graph_name}' not found"}
 
@@ -143,6 +197,11 @@ def delete_graph(graph_name: str) -> Any:
 
 
 def community_detection(graph_name: str) -> Any:
+    warnings.warn(
+        _DEPRECATION_MSG.format(name="community_detection"),
+        DeprecationWarning,
+        stacklevel=2,
+    )
     return _community_detection(graph_name, graphs)
 
 

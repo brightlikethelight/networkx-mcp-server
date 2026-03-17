@@ -21,6 +21,10 @@ logger = logging.getLogger(__name__)
 # Module-level session for connection pooling across CrossRef API calls
 _session = requests.Session()
 
+import atexit
+
+atexit.register(_session.close)
+
 
 def _safe_extract_year(work: Dict[str, Any]) -> Optional[int]:
     """Safely extract publication year from CrossRef work metadata."""

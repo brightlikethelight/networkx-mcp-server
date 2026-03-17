@@ -216,7 +216,7 @@ class GraphCache:
         try:
             process = psutil.Process()
             return process.memory_info().rss / 1024 / 1024
-        except Exception as e:
+        except (AttributeError, ProcessLookupError, OSError) as e:
             logger.warning(f"Failed to get memory usage: {e}")
             return 0
 
@@ -227,7 +227,9 @@ class GraphCache:
                 time.sleep(self.cleanup_interval)
                 if not self._shutdown:
                     self._cleanup()
-            except Exception as e:
+            except (
+                Exception
+            ) as e:  # Broad catch intentional: daemon thread must not crash
                 logger.error(f"Cleanup error: {e}")
                 if self._shutdown:
                     break
