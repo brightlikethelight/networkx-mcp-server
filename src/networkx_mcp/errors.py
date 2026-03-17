@@ -5,7 +5,7 @@ error codes and meaningful messages for all possible error conditions.
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -220,54 +220,6 @@ class ServerNotInitializedError(MCPError):
         self.operation = operation
 
 
-def handle_error(error: Exception, operation: str = "unknown") -> Dict[str, Any]:
-    """Convert any exception to proper JSON-RPC error response.
-
-    Args:
-        error: The exception that occurred
-        operation: The operation that failed (for logging)
-
-    Returns:
-        JSON-RPC 2.0 error object
-    """
-    if isinstance(error, MCPError):
-        # Already a proper MCP error
-        logger.error(f"MCP error in {operation}: {error.message}")
-        return error.to_dict()
-
-    # Handle NetworkX-specific exceptions
-    if hasattr(error, "__module__") and "networkx" in error.__module__:
-        logger.error(f"NetworkX error in {operation}: {str(error)}")
-
-        # Check if it's an algorithm-specific error
-        error_msg = str(error).lower()
-        if (
-            "no path" in error_msg
-            or "not connected" in error_msg
-            or "no route" in error_msg
-            or "unreachable" in error_msg
-        ):
-            return MCPError(
-                ErrorCodes.ALGORITHM_ERROR,
-                f"Algorithm error: {str(error)}",
-                {"operation": operation, "algorithm_error": str(error)},
-            ).to_dict()
-        else:
-            return MCPError(
-                ErrorCodes.GRAPH_OPERATION_FAILED,
-                f"Graph operation failed: {str(error)}",
-                {"operation": operation, "networkx_error": str(error)},
-            ).to_dict()
-
-    # Handle generic exceptions
-    logger.exception(f"Unexpected error in {operation}")
-    return MCPError(
-        ErrorCodes.INTERNAL_ERROR,
-        "Internal server error",
-        {"operation": operation, "error_type": type(error).__name__},
-    ).to_dict()
-
-
 def validate_graph_id(graph_id: Any) -> str:
     """Validate and normalize graph ID.
 
@@ -306,81 +258,3 @@ def validate_graph_id(graph_id: Any) -> str:
         raise InvalidGraphIdError(graph_id, "Graph ID cannot contain path elements")
 
     return str(graph_id)
-
-
-def validate_node_id(node_id: Any) -> str:
-    """Validate and normalize node ID.
-
-    Args:
-        node_id: Node ID to validate
-
-    Returns:
-        Validated node ID string
-
-    Raises:
-        InvalidNodeIdError: If node ID is invalid
-    """
-    if node_id is None:
-        raise InvalidNodeIdError("None", "Node ID cannot be None")
-
-    if not isinstance(node_id, (str, int)):
-        raise InvalidNodeIdError(str(node_id), "Node ID must be a string or integer")
-
-    node_id_str = str(node_id)
-
-    if not node_id_str.strip():
-        raise InvalidNodeIdError(node_id_str, "Node ID cannot be empty")
-
-    node_id_str = node_id_str.strip()
-
-    if len(node_id_str) > 100:
-        raise InvalidNodeIdError(node_id_str, "Node ID too long (max 100 characters)")
-
-    return node_id_str
-
-
-def validate_edge(edge: Any) -> Tuple[str, str]:
-    """Validate edge specification.
-
-    Args:
-        edge: Edge specification (should be [source, target])
-
-    Returns:
-        Tuple of (source, target) as strings
-
-    Raises:
-        InvalidEdgeError: If edge specification is invalid
-    """
-    if not isinstance(edge, (list, tuple)):
-        raise InvalidEdgeError(edge, "Edge must be a list or tuple")
-
-    if len(edge) != 2:
-        raise InvalidEdgeError(
-            edge, "Edge must have exactly 2 elements [source, target]"
-        )
-
-    try:
-        source = validate_node_id(edge[0])
-        target = validate_node_id(edge[1])
-    except InvalidNodeIdError as e:
-        raise InvalidEdgeError(edge, f"Invalid node in edge: {e.message}")
-
-    return source, target
-
-
-def validate_required_params(params: Dict[str, Any], required: List[str]) -> None:
-    """Validate that all required parameters are present.
-
-    Args:
-        params: Parameter dictionary
-        required: List of required parameter names
-
-    Raises:
-        ValidationError: If any required parameter is missing
-    """
-    for param in required:
-        if param not in params:
-            raise ValidationError(param, None, "Required parameter missing")
-
-        if params[param] is None:
-            raise ValidationError(param, None, "Required parameter cannot be None")
