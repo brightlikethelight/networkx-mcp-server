@@ -30,6 +30,7 @@ from .errors import ErrorCodes, MCPError, validate_graph_id
 MAX_NODES_PER_CALL = 100_000
 MAX_EDGES_PER_CALL = 500_000
 MAX_VISUALIZATION_NODES = 10_000
+MAX_ALGORITHM_NODES = 50_000
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -39,6 +40,7 @@ MAX_VISUALIZATION_NODES = 10_000
 
 def handle_create_graph(args: Dict[str, Any]) -> Dict[str, Any]:
     name = args["name"]
+    validate_graph_id(name)
     directed = args.get("directed", False)
     graphs[name] = nx.DiGraph() if directed else nx.Graph()
     return {"created": name, "type": "directed" if directed else "undirected"}
@@ -242,14 +244,26 @@ def handle_clustering_coefficients(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
     if graph_name not in graphs:
         raise ValueError(f"Graph '{graph_name}' not found")
-    return GraphAlgorithms.clustering_coefficients(graphs[graph_name])
+    graph = graphs[graph_name]
+    if graph.number_of_nodes() > MAX_ALGORITHM_NODES:
+        raise ValueError(
+            f"Graph too large ({graph.number_of_nodes()} nodes). "
+            f"Maximum for this algorithm is {MAX_ALGORITHM_NODES}."
+        )
+    return GraphAlgorithms.clustering_coefficients(graph)
 
 
 def handle_graph_statistics(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
     if graph_name not in graphs:
         raise ValueError(f"Graph '{graph_name}' not found")
-    result = GraphAlgorithms.graph_statistics(graphs[graph_name])
+    graph = graphs[graph_name]
+    if graph.number_of_nodes() > MAX_ALGORITHM_NODES:
+        raise ValueError(
+            f"Graph too large ({graph.number_of_nodes()} nodes). "
+            f"Maximum for this algorithm is {MAX_ALGORITHM_NODES}."
+        )
+    result = GraphAlgorithms.graph_statistics(graph)
     # Convert numpy scalars to Python types for JSON serialization
     for key in ("degree_stats", "in_degree_stats", "out_degree_stats"):
         if key in result:
@@ -277,24 +291,42 @@ def handle_graph_coloring(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
     if graph_name not in graphs:
         raise ValueError(f"Graph '{graph_name}' not found")
+    graph = graphs[graph_name]
+    if graph.number_of_nodes() > MAX_ALGORITHM_NODES:
+        raise ValueError(
+            f"Graph too large ({graph.number_of_nodes()} nodes). "
+            f"Maximum for this algorithm is {MAX_ALGORITHM_NODES}."
+        )
     strategy = args.get("strategy", "largest_first")
-    return GraphAlgorithms.graph_coloring(graphs[graph_name], strategy)
+    return GraphAlgorithms.graph_coloring(graph, strategy)
 
 
 def handle_centrality_measures(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
     if graph_name not in graphs:
         raise ValueError(f"Graph '{graph_name}' not found")
+    graph = graphs[graph_name]
+    if graph.number_of_nodes() > MAX_ALGORITHM_NODES:
+        raise ValueError(
+            f"Graph too large ({graph.number_of_nodes()} nodes). "
+            f"Maximum for this algorithm is {MAX_ALGORITHM_NODES}."
+        )
     measures = args.get("measures")
-    return GraphAlgorithms.centrality_measures(graphs[graph_name], measures)
+    return GraphAlgorithms.centrality_measures(graph, measures)
 
 
 def handle_matching(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
     if graph_name not in graphs:
         raise ValueError(f"Graph '{graph_name}' not found")
+    graph = graphs[graph_name]
+    if graph.number_of_nodes() > MAX_ALGORITHM_NODES:
+        raise ValueError(
+            f"Graph too large ({graph.number_of_nodes()} nodes). "
+            f"Maximum for this algorithm is {MAX_ALGORITHM_NODES}."
+        )
     max_cardinality = args.get("max_cardinality", True)
-    return GraphAlgorithms.matching(graphs[graph_name], max_cardinality)
+    return GraphAlgorithms.matching(graph, max_cardinality)
 
 
 def handle_maximum_flow(args: Dict[str, Any]) -> Dict[str, Any]:
@@ -394,6 +426,7 @@ def handle_visualize_graph(args: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def handle_import_csv(args: Dict[str, Any]) -> Dict[str, Any]:
+    validate_graph_id(args["graph"])
     return _import_csv(
         args["graph"], args["csv_data"], args.get("directed", False), graphs
     )
