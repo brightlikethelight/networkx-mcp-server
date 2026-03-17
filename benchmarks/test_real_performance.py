@@ -168,7 +168,7 @@ class RealBenchmark:
 
                 # Create graph
                 result = await self.call_tool(
-                    "create_graph", {"graph_id": f"test_{count}"}, count * 10
+                    "create_graph", {"name": f"test_{count}"}, count * 10
                 )
                 if "error" in result["response"]:
                     self.results["errors"].append(
@@ -187,7 +187,7 @@ class RealBenchmark:
 
                     result = await self.call_tool(
                         "add_nodes",
-                        {"graph_id": f"test_{count}", "nodes": nodes},
+                        {"graph": f"test_{count}", "nodes": nodes},
                         count * 10 + i,
                     )
 
@@ -232,11 +232,11 @@ class RealBenchmark:
         baseline_memory = self.get_memory_usage()
 
         # Create base graph with enough nodes
-        await self.call_tool("create_graph", {"graph_id": "edge_test"}, 1)
+        await self.call_tool("create_graph", {"name": "edge_test"}, 1)
 
         # Add 1000 nodes first
         nodes = [f"node_{i}" for i in range(1000)]
-        await self.call_tool("add_nodes", {"graph_id": "edge_test", "nodes": nodes}, 2)
+        await self.call_tool("add_nodes", {"graph": "edge_test", "nodes": nodes}, 2)
 
         # Test edge counts
         edge_counts = [100, 500, 1000, 2500, 5000, 10000]
@@ -264,7 +264,7 @@ class RealBenchmark:
 
                     result = await self.call_tool(
                         "add_edges",
-                        {"graph_id": "edge_test", "edges": batch_edges},
+                        {"graph": "edge_test", "edges": batch_edges},
                         1000 + i,
                     )
 
@@ -311,21 +311,21 @@ class RealBenchmark:
         await self.start_server()
 
         # Create test graph
-        await self.call_tool("create_graph", {"graph_id": "algo_test"}, 1)
+        await self.call_tool("create_graph", {"name": "algo_test"}, 1)
 
         # Add nodes and edges for a connected graph
         nodes = [f"node_{i}" for i in range(100)]
-        await self.call_tool("add_nodes", {"graph_id": "algo_test", "nodes": nodes}, 2)
+        await self.call_tool("add_nodes", {"graph": "algo_test", "nodes": nodes}, 2)
 
         # Create a connected graph (ring topology)
         edges = [[f"node_{i}", f"node_{(i + 1) % 100}"] for i in range(100)]
-        await self.call_tool("add_edges", {"graph_id": "algo_test", "edges": edges}, 3)
+        await self.call_tool("add_edges", {"graph": "algo_test", "edges": edges}, 3)
 
         # Test shortest path
         try:
             result = await self.call_tool(
                 "shortest_path",
-                {"graph_id": "algo_test", "source": "node_0", "target": "node_50"},
+                {"graph": "algo_test", "source": "node_0", "target": "node_50"},
                 4,
             )
 
@@ -352,7 +352,7 @@ class RealBenchmark:
         try:
             result = await self.call_tool(
                 "centrality_measures",
-                {"graph_id": "algo_test", "measures": ["degree", "betweenness"]},
+                {"graph": "algo_test", "measures": ["degree", "betweenness"]},
                 5,
             )
 
@@ -385,13 +385,13 @@ class RealBenchmark:
         await self.start_server()
 
         operations = [
-            ("create_graph", {"graph_id": "timing_test"}),
-            ("add_nodes", {"graph_id": "timing_test", "nodes": ["n1", "n2", "n3"]}),
+            ("create_graph", {"name": "timing_test"}),
+            ("add_nodes", {"graph": "timing_test", "nodes": ["n1", "n2", "n3"]}),
             (
                 "add_edges",
-                {"graph_id": "timing_test", "edges": [["n1", "n2"], ["n2", "n3"]]},
+                {"graph": "timing_test", "edges": [["n1", "n2"], ["n2", "n3"]]},
             ),
-            ("get_graph_info", {"graph_id": "timing_test"}),
+            ("get_info", {"graph": "timing_test"}),
         ]
 
         for i, (op_name, args) in enumerate(operations):

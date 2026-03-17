@@ -1,6 +1,6 @@
 # NetworkX MCP Server
 
-Graph analysis via the Model Context Protocol. v3.0.0.
+Graph analysis via the Model Context Protocol. v3.1.0.
 
 NetworkX MCP Server exposes [NetworkX](https://networkx.org/) through the
 [Model Context Protocol](https://github.com/anthropics/mcp), giving Claude

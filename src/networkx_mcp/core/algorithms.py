@@ -347,7 +347,7 @@ class GraphAlgorithms:
                 result["cycle_basis"] = cycle_basis
                 result["num_independent_cycles"] = len(cycle_basis)
                 result["has_cycle"] = len(cycle_basis) > 0
-            except Exception as e:
+            except nx.NetworkXError as e:
                 logger.debug(f"Failed to find cycle basis: {e}")
                 result["has_cycle"] = False
                 result["cycle_basis"] = []

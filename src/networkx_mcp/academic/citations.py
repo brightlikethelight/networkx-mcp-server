@@ -2,6 +2,7 @@
 Citation analysis and DOI resolution functions for academic networks.
 """
 
+import atexit
 import logging
 import time
 from collections import deque
@@ -20,9 +21,6 @@ logger = logging.getLogger(__name__)
 
 # Module-level session for connection pooling across CrossRef API calls
 _session = requests.Session()
-
-import atexit
-
 atexit.register(_session.close)
 
 

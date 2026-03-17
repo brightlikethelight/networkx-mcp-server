@@ -35,8 +35,8 @@ class PathfindingSuite:
         self.large_nodes = list(self.large_graph.nodes())
 
         # Ensure connectivity for reliable benchmarks
-        self.small_graph = max(nx.connected_components(self.small_graph), key=len)
-        self.small_graph = self.small_graph.subgraph(self.small_graph)
+        largest_cc = max(nx.connected_components(self.small_graph), key=len)
+        self.small_graph = self.small_graph.subgraph(largest_cc).copy()
 
     def time_shortest_path_unweighted_small(self):
         """Benchmark unweighted shortest path on small graph."""

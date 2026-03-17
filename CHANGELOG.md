@@ -5,6 +5,31 @@ All notable changes to NetworkX MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2026-03-16
+
+### Added
+
+- `topological_sort` tool for DAG workflow ordering
+- `subgraph` tool to extract induced subgraphs by node set
+- `merge_graphs` tool to compose two graphs into a new graph
+- 12 integration tests covering lifecycle, subprocess, and protocol compliance
+
+### Changed
+
+- CI/CD hardening: blocking secret scan, 85% coverage threshold, pinned ruff
+- Narrowed bare `except Exception` in `graph_cache.py` and `cicd_control.py`
+- Added `DeprecationWarning` to 14 server.py wrapper functions (removal in v4.0)
+
+### Fixed
+
+- Session leak in `citations.py` (requests.Session never closed)
+
+### Removed
+
+- `GraphManager` class (345 lines, 0 production imports)
+- `handle_error()` function (duplicated `_call_tool()` exception handling)
+- Unused `validate_node_id()`, `validate_edge()`, `validate_required_params()`
+
 ## [3.0.0] - 2025-01-14
 
 ### Added
@@ -90,6 +115,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+[3.1.0]: https://github.com/Bright-L01/networkx-mcp-server/releases/tag/v3.1.0
 [3.0.0]: https://github.com/Bright-L01/networkx-mcp-server/releases/tag/v3.0.0
 [2.0.0]: https://github.com/Bright-L01/networkx-mcp-server/releases/tag/v2.0.0
 [1.0.0]: https://github.com/Bright-L01/networkx-mcp-server/releases/tag/v1.0.0

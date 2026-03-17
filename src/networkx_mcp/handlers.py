@@ -24,7 +24,7 @@ from .core.basic_operations import (
     pagerank as _pagerank,
     visualize_graph as _visualize_graph,
 )
-from .errors import ErrorCodes, MCPError
+from .errors import ErrorCodes, MCPError, validate_graph_id
 
 # ── Bulk operation limits (DoS protection) ────────────────────────────
 MAX_NODES_PER_CALL = 100_000
@@ -326,6 +326,7 @@ def handle_subgraph(args: Dict[str, Any]) -> Dict[str, Any]:
         raise ValueError(f"Graph '{graph_name}' not found")
     nodes = args["nodes"]
     new_graph_name = args["new_graph"]
+    validate_graph_id(new_graph_name)
     graph = graphs[graph_name]
     missing = [n for n in nodes if n not in graph]
     if missing:
@@ -344,6 +345,9 @@ def handle_merge_graphs(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_a_name = args["graph_a"]
     graph_b_name = args["graph_b"]
     new_graph_name = args["new_graph"]
+    validate_graph_id(graph_a_name)
+    validate_graph_id(graph_b_name)
+    validate_graph_id(new_graph_name)
     if graph_a_name not in graphs:
         raise ValueError(f"Graph '{graph_a_name}' not found")
     if graph_b_name not in graphs:
