@@ -52,11 +52,12 @@ jobs:
       # Bandit - Python security linter
       - name: Bandit Security Scan
         run: |
-          bandit -r src/ -f json -o bandit-report.json --severity-level medium || true
-          bandit -r src/ -f sarif -o bandit-results.sarif --severity-level medium || true
+          bandit -r src/ -f json -o bandit-report.json --severity-level medium
+          bandit -r src/ -f sarif -o bandit-results.sarif --severity-level medium
 
           echo "## Bandit Security Scan Results" >> $GITHUB_STEP_SUMMARY
           bandit -r src/ -f txt --severity-level medium >> $GITHUB_STEP_SUMMARY 2>&1 || echo "No issues found" >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true
 
       - name: Upload Bandit SARIF
         if: always()
@@ -70,7 +71,7 @@ jobs:
       - name: Semgrep Scan
         run: |
           semgrep --config=auto --config=p/security-audit --config=p/python \
-            --sarif --output=semgrep-results.sarif src/ || true
+            --sarif --output=semgrep-results.sarif src/
         continue-on-error: true
 
       - name: Upload Semgrep SARIF
@@ -217,7 +218,7 @@ jobs:
 
       # Trivy - Container vulnerability scanner
       - name: Trivy Container Scan
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           image-ref: ${{ github.repository }}:scan
           format: 'sarif'
@@ -248,7 +249,7 @@ jobs:
 
       # Checkov - IaC scanner (covers Dockerfile, GitHub Actions, K8s)
       - name: Checkov IaC Scan
-        uses: bridgecrewio/checkov-action@master
+        uses: bridgecrewio/checkov-action@12.2.3
         with:
           directory: .
           quiet: false
