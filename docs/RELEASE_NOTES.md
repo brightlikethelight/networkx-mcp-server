@@ -1,5 +1,39 @@
 # Release Notes - NetworkX MCP Server
 
+## v3.1.0 - Cleanup & New Tools (2026-03-16)
+
+### Dead Code Removal
+
+- Removed `GraphManager` class (345 lines, 0 production imports)
+- Removed `handle_error()` function (duplicated `_call_tool()` exception handling)
+- Removed unused `validate_node_id()`, `validate_edge()`, `validate_required_params()` functions
+
+### Code Quality
+
+- Narrowed bare `except Exception` in `graph_cache.py` and `cicd_control.py` (6 sites)
+- Fixed session leak in `citations.py` (requests.Session never closed)
+- Added `DeprecationWarning` to 14 server.py wrapper functions (removal in v4.0)
+
+### CI/CD Hardening
+
+- Secret scanning (Gitleaks) now blocking
+- Docker test failures now blocking
+- Coverage threshold raised from 70% to 85%
+- Pinned ruff version to match pre-commit config
+- Added test step to dependency-update workflow
+
+### New Tools
+
+- `topological_sort` — topological ordering for DAG workflows
+- `subgraph` — extract induced subgraph by node set
+- `merge_graphs` — compose two graphs into a new graph
+
+### Integration Tests
+
+- Added 12 integration tests covering full graph lifecycle, multi-graph isolation, algorithm pipelines, subprocess smoke tests, and JSON-RPC protocol compliance
+
+---
+
 ## v3.0.0 - Academic Specialization Complete (2025-01-16)
 
 ### 🎓 MAJOR RELEASE: Academic Research Focus
