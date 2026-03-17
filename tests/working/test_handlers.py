@@ -25,12 +25,15 @@ from networkx_mcp.handlers import (
     handle_list_graphs,
     handle_matching,
     handle_maximum_flow,
+    handle_merge_graphs,
     handle_minimum_spanning_tree,
     handle_remove_edges,
     handle_remove_nodes,
     handle_set_edge_attributes,
     handle_set_node_attributes,
     handle_shortest_path,
+    handle_subgraph,
+    handle_topological_sort,
     handle_degree_centrality,
     handle_betweenness_centrality,
     handle_connected_components,
@@ -655,3 +658,146 @@ class TestEdgeAttributes:
     def test_get_missing_edge(self):
         with pytest.raises(ValueError, match="Edge.*not found"):
             handle_get_edge_attributes({"graph": "g", "source": "a", "target": "c"})
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# topological_sort
+# ═══════════════════════════════════════════════════════════════════════
+
+
+class TestTopologicalSort:
+    def test_happy_path(self):
+        handle_create_graph({"name": "dag", "directed": True})
+        handle_add_nodes({"graph": "dag", "nodes": ["a", "b", "c", "d"]})
+        handle_add_edges(
+            {"graph": "dag", "edges": [["a", "b"], ["a", "c"], ["b", "d"], ["c", "d"]]}
+        )
+        result = handle_topological_sort({"graph": "dag"})
+        assert result["graph"] == "dag"
+        assert result["count"] == 4
+        order = result["order"]
+        # "a" must come before "b" and "c"; "b" and "c" must come before "d"
+        assert order.index("a") < order.index("b")
+        assert order.index("a") < order.index("c")
+        assert order.index("b") < order.index("d")
+        assert order.index("c") < order.index("d")
+
+    def test_cyclic_graph_error(self):
+        handle_create_graph({"name": "cyc", "directed": True})
+        handle_add_nodes({"graph": "cyc", "nodes": ["a", "b", "c"]})
+        handle_add_edges(
+            {"graph": "cyc", "edges": [["a", "b"], ["b", "c"], ["c", "a"]]}
+        )
+        with pytest.raises(ValueError, match="cycles"):
+            handle_topological_sort({"graph": "cyc"})
+
+    def test_undirected_graph_error(self):
+        handle_create_graph({"name": "und"})
+        handle_add_nodes({"graph": "und", "nodes": [1, 2]})
+        with pytest.raises(ValueError, match="directed graph"):
+            handle_topological_sort({"graph": "und"})
+
+    def test_missing_graph(self):
+        with pytest.raises(ValueError, match="not found"):
+            handle_topological_sort({"graph": "nope"})
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# subgraph
+# ═══════════════════════════════════════════════════════════════════════
+
+
+class TestSubgraph:
+    @pytest.fixture(autouse=True)
+    def _setup(self):
+        handle_create_graph({"name": "g"})
+        handle_add_nodes({"graph": "g", "nodes": ["a", "b", "c", "d"]})
+        handle_add_edges(
+            {"graph": "g", "edges": [["a", "b"], ["b", "c"], ["c", "d"], ["a", "c"]]}
+        )
+
+    def test_happy_path(self):
+        result = handle_subgraph(
+            {"graph": "g", "nodes": ["a", "b", "c"], "new_graph": "sub"}
+        )
+        assert result["source"] == "g"
+        assert result["new_graph"] == "sub"
+        assert result["nodes"] == 3
+        # edges a-b, b-c, a-c should all be included
+        assert result["edges"] == 3
+
+    def test_missing_graph(self):
+        with pytest.raises(ValueError, match="not found"):
+            handle_subgraph({"graph": "nope", "nodes": ["a"], "new_graph": "sub"})
+
+    def test_missing_node_error(self):
+        with pytest.raises(ValueError, match="Nodes not found"):
+            handle_subgraph({"graph": "g", "nodes": ["a", "z"], "new_graph": "sub"})
+
+    def test_edges_included(self):
+        """Verify that edges between selected nodes are preserved."""
+        handle_subgraph({"graph": "g", "nodes": ["b", "c", "d"], "new_graph": "sub2"})
+        # edges b-c and c-d should be included; a-b and a-c should not
+        from networkx_mcp.graph_cache import graphs as g_cache
+
+        sub = g_cache["sub2"]
+        assert sub.has_edge("b", "c")
+        assert sub.has_edge("c", "d")
+        assert not sub.has_node("a")
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# merge_graphs
+# ═══════════════════════════════════════════════════════════════════════
+
+
+class TestMergeGraphs:
+    def test_same_type(self):
+        handle_create_graph({"name": "a"})
+        handle_add_nodes({"graph": "a", "nodes": [1, 2]})
+        handle_add_edges({"graph": "a", "edges": [[1, 2]]})
+        handle_create_graph({"name": "b"})
+        handle_add_nodes({"graph": "b", "nodes": [3, 4]})
+        handle_add_edges({"graph": "b", "edges": [[3, 4]]})
+        result = handle_merge_graphs(
+            {"graph_a": "a", "graph_b": "b", "new_graph": "merged"}
+        )
+        assert result["new_graph"] == "merged"
+        assert result["nodes"] == 4
+        assert result["edges"] == 2
+        assert result["source_graphs"] == ["a", "b"]
+
+    def test_different_types_error(self):
+        handle_create_graph({"name": "u"})  # undirected
+        handle_create_graph({"name": "d", "directed": True})  # directed
+        with pytest.raises(ValueError, match="Cannot merge different graph types"):
+            handle_merge_graphs({"graph_a": "u", "graph_b": "d", "new_graph": "m"})
+
+    def test_overlapping_nodes(self):
+        handle_create_graph({"name": "a"})
+        handle_add_nodes({"graph": "a", "nodes": [1, 2, 3]})
+        handle_add_edges({"graph": "a", "edges": [[1, 2]]})
+        handle_create_graph({"name": "b"})
+        handle_add_nodes({"graph": "b", "nodes": [2, 3, 4]})
+        handle_add_edges({"graph": "b", "edges": [[3, 4]]})
+        result = handle_merge_graphs(
+            {"graph_a": "a", "graph_b": "b", "new_graph": "merged"}
+        )
+        # nodes 1,2,3,4 — union
+        assert result["nodes"] == 4
+        # edges 1-2, 3-4
+        assert result["edges"] == 2
+
+    def test_disjoint_graphs(self):
+        handle_create_graph({"name": "x", "directed": True})
+        handle_add_nodes({"graph": "x", "nodes": ["a", "b"]})
+        handle_add_edges({"graph": "x", "edges": [["a", "b"]]})
+        handle_create_graph({"name": "y", "directed": True})
+        handle_add_nodes({"graph": "y", "nodes": ["c", "d"]})
+        handle_add_edges({"graph": "y", "edges": [["c", "d"]]})
+        result = handle_merge_graphs(
+            {"graph_a": "x", "graph_b": "y", "new_graph": "xy"}
+        )
+        assert result["nodes"] == 4
+        assert result["edges"] == 2
+        assert result["source_graphs"] == ["x", "y"]

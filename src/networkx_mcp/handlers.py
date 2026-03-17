@@ -307,6 +307,63 @@ def handle_maximum_flow(args: Dict[str, Any]) -> Dict[str, Any]:
     return GraphAlgorithms.maximum_flow(graphs[graph_name], source, sink, capacity)
 
 
+def handle_topological_sort(args: Dict[str, Any]) -> Dict[str, Any]:
+    graph_name = args["graph"]
+    if graph_name not in graphs:
+        raise ValueError(f"Graph '{graph_name}' not found")
+    graph = graphs[graph_name]
+    if not graph.is_directed():
+        raise ValueError("Topological sort requires a directed graph")
+    if not nx.is_directed_acyclic_graph(graph):
+        raise ValueError("Graph contains cycles; topological sort requires a DAG")
+    order = list(nx.topological_sort(graph))
+    return {"graph": graph_name, "order": order, "count": len(order)}
+
+
+def handle_subgraph(args: Dict[str, Any]) -> Dict[str, Any]:
+    graph_name = args["graph"]
+    if graph_name not in graphs:
+        raise ValueError(f"Graph '{graph_name}' not found")
+    nodes = args["nodes"]
+    new_graph_name = args["new_graph"]
+    graph = graphs[graph_name]
+    missing = [n for n in nodes if n not in graph]
+    if missing:
+        raise ValueError(f"Nodes not found in graph: {missing}")
+    sub = graph.subgraph(nodes).copy()
+    graphs[new_graph_name] = sub
+    return {
+        "source": graph_name,
+        "new_graph": new_graph_name,
+        "nodes": sub.number_of_nodes(),
+        "edges": sub.number_of_edges(),
+    }
+
+
+def handle_merge_graphs(args: Dict[str, Any]) -> Dict[str, Any]:
+    graph_a_name = args["graph_a"]
+    graph_b_name = args["graph_b"]
+    new_graph_name = args["new_graph"]
+    if graph_a_name not in graphs:
+        raise ValueError(f"Graph '{graph_a_name}' not found")
+    if graph_b_name not in graphs:
+        raise ValueError(f"Graph '{graph_b_name}' not found")
+    ga = graphs[graph_a_name]
+    gb = graphs[graph_b_name]
+    if type(ga) is not type(gb):
+        raise ValueError(
+            f"Cannot merge different graph types: {type(ga).__name__} and {type(gb).__name__}"
+        )
+    merged = nx.compose(ga, gb)
+    graphs[new_graph_name] = merged
+    return {
+        "new_graph": new_graph_name,
+        "nodes": merged.number_of_nodes(),
+        "edges": merged.number_of_edges(),
+        "source_graphs": [graph_a_name, graph_b_name],
+    }
+
+
 # ═══════════════════════════════════════════════════════════════════════
 # I/O & Visualization
 # ═══════════════════════════════════════════════════════════════════════

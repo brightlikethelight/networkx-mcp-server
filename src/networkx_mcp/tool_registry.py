@@ -491,6 +491,57 @@ def build_registry(
             graph_param="graph",
         )
     )
+    registry.register(
+        ToolDef(
+            name="topological_sort",
+            description="Return a topological ordering of a directed acyclic graph",
+            input_schema={
+                "type": "object",
+                "properties": {"graph": {"type": "string"}},
+                "required": ["graph"],
+            },
+            handler=h.handle_topological_sort,
+            graph_param="graph",
+        )
+    )
+    registry.register(
+        ToolDef(
+            name="subgraph",
+            description="Extract an induced subgraph and store it as a new graph",
+            input_schema={
+                "type": "object",
+                "properties": {
+                    "graph": {"type": "string"},
+                    "nodes": {
+                        "type": "array",
+                        "items": {"type": ["string", "number"]},
+                    },
+                    "new_graph": {"type": "string"},
+                },
+                "required": ["graph", "nodes", "new_graph"],
+            },
+            handler=h.handle_subgraph,
+            is_write=True,
+            graph_param="graph",
+        )
+    )
+    registry.register(
+        ToolDef(
+            name="merge_graphs",
+            description="Compose two graphs into a new graph (union of nodes and edges)",
+            input_schema={
+                "type": "object",
+                "properties": {
+                    "graph_a": {"type": "string"},
+                    "graph_b": {"type": "string"},
+                    "new_graph": {"type": "string"},
+                },
+                "required": ["graph_a", "graph_b", "new_graph"],
+            },
+            handler=h.handle_merge_graphs,
+            is_write=True,
+        )
+    )
 
     # ── I/O & Visualization ───────────────────────────────────────────
     registry.register(

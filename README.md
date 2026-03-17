@@ -126,6 +126,9 @@ Ask Claude: "Create a graph called 'test', add nodes 1, 2, 3 with edges between 
 - `graph_coloring` - Greedy vertex coloring
 - `matching` - Maximum weight matching
 - `maximum_flow` - Maximum flow in directed graphs
+- `topological_sort` - Topological ordering of DAGs
+- `subgraph` - Extract induced subgraph as new graph
+- `merge_graphs` - Compose two graphs into one
 
 ### 🎨 Visualization & I/O
 

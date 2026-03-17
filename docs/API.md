@@ -6,7 +6,7 @@ Parameters are passed as `arguments` inside the request.
 ## Table of Contents
 
 1. [Graph Management](#graph-management) -- create_graph, add_nodes, add_edges, get_info, list_graphs, delete_graph, remove_nodes, remove_edges, get_neighbors, set_node_attributes, get_node_attributes, set_edge_attributes, get_edge_attributes
-2. [Algorithms](#algorithms) -- shortest_path, degree_centrality, betweenness_centrality, connected_components, pagerank, community_detection, clustering_coefficients, graph_statistics, minimum_spanning_tree, cycles_detection, graph_coloring, centrality_measures, matching, maximum_flow
+2. [Algorithms](#algorithms) -- shortest_path, degree_centrality, betweenness_centrality, connected_components, pagerank, community_detection, clustering_coefficients, graph_statistics, minimum_spanning_tree, cycles_detection, graph_coloring, centrality_measures, matching, maximum_flow, topological_sort, subgraph, merge_graphs
 3. [I/O and Visualization](#io-and-visualization) -- import_csv, export_json, visualize_graph
 4. [Academic / Citation](#academic--citation) -- build_citation_network, analyze_author_impact, find_collaboration_patterns, detect_research_trends, export_bibtex, recommend_papers, resolve_doi
 5. [CI/CD Control](#cicd-control) -- trigger_workflow, get_workflow_status, cancel_workflow, rerun_failed_jobs, get_dora_metrics, analyze_workflow_failures
@@ -381,6 +381,46 @@ Calculate maximum flow in a directed graph.
 
 ```json
 {"graph": "flow_net", "source": "s", "sink": "t", "capacity": "capacity"}
+```
+
+### topological_sort
+
+Return a topological ordering of a directed acyclic graph (DAG).
+
+| Parameter | Type   | Required | Default | Description |
+|-----------|--------|----------|---------|-------------|
+| `graph`   | string | yes      | --      | Graph name (must be a DAG) |
+
+```json
+{"graph": "dag"}
+```
+
+### subgraph
+
+Extract an induced subgraph by node set and store it as a new graph.
+
+| Parameter   | Type   | Required | Default | Description |
+|-------------|--------|----------|---------|-------------|
+| `graph`     | string | yes      | --      | Source graph name |
+| `nodes`     | array  | yes      | --      | Nodes to include |
+| `new_graph` | string | yes      | --      | Name for the new subgraph |
+
+```json
+{"graph": "social", "nodes": ["alice", "bob", "carol"], "new_graph": "team"}
+```
+
+### merge_graphs
+
+Compose two graphs into a new graph (union of nodes and edges).
+
+| Parameter   | Type   | Required | Default | Description |
+|-------------|--------|----------|---------|-------------|
+| `graph_a`   | string | yes      | --      | First graph |
+| `graph_b`   | string | yes      | --      | Second graph |
+| `new_graph` | string | yes      | --      | Name for the merged graph |
+
+```json
+{"graph_a": "dept_a", "graph_b": "dept_b", "new_graph": "company"}
 ```
 
 ---
