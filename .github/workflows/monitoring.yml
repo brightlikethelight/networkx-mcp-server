@@ -61,6 +61,8 @@ jobs:
           check_workflow "Security" "security.yml"
           check_workflow "Docker Build" "docker-build.yml"
           check_workflow "Documentation" "docs.yml"
+          check_workflow "Dependency Update" "dependency-update.yml"
+          check_workflow "Release" "release.yml"
 
           failure_count=0
           if [ -f workflow_failures.txt ]; then

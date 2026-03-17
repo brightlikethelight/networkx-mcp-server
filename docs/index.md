@@ -8,7 +8,7 @@ Desktop and other MCP clients access to graph algorithms without writing Python.
 
 ## Capabilities
 
-**46 tools** across 4 categories:
+**43 tools** across 4 categories:
 
 - **Core graph operations (30)** -- create/delete graphs, list graphs,
   add/remove nodes and edges, get/set node/edge attributes,

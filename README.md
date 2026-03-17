@@ -31,7 +31,7 @@ NetworkX MCP Server enables Large Language Models (like Claude) to perform sophi
 
 #### 📊 Core Graph Operations
 
-- **46 Graph Tools**: From basic operations to advanced algorithms like PageRank
+- **43 Graph Tools**: From basic operations to advanced algorithms like PageRank
 - **BibTeX Export**: Export citation networks in academic-standard BibTeX format
 - **CrossRef Integration**: Access 156+ million academic papers via DOI resolution
 - **Visualization**: Generate publication-ready network visualizations
