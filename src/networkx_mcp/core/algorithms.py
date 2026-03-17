@@ -89,11 +89,18 @@ class GraphAlgorithms:
 
         return result
 
+    MAX_APSP_NODES = 1_000
+
     @staticmethod
     def all_pairs_shortest_path(
         graph: nx.Graph, weight: str | None = None
     ) -> Dict[str, Any]:
         """Compute shortest paths between all pairs of nodes."""
+        if graph.number_of_nodes() > GraphAlgorithms.MAX_APSP_NODES:
+            raise ValueError(
+                f"Graph too large for all-pairs shortest path ({graph.number_of_nodes()} nodes). "
+                f"Maximum is {GraphAlgorithms.MAX_APSP_NODES}."
+            )
         if weight:
             lengths = dict(nx.all_pairs_dijkstra_path_length(graph, weight=weight))
             paths = dict(nx.all_pairs_dijkstra_path(graph, weight=weight))
