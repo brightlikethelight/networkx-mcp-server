@@ -3,6 +3,8 @@
 import networkx as nx
 import pytest
 
+from networkx_mcp.errors import GraphNotFoundError
+
 from networkx_mcp.academic.analytics import (
     analyze_author_impact,
     calculate_h_index,
@@ -104,11 +106,11 @@ class TestAnalyzeAuthorImpact:
         assert result["h_index"] == 0
 
     def test_graph_not_found_raises(self):
-        with pytest.raises(ValueError, match="not found"):
+        with pytest.raises(GraphNotFoundError):
             analyze_author_impact("nonexistent", "Alice", graphs={})
 
     def test_none_graphs_raises(self):
-        with pytest.raises(ValueError, match="not found"):
+        with pytest.raises(GraphNotFoundError):
             analyze_author_impact("any", "Alice", graphs=None)
 
 
@@ -191,7 +193,7 @@ class TestFindCollaborationPatterns:
         assert result["patterns"]["num_clusters"] == 2
 
     def test_graph_not_found_raises(self):
-        with pytest.raises(ValueError, match="not found"):
+        with pytest.raises(GraphNotFoundError):
             find_collaboration_patterns("nope", graphs={})
 
 
@@ -326,5 +328,5 @@ class TestDetectResearchTrends:
         assert result["trends_by_year"][2010]["publications"] == 3
 
     def test_graph_not_found_raises(self):
-        with pytest.raises(ValueError, match="not found"):
+        with pytest.raises(GraphNotFoundError):
             detect_research_trends("missing", graphs={})

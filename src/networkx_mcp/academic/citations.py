@@ -16,7 +16,7 @@ from bibtexparser.bwriter import BibTexWriter
 from requests.exceptions import HTTPError, RequestException, Timeout
 
 from networkx_mcp.__version__ import __version__
-from networkx_mcp.errors import GraphAlreadyExistsError
+from networkx_mcp.errors import GraphAlreadyExistsError, GraphNotFoundError
 
 logger = logging.getLogger(__name__)
 
@@ -242,7 +242,7 @@ def export_bibtex(
         graphs = {}
 
     if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
+        raise GraphNotFoundError(graph_name)
 
     graph = graphs[graph_name]
 
@@ -289,7 +289,7 @@ def recommend_papers(
         graphs = {}
 
     if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
+        raise GraphNotFoundError(graph_name)
 
     graph = graphs[graph_name]
 

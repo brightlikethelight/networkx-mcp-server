@@ -502,7 +502,7 @@ def handle_resolve_doi(args: Dict[str, Any]) -> Dict[str, Any]:
     result, error = _resolve_doi(args["doi"])
     if result is None:
         error_msg = error or "Unknown error"
-        raise ValueError(f"Could not resolve DOI: {args['doi']} - {error_msg}")
+        raise GraphOperationError("resolve_doi", args["doi"], error_msg)
     return result
 
 

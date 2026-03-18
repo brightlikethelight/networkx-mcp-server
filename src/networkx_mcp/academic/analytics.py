@@ -7,6 +7,8 @@ from typing import Any, Optional
 
 import networkx as nx
 
+from networkx_mcp.errors import GraphNotFoundError
+
 
 def calculate_h_index(author_citations: list[int]) -> int:
     """Calculate h-index from list of citation counts."""
@@ -30,7 +32,7 @@ def analyze_author_impact(
         graphs = {}
 
     if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
+        raise GraphNotFoundError(graph_name)
 
     graph = graphs[graph_name]
 
@@ -79,7 +81,7 @@ def find_collaboration_patterns(
         graphs = {}
 
     if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
+        raise GraphNotFoundError(graph_name)
 
     graph = graphs[graph_name]
 
@@ -185,7 +187,7 @@ def detect_research_trends(
         graphs = {}
 
     if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
+        raise GraphNotFoundError(graph_name)
 
     graph = graphs[graph_name]
 

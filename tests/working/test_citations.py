@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 import networkx as nx
 import pytest
 
-from networkx_mcp.errors import GraphAlreadyExistsError
+from networkx_mcp.errors import GraphAlreadyExistsError, GraphNotFoundError
 
 from networkx_mcp.academic.citations import (
     _safe_extract_year,
@@ -307,7 +307,7 @@ class TestExportBibtex:
         assert result["entries"] == 0
 
     def test_export_missing_graph(self):
-        with pytest.raises(ValueError, match="not found"):
+        with pytest.raises(GraphNotFoundError):
             export_bibtex("nope", {})
 
 
@@ -350,7 +350,7 @@ class TestRecommendPapers:
         assert len(result["recommendations"]) == 0
 
     def test_missing_graph_raises(self):
-        with pytest.raises(ValueError, match="not found"):
+        with pytest.raises(GraphNotFoundError):
             recommend_papers("nope", "doi", graphs={})
 
 
