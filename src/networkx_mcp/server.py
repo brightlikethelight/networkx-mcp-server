@@ -345,7 +345,7 @@ class NetworkXMCPServer:
                         "jsonrpc": "2.0",
                         "id": req_id,
                         "error": {
-                            "code": -32603,
+                            "code": ErrorCodes.INVALID_PARAMS,
                             "message": "Permission denied: write access required",
                         },
                     }
@@ -579,7 +579,15 @@ class NetworkXMCPServer:
             except Exception as e:
                 # Unexpected errors - log and continue
                 logger.exception("Unexpected error in main loop")
-                print(json.dumps({"error": str(e)}), file=sys.stderr, flush=True)
+                error_response = {
+                    "jsonrpc": "2.0",
+                    "error": {
+                        "code": ErrorCodes.INTERNAL_ERROR,
+                        "message": f"Internal error: {type(e).__name__}",
+                    },
+                    "id": None,
+                }
+                print(json.dumps(error_response), file=sys.stderr, flush=True)
 
 
 # Create module-level mcp instance for test compatibility
@@ -655,8 +663,7 @@ def main() -> None:
     try:
         asyncio.run(server.run())
     finally:
-        if hasattr(server, "_executor"):
-            server._executor.shutdown(wait=False)
+        server._executor.shutdown(wait=True, cancel_futures=True)
         server.graphs.shutdown()
 
 

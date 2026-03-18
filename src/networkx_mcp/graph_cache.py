@@ -12,7 +12,7 @@ import threading
 import time
 from collections import OrderedDict
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Iterator, List, Optional, Tuple
 
 import networkx as nx
 
@@ -285,7 +285,7 @@ def get_graph_cache() -> GraphCache:
 class GraphDict(dict):
     """Dict-like interface for graph cache (backward compatibility)."""
 
-    def __init__(self, cache: GraphCache):
+    def __init__(self, cache: GraphCache) -> None:
         super().__init__()
         self._cache = cache
 
@@ -310,17 +310,17 @@ class GraphDict(dict):
     def __len__(self) -> int:
         return len(self._cache.list_graphs())
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[str]:
         return iter(self._cache.list_graphs())
 
-    def keys(self):
+    def keys(self) -> List[str]:  # type: ignore[override]
         return self._cache.list_graphs()
 
-    def get(self, key: str, default=None):
+    def get(self, key: str, default: Optional[nx.Graph] = None) -> Optional[nx.Graph]:
         graph = self._cache.get(key)
         return graph if graph is not None else default
 
-    def pop(self, key: str, *args):
+    def pop(self, key: str, *args: Any) -> Any:
         """Remove and return graph, or default if not found."""
         graph = self._cache.get(key)
         if graph is not None:
@@ -330,15 +330,15 @@ class GraphDict(dict):
             return args[0]
         raise KeyError(key)
 
-    def values(self):
+    def values(self) -> List[Optional[nx.Graph]]:  # type: ignore[override]
         """Return all cached graph objects."""
         return [self._cache.get(k) for k in self._cache.list_graphs()]
 
-    def items(self):
+    def items(self) -> List[Tuple[str, Optional[nx.Graph]]]:  # type: ignore[override]
         """Return (key, graph) pairs for all cached graphs."""
         return [(k, self._cache.get(k)) for k in self._cache.list_graphs()]
 
-    def update(self, other=(), /, **kwargs):  # type: ignore[override]
+    def update(self, other: Any = (), /, **kwargs: Any) -> None:  # type: ignore[override]
         """Update cache from dict or keyword args."""
         if hasattr(other, "items"):
             for k, v in other.items():

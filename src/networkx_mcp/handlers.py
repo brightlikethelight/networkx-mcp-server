@@ -44,7 +44,7 @@ MAX_VISUALIZATION_NODES = 10_000
 MAX_ALGORITHM_NODES = 50_000
 
 
-def _require_graph(graph_name: str) -> Any:
+def _require_graph(graph_name: str) -> nx.Graph:
     """Look up a graph by name, raising GraphNotFoundError if not found."""
     if graph_name not in graphs:
         raise GraphNotFoundError(graph_name)
