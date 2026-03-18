@@ -2,6 +2,7 @@
 
 from unittest.mock import patch
 
+import networkx as nx
 import pytest
 
 from networkx_mcp.errors import (
@@ -12,17 +13,25 @@ from networkx_mcp.errors import (
     MCPError,
     NodeNotFoundError,
     ResourceLimitExceededError,
+    ValidationError,
 )
 from networkx_mcp.graph_cache import graphs
 from networkx_mcp.handlers import (
     handle_add_edges,
     handle_add_nodes,
+    handle_analyze_author_impact,
+    handle_build_citation_network,
     handle_centrality_measures,
     handle_clustering_coefficients,
+    handle_community_detection,
     handle_create_graph,
     handle_cycles_detection,
+    handle_degree_centrality,
     handle_delete_graph,
+    handle_detect_research_trends,
+    handle_export_bibtex,
     handle_export_json,
+    handle_find_collaboration_patterns,
     handle_get_edge_attributes,
     handle_get_info,
     handle_get_neighbors,
@@ -35,18 +44,18 @@ from networkx_mcp.handlers import (
     handle_maximum_flow,
     handle_merge_graphs,
     handle_minimum_spanning_tree,
+    handle_pagerank,
+    handle_recommend_papers,
     handle_remove_edges,
     handle_remove_nodes,
+    handle_resolve_doi,
     handle_set_edge_attributes,
     handle_set_node_attributes,
     handle_shortest_path,
     handle_subgraph,
     handle_topological_sort,
-    handle_degree_centrality,
     handle_betweenness_centrality,
     handle_connected_components,
-    handle_pagerank,
-    handle_community_detection,
     handle_visualize_graph,
     handle_trigger_workflow,
     handle_get_workflow_status,
@@ -924,3 +933,165 @@ class TestCSVEdgeLimit:
             handle_import_csv(
                 {"graph": "csv_huge", "csv_data": csv_data, "directed": False}
             )
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Academic / Citation handlers
+# ═══════════════════════════════════════════════════════════════════════
+
+
+def _make_academic_graph():
+    """Build a small citation DiGraph with full metadata for testing."""
+    g = nx.DiGraph()
+    g.add_node(
+        "10.1/a",
+        doi="10.1/a",
+        title="Paper A",
+        authors=["Alice", "Bob"],
+        journal="J1",
+        year=2020,
+        citations=10,
+    )
+    g.add_node(
+        "10.1/b",
+        doi="10.1/b",
+        title="Paper B",
+        authors=["Bob", "Charlie"],
+        journal="J2",
+        year=2021,
+        citations=5,
+    )
+    g.add_node(
+        "10.1/c",
+        doi="10.1/c",
+        title="Paper C",
+        authors=["Alice"],
+        journal="J1",
+        year=2022,
+        citations=2,
+    )
+    g.add_edge("10.1/a", "10.1/b")  # A cites B
+    g.add_edge("10.1/c", "10.1/a")  # C cites A
+    return g
+
+
+class TestAcademicHandlers:
+    @pytest.fixture(autouse=True)
+    def _setup(self):
+        graphs["acad"] = _make_academic_graph()
+
+    # ── build_citation_network ──────────────────────────────────────
+
+    def test_build_citation_network(self):
+        mock_meta = {
+            "doi": "10.1/x",
+            "title": "X",
+            "authors": [],
+            "journal": "J",
+            "year": 2023,
+            "citations": 0,
+            "references": [],
+        }
+        with patch(
+            "networkx_mcp.academic.citations.resolve_doi",
+            return_value=(mock_meta, None),
+        ):
+            result = handle_build_citation_network(
+                {"graph": "cite_net", "seed_dois": ["10.1/x"], "max_depth": 1}
+            )
+        assert result["nodes"] >= 1
+        assert "cite_net" in graphs
+
+    def test_build_citation_network_default_depth(self):
+        mock_meta = {
+            "doi": "10.1/y",
+            "title": "Y",
+            "authors": [],
+            "journal": "J",
+            "year": 2023,
+            "citations": 0,
+            "references": [],
+        }
+        with patch(
+            "networkx_mcp.academic.citations.resolve_doi",
+            return_value=(mock_meta, None),
+        ):
+            # Omit max_depth — handler defaults to 2 via .get("max_depth", 2)
+            result = handle_build_citation_network(
+                {"graph": "cite_d", "seed_dois": ["10.1/y"]}
+            )
+        assert result["max_depth"] == 2
+
+    # ── analyze_author_impact ───────────────────────────────────────
+
+    def test_analyze_author_impact(self):
+        result = handle_analyze_author_impact({"graph": "acad", "author_name": "Alice"})
+        assert result["papers_found"] >= 1
+        assert "h_index" in result
+
+    # ── find_collaboration_patterns ─────────────────────────────────
+
+    def test_find_collaboration_patterns(self):
+        result = handle_find_collaboration_patterns({"graph": "acad"})
+        assert "coauthorship_network" in result or "patterns" in result
+
+    # ── detect_research_trends ──────────────────────────────────────
+
+    def test_detect_research_trends(self):
+        result = handle_detect_research_trends({"graph": "acad"})
+        assert (
+            "years_analyzed" in result
+            or "trends_by_year" in result
+            or "trend" in result
+        )
+
+    def test_detect_research_trends_custom_window(self):
+        result = handle_detect_research_trends({"graph": "acad", "time_window": 3})
+        # Should not crash with a custom window
+        assert "trend" in result or "years_analyzed" in result
+
+    # ── export_bibtex ───────────────────────────────────────────────
+
+    def test_export_bibtex(self):
+        result = handle_export_bibtex({"graph": "acad"})
+        assert result["format"] == "bibtex"
+        assert result["entries"] >= 1
+        assert "Alice" in result["bibtex_data"]
+
+    # ── recommend_papers ────────────────────────────────────────────
+
+    def test_recommend_papers(self):
+        result = handle_recommend_papers(
+            {"graph": "acad", "seed_doi": "10.1/a", "max_recommendations": 5}
+        )
+        assert result["seed_paper"] == "10.1/a"
+        assert isinstance(result["recommendations"], list)
+
+    def test_recommend_papers_legacy_params(self):
+        result = handle_recommend_papers(
+            {"graph": "acad", "seed_paper": "10.1/a", "top_n": 3}
+        )
+        assert result["seed_paper"] == "10.1/a"
+
+    def test_recommend_papers_missing_seed(self):
+        with pytest.raises(ValidationError):
+            handle_recommend_papers({"graph": "acad"})
+
+    # ── resolve_doi ─────────────────────────────────────────────────
+
+    def test_resolve_doi_success(self):
+        mock_meta = {"doi": "10.1/z", "title": "Z"}
+        with patch(
+            "networkx_mcp.academic.resolve_doi",
+            return_value=(mock_meta, None),
+        ):
+            result = handle_resolve_doi({"doi": "10.1/z"})
+        assert result["doi"] == "10.1/z"
+
+    def test_resolve_doi_failure(self):
+        with patch(
+            "networkx_mcp.academic.resolve_doi",
+            return_value=(None, "DOI not found"),
+        ):
+            with pytest.raises(GraphOperationError):
+                handle_resolve_doi({"doi": "10.1/bad"})
