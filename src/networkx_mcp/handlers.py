@@ -24,7 +24,17 @@ from .core.basic_operations import (
     pagerank as _pagerank,
     visualize_graph as _visualize_graph,
 )
-from .errors import ErrorCodes, MCPError, validate_graph_id
+from .errors import (
+    EdgeNotFoundError,
+    ErrorCodes,
+    GraphNotFoundError,
+    GraphOperationError,
+    MCPError,
+    NodeNotFoundError,
+    ResourceLimitExceededError,
+    ValidationError,
+    validate_graph_id,
+)
 
 # ── Bulk operation limits (DoS protection) ────────────────────────────
 MAX_NODES_PER_CALL = 100_000
@@ -34,9 +44,9 @@ MAX_ALGORITHM_NODES = 50_000
 
 
 def _require_graph(graph_name: str) -> Any:
-    """Look up a graph by name, raising ValueError if not found."""
+    """Look up a graph by name, raising GraphNotFoundError if not found."""
     if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
+        raise GraphNotFoundError(graph_name)
     return graphs[graph_name]
 
 
@@ -58,9 +68,7 @@ def handle_add_nodes(args: Dict[str, Any]) -> Dict[str, Any]:
     graph = _require_graph(graph_name)
     nodes = args["nodes"]
     if len(nodes) > MAX_NODES_PER_CALL:
-        raise ValueError(
-            f"Too many nodes ({len(nodes)}). Maximum is {MAX_NODES_PER_CALL} per call."
-        )
+        raise ResourceLimitExceededError("nodes", MAX_NODES_PER_CALL, len(nodes))
     graph.add_nodes_from(nodes)
     return {"added": len(nodes), "total": graph.number_of_nodes()}
 
@@ -70,9 +78,7 @@ def handle_add_edges(args: Dict[str, Any]) -> Dict[str, Any]:
     graph = _require_graph(graph_name)
     raw_edges = args["edges"]
     if len(raw_edges) > MAX_EDGES_PER_CALL:
-        raise ValueError(
-            f"Too many edges ({len(raw_edges)}). Maximum is {MAX_EDGES_PER_CALL} per call."
-        )
+        raise ResourceLimitExceededError("edges", MAX_EDGES_PER_CALL, len(raw_edges))
     edges = [tuple(e) for e in raw_edges]
     graph.add_edges_from(edges)
     return {"added": len(edges), "total": graph.number_of_edges()}
@@ -139,7 +145,7 @@ def handle_get_neighbors(args: Dict[str, Any]) -> Dict[str, Any]:
     graph = _require_graph(graph_name)
     node = args["node"]
     if node not in graph:
-        raise ValueError(f"Node '{node}' not found in graph '{graph_name}'")
+        raise NodeNotFoundError(graph_name, str(node))
     neighbors = list(graph.neighbors(node))
     return {"node": node, "neighbors": neighbors, "count": len(neighbors)}
 
@@ -150,7 +156,7 @@ def handle_set_node_attributes(args: Dict[str, Any]) -> Dict[str, Any]:
     attributes = args["attributes"]  # {node: {attr: value}}
     for node, attrs in attributes.items():
         if node not in graph:
-            raise ValueError(f"Node '{node}' not found")
+            raise NodeNotFoundError(graph_name, str(node))
         for key, val in attrs.items():
             graph.nodes[node][key] = val
     return {"updated": len(attributes)}
@@ -161,7 +167,7 @@ def handle_get_node_attributes(args: Dict[str, Any]) -> Dict[str, Any]:
     graph = _require_graph(graph_name)
     node = args["node"]
     if node not in graph:
-        raise ValueError(f"Node '{node}' not found in graph '{graph_name}'")
+        raise NodeNotFoundError(graph_name, str(node))
     return {"node": node, "attributes": dict(graph.nodes[node])}
 
 
@@ -175,7 +181,7 @@ def handle_set_edge_attributes(args: Dict[str, Any]) -> Dict[str, Any]:
     for entry in attributes:
         s, t = entry["source"], entry["target"]
         if not graph.has_edge(s, t):
-            raise ValueError(f"Edge '{s}'->'{t}' not found")
+            raise EdgeNotFoundError(graph_name, str(s), str(t))
         graph[s][t][entry["attr"]] = entry["value"]
         count += 1
     return {"updated": count}
@@ -186,7 +192,7 @@ def handle_get_edge_attributes(args: Dict[str, Any]) -> Dict[str, Any]:
     graph = _require_graph(graph_name)
     source, target = args["source"], args["target"]
     if not graph.has_edge(source, target):
-        raise ValueError(f"Edge '{source}'->'{target}' not found")
+        raise EdgeNotFoundError(graph_name, str(source), str(target))
     return {
         "source": source,
         "target": target,
@@ -203,9 +209,8 @@ def handle_degree_centrality(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
     graph = _require_graph(graph_name)
     if graph.number_of_nodes() > MAX_ALGORITHM_NODES:
-        raise ValueError(
-            f"Graph too large ({graph.number_of_nodes()} nodes). "
-            f"Maximum for this algorithm is {MAX_ALGORITHM_NODES}."
+        raise ResourceLimitExceededError(
+            "algorithm_nodes", MAX_ALGORITHM_NODES, graph.number_of_nodes()
         )
     return _degree_centrality(graph_name, graphs)
 
@@ -214,9 +219,8 @@ def handle_betweenness_centrality(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
     graph = _require_graph(graph_name)
     if graph.number_of_nodes() > MAX_ALGORITHM_NODES:
-        raise ValueError(
-            f"Graph too large ({graph.number_of_nodes()} nodes). "
-            f"Maximum for this algorithm is {MAX_ALGORITHM_NODES}."
+        raise ResourceLimitExceededError(
+            "algorithm_nodes", MAX_ALGORITHM_NODES, graph.number_of_nodes()
         )
     return _betweenness_centrality(graph_name, graphs)
 
@@ -225,9 +229,8 @@ def handle_connected_components(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
     graph = _require_graph(graph_name)
     if graph.number_of_nodes() > MAX_ALGORITHM_NODES:
-        raise ValueError(
-            f"Graph too large ({graph.number_of_nodes()} nodes). "
-            f"Maximum for this algorithm is {MAX_ALGORITHM_NODES}."
+        raise ResourceLimitExceededError(
+            "algorithm_nodes", MAX_ALGORITHM_NODES, graph.number_of_nodes()
         )
     return _connected_components(graph_name, graphs)
 
@@ -236,9 +239,8 @@ def handle_pagerank(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
     graph = _require_graph(graph_name)
     if graph.number_of_nodes() > MAX_ALGORITHM_NODES:
-        raise ValueError(
-            f"Graph too large ({graph.number_of_nodes()} nodes). "
-            f"Maximum for this algorithm is {MAX_ALGORITHM_NODES}."
+        raise ResourceLimitExceededError(
+            "algorithm_nodes", MAX_ALGORITHM_NODES, graph.number_of_nodes()
         )
     return _pagerank(graph_name, graphs)
 
@@ -247,9 +249,8 @@ def handle_community_detection(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
     graph = _require_graph(graph_name)
     if graph.number_of_nodes() > MAX_ALGORITHM_NODES:
-        raise ValueError(
-            f"Graph too large ({graph.number_of_nodes()} nodes). "
-            f"Maximum for this algorithm is {MAX_ALGORITHM_NODES}."
+        raise ResourceLimitExceededError(
+            "algorithm_nodes", MAX_ALGORITHM_NODES, graph.number_of_nodes()
         )
     return _community_detection(graph_name, graphs)
 
@@ -263,9 +264,8 @@ def handle_clustering_coefficients(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
     graph = _require_graph(graph_name)
     if graph.number_of_nodes() > MAX_ALGORITHM_NODES:
-        raise ValueError(
-            f"Graph too large ({graph.number_of_nodes()} nodes). "
-            f"Maximum for this algorithm is {MAX_ALGORITHM_NODES}."
+        raise ResourceLimitExceededError(
+            "algorithm_nodes", MAX_ALGORITHM_NODES, graph.number_of_nodes()
         )
     return GraphAlgorithms.clustering_coefficients(graph)
 
@@ -274,9 +274,8 @@ def handle_graph_statistics(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
     graph = _require_graph(graph_name)
     if graph.number_of_nodes() > MAX_ALGORITHM_NODES:
-        raise ValueError(
-            f"Graph too large ({graph.number_of_nodes()} nodes). "
-            f"Maximum for this algorithm is {MAX_ALGORITHM_NODES}."
+        raise ResourceLimitExceededError(
+            "algorithm_nodes", MAX_ALGORITHM_NODES, graph.number_of_nodes()
         )
     result = GraphAlgorithms.graph_statistics(graph)
     # Convert numpy scalars to Python types for JSON serialization
@@ -304,9 +303,8 @@ def handle_graph_coloring(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
     graph = _require_graph(graph_name)
     if graph.number_of_nodes() > MAX_ALGORITHM_NODES:
-        raise ValueError(
-            f"Graph too large ({graph.number_of_nodes()} nodes). "
-            f"Maximum for this algorithm is {MAX_ALGORITHM_NODES}."
+        raise ResourceLimitExceededError(
+            "algorithm_nodes", MAX_ALGORITHM_NODES, graph.number_of_nodes()
         )
     strategy = args.get("strategy", "largest_first")
     return GraphAlgorithms.graph_coloring(graph, strategy)
@@ -316,9 +314,8 @@ def handle_centrality_measures(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
     graph = _require_graph(graph_name)
     if graph.number_of_nodes() > MAX_ALGORITHM_NODES:
-        raise ValueError(
-            f"Graph too large ({graph.number_of_nodes()} nodes). "
-            f"Maximum for this algorithm is {MAX_ALGORITHM_NODES}."
+        raise ResourceLimitExceededError(
+            "algorithm_nodes", MAX_ALGORITHM_NODES, graph.number_of_nodes()
         )
     measures = args.get("measures")
     return GraphAlgorithms.centrality_measures(graph, measures)
@@ -328,9 +325,8 @@ def handle_matching(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
     graph = _require_graph(graph_name)
     if graph.number_of_nodes() > MAX_ALGORITHM_NODES:
-        raise ValueError(
-            f"Graph too large ({graph.number_of_nodes()} nodes). "
-            f"Maximum for this algorithm is {MAX_ALGORITHM_NODES}."
+        raise ResourceLimitExceededError(
+            "algorithm_nodes", MAX_ALGORITHM_NODES, graph.number_of_nodes()
         )
     max_cardinality = args.get("max_cardinality", True)
     return GraphAlgorithms.matching(graph, max_cardinality)
@@ -339,6 +335,10 @@ def handle_matching(args: Dict[str, Any]) -> Dict[str, Any]:
 def handle_maximum_flow(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
     graph = _require_graph(graph_name)
+    if not graph.is_directed():
+        raise GraphOperationError(
+            "maximum_flow", graph_name, "requires a directed graph"
+        )
     source = args["source"]
     sink = args["sink"]
     capacity = args.get("capacity", "capacity")
@@ -349,9 +349,15 @@ def handle_topological_sort(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
     graph = _require_graph(graph_name)
     if not graph.is_directed():
-        raise ValueError("Topological sort requires a directed graph")
+        raise GraphOperationError(
+            "topological_sort", graph_name, "requires a directed graph"
+        )
     if not nx.is_directed_acyclic_graph(graph):
-        raise ValueError("Graph contains cycles; topological sort requires a DAG")
+        raise GraphOperationError(
+            "topological_sort",
+            graph_name,
+            "graph contains cycles; topological sort requires a DAG",
+        )
     order = list(nx.topological_sort(graph))
     return {"graph": graph_name, "order": order, "count": len(order)}
 
@@ -364,7 +370,7 @@ def handle_subgraph(args: Dict[str, Any]) -> Dict[str, Any]:
     validate_graph_id(new_graph_name)
     missing = [n for n in nodes if n not in graph]
     if missing:
-        raise ValueError(f"Nodes not found in graph: {missing}")
+        raise NodeNotFoundError(graph_name, str(missing))
     sub = graph.subgraph(nodes).copy()
     graphs[new_graph_name] = sub
     return {
@@ -385,8 +391,10 @@ def handle_merge_graphs(args: Dict[str, Any]) -> Dict[str, Any]:
     ga = _require_graph(graph_a_name)
     gb = _require_graph(graph_b_name)
     if type(ga) is not type(gb):
-        raise ValueError(
-            f"Cannot merge different graph types: {type(ga).__name__} and {type(gb).__name__}"
+        raise GraphOperationError(
+            "merge_graphs",
+            new_graph_name,
+            f"cannot merge different graph types: {type(ga).__name__} and {type(gb).__name__}",
         )
     merged = nx.compose(ga, gb)
     graphs[new_graph_name] = merged
@@ -407,9 +415,8 @@ def handle_visualize_graph(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
     graph = _require_graph(graph_name)
     if graph.number_of_nodes() > MAX_VISUALIZATION_NODES:
-        raise ValueError(
-            f"Graph too large for visualization ({graph.number_of_nodes()} nodes). "
-            f"Maximum is {MAX_VISUALIZATION_NODES}."
+        raise ResourceLimitExceededError(
+            "visualization_nodes", MAX_VISUALIZATION_NODES, graph.number_of_nodes()
         )
     layout = args.get("layout", "spring")
     viz_result = _visualize_graph(graph_name, layout, graphs)
@@ -476,7 +483,7 @@ def handle_recommend_papers(args: Dict[str, Any]) -> Dict[str, Any]:
     seed = args.get("seed_doi") or args.get("seed_paper")
     max_recs = args.get("max_recommendations") or args.get("top_n", 10)
     if not seed:
-        raise ValueError("Missing required parameter: seed_doi or seed_paper")
+        raise ValidationError("seed_doi", None, "required parameter missing")
     return _recommend_papers(args["graph"], seed, max_recs, graphs)
 
 

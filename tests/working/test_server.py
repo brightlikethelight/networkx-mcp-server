@@ -556,7 +556,7 @@ class TestToolErrorHandling:
             _tool_call("add_nodes", {"graph": "nonexistent", "nodes": [1]})
         )
         assert "error" in resp
-        assert resp["error"]["code"] == ErrorCodes.INVALID_PARAMS
+        assert resp["error"]["code"] == ErrorCodes.GRAPH_NOT_FOUND
         assert "not found" in resp["error"]["message"].lower()
 
     @pytest.mark.asyncio

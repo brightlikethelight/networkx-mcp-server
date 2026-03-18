@@ -4,7 +4,14 @@ from unittest.mock import patch
 
 import pytest
 
-from networkx_mcp.errors import MCPError
+from networkx_mcp.errors import (
+    EdgeNotFoundError,
+    GraphNotFoundError,
+    GraphOperationError,
+    MCPError,
+    NodeNotFoundError,
+    ResourceLimitExceededError,
+)
 from networkx_mcp.graph_cache import graphs
 from networkx_mcp.handlers import (
     handle_add_edges,
@@ -79,7 +86,7 @@ class TestSyncHandlers:
         assert result["total"] == 3
 
     def test_add_nodes_missing_graph(self):
-        with pytest.raises(ValueError, match="not found"):
+        with pytest.raises(GraphNotFoundError):
             handle_add_nodes({"graph": "nope", "nodes": [1]})
 
     def test_add_edges(self):
@@ -90,7 +97,7 @@ class TestSyncHandlers:
         assert result["total"] == 2
 
     def test_add_edges_missing_graph(self):
-        with pytest.raises(ValueError, match="not found"):
+        with pytest.raises(GraphNotFoundError):
             handle_add_edges({"graph": "nope", "edges": [[1, 2]]})
 
     def test_get_info(self):
@@ -102,7 +109,7 @@ class TestSyncHandlers:
         assert result["directed"] is False
 
     def test_get_info_missing_graph(self):
-        with pytest.raises(ValueError, match="not found"):
+        with pytest.raises(GraphNotFoundError):
             handle_get_info({"graph": "nope"})
 
     def test_delete_graph_success(self):
@@ -111,7 +118,7 @@ class TestSyncHandlers:
         assert result["deleted"] == "g"
 
     def test_delete_graph_missing(self):
-        with pytest.raises(ValueError, match="not found"):
+        with pytest.raises(GraphNotFoundError):
             handle_delete_graph({"graph": "nope"})
 
     def test_shortest_path(self):
@@ -123,7 +130,7 @@ class TestSyncHandlers:
         assert result["length"] == 2
 
     def test_shortest_path_missing_graph(self):
-        with pytest.raises(ValueError, match="not found"):
+        with pytest.raises(GraphNotFoundError):
             handle_shortest_path({"graph": "nope", "source": 1, "target": 2})
 
 
@@ -189,7 +196,7 @@ class TestAdvancedAlgorithmHandlers:
         assert isinstance(result["average_clustering"], float)
 
     def test_clustering_coefficients_missing_graph(self):
-        with pytest.raises(ValueError, match="not found"):
+        with pytest.raises(GraphNotFoundError):
             handle_clustering_coefficients({"graph": "nope"})
 
     # ── graph_statistics ─────────────────────────────────────────────
@@ -203,7 +210,7 @@ class TestAdvancedAlgorithmHandlers:
             assert isinstance(v, float)
 
     def test_graph_statistics_missing_graph(self):
-        with pytest.raises(ValueError, match="not found"):
+        with pytest.raises(GraphNotFoundError):
             handle_graph_statistics({"graph": "nope"})
 
     # ── minimum_spanning_tree ────────────────────────────────────────
@@ -220,7 +227,7 @@ class TestAdvancedAlgorithmHandlers:
         assert result["num_edges"] == 4
 
     def test_minimum_spanning_tree_missing_graph(self):
-        with pytest.raises(ValueError, match="not found"):
+        with pytest.raises(GraphNotFoundError):
             handle_minimum_spanning_tree({"graph": "nope"})
 
     # ── cycles_detection ─────────────────────────────────────────────
@@ -230,7 +237,7 @@ class TestAdvancedAlgorithmHandlers:
         assert result["has_cycle"] is True
 
     def test_cycles_detection_missing_graph(self):
-        with pytest.raises(ValueError, match="not found"):
+        with pytest.raises(GraphNotFoundError):
             handle_cycles_detection({"graph": "nope"})
 
     # ── graph_coloring ───────────────────────────────────────────────
@@ -245,7 +252,7 @@ class TestAdvancedAlgorithmHandlers:
         assert result["num_colors"] >= 1
 
     def test_graph_coloring_missing_graph(self):
-        with pytest.raises(ValueError, match="not found"):
+        with pytest.raises(GraphNotFoundError):
             handle_graph_coloring({"graph": "nope"})
 
 
@@ -392,7 +399,7 @@ class TestRemoveOperations:
         assert result["total_nodes"] == 3
 
     def test_remove_nodes_missing_graph(self):
-        with pytest.raises(ValueError, match="not found"):
+        with pytest.raises(GraphNotFoundError):
             handle_remove_nodes({"graph": "nope", "nodes": [1]})
 
     def test_remove_nonexistent_node(self):
@@ -406,7 +413,7 @@ class TestRemoveOperations:
         assert result["total_edges"] == 2
 
     def test_remove_edges_missing_graph(self):
-        with pytest.raises(ValueError, match="not found"):
+        with pytest.raises(GraphNotFoundError):
             handle_remove_edges({"graph": "nope", "edges": [[1, 2]]})
 
 
@@ -435,7 +442,7 @@ class TestNewAlgorithmHandlers:
         assert "degree_centrality" not in result
 
     def test_centrality_measures_missing_graph(self):
-        with pytest.raises(ValueError, match="not found"):
+        with pytest.raises(GraphNotFoundError):
             handle_centrality_measures({"graph": "nope"})
 
     # ── matching ─────────────────────────────────────────────────────
@@ -446,7 +453,7 @@ class TestNewAlgorithmHandlers:
         assert result["matching_size"] >= 1
 
     def test_matching_missing_graph(self):
-        with pytest.raises(ValueError, match="not found"):
+        with pytest.raises(GraphNotFoundError):
             handle_matching({"graph": "nope"})
 
     # ── maximum_flow ─────────────────────────────────────────────────
@@ -467,11 +474,11 @@ class TestNewAlgorithmHandlers:
         assert result["sink"] == "t"
 
     def test_maximum_flow_missing_graph(self):
-        with pytest.raises(ValueError, match="not found"):
+        with pytest.raises(GraphNotFoundError):
             handle_maximum_flow({"graph": "nope", "source": "s", "sink": "t"})
 
     def test_maximum_flow_undirected_raises(self):
-        with pytest.raises(ValueError, match="directed"):
+        with pytest.raises(GraphOperationError):
             handle_maximum_flow({"graph": "g", "source": 1, "sink": 4})
 
 
@@ -484,13 +491,13 @@ class TestBulkLimits:
     def test_add_nodes_exceeds_limit(self):
         handle_create_graph({"name": "g"})
         nodes = list(range(100_001))
-        with pytest.raises(ValueError, match="Too many nodes"):
+        with pytest.raises(ResourceLimitExceededError):
             handle_add_nodes({"graph": "g", "nodes": nodes})
 
     def test_add_edges_exceeds_limit(self):
         handle_create_graph({"name": "g"})
         edges = [[i, i + 1] for i in range(500_001)]
-        with pytest.raises(ValueError, match="Too many edges"):
+        with pytest.raises(ResourceLimitExceededError):
             handle_add_edges({"graph": "g", "edges": edges})
 
     def test_visualize_large_graph_rejected(self):
@@ -498,7 +505,7 @@ class TestBulkLimits:
         import networkx as nx
 
         graphs["g"] = nx.path_graph(10_001)
-        with pytest.raises(ValueError, match="too large for visualization"):
+        with pytest.raises(ResourceLimitExceededError):
             handle_visualize_graph({"graph": "g"})
 
     def test_visualize_small_graph_succeeds(self):
@@ -531,11 +538,11 @@ class TestGetNeighbors:
         assert result["neighbors"] == ["a"]
 
     def test_missing_graph(self):
-        with pytest.raises(ValueError, match="not found"):
+        with pytest.raises(GraphNotFoundError):
             handle_get_neighbors({"graph": "nope", "node": "a"})
 
     def test_missing_node(self):
-        with pytest.raises(ValueError, match="Node.*not found"):
+        with pytest.raises(NodeNotFoundError):
             handle_get_neighbors({"graph": "g", "node": "z"})
 
 
@@ -569,19 +576,19 @@ class TestNodeAttributes:
         assert result["attributes"] == {}
 
     def test_set_missing_graph(self):
-        with pytest.raises(ValueError, match="not found"):
+        with pytest.raises(GraphNotFoundError):
             handle_set_node_attributes({"graph": "nope", "attributes": {"a": {"x": 1}}})
 
     def test_set_missing_node(self):
-        with pytest.raises(ValueError, match="Node.*not found"):
+        with pytest.raises(NodeNotFoundError):
             handle_set_node_attributes({"graph": "g", "attributes": {"z": {"x": 1}}})
 
     def test_get_missing_graph(self):
-        with pytest.raises(ValueError, match="not found"):
+        with pytest.raises(GraphNotFoundError):
             handle_get_node_attributes({"graph": "nope", "node": "a"})
 
     def test_get_missing_node(self):
-        with pytest.raises(ValueError, match="Node.*not found"):
+        with pytest.raises(NodeNotFoundError):
             handle_get_node_attributes({"graph": "g", "node": "z"})
 
 
@@ -630,7 +637,7 @@ class TestEdgeAttributes:
         assert result["attributes"] == {}
 
     def test_set_missing_graph(self):
-        with pytest.raises(ValueError, match="not found"):
+        with pytest.raises(GraphNotFoundError):
             handle_set_edge_attributes(
                 {
                     "graph": "nope",
@@ -641,7 +648,7 @@ class TestEdgeAttributes:
             )
 
     def test_set_missing_edge(self):
-        with pytest.raises(ValueError, match="Edge.*not found"):
+        with pytest.raises(EdgeNotFoundError):
             handle_set_edge_attributes(
                 {
                     "graph": "g",
@@ -652,11 +659,11 @@ class TestEdgeAttributes:
             )
 
     def test_get_missing_graph(self):
-        with pytest.raises(ValueError, match="not found"):
+        with pytest.raises(GraphNotFoundError):
             handle_get_edge_attributes({"graph": "nope", "source": "a", "target": "b"})
 
     def test_get_missing_edge(self):
-        with pytest.raises(ValueError, match="Edge.*not found"):
+        with pytest.raises(EdgeNotFoundError):
             handle_get_edge_attributes({"graph": "g", "source": "a", "target": "c"})
 
 
@@ -688,17 +695,17 @@ class TestTopologicalSort:
         handle_add_edges(
             {"graph": "cyc", "edges": [["a", "b"], ["b", "c"], ["c", "a"]]}
         )
-        with pytest.raises(ValueError, match="cycles"):
+        with pytest.raises(GraphOperationError):
             handle_topological_sort({"graph": "cyc"})
 
     def test_undirected_graph_error(self):
         handle_create_graph({"name": "und"})
         handle_add_nodes({"graph": "und", "nodes": [1, 2]})
-        with pytest.raises(ValueError, match="directed graph"):
+        with pytest.raises(GraphOperationError):
             handle_topological_sort({"graph": "und"})
 
     def test_missing_graph(self):
-        with pytest.raises(ValueError, match="not found"):
+        with pytest.raises(GraphNotFoundError):
             handle_topological_sort({"graph": "nope"})
 
 
@@ -727,11 +734,11 @@ class TestSubgraph:
         assert result["edges"] == 3
 
     def test_missing_graph(self):
-        with pytest.raises(ValueError, match="not found"):
+        with pytest.raises(GraphNotFoundError):
             handle_subgraph({"graph": "nope", "nodes": ["a"], "new_graph": "sub"})
 
     def test_missing_node_error(self):
-        with pytest.raises(ValueError, match="Nodes not found"):
+        with pytest.raises(NodeNotFoundError):
             handle_subgraph({"graph": "g", "nodes": ["a", "z"], "new_graph": "sub"})
 
     def test_edges_included(self):
@@ -770,7 +777,7 @@ class TestMergeGraphs:
     def test_different_types_error(self):
         handle_create_graph({"name": "u"})  # undirected
         handle_create_graph({"name": "d", "directed": True})  # directed
-        with pytest.raises(ValueError, match="Cannot merge different graph types"):
+        with pytest.raises(GraphOperationError):
             handle_merge_graphs({"graph_a": "u", "graph_b": "d", "new_graph": "m"})
 
     def test_overlapping_nodes(self):
