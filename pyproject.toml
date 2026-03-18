@@ -136,12 +136,9 @@ namespace_packages = true
 explicit_package_bases = true
 # Disable error codes that still produce errors in the codebase
 disable_error_code = [
-    "attr-defined",  # 1 error: dynamic attribute access in server.py
     "assignment",  # 9 errors: type assignment issues in algorithms.py, server.py
     "var-annotated",  # 2 errors: missing variable annotations
-    "return-value",  # 1 error: return type mismatch in server.py
     "dict-item",  # 2 errors: dict type issues in server.py
-    "list-item",  # 1 error: polymorphic result dict in server.py
 ]
 
 # Per-module options for gradual typing

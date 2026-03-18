@@ -103,7 +103,7 @@ class NetworkXMCPServer:
         """Mock tool decorator for test compatibility."""
         return func
 
-    async def handle_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
+    async def handle_request(self, request: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Route requests to handlers."""
         # JSON-RPC 2.0 validation
         if request.get("jsonrpc") != "2.0":
@@ -142,6 +142,7 @@ class NetworkXMCPServer:
             self.monitor.record_request(method)
 
         # Route to appropriate handler
+        result: Dict[str, Any]
         if method == "initialize":
             self.initialized = True  # Mark as initialized
             result = {

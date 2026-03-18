@@ -25,7 +25,8 @@ class HealthMonitor:
         self.start_time = time.time()
         self.request_count = 0
         self.error_count = 0
-        self.tool_usage = {}
+        self.tool_usage: Dict[str, int] = {}
+        self.graphs: Any = {}  # Injected by NetworkXMCPServer after construction
         if HAS_PSUTIL:
             self.process = psutil.Process(os.getpid())
         else:
