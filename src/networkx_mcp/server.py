@@ -4,6 +4,8 @@ NetworkX MCP Server - Refactored and Modular
 Core server functionality with plugin-based architecture.
 """
 
+from __future__ import annotations
+
 import asyncio
 import inspect
 import json
@@ -65,11 +67,11 @@ class NetworkXMCPServer:
 
         # Set up authentication if enabled
         self.auth_required = auth_required and HAS_AUTH
+        self.auth: AuthMiddleware | None = None
         if self.auth_required:
             self.key_manager = APIKeyManager()
             self.auth = AuthMiddleware(self.key_manager, required=auth_required)
         else:
-            self.auth = None
             # Only show warning if not in test mode
             if not os.environ.get("PYTEST_CURRENT_TEST") and not os.environ.get(
                 "NETWORKX_MCP_SUPPRESS_AUTH_WARNING"
@@ -87,11 +89,10 @@ class NetworkXMCPServer:
 
         # Set up monitoring if enabled
         self.monitoring_enabled = enable_monitoring and HAS_MONITORING
+        self.monitor: HealthMonitor | None = None
         if self.monitoring_enabled:
             self.monitor = HealthMonitor()
             self.monitor.graphs = graphs  # Give monitor access to graphs
-        else:
-            self.monitor = None
 
         # Build tool registry (single source of truth for tools)
         self._registry = build_registry(

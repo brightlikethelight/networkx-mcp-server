@@ -134,13 +134,6 @@ ignore_missing_imports = true
 mypy_path = "src"
 namespace_packages = true
 explicit_package_bases = true
-# Disable error codes that still produce errors in the codebase
-disable_error_code = [
-    "assignment",  # 9 errors: type assignment issues in algorithms.py, server.py
-    "var-annotated",  # 2 errors: missing variable annotations
-    "dict-item",  # 2 errors: dict type issues in server.py
-]
-
 # Per-module options for gradual typing
 [[tool.mypy.overrides]]
 module = [

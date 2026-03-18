@@ -414,7 +414,7 @@ class CICDController:
             data = json.loads(stdout.decode())
 
             # Analyze failures
-            failure_patterns = {
+            failure_patterns: Dict[str, list[str]] = {
                 "import_errors": [],
                 "timeout_errors": [],
                 "assertion_errors": [],

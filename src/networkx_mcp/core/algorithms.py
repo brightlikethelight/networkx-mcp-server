@@ -345,7 +345,7 @@ class GraphAlgorithms:
     @staticmethod
     def cycles_detection(graph: nx.Graph) -> Dict[str, Any]:
         """Detect cycles in a graph."""
-        result = {}
+        result: Dict[str, Any] = {}
 
         if graph.is_directed():
             has_cycle = not nx.is_directed_acyclic_graph(graph)
