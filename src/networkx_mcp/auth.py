@@ -6,6 +6,7 @@ import hashlib
 import hmac
 import json
 import logging
+import os
 import secrets
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -22,7 +23,7 @@ class APIKeyManager:
         self.storage_path = (
             storage_path or Path.home() / ".networkx-mcp" / "api_keys.json"
         )
-        self.storage_path.parent.mkdir(parents=True, exist_ok=True)
+        self.storage_path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
         self.keys: Dict[str, Dict[str, Any]] = self._load_keys()
         self.rate_limits: Dict[str, List[datetime]] = {}  # Track requests per key
 
@@ -44,6 +45,7 @@ class APIKeyManager:
         """Save API keys to storage."""
         with open(self.storage_path, "w") as f:
             json.dump(self.keys, f, indent=2, default=str)
+        os.chmod(self.storage_path, 0o600)
 
     def generate_key(self, name: str, permissions: Optional[Set[str]] = None) -> str:
         """Generate a new API key."""

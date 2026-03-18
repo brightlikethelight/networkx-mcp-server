@@ -165,6 +165,10 @@ def build_citation_network(
     if graph_name in graphs:
         raise ValueError(f"Graph '{graph_name}' already exists")
 
+    # Cap depth to prevent exponential crawl
+    if max_depth > 5:
+        max_depth = 5
+
     # Create directed graph for citations
     citation_graph: nx.DiGraph = nx.DiGraph()
     processed = set()
@@ -176,6 +180,9 @@ def build_citation_network(
     resolution_failures = 0
 
     while to_process and nodes_added < 1000:  # Limit to prevent overload
+        if len(to_process) > 10_000:
+            errors.append("Queue size limit exceeded; stopping crawl")
+            break
         current_doi, depth = to_process.popleft()
 
         if current_doi in processed or depth > max_depth:
