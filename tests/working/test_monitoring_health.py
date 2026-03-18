@@ -1,6 +1,6 @@
-"""Tests for monitoring_legacy.py HealthMonitor."""
+"""Tests for monitoring_health.py HealthMonitor."""
 
-from networkx_mcp.monitoring_legacy import HealthMonitor
+from networkx_mcp.monitoring_health import HealthMonitor
 
 
 class TestHealthMonitor:
