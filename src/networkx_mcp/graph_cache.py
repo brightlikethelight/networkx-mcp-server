@@ -119,6 +119,17 @@ class GraphCache:
 
             return cached.graph
 
+    def has(self, key: str) -> bool:
+        """Check if key exists and is not expired, without updating LRU/stats."""
+        with self._lock:
+            if key not in self._cache:
+                return False
+            if self._is_expired(self._cache[key]):
+                del self._cache[key]
+                self.evictions += 1
+                return False
+            return True
+
     def put(self, key: str, graph: nx.Graph) -> None:
         """Add or update a graph in cache.
 
@@ -294,7 +305,7 @@ class GraphDict(dict):
     def __contains__(self, key: object) -> bool:
         if not isinstance(key, str):
             return False
-        return self._cache.get(key) is not None
+        return self._cache.has(key)
 
     def __len__(self) -> int:
         return len(self._cache.list_graphs())

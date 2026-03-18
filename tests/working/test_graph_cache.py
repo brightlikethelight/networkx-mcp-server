@@ -516,3 +516,35 @@ class TestShutdown:
         )
         c.shutdown()
         c.shutdown()  # should not raise
+
+
+# ===================================================================
+# GraphCache.has() — stat-free existence check
+# ===================================================================
+
+
+class TestGraphCacheHas:
+    def test_has_does_not_increment_hits(self, cache):
+        cache.put("g", _make_graph())
+        initial_hits = cache.hits
+        assert cache.has("g") is True
+        assert cache.hits == initial_hits
+
+    def test_has_returns_false_for_missing(self, cache):
+        assert cache.has("nonexistent") is False
+
+    def test_has_evicts_expired(self):
+        cache = GraphCache(
+            max_size=10, ttl_seconds=0.001, max_memory_mb=500, cleanup_interval=9999
+        )
+        cache.put("g", _make_graph())
+        time.sleep(0.01)
+        assert cache.has("g") is False
+        cache.shutdown()
+
+    def test_contains_does_not_pollute_hits(self, cache):
+        gd = GraphDict(cache)
+        gd["g"] = _make_graph()
+        initial_hits = cache.hits
+        assert "g" in gd
+        assert cache.hits == initial_hits
