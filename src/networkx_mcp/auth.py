@@ -95,6 +95,10 @@ class APIKeyManager:
 
         return None
 
+    # Maximum number of tracked keys to prevent unbounded memory growth.
+    # Once exceeded, the oldest entries (by last request time) are evicted.
+    _MAX_RATE_LIMIT_KEYS = 10_000
+
     def check_rate_limit(
         self, api_key: str, limit: int = 1000, window_minutes: int = 60
     ) -> bool:
@@ -113,6 +117,23 @@ class APIKeyManager:
             for req_time in self.rate_limits[key_hash]
             if req_time > window_start
         ]
+
+        # Evict empty entries to reclaim memory
+        if not self.rate_limits[key_hash]:
+            del self.rate_limits[key_hash]
+            self.rate_limits[key_hash] = []
+
+        # Evict oldest entries if dict exceeds cap (DoS protection)
+        if len(self.rate_limits) > self._MAX_RATE_LIMIT_KEYS:
+            # Sort by most recent request, drop the oldest half
+            sorted_keys = sorted(
+                self.rate_limits,
+                key=lambda k: self.rate_limits[k][-1]
+                if self.rate_limits[k]
+                else datetime.min,
+            )
+            for stale_key in sorted_keys[: len(sorted_keys) // 2]:
+                del self.rate_limits[stale_key]
 
         # Check if under limit
         if len(self.rate_limits[key_hash]) >= limit:

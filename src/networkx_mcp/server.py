@@ -347,13 +347,14 @@ class NetworkXMCPServer:
                 }
             }
 
-        except Exception as e:
-            # Unexpected errors - log for debugging
+        except Exception:
+            # Unexpected errors - log full details server-side only;
+            # return generic message to client to prevent information leakage.
             logger.exception(f"Unexpected error in tool {tool_name}")
             return {
                 "error": {
                     "code": ErrorCodes.INTERNAL_ERROR,
-                    "message": f"Internal error: {str(e)}",
+                    "message": f"Internal error in tool '{tool_name}'",
                 }
             }
 
