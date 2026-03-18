@@ -219,6 +219,11 @@ class NetworkXMCPServer:
         self.initialized = False  # Track initialization state
         self.mcp = self  # For test compatibility
         self.graphs = graphs  # Reference to global graphs
+        # Thread safety note: MCP protocol is request-response (one active
+        # request at a time via await), so concurrent handler execution cannot
+        # occur. The executor prevents blocking the asyncio event loop on
+        # CPU-bound NetworkX operations. Individual graph objects are NOT
+        # thread-safe, but sequential MCP dispatch makes this safe.
         self._executor = ThreadPoolExecutor(max_workers=4)
 
         # Set up authentication if enabled
