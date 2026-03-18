@@ -59,6 +59,7 @@ class CICDController:
             cmd = ["gh", "workflow", "run", workflow_name, "--ref", branch]
 
             if inputs:
+                _RE_INPUT_VALUE = re.compile(r"^[a-zA-Z0-9_\-./@ :,=]+$")
                 for key, value in inputs.items():
                     if not re.match(r"^[a-zA-Z0-9_-]+$", str(key)):
                         return {
@@ -71,6 +72,12 @@ class CICDController:
                         return {
                             "success": False,
                             "error": f"Invalid input value for '{key}': values cannot start with '-'",
+                        }
+                    # Strict character whitelist (alphanumeric + safe punctuation)
+                    if not _RE_INPUT_VALUE.match(value_str):
+                        return {
+                            "success": False,
+                            "error": f"Invalid input value for '{key}': only alphanumeric, _-./@ :,= allowed",
                         }
                     # Enforce max length
                     if len(value_str) > 1000:
