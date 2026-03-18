@@ -28,10 +28,8 @@ repos:
       # Run the linter
       - id: ruff
         args: [--fix]
-        exclude: ^docs/archive/
       # Run the formatter
       - id: ruff-format
-        exclude: ^docs/archive/
 
   # Python type checking
   - repo: https://github.com/pre-commit/mirrors-mypy
@@ -61,7 +59,6 @@ repos:
     hooks:
       - id: markdownlint
         args: ['--fix']
-        exclude: ^(docs/archive/|scripts/archive/)
 
   # YAML formatting
   - repo: https://github.com/pre-commit/mirrors-prettier
@@ -69,7 +66,6 @@ repos:
     hooks:
       - id: prettier
         types_or: [yaml]
-        exclude: ^(docs/archive/|scripts/archive/)
 
   # GitHub Actions workflow validation
   - repo: https://github.com/python-jsonschema/check-jsonschema
