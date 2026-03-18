@@ -11,6 +11,8 @@ from typing import Any, Dict, List, Optional, Union
 import networkx as nx
 import networkx.algorithms.community as nx_comm
 
+from networkx_mcp.errors import ResourceLimitExceededError
+
 
 def create_graph(
     name: str, directed: bool = False, graphs: Optional[Dict[str, Any]] = None
@@ -260,7 +262,9 @@ def import_csv(
     if graphs is None:
         graphs = {}
     if len(csv_data) > 10_000_000:
-        raise ValueError("CSV data exceeds 10MB limit")
+        raise ResourceLimitExceededError(
+            "csv_data_size", "10MB", f"{len(csv_data)} bytes"
+        )
     # Parse CSV data
     reader = csv.reader(io.StringIO(csv_data))
     edges = []
@@ -280,9 +284,7 @@ def import_csv(
             edges.append((row[0].strip(), row[1].strip()))
 
     if len(edges) > 500_000:
-        raise ValueError(
-            f"CSV contains too many edges ({len(edges)}). Maximum is 500,000."
-        )
+        raise ResourceLimitExceededError("csv_edges", 500_000, len(edges))
 
     # Create graph
     graph: Any = nx.DiGraph() if directed else nx.Graph()

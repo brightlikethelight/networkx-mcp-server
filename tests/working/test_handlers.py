@@ -913,7 +913,14 @@ class TestAlgorithmSizeGuards:
 class TestCSVEdgeLimit:
     def test_import_csv_edge_limit(self):
         csv_data = "\n".join(f"{i},{i + 1}" for i in range(500_001))
-        with pytest.raises(ValueError, match="too many edges"):
+        with pytest.raises(ResourceLimitExceededError):
             handle_import_csv(
                 {"graph": "csv_big", "csv_data": csv_data, "directed": False}
+            )
+
+    def test_import_csv_size_limit(self):
+        csv_data = "a,b\n" * 3_000_001  # ~12MB
+        with pytest.raises(ResourceLimitExceededError):
+            handle_import_csv(
+                {"graph": "csv_huge", "csv_data": csv_data, "directed": False}
             )

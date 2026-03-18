@@ -153,8 +153,10 @@ class TestErrorHandling:
 
     def test_import_csv_rejects_oversized_data(self):
         """Test that CSV import rejects data exceeding 10MB limit."""
+        from networkx_mcp.errors import ResourceLimitExceededError
+
         oversized = "a,b\n" * 5_000_001  # > 10MB
-        with pytest.raises(ValueError, match="exceeds 10MB limit"):
+        with pytest.raises(ResourceLimitExceededError):
             import_csv("csv_g", oversized)
 
 
