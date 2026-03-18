@@ -81,10 +81,12 @@ class HealthMonitor:
                     "total_nodes": sum(
                         g.number_of_nodes()
                         for g in getattr(self, "graphs", {}).values()
+                        if g is not None
                     ),
                     "total_edges": sum(
                         g.number_of_edges()
                         for g in getattr(self, "graphs", {}).values()
+                        if g is not None
                     ),
                 },
             },

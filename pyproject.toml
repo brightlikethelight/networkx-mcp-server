@@ -32,7 +32,7 @@ dependencies = [
     "numpy>=1.21.0",  # Required for NetworkX and core algorithms
     "matplotlib>=3.5.0",  # Required for graph visualization
     "requests>=2.28.0",  # For API calls to CrossRef, ORCID, etc.
-    "bibtexparser>=1.4.0",  # For BibTeX parsing and generation
+    "bibtexparser>=1.4.0,<2.0",  # For BibTeX parsing and generation (v2 has incompatible API)
     "psutil>=5.9.0",  # For memory monitoring in graph cache and health checks
 ]
 
@@ -40,17 +40,16 @@ dependencies = [
 # Development dependencies
 dev = [
     "pytest>=7.0.0",
-    "pytest-asyncio>=0.21.0",
+    "pytest-asyncio>=0.24.0",
     "pytest-cov>=4.0.0",  # For coverage testing
     "pytest-benchmark>=4.0.0",  # For performance benchmarking
     "coverage>=7.0.0",  # For coverage reporting
-    "black>=24.0.0",  # Code formatting
     "ruff==0.12.10",  # Pinned to match .pre-commit-config.yaml
     "mypy>=1.13.0",  # Type checking
     "bandit>=1.8.0",  # Security scanning
     "pre-commit>=4.0.0",  # Git hooks
     "uv>=0.5.0",  # Fast package manager
-    "psutil>=5.9.0",  # Also in core deps; kept here for explicit dev tooling
+    "pytest-timeout>=2.0.0",  # For --timeout in pytest addopts
     "hypothesis>=6.0.0",  # For property-based testing
     "types-requests>=2.28.0",  # Type stubs for requests
 ]
@@ -111,11 +110,6 @@ log_cli_level = "INFO"
 log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s"
 log_cli_date_format = "%Y-%m-%d %H:%M:%S"
 
-[tool.black]
-line-length = 88
-target-version = ['py311', 'py312']
-include = '\.pyi?$'
-
 [tool.mypy]
 python_version = "3.11"
 # Temporarily disable strict mode to get CI passing
@@ -140,14 +134,13 @@ ignore_missing_imports = true
 mypy_path = "src"
 namespace_packages = true
 explicit_package_bases = true
-# Disable error codes that still produce errors in the current 19-file codebase
+# Disable error codes that still produce errors in the codebase
 disable_error_code = [
-    "misc",  # 1 error: parameterized generics in isinstance
-    "attr-defined",  # 1 error: dynamic attribute access
-    "assignment",  # 9 errors: type assignment issues
+    "attr-defined",  # 1 error: dynamic attribute access in server.py
+    "assignment",  # 9 errors: type assignment issues in algorithms.py, server.py
     "var-annotated",  # 2 errors: missing variable annotations
-    "return-value",  # 2 errors: return type mismatches
-    "dict-item",  # 1 error: dict type issue
+    "return-value",  # 1 error: return type mismatch in server.py
+    "dict-item",  # 2 errors: dict type issues in server.py
     "list-item",  # 1 error: polymorphic result dict in server.py
 ]
 

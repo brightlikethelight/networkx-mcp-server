@@ -12,6 +12,7 @@ import logging
 import re
 from typing import Any, Dict, List, Optional
 
+from ..errors import ValidationError
 from ..monitoring.dora_metrics import generate_dora_report, get_dora_metrics
 
 logger = logging.getLogger(__name__)
@@ -23,7 +24,7 @@ _RE_RUN_ID = re.compile(r"^[0-9]+$")
 
 def _validate_cicd_param(value: str, pattern: re.Pattern, name: str) -> str:
     if not pattern.match(value):
-        raise ValueError(f"Invalid {name}: {value!r}")
+        raise ValidationError(name, value, "does not match expected pattern")
     return value
 
 
