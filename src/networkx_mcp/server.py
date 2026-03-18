@@ -9,7 +9,9 @@ import inspect
 import json
 import logging
 import os
+import signal
 import sys
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, List, Optional
 
 import networkx as nx
@@ -217,6 +219,7 @@ class NetworkXMCPServer:
         self.initialized = False  # Track initialization state
         self.mcp = self  # For test compatibility
         self.graphs = graphs  # Reference to global graphs
+        self._executor = ThreadPoolExecutor(max_workers=4)
 
         # Set up authentication if enabled
         self.auth_required = auth_required and HAS_AUTH
@@ -459,9 +462,13 @@ class NetworkXMCPServer:
                     validate_graph_id(graph_id)
 
             # Call the handler (sync or async)
-            result = tool_def.handler(args)
-            if inspect.isawaitable(result):
-                result = await result
+            if inspect.iscoroutinefunction(tool_def.handler):
+                result = await tool_def.handler(args)
+            else:
+                loop = asyncio.get_running_loop()
+                result = await loop.run_in_executor(
+                    self._executor, tool_def.handler, args
+                )
 
             logger.debug(f"Tool {tool_name} completed successfully")
             return {"content": [{"type": "text", "text": json.dumps(result)}]}
@@ -508,8 +515,31 @@ class NetworkXMCPServer:
                 }
             }
 
+    def _handle_signal(self, sig: signal.Signals) -> None:
+        logger.info("Received signal %s, shutting down...", sig.name)
+        self.running = False
+
+    async def _shutdown(self) -> None:
+        logger.info("Shutting down server...")
+        self.graphs.shutdown()
+        self._executor.shutdown(wait=True, cancel_futures=True)
+        logger.info("Server shutdown complete")
+
     async def run(self) -> None:
         """Main server loop - read stdin, write stdout."""
+        loop = asyncio.get_running_loop()
+        for sig in (signal.SIGTERM, signal.SIGINT):
+            try:
+                loop.add_signal_handler(sig, self._handle_signal, sig)
+            except NotImplementedError:
+                pass  # Windows
+        try:
+            await self._run_loop()
+        finally:
+            await self._shutdown()
+
+    async def _run_loop(self) -> None:
+        """Inner loop split out so run() can wrap with try/finally."""
         while self.running:
             try:
                 line = await asyncio.get_event_loop().run_in_executor(
@@ -617,7 +647,12 @@ def main() -> None:
     server = NetworkXMCPServer(
         auth_required=auth_required, enable_monitoring=enable_monitoring
     )
-    asyncio.run(server.run())
+    try:
+        asyncio.run(server.run())
+    finally:
+        if hasattr(server, "_executor"):
+            server._executor.shutdown(wait=False)
+        server.graphs.shutdown()
 
 
 # Run the server
