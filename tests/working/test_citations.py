@@ -5,6 +5,8 @@ from unittest.mock import MagicMock, patch
 import networkx as nx
 import pytest
 
+from networkx_mcp.errors import GraphAlreadyExistsError
+
 from networkx_mcp.academic.citations import (
     _safe_extract_year,
     build_citation_network,
@@ -253,7 +255,7 @@ class TestBuildCitationNetwork:
 
     def test_duplicate_graph_name_raises(self):
         graphs = {"existing": nx.Graph()}
-        with pytest.raises(ValueError, match="already exists"):
+        with pytest.raises(GraphAlreadyExistsError):
             build_citation_network("existing", ["10.1/a"], graphs=graphs)
 
     @patch("networkx_mcp.academic.citations.resolve_doi")

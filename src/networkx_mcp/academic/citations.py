@@ -16,6 +16,7 @@ from bibtexparser.bwriter import BibTexWriter
 from requests.exceptions import HTTPError, RequestException, Timeout
 
 from networkx_mcp.__version__ import __version__
+from networkx_mcp.errors import GraphAlreadyExistsError
 
 logger = logging.getLogger(__name__)
 
@@ -163,7 +164,7 @@ def build_citation_network(
         graphs = {}
 
     if graph_name in graphs:
-        raise ValueError(f"Graph '{graph_name}' already exists")
+        raise GraphAlreadyExistsError(graph_name)
 
     # Cap depth to prevent exponential crawl
     if max_depth > 5:

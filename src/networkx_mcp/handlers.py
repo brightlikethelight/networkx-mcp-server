@@ -27,6 +27,7 @@ from .core.basic_operations import (
 from .errors import (
     EdgeNotFoundError,
     ErrorCodes,
+    GraphAlreadyExistsError,
     GraphNotFoundError,
     GraphOperationError,
     MCPError,
@@ -58,6 +59,8 @@ def _require_graph(graph_name: str) -> Any:
 def handle_create_graph(args: Dict[str, Any]) -> Dict[str, Any]:
     name = args["name"]
     validate_graph_id(name)
+    if name in graphs:
+        raise GraphAlreadyExistsError(name)
     directed = args.get("directed", False)
     graphs[name] = nx.DiGraph() if directed else nx.Graph()
     return {"created": name, "type": "directed" if directed else "undirected"}
@@ -368,6 +371,8 @@ def handle_subgraph(args: Dict[str, Any]) -> Dict[str, Any]:
     nodes = args["nodes"]
     new_graph_name = args["new_graph"]
     validate_graph_id(new_graph_name)
+    if new_graph_name in graphs:
+        raise GraphAlreadyExistsError(new_graph_name)
     missing = [n for n in nodes if n not in graph]
     if missing:
         raise NodeNotFoundError(graph_name, str(missing))
@@ -388,6 +393,8 @@ def handle_merge_graphs(args: Dict[str, Any]) -> Dict[str, Any]:
     validate_graph_id(graph_a_name)
     validate_graph_id(graph_b_name)
     validate_graph_id(new_graph_name)
+    if new_graph_name in graphs:
+        raise GraphAlreadyExistsError(new_graph_name)
     ga = _require_graph(graph_a_name)
     gb = _require_graph(graph_b_name)
     if type(ga) is not type(gb):
@@ -430,6 +437,8 @@ def handle_visualize_graph(args: Dict[str, Any]) -> Dict[str, Any]:
 
 def handle_import_csv(args: Dict[str, Any]) -> Dict[str, Any]:
     validate_graph_id(args["graph"])
+    if args["graph"] in graphs:
+        raise GraphAlreadyExistsError(args["graph"])
     return _import_csv(
         args["graph"], args["csv_data"], args.get("directed", False), graphs
     )

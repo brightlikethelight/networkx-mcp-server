@@ -6,6 +6,7 @@ import pytest
 
 from networkx_mcp.errors import (
     EdgeNotFoundError,
+    GraphAlreadyExistsError,
     GraphNotFoundError,
     GraphOperationError,
     MCPError,
@@ -74,6 +75,11 @@ class TestSyncHandlers:
         result = handle_create_graph({"name": "g1"})
         assert result["created"] == "g1"
         assert result["type"] == "undirected"
+
+    def test_create_graph_already_exists(self):
+        handle_create_graph({"name": "g1"})
+        with pytest.raises(GraphAlreadyExistsError):
+            handle_create_graph({"name": "g1"})
 
     def test_create_directed_graph(self):
         result = handle_create_graph({"name": "g2", "directed": True})
@@ -268,6 +274,13 @@ class TestIOHandlers:
         )
         assert result["nodes"] == 4
         assert result["edges"] == 2
+
+    def test_import_csv_already_exists(self):
+        handle_create_graph({"name": "csv_g"})
+        with pytest.raises(GraphAlreadyExistsError):
+            handle_import_csv(
+                {"graph": "csv_g", "csv_data": "a,b\n", "directed": False}
+            )
 
     def test_export_json(self):
         handle_create_graph({"name": "g"})
@@ -741,6 +754,13 @@ class TestSubgraph:
         with pytest.raises(NodeNotFoundError):
             handle_subgraph({"graph": "g", "nodes": ["a", "z"], "new_graph": "sub"})
 
+    def test_subgraph_target_exists_error(self):
+        handle_create_graph({"name": "existing"})
+        with pytest.raises(GraphAlreadyExistsError):
+            handle_subgraph(
+                {"graph": "g", "nodes": ["a", "b"], "new_graph": "existing"}
+            )
+
     def test_edges_included(self):
         """Verify that edges between selected nodes are preserved."""
         handle_subgraph({"graph": "g", "nodes": ["b", "c", "d"], "new_graph": "sub2"})
@@ -773,6 +793,15 @@ class TestMergeGraphs:
         assert result["nodes"] == 4
         assert result["edges"] == 2
         assert result["source_graphs"] == ["a", "b"]
+
+    def test_merge_target_exists_error(self):
+        handle_create_graph({"name": "a"})
+        handle_create_graph({"name": "b"})
+        handle_create_graph({"name": "existing"})
+        with pytest.raises(GraphAlreadyExistsError):
+            handle_merge_graphs(
+                {"graph_a": "a", "graph_b": "b", "new_graph": "existing"}
+            )
 
     def test_different_types_error(self):
         handle_create_graph({"name": "u"})  # undirected
