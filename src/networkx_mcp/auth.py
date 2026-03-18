@@ -12,6 +12,8 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 
+from .errors import ErrorCodes, MCPError
+
 logger = logging.getLogger(__name__)
 
 
@@ -165,16 +167,16 @@ class AuthMiddleware:
             return {"name": "anonymous", "permissions": ["read"]}
 
         if not api_key:
-            raise ValueError("API key required")
+            raise MCPError(ErrorCodes.INVALID_PARAMS, "API key required")
 
         # Validate key
         key_data = self.key_manager.validate_key(api_key)
         if not key_data:
-            raise ValueError("Invalid API key")
+            raise MCPError(ErrorCodes.INVALID_PARAMS, "Invalid API key")
 
         # Check rate limit
         if not self.key_manager.check_rate_limit(api_key):
-            raise ValueError("Rate limit exceeded")
+            raise MCPError(ErrorCodes.RESOURCE_LIMIT_EXCEEDED, "Rate limit exceeded")
 
         return key_data
 

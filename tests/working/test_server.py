@@ -1000,7 +1000,7 @@ class TestAuthenticationFlow:
         await _init_server(srv)
         resp = await srv.handle_request(_tool_call("create_graph", {"name": "g"}))
         assert "error" in resp
-        assert resp["error"]["code"] == -32603
+        assert resp["error"]["code"] == -32602
         assert "API key required" in resp["error"]["message"]
 
     @pytest.mark.asyncio

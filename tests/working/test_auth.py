@@ -10,6 +10,7 @@ from unittest.mock import patch
 import pytest
 
 from networkx_mcp.auth import APIKeyManager, AuthMiddleware
+from networkx_mcp.errors import MCPError
 
 
 # ---------------------------------------------------------------------------
@@ -322,7 +323,7 @@ class TestAuthMiddleware:
         assert result is not None
 
     def test_missing_key_raises_when_required(self, middleware: AuthMiddleware) -> None:
-        with pytest.raises(ValueError, match="API key required"):
+        with pytest.raises(MCPError, match="API key required"):
             middleware.authenticate({"params": {}})
 
     def test_missing_key_allowed_when_not_required(
@@ -334,7 +335,7 @@ class TestAuthMiddleware:
         assert result["permissions"] == ["read"]
 
     def test_invalid_key_raises(self, middleware: AuthMiddleware) -> None:
-        with pytest.raises(ValueError, match="Invalid API key"):
+        with pytest.raises(MCPError, match="Invalid API key"):
             middleware.authenticate({"params": {"api_key": "nxmcp_fake"}})
 
     def test_rate_limited_key_raises(
@@ -345,7 +346,7 @@ class TestAuthMiddleware:
         key_hash = hashlib.sha256(key.encode()).hexdigest()
         manager.rate_limits[key_hash] = [datetime.now()] * 1000
 
-        with pytest.raises(ValueError, match="Rate limit exceeded"):
+        with pytest.raises(MCPError, match="Rate limit exceeded"):
             middleware.authenticate({"params": {"api_key": key}})
 
     # --- check_permission ---

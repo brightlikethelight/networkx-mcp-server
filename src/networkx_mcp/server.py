@@ -293,11 +293,11 @@ class NetworkXMCPServer:
                     del params["api_key"]
                 if "apiKey" in params:
                     del params["apiKey"]
-            except ValueError as e:
+            except MCPError as e:
                 return {
                     "jsonrpc": "2.0",
                     "id": req_id,
-                    "error": {"code": -32603, "message": str(e)},
+                    "error": e.to_dict(),
                 }
 
         # Record request for monitoring
