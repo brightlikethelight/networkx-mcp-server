@@ -548,3 +548,43 @@ class TestGraphCacheHas:
         initial_hits = cache.hits
         assert "g" in gd
         assert cache.hits == initial_hits
+
+
+# ===================================================================
+# GraphDict delegation: pop/values/items/update
+# ===================================================================
+
+
+class TestGraphDictDelegation:
+    """Verify GraphDict delegates pop/values/items/update to cache."""
+
+    def test_pop_existing(self, gdict, cache):
+        gdict["g"] = _make_graph()
+        result = gdict.pop("g")
+        assert result is not None
+        assert "g" not in gdict
+
+    def test_pop_missing_with_default(self, gdict):
+        assert gdict.pop("nope", None) is None
+
+    def test_pop_missing_raises(self, gdict):
+        with pytest.raises(KeyError):
+            gdict.pop("nope")
+
+    def test_values_returns_graphs(self, gdict):
+        gdict["a"] = _make_graph()
+        gdict["b"] = _make_graph()
+        vals = gdict.values()
+        assert len(vals) == 2
+
+    def test_items_returns_pairs(self, gdict):
+        gdict["x"] = _make_graph()
+        pairs = gdict.items()
+        assert len(pairs) == 1
+        assert pairs[0][0] == "x"
+
+    def test_update_from_dict(self, gdict):
+        gdict.update({"m": _make_graph(), "n": _make_graph()})
+        assert len(gdict) == 2
+        assert "m" in gdict
+        assert "n" in gdict

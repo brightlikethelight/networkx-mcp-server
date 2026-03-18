@@ -320,6 +320,35 @@ class GraphDict(dict):
         graph = self._cache.get(key)
         return graph if graph is not None else default
 
+    def pop(self, key: str, *args):
+        """Remove and return graph, or default if not found."""
+        graph = self._cache.get(key)
+        if graph is not None:
+            self._cache.delete(key)
+            return graph
+        if args:
+            return args[0]
+        raise KeyError(key)
+
+    def values(self):
+        """Return all cached graph objects."""
+        return [self._cache.get(k) for k in self._cache.list_graphs()]
+
+    def items(self):
+        """Return (key, graph) pairs for all cached graphs."""
+        return [(k, self._cache.get(k)) for k in self._cache.list_graphs()]
+
+    def update(self, other=(), /, **kwargs):  # type: ignore[override]
+        """Update cache from dict or keyword args."""
+        if hasattr(other, "items"):
+            for k, v in other.items():
+                self._cache.put(k, v)
+        else:
+            for k, v in other:
+                self._cache.put(k, v)
+        for k, v in kwargs.items():
+            self._cache.put(k, v)
+
     def clear(self) -> None:
         self._cache.clear()
 
