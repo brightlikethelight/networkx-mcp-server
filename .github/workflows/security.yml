@@ -36,10 +36,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
@@ -49,15 +49,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install bandit[toml] semgrep
 
-      # Bandit - Python security linter
+      # Bandit - Python security linter (blocking: medium+ findings fail the build)
       - name: Bandit Security Scan
         run: |
-          bandit -r src/ -f json -o bandit-report.json --severity-level medium
-          bandit -r src/ -f sarif -o bandit-results.sarif --severity-level medium
+          bandit -r src/ -f json -o bandit-report.json --severity-level medium || true
+          bandit -r src/ -f sarif -o bandit-results.sarif --severity-level medium || true
 
           echo "## Bandit Security Scan Results" >> $GITHUB_STEP_SUMMARY
           bandit -r src/ -f txt --severity-level medium >> $GITHUB_STEP_SUMMARY 2>&1 || echo "No issues found" >> $GITHUB_STEP_SUMMARY
-        continue-on-error: true
+
+          # Fail the step on medium+ severity findings (exit code from txt report)
+          bandit -r src/ --severity-level medium -q
 
       - name: Upload Bandit SARIF
         if: always()
@@ -67,12 +69,11 @@ jobs:
           category: bandit
         continue-on-error: true
 
-      # Semgrep - Advanced SAST
+      # Semgrep - Advanced SAST (blocking: findings fail the build)
       - name: Semgrep Scan
         run: |
           semgrep --config=auto --config=p/security-audit --config=p/python \
             --sarif --output=semgrep-results.sarif src/
-        continue-on-error: true
 
       - name: Upload Semgrep SARIF
         if: always()
@@ -84,7 +85,7 @@ jobs:
 
       - name: Upload SAST Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: sast-reports
           path: |
@@ -100,7 +101,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
@@ -133,10 +134,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
@@ -172,7 +173,7 @@ jobs:
 
       - name: Upload Dependency Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: dependency-reports
           path: |
@@ -188,7 +189,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0  # Full history for secret scanning
 
@@ -211,7 +212,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Build Container Image
         run: docker build -t ${{ github.repository }}:scan .
@@ -245,7 +246,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       # Checkov - IaC scanner (covers Dockerfile, GitHub Actions, K8s)
       - name: Checkov IaC Scan
@@ -257,7 +258,6 @@ jobs:
           framework: dockerfile,github_actions
           output_format: sarif
           output_file_path: checkov-results.sarif
-        continue-on-error: true
 
       - name: Upload Checkov SARIF
         uses: github/codeql-action/upload-sarif@v3
@@ -273,10 +273,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
@@ -292,7 +292,7 @@ jobs:
           pip-licenses --format=json --output-file=licenses.json
 
       - name: Upload SBOM
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: sbom-artifacts
           path: |
