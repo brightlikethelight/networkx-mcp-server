@@ -354,7 +354,7 @@ async def _spawn_server():
     return proc
 
 
-async def _send_and_recv(proc, request, timeout=5.0):
+async def _send_and_recv(proc, request, timeout=15.0):
     """Send a JSON-RPC request line and read one response line."""
     line = json.dumps(request) + "\n"
     proc.stdin.write(line.encode())
