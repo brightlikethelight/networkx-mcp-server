@@ -7,30 +7,21 @@ These tests actually run and verify that the core functionality works.
 import pytest
 
 from networkx_mcp.core.basic_operations import (
-    add_edges as _add_edges,
-    add_nodes as _add_nodes,
-    betweenness_centrality as _betweenness_centrality,
-    community_detection as _community_detection,
-    connected_components as _connected_components,
-    create_graph as _create_graph,
-    degree_centrality as _degree_centrality,
-    export_json as _export_json,
-    get_graph_info as _get_graph_info,
-    import_csv as _import_csv,
-    pagerank as _pagerank,
-    shortest_path as _shortest_path,
-    visualize_graph as _visualize_graph,
-)
-from networkx_mcp.server import (
     add_edges,
     add_nodes,
+    betweenness_centrality,
+    community_detection,
+    connected_components,
     create_graph,
+    degree_centrality,
+    export_json,
     get_graph_info,
-    graphs,
     import_csv,
+    pagerank,
     shortest_path,
     visualize_graph,
 )
+from networkx_mcp.graph_cache import graphs
 
 
 class TestGraphOperations:
@@ -38,7 +29,7 @@ class TestGraphOperations:
 
     def test_create_graph_undirected(self):
         """Test creating an undirected graph."""
-        result = create_graph("test_undirected", directed=False)
+        result = create_graph("test_undirected", directed=False, graphs=graphs)
 
         assert result["created"]
         assert result["graph_id"] == "test_undirected"
@@ -48,7 +39,7 @@ class TestGraphOperations:
 
     def test_create_graph_directed(self):
         """Test creating a directed graph."""
-        result = create_graph("test_directed", directed=True)
+        result = create_graph("test_directed", directed=True, graphs=graphs)
 
         assert result["created"]
         assert result["graph_id"] == "test_directed"
@@ -58,8 +49,8 @@ class TestGraphOperations:
 
     def test_add_nodes(self):
         """Test adding nodes to a graph."""
-        create_graph("test_nodes", directed=False)
-        result = add_nodes("test_nodes", [1, 2, 3, 4, 5])
+        create_graph("test_nodes", directed=False, graphs=graphs)
+        result = add_nodes("test_nodes", [1, 2, 3, 4, 5], graphs=graphs)
 
         assert result["success"]
         assert result["nodes_added"] == 5
@@ -70,9 +61,9 @@ class TestGraphOperations:
 
     def test_add_edges(self):
         """Test adding edges to a graph."""
-        create_graph("test_edges", directed=False)
-        add_nodes("test_edges", [1, 2, 3, 4])
-        result = add_edges("test_edges", [[1, 2], [2, 3], [3, 4]])
+        create_graph("test_edges", directed=False, graphs=graphs)
+        add_nodes("test_edges", [1, 2, 3, 4], graphs=graphs)
+        result = add_edges("test_edges", [[1, 2], [2, 3], [3, 4]], graphs=graphs)
 
         assert result["success"]
         assert result["edges_added"] == 3
@@ -85,11 +76,11 @@ class TestGraphOperations:
 
     def test_get_graph_info(self):
         """Test getting graph information."""
-        create_graph("test_info", directed=False)
-        add_nodes("test_info", [1, 2, 3])
-        add_edges("test_info", [[1, 2], [2, 3]])
+        create_graph("test_info", directed=False, graphs=graphs)
+        add_nodes("test_info", [1, 2, 3], graphs=graphs)
+        add_edges("test_info", [[1, 2], [2, 3]], graphs=graphs)
 
-        result = get_graph_info("test_info")
+        result = get_graph_info("test_info", graphs=graphs)
 
         assert result["num_nodes"] == 3
         assert result["num_edges"] == 2
@@ -99,11 +90,11 @@ class TestGraphOperations:
 
     def test_shortest_path(self):
         """Test shortest path calculation."""
-        create_graph("test_path", directed=False)
-        add_nodes("test_path", [1, 2, 3, 4, 5])
-        add_edges("test_path", [[1, 2], [2, 3], [3, 4], [4, 5]])
+        create_graph("test_path", directed=False, graphs=graphs)
+        add_nodes("test_path", [1, 2, 3, 4, 5], graphs=graphs)
+        add_edges("test_path", [[1, 2], [2, 3], [3, 4], [4, 5]], graphs=graphs)
 
-        result = shortest_path("test_path", 1, 5)
+        result = shortest_path("test_path", 1, 5, graphs=graphs)
 
         assert result["path"] == [1, 2, 3, 4, 5]
         assert result["length"] == 4
@@ -115,39 +106,41 @@ class TestErrorHandling:
     def test_add_nodes_nonexistent_graph(self):
         """Test adding nodes to a non-existent graph."""
         with pytest.raises(ValueError, match="Graph 'nonexistent' not found"):
-            add_nodes("nonexistent", [1, 2, 3])
+            add_nodes("nonexistent", [1, 2, 3], graphs=graphs)
 
     def test_add_edges_malformed_raises(self):
         """Test that malformed edges raise ValueError instead of silently dropping."""
-        create_graph("test_malformed", directed=False)
-        add_nodes("test_malformed", [1, 2])
+        create_graph("test_malformed", directed=False, graphs=graphs)
+        add_nodes("test_malformed", [1, 2], graphs=graphs)
         with pytest.raises(ValueError, match="at least 2 elements"):
-            add_edges("test_malformed", [[1]])  # Too few elements
+            add_edges("test_malformed", [[1]], graphs=graphs)  # Too few elements
 
     def test_add_edges_nonexistent_graph(self):
         """Test adding edges to a non-existent graph."""
         with pytest.raises(ValueError, match="Graph 'nonexistent' not found"):
-            add_edges("nonexistent", [[1, 2]])
+            add_edges("nonexistent", [[1, 2]], graphs=graphs)
 
     def test_get_info_nonexistent_graph(self):
         """Test getting info for a non-existent graph."""
-        result = get_graph_info("nonexistent")
+        result = get_graph_info("nonexistent", graphs=graphs)
         assert not result["success"]
         assert "not found" in result["error"]
 
     def test_shortest_path_nonexistent_graph(self):
         """Test shortest path on a non-existent graph."""
-        result = shortest_path("nonexistent", 1, 2)
+        result = shortest_path("nonexistent", 1, 2, graphs=graphs)
         assert not result["success"]
         assert "not found" in result["error"]
 
     def test_shortest_path_no_path(self):
         """Test shortest path when no path exists."""
-        create_graph("test_no_path", directed=False)
-        add_nodes("test_no_path", [1, 2, 3, 4])
-        add_edges("test_no_path", [[1, 2]])  # Only connect 1-2, leave 3-4 isolated
+        create_graph("test_no_path", directed=False, graphs=graphs)
+        add_nodes("test_no_path", [1, 2, 3, 4], graphs=graphs)
+        add_edges(
+            "test_no_path", [[1, 2]], graphs=graphs
+        )  # Only connect 1-2, leave 3-4 isolated
 
-        result = shortest_path("test_no_path", 1, 3)
+        result = shortest_path("test_no_path", 1, 3, graphs=graphs)
         assert not result["success"]
         assert "No path found" in result["error"]
 
@@ -157,7 +150,7 @@ class TestErrorHandling:
 
         oversized = "a,b\n" * 5_000_001  # > 10MB
         with pytest.raises(ResourceLimitExceededError):
-            import_csv("csv_g", oversized)
+            import_csv("csv_g", oversized, graphs=graphs)
 
 
 class TestComplexScenarios:
@@ -166,19 +159,19 @@ class TestComplexScenarios:
     def test_multiple_graphs(self):
         """Test managing multiple graphs simultaneously."""
         # Create multiple graphs
-        create_graph("graph1", directed=False)
-        create_graph("graph2", directed=True)
-        create_graph("graph3", directed=False)
+        create_graph("graph1", directed=False, graphs=graphs)
+        create_graph("graph2", directed=True, graphs=graphs)
+        create_graph("graph3", directed=False, graphs=graphs)
 
         # Add different data to each
-        add_nodes("graph1", [1, 2, 3])
-        add_nodes("graph2", ["a", "b", "c"])
-        add_nodes("graph3", [10, 20, 30])
+        add_nodes("graph1", [1, 2, 3], graphs=graphs)
+        add_nodes("graph2", ["a", "b", "c"], graphs=graphs)
+        add_nodes("graph3", [10, 20, 30], graphs=graphs)
 
         # Verify they're independent
-        info1 = get_graph_info("graph1")
-        info2 = get_graph_info("graph2")
-        info3 = get_graph_info("graph3")
+        info1 = get_graph_info("graph1", graphs=graphs)
+        info2 = get_graph_info("graph2", graphs=graphs)
+        info3 = get_graph_info("graph3", graphs=graphs)
 
         assert info1["num_nodes"] == 3
         assert info2["num_nodes"] == 3
@@ -191,22 +184,22 @@ class TestComplexScenarios:
     @pytest.mark.timeout(30)
     def test_large_graph(self):
         """Test with a reasonably large graph."""
-        create_graph("large_graph", directed=False)
+        create_graph("large_graph", directed=False, graphs=graphs)
 
         # Create a 100-node graph
         nodes = list(range(100))
-        add_nodes("large_graph", nodes)
+        add_nodes("large_graph", nodes, graphs=graphs)
 
         # Create a path graph
         edges = [[i, i + 1] for i in range(99)]
-        add_edges("large_graph", edges)
+        add_edges("large_graph", edges, graphs=graphs)
 
-        info = get_graph_info("large_graph")
+        info = get_graph_info("large_graph", graphs=graphs)
         assert info["num_nodes"] == 100
         assert info["num_edges"] == 99
 
         # Test shortest path from start to end
-        result = shortest_path("large_graph", 0, 99)
+        result = shortest_path("large_graph", 0, 99, graphs=graphs)
         assert result["length"] == 99
         assert len(result["path"]) == 100
 
@@ -217,23 +210,23 @@ class TestComplexScenarios:
 
 # All 13 compatibility functions from basic_operations.py that accept graphs=
 _FUNCS_REQUIRING_GRAPH_NAME = [
-    ("create_graph", _create_graph, {"name": "g", "directed": False}),
-    ("add_nodes", _add_nodes, {"graph_name": "missing", "nodes": [1]}),
-    ("add_edges", _add_edges, {"graph_name": "missing", "edges": [[1, 2]]}),
-    ("get_graph_info", _get_graph_info, {"graph_name": "missing"}),
+    ("create_graph", create_graph, {"name": "g", "directed": False}),
+    ("add_nodes", add_nodes, {"graph_name": "missing", "nodes": [1]}),
+    ("add_edges", add_edges, {"graph_name": "missing", "edges": [[1, 2]]}),
+    ("get_graph_info", get_graph_info, {"graph_name": "missing"}),
     (
         "shortest_path",
-        _shortest_path,
+        shortest_path,
         {"graph_name": "missing", "source": 1, "target": 2},
     ),
-    ("degree_centrality", _degree_centrality, {"graph_name": "missing"}),
-    ("betweenness_centrality", _betweenness_centrality, {"graph_name": "missing"}),
-    ("connected_components", _connected_components, {"graph_name": "missing"}),
-    ("pagerank", _pagerank, {"graph_name": "missing"}),
-    ("visualize_graph", _visualize_graph, {"graph_name": "missing"}),
-    ("import_csv", _import_csv, {"graph_name": "g", "csv_data": "a,b\n1,2"}),
-    ("export_json", _export_json, {"graph_name": "missing"}),
-    ("community_detection", _community_detection, {"graph_name": "missing"}),
+    ("degree_centrality", degree_centrality, {"graph_name": "missing"}),
+    ("betweenness_centrality", betweenness_centrality, {"graph_name": "missing"}),
+    ("connected_components", connected_components, {"graph_name": "missing"}),
+    ("pagerank", pagerank, {"graph_name": "missing"}),
+    ("visualize_graph", visualize_graph, {"graph_name": "missing"}),
+    ("import_csv", import_csv, {"graph_name": "g", "csv_data": "a,b\n1,2"}),
+    ("export_json", export_json, {"graph_name": "missing"}),
+    ("community_detection", community_detection, {"graph_name": "missing"}),
 ]
 
 
@@ -265,11 +258,11 @@ def test_functions_with_none_graphs(name, func, kwargs):
 class TestVisualizeKamadaKwai:
     def test_visualize_kamada_kawai_layout(self):
         """Kamada-Kawai layout option produces a valid result."""
-        create_graph("kk_graph", directed=False)
-        add_nodes("kk_graph", [1, 2, 3])
-        add_edges("kk_graph", [[1, 2], [2, 3]])
+        create_graph("kk_graph", directed=False, graphs=graphs)
+        add_nodes("kk_graph", [1, 2, 3], graphs=graphs)
+        add_edges("kk_graph", [[1, 2], [2, 3]], graphs=graphs)
 
-        result = visualize_graph("kk_graph", layout="kamada_kawai")
+        result = visualize_graph("kk_graph", layout="kamada_kawai", graphs=graphs)
         assert result["layout"] == "kamada_kwai" or result["layout"] == "kamada_kawai"
         assert result["format"] == "png"
         assert result["image"].startswith("data:image/png;base64,")
@@ -283,10 +276,10 @@ class TestVisualizeKamadaKwai:
 class TestShortestPathNodeNotFound:
     def test_shortest_path_node_not_found(self):
         """Requesting a path with a non-existent node returns an error."""
-        create_graph("sp_missing", directed=False)
-        add_nodes("sp_missing", [1, 2, 3])
-        add_edges("sp_missing", [[1, 2], [2, 3]])
+        create_graph("sp_missing", directed=False, graphs=graphs)
+        add_nodes("sp_missing", [1, 2, 3], graphs=graphs)
+        add_edges("sp_missing", [[1, 2], [2, 3]], graphs=graphs)
 
-        result = shortest_path("sp_missing", 1, 999)
+        result = shortest_path("sp_missing", 1, 999, graphs=graphs)
         assert result["success"] is False
         assert "not found" in result["error"].lower() or "No path" in result["error"]

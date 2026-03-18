@@ -16,7 +16,7 @@ sys.path.insert(0, str(src_path))
 def setup_test_environment():
     """Set up clean test environment for each test."""
     # Clear any existing graphs
-    from networkx_mcp.server import graphs
+    from networkx_mcp.graph_cache import graphs
 
     graphs.clear()
     yield
@@ -27,11 +27,12 @@ def setup_test_environment():
 @pytest.fixture
 def sample_graph():
     """Create a sample graph for testing."""
-    from networkx_mcp.server import add_edges, add_nodes, create_graph
+    from networkx_mcp.core.basic_operations import add_edges, add_nodes, create_graph
+    from networkx_mcp.graph_cache import graphs
 
     # Create a simple test graph
-    create_graph("test_graph", directed=False)
-    add_nodes("test_graph", [1, 2, 3, 4, 5])
-    add_edges("test_graph", [[1, 2], [2, 3], [3, 4], [4, 5]])
+    create_graph("test_graph", directed=False, graphs=graphs)
+    add_nodes("test_graph", [1, 2, 3, 4, 5], graphs=graphs)
+    add_edges("test_graph", [[1, 2], [2, 3], [3, 4], [4, 5]], graphs=graphs)
 
     return "test_graph"
