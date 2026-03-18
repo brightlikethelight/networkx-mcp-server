@@ -33,6 +33,13 @@ MAX_VISUALIZATION_NODES = 10_000
 MAX_ALGORITHM_NODES = 50_000
 
 
+def _require_graph(graph_name: str) -> Any:
+    """Look up a graph by name, raising ValueError if not found."""
+    if graph_name not in graphs:
+        raise ValueError(f"Graph '{graph_name}' not found")
+    return graphs[graph_name]
+
+
 # ═══════════════════════════════════════════════════════════════════════
 # Graph Management
 # ═══════════════════════════════════════════════════════════════════════
@@ -48,28 +55,24 @@ def handle_create_graph(args: Dict[str, Any]) -> Dict[str, Any]:
 
 def handle_add_nodes(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
+    graph = _require_graph(graph_name)
     nodes = args["nodes"]
     if len(nodes) > MAX_NODES_PER_CALL:
         raise ValueError(
             f"Too many nodes ({len(nodes)}). Maximum is {MAX_NODES_PER_CALL} per call."
         )
-    graph = graphs[graph_name]
     graph.add_nodes_from(nodes)
     return {"added": len(nodes), "total": graph.number_of_nodes()}
 
 
 def handle_add_edges(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
+    graph = _require_graph(graph_name)
     raw_edges = args["edges"]
     if len(raw_edges) > MAX_EDGES_PER_CALL:
         raise ValueError(
             f"Too many edges ({len(raw_edges)}). Maximum is {MAX_EDGES_PER_CALL} per call."
         )
-    graph = graphs[graph_name]
     edges = [tuple(e) for e in raw_edges]
     graph.add_edges_from(edges)
     return {"added": len(edges), "total": graph.number_of_edges()}
@@ -77,9 +80,7 @@ def handle_add_edges(args: Dict[str, Any]) -> Dict[str, Any]:
 
 def handle_get_info(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    graph = graphs[graph_name]
+    graph = _require_graph(graph_name)
     return {
         "nodes": graph.number_of_nodes(),
         "edges": graph.number_of_edges(),
@@ -104,28 +105,23 @@ def handle_list_graphs(args: Dict[str, Any]) -> Dict[str, Any]:
 
 def handle_delete_graph(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
+    _require_graph(graph_name)
     del graphs[graph_name]
     return {"deleted": graph_name}
 
 
 def handle_remove_nodes(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
+    graph = _require_graph(graph_name)
     nodes = args["nodes"]
-    graph = graphs[graph_name]
     graph.remove_nodes_from(nodes)
     return {"removed": len(nodes), "total_nodes": graph.number_of_nodes()}
 
 
 def handle_remove_edges(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
+    graph = _require_graph(graph_name)
     raw_edges = args["edges"]
-    graph = graphs[graph_name]
     edges = [tuple(e) for e in raw_edges]
     graph.remove_edges_from(edges)
     return {"removed": len(edges), "total_edges": graph.number_of_edges()}
@@ -133,19 +129,15 @@ def handle_remove_edges(args: Dict[str, Any]) -> Dict[str, Any]:
 
 def handle_shortest_path(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    graph = graphs[graph_name]
+    graph = _require_graph(graph_name)
     path = nx.shortest_path(graph, args["source"], args["target"])
     return {"path": path, "length": len(path) - 1}
 
 
 def handle_get_neighbors(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
+    graph = _require_graph(graph_name)
     node = args["node"]
-    graph = graphs[graph_name]
     if node not in graph:
         raise ValueError(f"Node '{node}' not found in graph '{graph_name}'")
     neighbors = list(graph.neighbors(node))
@@ -154,9 +146,7 @@ def handle_get_neighbors(args: Dict[str, Any]) -> Dict[str, Any]:
 
 def handle_set_node_attributes(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    graph = graphs[graph_name]
+    graph = _require_graph(graph_name)
     attributes = args["attributes"]  # {node: {attr: value}}
     for node, attrs in attributes.items():
         if node not in graph:
@@ -168,10 +158,8 @@ def handle_set_node_attributes(args: Dict[str, Any]) -> Dict[str, Any]:
 
 def handle_get_node_attributes(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
+    graph = _require_graph(graph_name)
     node = args["node"]
-    graph = graphs[graph_name]
     if node not in graph:
         raise ValueError(f"Node '{node}' not found in graph '{graph_name}'")
     return {"node": node, "attributes": dict(graph.nodes[node])}
@@ -179,9 +167,7 @@ def handle_get_node_attributes(args: Dict[str, Any]) -> Dict[str, Any]:
 
 def handle_set_edge_attributes(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    graph = graphs[graph_name]
+    graph = _require_graph(graph_name)
     attributes = args[
         "attributes"
     ]  # [{"source": s, "target": t, "attr": k, "value": v}]
@@ -197,10 +183,8 @@ def handle_set_edge_attributes(args: Dict[str, Any]) -> Dict[str, Any]:
 
 def handle_get_edge_attributes(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
+    graph = _require_graph(graph_name)
     source, target = args["source"], args["target"]
-    graph = graphs[graph_name]
     if not graph.has_edge(source, target):
         raise ValueError(f"Edge '{source}'->'{target}' not found")
     return {
@@ -217,11 +201,10 @@ def handle_get_edge_attributes(args: Dict[str, Any]) -> Dict[str, Any]:
 
 def handle_degree_centrality(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    if graphs[graph_name].number_of_nodes() > MAX_ALGORITHM_NODES:
+    graph = _require_graph(graph_name)
+    if graph.number_of_nodes() > MAX_ALGORITHM_NODES:
         raise ValueError(
-            f"Graph too large ({graphs[graph_name].number_of_nodes()} nodes). "
+            f"Graph too large ({graph.number_of_nodes()} nodes). "
             f"Maximum for this algorithm is {MAX_ALGORITHM_NODES}."
         )
     return _degree_centrality(graph_name, graphs)
@@ -229,11 +212,10 @@ def handle_degree_centrality(args: Dict[str, Any]) -> Dict[str, Any]:
 
 def handle_betweenness_centrality(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    if graphs[graph_name].number_of_nodes() > MAX_ALGORITHM_NODES:
+    graph = _require_graph(graph_name)
+    if graph.number_of_nodes() > MAX_ALGORITHM_NODES:
         raise ValueError(
-            f"Graph too large ({graphs[graph_name].number_of_nodes()} nodes). "
+            f"Graph too large ({graph.number_of_nodes()} nodes). "
             f"Maximum for this algorithm is {MAX_ALGORITHM_NODES}."
         )
     return _betweenness_centrality(graph_name, graphs)
@@ -241,11 +223,10 @@ def handle_betweenness_centrality(args: Dict[str, Any]) -> Dict[str, Any]:
 
 def handle_connected_components(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    if graphs[graph_name].number_of_nodes() > MAX_ALGORITHM_NODES:
+    graph = _require_graph(graph_name)
+    if graph.number_of_nodes() > MAX_ALGORITHM_NODES:
         raise ValueError(
-            f"Graph too large ({graphs[graph_name].number_of_nodes()} nodes). "
+            f"Graph too large ({graph.number_of_nodes()} nodes). "
             f"Maximum for this algorithm is {MAX_ALGORITHM_NODES}."
         )
     return _connected_components(graph_name, graphs)
@@ -253,11 +234,10 @@ def handle_connected_components(args: Dict[str, Any]) -> Dict[str, Any]:
 
 def handle_pagerank(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    if graphs[graph_name].number_of_nodes() > MAX_ALGORITHM_NODES:
+    graph = _require_graph(graph_name)
+    if graph.number_of_nodes() > MAX_ALGORITHM_NODES:
         raise ValueError(
-            f"Graph too large ({graphs[graph_name].number_of_nodes()} nodes). "
+            f"Graph too large ({graph.number_of_nodes()} nodes). "
             f"Maximum for this algorithm is {MAX_ALGORITHM_NODES}."
         )
     return _pagerank(graph_name, graphs)
@@ -265,11 +245,10 @@ def handle_pagerank(args: Dict[str, Any]) -> Dict[str, Any]:
 
 def handle_community_detection(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    if graphs[graph_name].number_of_nodes() > MAX_ALGORITHM_NODES:
+    graph = _require_graph(graph_name)
+    if graph.number_of_nodes() > MAX_ALGORITHM_NODES:
         raise ValueError(
-            f"Graph too large ({graphs[graph_name].number_of_nodes()} nodes). "
+            f"Graph too large ({graph.number_of_nodes()} nodes). "
             f"Maximum for this algorithm is {MAX_ALGORITHM_NODES}."
         )
     return _community_detection(graph_name, graphs)
@@ -282,9 +261,7 @@ def handle_community_detection(args: Dict[str, Any]) -> Dict[str, Any]:
 
 def handle_clustering_coefficients(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    graph = graphs[graph_name]
+    graph = _require_graph(graph_name)
     if graph.number_of_nodes() > MAX_ALGORITHM_NODES:
         raise ValueError(
             f"Graph too large ({graph.number_of_nodes()} nodes). "
@@ -295,9 +272,7 @@ def handle_clustering_coefficients(args: Dict[str, Any]) -> Dict[str, Any]:
 
 def handle_graph_statistics(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    graph = graphs[graph_name]
+    graph = _require_graph(graph_name)
     if graph.number_of_nodes() > MAX_ALGORITHM_NODES:
         raise ValueError(
             f"Graph too large ({graph.number_of_nodes()} nodes). "
@@ -313,25 +288,21 @@ def handle_graph_statistics(args: Dict[str, Any]) -> Dict[str, Any]:
 
 def handle_minimum_spanning_tree(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
+    graph = _require_graph(graph_name)
     weight = args.get("weight", "weight")
     algorithm = args.get("algorithm", "kruskal")
-    return GraphAlgorithms.minimum_spanning_tree(graphs[graph_name], weight, algorithm)
+    return GraphAlgorithms.minimum_spanning_tree(graph, weight, algorithm)
 
 
 def handle_cycles_detection(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    return GraphAlgorithms.cycles_detection(graphs[graph_name])
+    graph = _require_graph(graph_name)
+    return GraphAlgorithms.cycles_detection(graph)
 
 
 def handle_graph_coloring(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    graph = graphs[graph_name]
+    graph = _require_graph(graph_name)
     if graph.number_of_nodes() > MAX_ALGORITHM_NODES:
         raise ValueError(
             f"Graph too large ({graph.number_of_nodes()} nodes). "
@@ -343,9 +314,7 @@ def handle_graph_coloring(args: Dict[str, Any]) -> Dict[str, Any]:
 
 def handle_centrality_measures(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    graph = graphs[graph_name]
+    graph = _require_graph(graph_name)
     if graph.number_of_nodes() > MAX_ALGORITHM_NODES:
         raise ValueError(
             f"Graph too large ({graph.number_of_nodes()} nodes). "
@@ -357,9 +326,7 @@ def handle_centrality_measures(args: Dict[str, Any]) -> Dict[str, Any]:
 
 def handle_matching(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    graph = graphs[graph_name]
+    graph = _require_graph(graph_name)
     if graph.number_of_nodes() > MAX_ALGORITHM_NODES:
         raise ValueError(
             f"Graph too large ({graph.number_of_nodes()} nodes). "
@@ -371,19 +338,16 @@ def handle_matching(args: Dict[str, Any]) -> Dict[str, Any]:
 
 def handle_maximum_flow(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
+    graph = _require_graph(graph_name)
     source = args["source"]
     sink = args["sink"]
     capacity = args.get("capacity", "capacity")
-    return GraphAlgorithms.maximum_flow(graphs[graph_name], source, sink, capacity)
+    return GraphAlgorithms.maximum_flow(graph, source, sink, capacity)
 
 
 def handle_topological_sort(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    graph = graphs[graph_name]
+    graph = _require_graph(graph_name)
     if not graph.is_directed():
         raise ValueError("Topological sort requires a directed graph")
     if not nx.is_directed_acyclic_graph(graph):
@@ -394,12 +358,10 @@ def handle_topological_sort(args: Dict[str, Any]) -> Dict[str, Any]:
 
 def handle_subgraph(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
+    graph = _require_graph(graph_name)
     nodes = args["nodes"]
     new_graph_name = args["new_graph"]
     validate_graph_id(new_graph_name)
-    graph = graphs[graph_name]
     missing = [n for n in nodes if n not in graph]
     if missing:
         raise ValueError(f"Nodes not found in graph: {missing}")
@@ -420,12 +382,8 @@ def handle_merge_graphs(args: Dict[str, Any]) -> Dict[str, Any]:
     validate_graph_id(graph_a_name)
     validate_graph_id(graph_b_name)
     validate_graph_id(new_graph_name)
-    if graph_a_name not in graphs:
-        raise ValueError(f"Graph '{graph_a_name}' not found")
-    if graph_b_name not in graphs:
-        raise ValueError(f"Graph '{graph_b_name}' not found")
-    ga = graphs[graph_a_name]
-    gb = graphs[graph_b_name]
+    ga = _require_graph(graph_a_name)
+    gb = _require_graph(graph_b_name)
     if type(ga) is not type(gb):
         raise ValueError(
             f"Cannot merge different graph types: {type(ga).__name__} and {type(gb).__name__}"
@@ -447,9 +405,7 @@ def handle_merge_graphs(args: Dict[str, Any]) -> Dict[str, Any]:
 
 def handle_visualize_graph(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
-    if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
-    graph = graphs[graph_name]
+    graph = _require_graph(graph_name)
     if graph.number_of_nodes() > MAX_VISUALIZATION_NODES:
         raise ValueError(
             f"Graph too large for visualization ({graph.number_of_nodes()} nodes). "
