@@ -8,6 +8,12 @@ from typing import Any, Dict, List
 import networkx as nx
 import numpy as np
 
+from networkx_mcp.errors import (
+    AlgorithmError,
+    ResourceLimitExceededError,
+    ValidationError,
+)
+
 logger = logging.getLogger(__name__)
 
 # Try to import community algorithms - they might not be available in all NetworkX versions
@@ -84,8 +90,9 @@ class GraphAlgorithms:
                     "source": source,
                 }
         else:
-            msg = f"Unknown method: {method}"
-            raise ValueError(msg)
+            raise ValidationError(
+                "method", method, "must be 'dijkstra' or 'bellman-ford'"
+            )
 
         return result
 
@@ -97,9 +104,8 @@ class GraphAlgorithms:
     ) -> Dict[str, Any]:
         """Compute shortest paths between all pairs of nodes."""
         if graph.number_of_nodes() > GraphAlgorithms.MAX_APSP_NODES:
-            raise ValueError(
-                f"Graph too large for all-pairs shortest path ({graph.number_of_nodes()} nodes). "
-                f"Maximum is {GraphAlgorithms.MAX_APSP_NODES}."
+            raise ResourceLimitExceededError(
+                "nodes", GraphAlgorithms.MAX_APSP_NODES, graph.number_of_nodes()
             )
         if weight:
             lengths = dict(nx.all_pairs_dijkstra_path_length(graph, weight=weight))
@@ -239,16 +245,18 @@ class GraphAlgorithms:
     ) -> Dict[str, Any]:
         """Find minimum spanning tree."""
         if graph.is_directed():
-            msg = "Minimum spanning tree requires undirected graph"
-            raise ValueError(msg)
+            raise ValidationError(
+                "graph",
+                "directed",
+                "minimum spanning tree requires an undirected graph",
+            )
 
         if algorithm == "kruskal":
             mst = nx.minimum_spanning_tree(graph, weight=weight, algorithm="kruskal")
         elif algorithm == "prim":
             mst = nx.minimum_spanning_tree(graph, weight=weight, algorithm="prim")
         else:
-            msg = f"Unknown algorithm: {algorithm}"
-            raise ValueError(msg)
+            raise ValidationError("algorithm", algorithm, "must be 'kruskal' or 'prim'")
 
         total_weight = sum(data.get(weight, 1) for _, _, data in mst.edges(data=True))
 
@@ -265,8 +273,9 @@ class GraphAlgorithms:
     ) -> Dict[str, Any]:
         """Calculate maximum flow."""
         if not graph.is_directed():
-            msg = "Maximum flow requires directed graph"
-            raise ValueError(msg)
+            raise ValidationError(
+                "graph", "undirected", "maximum flow requires a directed graph"
+            )
 
         flow_value, flow_dict = nx.maximum_flow(graph, source, sink, capacity=capacity)
 
@@ -300,10 +309,11 @@ class GraphAlgorithms:
     def community_detection(graph: nx.Graph, method: str = "louvain") -> Dict[str, Any]:
         """Detect communities in a graph."""
         if not HAS_COMMUNITY:
-            msg = (
-                "Community detection algorithms not available in this NetworkX version"
+            raise AlgorithmError(
+                "community_detection",
+                "N/A",
+                "community detection algorithms not available in this NetworkX version",
             )
-            raise ImportError(msg)
 
         if method == "louvain":
             communities = nx_comm.louvain_communities(graph)
@@ -312,8 +322,11 @@ class GraphAlgorithms:
         elif method == "greedy_modularity":
             communities = list(nx_comm.greedy_modularity_communities(graph))
         else:
-            msg = f"Unknown method: {method}"
-            raise ValueError(msg)
+            raise ValidationError(
+                "method",
+                method,
+                "must be 'louvain', 'label_propagation', or 'greedy_modularity'",
+            )
 
         # Convert communities to list format
         communities_list = [list(comm) for comm in communities]

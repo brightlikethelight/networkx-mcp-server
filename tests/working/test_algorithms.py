@@ -8,6 +8,9 @@ import pytest
 import networkx as nx
 
 from networkx_mcp.core.algorithms import GraphAlgorithms
+from networkx_mcp.errors import (
+    ValidationError,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -169,7 +172,7 @@ class TestShortestPath:
             GraphAlgorithms.shortest_path(path_graph, 0, 99)
 
     def test_unknown_method_raises(self, path_graph):
-        with pytest.raises(ValueError, match="Unknown method"):
+        with pytest.raises(ValidationError):
             GraphAlgorithms.shortest_path(path_graph, 0, 4, method="astar")
 
     def test_source_equals_target(self, path_graph):
@@ -424,11 +427,11 @@ class TestMinimumSpanningTree:
         assert result["total_weight"] == 4
 
     def test_directed_raises(self, directed_graph):
-        with pytest.raises(ValueError, match="undirected graph"):
+        with pytest.raises(ValidationError):
             GraphAlgorithms.minimum_spanning_tree(directed_graph)
 
     def test_unknown_algorithm_raises(self, path_graph):
-        with pytest.raises(ValueError, match="Unknown algorithm"):
+        with pytest.raises(ValidationError):
             GraphAlgorithms.minimum_spanning_tree(path_graph, algorithm="boruvka")
 
 
@@ -446,7 +449,7 @@ class TestMaximumFlow:
         assert result["sink"] == 3
 
     def test_undirected_raises(self, path_graph):
-        with pytest.raises(ValueError, match="directed graph"):
+        with pytest.raises(ValidationError):
             GraphAlgorithms.maximum_flow(path_graph, 0, 4)
 
     def test_single_path_flow(self):
@@ -531,7 +534,7 @@ class TestCommunityDetection:
         assert result["modularity"] > 0.0
 
     def test_unknown_method_raises(self, path_graph):
-        with pytest.raises(ValueError, match="Unknown method"):
+        with pytest.raises(ValidationError):
             GraphAlgorithms.community_detection(path_graph, method="spectral")
 
     def test_community_sizes_match(self, disconnected_graph):

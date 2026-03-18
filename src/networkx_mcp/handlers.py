@@ -291,6 +291,10 @@ def handle_graph_statistics(args: Dict[str, Any]) -> Dict[str, Any]:
 def handle_minimum_spanning_tree(args: Dict[str, Any]) -> Dict[str, Any]:
     graph_name = args["graph"]
     graph = _require_graph(graph_name)
+    if graph.is_directed():
+        raise GraphOperationError(
+            "minimum_spanning_tree", graph_name, "requires an undirected graph"
+        )
     weight = args.get("weight", "weight")
     algorithm = args.get("algorithm", "kruskal")
     return GraphAlgorithms.minimum_spanning_tree(graph, weight, algorithm)

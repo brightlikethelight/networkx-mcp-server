@@ -261,6 +261,15 @@ class TestAdvancedAlgorithmHandlers:
         with pytest.raises(GraphNotFoundError):
             handle_graph_coloring({"graph": "nope"})
 
+    # ── minimum_spanning_tree directed guard ─────────────────────────
+
+    def test_minimum_spanning_tree_directed_raises(self):
+        handle_create_graph({"name": "dg", "directed": True})
+        handle_add_nodes({"graph": "dg", "nodes": [1, 2]})
+        handle_add_edges({"graph": "dg", "edges": [[1, 2]]})
+        with pytest.raises(GraphOperationError):
+            handle_minimum_spanning_tree({"graph": "dg"})
+
 
 # ═══════════════════════════════════════════════════════════════════════
 # I/O handlers
