@@ -808,3 +808,74 @@ class TestMergeGraphs:
         assert result["nodes"] == 4
         assert result["edges"] == 2
         assert result["source_graphs"] == ["x", "y"]
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Algorithm size guards (MAX_ALGORITHM_NODES = 50_000)
+# ═══════════════════════════════════════════════════════════════════════
+
+
+class TestAlgorithmSizeGuards:
+    """Verify MAX_ALGORITHM_NODES (50k) rejects oversized graphs."""
+
+    @pytest.fixture(autouse=True)
+    def _setup(self):
+        import networkx as nx
+
+        graphs["big"] = nx.path_graph(50_001)
+        yield
+        graphs.pop("big", None)
+
+    def test_degree_centrality_rejects(self):
+        with pytest.raises(ResourceLimitExceededError):
+            handle_degree_centrality({"graph": "big"})
+
+    def test_betweenness_centrality_rejects(self):
+        with pytest.raises(ResourceLimitExceededError):
+            handle_betweenness_centrality({"graph": "big"})
+
+    def test_connected_components_rejects(self):
+        with pytest.raises(ResourceLimitExceededError):
+            handle_connected_components({"graph": "big"})
+
+    def test_pagerank_rejects(self):
+        with pytest.raises(ResourceLimitExceededError):
+            handle_pagerank({"graph": "big"})
+
+    def test_community_detection_rejects(self):
+        with pytest.raises(ResourceLimitExceededError):
+            handle_community_detection({"graph": "big"})
+
+    def test_clustering_coefficients_rejects(self):
+        with pytest.raises(ResourceLimitExceededError):
+            handle_clustering_coefficients({"graph": "big"})
+
+    def test_graph_statistics_rejects(self):
+        with pytest.raises(ResourceLimitExceededError):
+            handle_graph_statistics({"graph": "big"})
+
+    def test_graph_coloring_rejects(self):
+        with pytest.raises(ResourceLimitExceededError):
+            handle_graph_coloring({"graph": "big"})
+
+    def test_centrality_measures_rejects(self):
+        with pytest.raises(ResourceLimitExceededError):
+            handle_centrality_measures({"graph": "big"})
+
+    def test_matching_rejects(self):
+        with pytest.raises(ResourceLimitExceededError):
+            handle_matching({"graph": "big"})
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# CSV edge limit
+# ═══════════════════════════════════════════════════════════════════════
+
+
+class TestCSVEdgeLimit:
+    def test_import_csv_edge_limit(self):
+        csv_data = "\n".join(f"{i},{i + 1}" for i in range(500_001))
+        with pytest.raises(ValueError, match="too many edges"):
+            handle_import_csv(
+                {"graph": "csv_big", "csv_data": csv_data, "directed": False}
+            )

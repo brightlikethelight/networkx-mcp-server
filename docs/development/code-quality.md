@@ -32,17 +32,11 @@ Our automated quality gate runs multiple checks:
 ### Running Quality Checks
 
 ```bash
-# Run complete quality gate
-python scripts/quality_gate.py
+# Run all quality checks
+ruff check . && ruff format --check . && mypy src/networkx_mcp/
 
-# Run specific checks
-python scripts/quality_gate.py --checks ruff mypy coverage
-
-# Run with custom thresholds
-python scripts/quality_gate.py --threshold-coverage 90 --threshold-complexity 12
-
-# Generate detailed report
-python scripts/quality_gate.py --output quality-report.json
+# Run tests with coverage
+pytest tests/working/ --cov=src/networkx_mcp --cov-report=term-missing
 ```
 
 ## Pre-commit Hooks
@@ -273,14 +267,9 @@ class TestGraphOperations:
 Quality metrics are tracked over time:
 
 ```bash
-# Generate quality report
-python scripts/quality_gate.py --output reports/quality-$(date +%Y%m%d).json
-
-# Compare with previous reports
-python scripts/quality_trend_analyzer.py reports/
-
-# View quality dashboard
-open reports/quality-dashboard.html
+# Generate coverage report
+pytest tests/working/ --cov=src/networkx_mcp --cov-report=html
+open htmlcov/index.html
 ```
 
 ## CI/CD Integration
@@ -394,8 +383,8 @@ addopts = [
 3. **Before Committing**
 
    ```bash
-   # Run full quality gate
-   python scripts/quality_gate.py
+   # Run quality checks
+   ruff check . && mypy src/networkx_mcp/
 
    # Pre-commit hooks run automatically
    git commit -m "feat: add new feature"

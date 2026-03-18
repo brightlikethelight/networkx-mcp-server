@@ -6,26 +6,19 @@ Get your development environment ready for contributing to NetworkX MCP Server i
 
 ### Automated Setup (Recommended)
 
-Run our automated setup script to configure everything:
-
 ```bash
 # Clone the repository
 git clone https://github.com/brightliu/networkx-mcp-server.git
 cd networkx-mcp-server
 
-# Run automated setup
-python scripts/dev_setup.py
+# Create venv and install
+python -m venv venv
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+pip install -e ".[dev,all]"
+
+# Set up pre-commit hooks
+pre-commit install
 ```
-
-This script will:
-
-- ✅ Check prerequisites (Python 3.11+, Git)
-- ✅ Create virtual environment
-- ✅ Install development dependencies
-- ✅ Set up pre-commit hooks
-- ✅ Configure IDE settings (VSCode, PyCharm)
-- ✅ Create development services (Redis)
-- ✅ Validate the setup
 
 ### Manual Setup
 
@@ -97,14 +90,15 @@ networkx-mcp-server/
 └── configs/                  # Configuration examples
 ```
 
-### Development Scripts
+### Development Commands
 
-| Script | Purpose | Usage |
-|--------|---------|-------|
-| `scripts/dev_setup.py` | Automated environment setup | `python scripts/dev_setup.py` |
-| `scripts/test_automation.py` | Advanced test runner | `python scripts/test_automation.py --quality-gate` |
-| `scripts/dev_server.py` | Development server | `python scripts/dev_server.py` |
-| `scripts/test_runner.py` | Enhanced test runner | `python scripts/test_runner.py --coverage` |
+| Task | Command |
+|------|---------|
+| Install dev deps | `pip install -e ".[dev]"` |
+| Run tests | `pytest tests/working/` |
+| Run tests with coverage | `pytest tests/working/ --cov` |
+| Start server | `python -m networkx_mcp` |
+| Lint + type check | `ruff check . && mypy src/` |
 
 ### Environment Configuration
 
@@ -239,10 +233,10 @@ git pull origin main
 pip install -e ".[dev,all]"
 
 # 4. Start development server
-python scripts/dev_server.py
+python -m networkx_mcp
 
 # 5. Run tests (in another terminal)
-python scripts/test_runner.py --unit --coverage
+pytest tests/working/ --cov
 ```
 
 ### Code Quality Checks
@@ -269,22 +263,16 @@ pre-commit run --all-files
 
 ```bash
 # Run all tests with coverage
-python scripts/test_runner.py --coverage
+pytest tests/working/ --cov
 
-# Run specific test types
-python scripts/test_runner.py --unit         # Unit tests only
-python scripts/test_runner.py --integration  # Integration tests
-python scripts/test_runner.py --property     # Property-based tests
-python scripts/test_runner.py --security     # Security tests
+# Stop on first failure
+pytest tests/working/ -x
 
-# Fast testing (stop on first failure)
-python scripts/test_runner.py --fast
-
-# Parallel testing
-python scripts/test_runner.py --parallel
+# Run a specific test file
+pytest tests/working/test_handlers.py -v
 
 # Debug a specific test
-python scripts/test_runner.py tests/unit/test_graph_manager.py::test_create_graph -v
+pytest tests/working/test_handlers.py::TestSyncHandlers::test_create_graph -v -s
 ```
 
 ### Performance Testing
@@ -511,17 +499,14 @@ if __name__ == "__main__":
 Test your changes against CI locally:
 
 ```bash
-# Run full CI suite
-python scripts/test_automation.py --quality-gate
+# Run full test suite
+pytest tests/working/ -x -q --tb=short
 
-# Run security checks
-nox -s security_scan
+# Lint + format check
+ruff check . && ruff format --check .
 
-# Run mutation testing
-nox -s mutation_test
-
-# Run benchmarks
-nox -s benchmarks
+# Type checking
+mypy src/networkx_mcp/
 ```
 
 ## Getting Help
