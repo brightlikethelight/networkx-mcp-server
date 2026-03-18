@@ -227,7 +227,7 @@ class NetworkXMCPServer:
                     "jsonrpc": "2.0",
                     "id": req_id,
                     "error": {
-                        "code": -32602,
+                        "code": ErrorCodes.INVALID_PARAMS,
                         "message": f"Invalid resource URI: {uri}",
                     },
                 }
@@ -237,7 +237,7 @@ class NetworkXMCPServer:
                     "jsonrpc": "2.0",
                     "id": req_id,
                     "error": {
-                        "code": -32602,
+                        "code": ErrorCodes.INVALID_PARAMS,
                         "message": f"Graph '{graph_id}' not found",
                     },
                 }
