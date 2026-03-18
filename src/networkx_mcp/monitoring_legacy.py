@@ -48,7 +48,7 @@ class HealthMonitor:
         # Get system metrics if psutil is available
         if HAS_PSUTIL and self.process:
             memory_info = self.process.memory_info()
-            cpu_percent = self.process.cpu_percent(interval=0.1)
+            cpu_percent = self.process.cpu_percent(interval=0)
             memory_mb = round(memory_info.rss / 1024 / 1024, 2)
         else:
             memory_mb = 0
