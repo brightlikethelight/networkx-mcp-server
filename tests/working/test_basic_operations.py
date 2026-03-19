@@ -6,6 +6,7 @@ These tests actually run and verify that the core functionality works.
 
 import pytest
 
+from networkx_mcp.errors import MCPError
 from networkx_mcp.core.basic_operations import (
     add_edges,
     add_nodes,
@@ -245,8 +246,9 @@ def test_functions_with_none_graphs(name, func, kwargs):
         if isinstance(result, dict) and "success" in result:
             # get_graph_info and shortest_path return {"success": False, ...}
             assert not result["success"] or name in ("create_graph", "import_csv")
-    except ValueError:
-        # add_nodes, add_edges, degree_centrality, etc. raise ValueError
+    except (ValueError, MCPError):
+        # add_nodes, add_edges, etc. raise ValueError;
+        # export_json raises GraphNotFoundError (MCPError subclass)
         pass
 
 

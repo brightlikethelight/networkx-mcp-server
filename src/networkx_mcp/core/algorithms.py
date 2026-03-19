@@ -41,12 +41,10 @@ class GraphAlgorithms:
     ) -> Dict[str, Any]:
         """Find shortest path(s) in a graph."""
         if source not in graph:
-            msg = f"Source node '{source}' not in graph"
-            raise ValueError(msg)
+            raise ValidationError("source", source, "node not found in graph")
 
         if target is not None and target not in graph:
-            msg = f"Target node '{target}' not in graph"
-            raise ValueError(msg)
+            raise ValidationError("target", target, "node not found in graph")
 
         result = {}
 

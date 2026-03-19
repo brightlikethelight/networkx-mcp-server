@@ -164,11 +164,11 @@ class TestShortestPath:
         assert result["source"] == 0
 
     def test_invalid_source_raises(self, path_graph):
-        with pytest.raises(ValueError, match="Source node '99'"):
+        with pytest.raises(ValidationError, match="source"):
             GraphAlgorithms.shortest_path(path_graph, 99, 0)
 
     def test_invalid_target_raises(self, path_graph):
-        with pytest.raises(ValueError, match="Target node '99'"):
+        with pytest.raises(ValidationError, match="target"):
             GraphAlgorithms.shortest_path(path_graph, 0, 99)
 
     def test_unknown_method_raises(self, path_graph):

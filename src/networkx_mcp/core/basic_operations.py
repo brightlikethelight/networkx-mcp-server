@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Optional, Union
 import networkx as nx
 import networkx.algorithms.community as nx_comm
 
-from networkx_mcp.errors import ResourceLimitExceededError
+from networkx_mcp.errors import GraphNotFoundError, ResourceLimitExceededError
 
 
 def create_graph(
@@ -306,7 +306,7 @@ def export_json(
     if graphs is None:
         graphs = {}
     if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
+        raise GraphNotFoundError(graph_name)
     graph = graphs[graph_name]
 
     # Convert to node-link format (explicit edges="links" for NX 3.6+ compatibility)
