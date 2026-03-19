@@ -357,7 +357,7 @@ class TestExceptionPaths:
         ):
             result = await controller.get_workflow_status("123")
             assert result["success"] is False
-            assert "gh not found" in result["error"]
+            assert "error" in result
 
     @pytest.mark.asyncio
     async def test_cancel_workflow_oserror(self, controller):
@@ -367,7 +367,7 @@ class TestExceptionPaths:
         ):
             result = await controller.cancel_workflow("42")
             assert result["success"] is False
-            assert "gh not found" in result["error"]
+            assert "error" in result
 
     @pytest.mark.asyncio
     async def test_rerun_failed_jobs_oserror(self, controller):
@@ -377,7 +377,7 @@ class TestExceptionPaths:
         ):
             result = await controller.rerun_failed_jobs("42")
             assert result["success"] is False
-            assert "command failed" in result["error"]
+            assert "error" in result
 
     @pytest.mark.asyncio
     async def test_analyze_test_failures_oserror(self, controller):
@@ -387,7 +387,7 @@ class TestExceptionPaths:
         ):
             result = await controller.analyze_test_failures("42")
             assert result["success"] is False
-            assert "subprocess error" in result["error"]
+            assert "error" in result
 
 
 # ===========================================================================
@@ -407,7 +407,7 @@ class TestDORAMetricsException:
         mock_metrics.side_effect = ValueError("no deployment data")
         result = await controller.get_dora_metrics_mcp()
         assert result["success"] is False
-        assert "no deployment data" in result["error"]
+        assert "error" in result
 
     @pytest.mark.asyncio
     @patch("networkx_mcp.tools.cicd_control.generate_dora_report")
@@ -419,7 +419,7 @@ class TestDORAMetricsException:
         mock_report.side_effect = ValueError("report generation failed")
         result = await controller.get_dora_metrics_mcp()
         assert result["success"] is False
-        assert "report generation failed" in result["error"]
+        assert "error" in result
 
 
 # ===========================================================================

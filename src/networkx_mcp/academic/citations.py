@@ -121,20 +121,20 @@ def resolve_doi(
             )
             logger.warning(last_error)
         except HTTPError as e:
-            last_error = f"HTTP error {e.response.status_code} for DOI {doi}: {str(e)}"
-            logger.error(last_error)
+            logger.error(f"HTTP error for DOI {doi}: {e}")
+            last_error = f"HTTP error {e.response.status_code} for DOI {doi}"
             if e.response.status_code != 429:  # Don't retry non-rate-limit errors
                 break
         except RequestException as e:
-            last_error = f"Network error resolving DOI {doi}: {str(e)}"
-            logger.error(last_error)
+            logger.error(f"Network error resolving DOI {doi}: {e}")
+            last_error = f"Network error resolving DOI {doi}"
         except (KeyError, ValueError, TypeError) as e:
-            last_error = f"Invalid response format for DOI {doi}: {str(e)}"
-            logger.error(last_error)
+            logger.error(f"Invalid response format for DOI {doi}: {e}")
+            last_error = f"Invalid response format for DOI {doi}"
             break  # Don't retry parsing errors
         except Exception as e:
-            last_error = f"Unexpected error resolving DOI {doi}: {str(e)}"
-            logger.error(last_error)
+            logger.error(f"Unexpected error resolving DOI {doi}: {e}")
+            last_error = f"Unexpected error resolving DOI {doi}"
             break
 
         if attempt < retry_count - 1:

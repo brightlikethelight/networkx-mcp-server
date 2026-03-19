@@ -99,7 +99,7 @@ class CICDController:
                 logger.error(f"Failed to trigger workflow: {stderr.decode()}")
                 return {
                     "success": False,
-                    "error": stderr.decode(),
+                    "error": "Failed to trigger workflow",
                 }
 
             # Get the run ID
@@ -149,7 +149,7 @@ class CICDController:
             logger.error(f"Error triggering workflow: {e}")
             return {
                 "success": False,
-                "error": str(e),
+                "error": "Workflow trigger failed",
             }
 
     async def get_workflow_status(self, run_id: Optional[str] = None) -> Dict[str, Any]:
@@ -193,9 +193,10 @@ class CICDController:
             stdout, stderr = await result.communicate()
 
             if result.returncode != 0:
+                logger.error(f"Failed to get workflow status: {stderr.decode()}")
                 return {
                     "success": False,
-                    "error": stderr.decode(),
+                    "error": "Failed to retrieve workflow status",
                 }
 
             data = json.loads(stdout.decode())
@@ -235,7 +236,7 @@ class CICDController:
             logger.error(f"Error getting workflow status: {e}")
             return {
                 "success": False,
-                "error": str(e),
+                "error": "Failed to retrieve workflow status",
             }
 
     async def cancel_workflow(self, run_id: str) -> Dict[str, Any]:
@@ -259,9 +260,10 @@ class CICDController:
             stdout, stderr = await result.communicate()
 
             if result.returncode != 0:
+                logger.error(f"Failed to cancel workflow: {stderr.decode()}")
                 return {
                     "success": False,
-                    "error": stderr.decode(),
+                    "error": "Failed to cancel workflow",
                 }
 
             # Remove from active workflows
@@ -277,7 +279,7 @@ class CICDController:
             logger.error(f"Error cancelling workflow: {e}")
             return {
                 "success": False,
-                "error": str(e),
+                "error": "Workflow cancellation failed",
             }
 
     async def rerun_failed_jobs(self, run_id: str) -> Dict[str, Any]:
@@ -301,9 +303,10 @@ class CICDController:
             stdout, stderr = await result.communicate()
 
             if result.returncode != 0:
+                logger.error(f"Failed to rerun jobs: {stderr.decode()}")
                 return {
                     "success": False,
-                    "error": stderr.decode(),
+                    "error": "Failed to rerun failed jobs",
                 }
 
             return {
@@ -316,7 +319,7 @@ class CICDController:
             logger.error(f"Error rerunning failed jobs: {e}")
             return {
                 "success": False,
-                "error": str(e),
+                "error": "Failed to rerun failed jobs",
             }
 
     async def get_dora_metrics_mcp(self) -> Dict[str, Any]:
@@ -341,7 +344,7 @@ class CICDController:
             logger.error(f"Error getting DORA metrics: {e}")
             return {
                 "success": False,
-                "error": str(e),
+                "error": "Failed to compute DORA metrics",
             }
 
     def _generate_recommendations(self, metrics: Dict[str, Any]) -> List[str]:
@@ -406,9 +409,10 @@ class CICDController:
             stdout, stderr = await result.communicate()
 
             if result.returncode != 0:
+                logger.error(f"Failed to analyze failures: {stderr.decode()}")
                 return {
                     "success": False,
-                    "error": stderr.decode(),
+                    "error": "Failed to analyze test failures",
                 }
 
             data = json.loads(stdout.decode())
@@ -462,7 +466,7 @@ class CICDController:
             logger.error(f"Error analyzing test failures: {e}")
             return {
                 "success": False,
-                "error": str(e),
+                "error": "Test failure analysis failed",
             }
 
 
@@ -489,8 +493,8 @@ async def mcp_trigger_workflow(
     if inputs:
         try:
             workflow_inputs = json.loads(inputs)
-        except json.JSONDecodeError as e:
-            return {"success": False, "error": f"Invalid JSON in inputs: {e}"}
+        except json.JSONDecodeError:
+            return {"success": False, "error": "Invalid JSON in workflow inputs"}
     else:
         workflow_inputs = None
     return await cicd_controller.trigger_workflow(workflow, branch, workflow_inputs)
