@@ -262,13 +262,19 @@ class NetworkXMCPServer:
             return {
                 "jsonrpc": "2.0",
                 "id": req_id,
-                "error": {"code": -32601, "message": "prompts/get not implemented"},
+                "error": {
+                    "code": ErrorCodes.METHOD_NOT_FOUND,
+                    "message": "prompts/get not implemented",
+                },
             }
         else:
             return {
                 "jsonrpc": "2.0",
                 "id": req_id,
-                "error": {"code": -32601, "message": f"Unknown method: {method}"},
+                "error": {
+                    "code": ErrorCodes.METHOD_NOT_FOUND,
+                    "message": f"Unknown method: {method}",
+                },
             }
 
         return {"jsonrpc": "2.0", "id": req_id, "result": result}
@@ -296,7 +302,10 @@ class NetworkXMCPServer:
             tool_def = self._registry.get(tool_name)
             if tool_def is None:
                 return {
-                    "error": {"code": -32601, "message": f"Unknown tool: {tool_name}"}
+                    "error": {
+                        "code": ErrorCodes.METHOD_NOT_FOUND,
+                        "message": f"Unknown tool: {tool_name}",
+                    }
                 }
 
             # Validate graph ID if this tool accepts a graph parameter
@@ -341,11 +350,13 @@ class NetworkXMCPServer:
             }
 
         except (TypeError, ValueError) as e:
-            # Invalid parameter types or values
+            # Invalid parameter types or values — log details server-side,
+            # return generic message to avoid leaking Python internals.
+            logger.warning(f"Parameter error in tool {tool_name}: {e}")
             return {
                 "error": {
                     "code": ErrorCodes.INVALID_PARAMS,
-                    "message": f"Invalid parameter: {str(e)}",
+                    "message": "Invalid parameter type or value",
                 }
             }
 
@@ -405,7 +416,7 @@ class NetworkXMCPServer:
                     "jsonrpc": "2.0",
                     "error": {
                         "code": ErrorCodes.PARSE_ERROR,
-                        "message": f"Parse error: {str(e)}",
+                        "message": "Parse error: invalid JSON input",
                     },
                     "id": None,
                 }
@@ -416,14 +427,14 @@ class NetworkXMCPServer:
                 logger.error(f"IO error in main loop: {e}")
                 break  # Exit the loop on IO errors
 
-            except Exception as e:
+            except Exception:
                 # Unexpected errors - log and continue
                 logger.exception("Unexpected error in main loop")
                 error_response = {
                     "jsonrpc": "2.0",
                     "error": {
                         "code": ErrorCodes.INTERNAL_ERROR,
-                        "message": f"Internal error: {type(e).__name__}",
+                        "message": "Internal server error",
                     },
                     "id": None,
                 }
