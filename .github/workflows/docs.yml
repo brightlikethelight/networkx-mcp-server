@@ -6,48 +6,49 @@ on:
     paths:
       - 'docs/**'
       - '*.md'
-      - 'mkdocs.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - '*.md'
 
 jobs:
-  build-docs:
+  check-docs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-    - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
-      with:
-        python-version: '3.12'
 
-    - name: Check if MkDocs configuration exists
+    - name: Validate documentation
       run: |
-        if [ ! -f mkdocs.yml ]; then
-          echo "No mkdocs.yml found. Creating basic documentation check instead."
-          echo "docs_type=simple" >> $GITHUB_ENV
+        echo "## Documentation Check" >> $GITHUB_STEP_SUMMARY
+
+        # Verify essential docs exist
+        for f in README.md CHANGELOG.md CONTRIBUTING.md LICENSE docs/API.md; do
+          if [ -f "$f" ]; then
+            echo "- ✅ $f" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ❌ $f missing" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+        done
+
+        # Check for broken internal doc links (relative .md references)
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Link Check" >> $GITHUB_STEP_SUMMARY
+        BROKEN=0
+        for md in $(find docs/ -name '*.md' 2>/dev/null); do
+          # Extract relative .md links
+          for link in $(grep -oP '\]\(\K[^)]+\.md' "$md" 2>/dev/null || true); do
+            dir=$(dirname "$md")
+            target="$dir/$link"
+            if [ ! -f "$target" ]; then
+              echo "- ❌ Broken link in $md: $link" >> $GITHUB_STEP_SUMMARY
+              BROKEN=1
+            fi
+          done
+        done
+        if [ $BROKEN -eq 0 ]; then
+          echo "- ✅ No broken internal links" >> $GITHUB_STEP_SUMMARY
         else
-          echo "MkDocs configuration found."
-          echo "docs_type=mkdocs" >> $GITHUB_ENV
+          exit 1
         fi
-
-    - name: Install dependencies (MkDocs)
-      if: env.docs_type == 'mkdocs'
-      run: |
-        pip install mkdocs mkdocs-material mkdocstrings[python]
-
-    - name: Build documentation (MkDocs)
-      if: env.docs_type == 'mkdocs'
-      run: |
-        mkdocs build
-
-    - name: Simple documentation check
-      if: env.docs_type == 'simple'
-      run: |
-        echo "Checking documentation files..."
-        ls -la docs/ || echo "No docs/ directory found"
-        echo "✅ README.md exists: $(test -f README.md && echo "Yes" || echo "No")"
-        echo "✅ Documentation check completed"
-
-    - name: Deploy to GitHub Pages
-      if: github.ref == 'refs/heads/main' && env.docs_type == 'mkdocs'
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./site

@@ -63,7 +63,7 @@ jobs:
 
       - name: Upload Bandit SARIF
         if: always()
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@603b797f8b14b413fe025cd935a91c16c4782713 # v3
         with:
           sarif_file: bandit-results.sarif
           category: bandit
@@ -77,7 +77,7 @@ jobs:
 
       - name: Upload Semgrep SARIF
         if: always()
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@603b797f8b14b413fe025cd935a91c16c4782713 # v3
         with:
           sarif_file: semgrep-results.sarif
           category: semgrep
@@ -104,7 +104,7 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@603b797f8b14b413fe025cd935a91c16c4782713 # v3
         with:
           languages: python
           queries: security-extended,security-and-quality
@@ -120,10 +120,10 @@ jobs:
                   id: py/sql-injection
 
       - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
+        uses: github/codeql-action/autobuild@603b797f8b14b413fe025cd935a91c16c4782713 # v3
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@603b797f8b14b413fe025cd935a91c16c4782713 # v3
         with:
           category: "/language:python"
 
@@ -195,7 +195,7 @@ jobs:
 
       # Gitleaks - Secret scanner
       - name: Gitleaks Secret Scan
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -228,7 +228,7 @@ jobs:
           vuln-type: 'os,library'
 
       - name: Upload Trivy SARIF
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@603b797f8b14b413fe025cd935a91c16c4782713 # v3
         with:
           sarif_file: trivy-results.sarif
           category: trivy
@@ -260,7 +260,7 @@ jobs:
           output_file_path: checkov-results.sarif
 
       - name: Upload Checkov SARIF
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@603b797f8b14b413fe025cd935a91c16c4782713 # v3
         with:
           sarif_file: checkov-results.sarif
           category: checkov
@@ -338,7 +338,7 @@ jobs:
           needs.sast.result == 'failure' ||
           needs.dependency-scan.result == 'failure' ||
           needs.secret-scan.result == 'failure'
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             // Check if similar issue already exists
@@ -372,7 +372,7 @@ jobs:
 
       - name: Post PR Comment
         if: github.event_name == 'pull_request' && (needs.sast.result == 'failure' || needs.dependency-scan.result == 'failure')
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             await github.rest.issues.createComment({
