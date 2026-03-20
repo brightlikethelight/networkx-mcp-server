@@ -11,7 +11,11 @@ from typing import Any, Dict, List, Optional, Union
 import networkx as nx
 import networkx.algorithms.community as nx_comm
 
-from networkx_mcp.errors import GraphNotFoundError, ResourceLimitExceededError
+from networkx_mcp.errors import (
+    GraphNotFoundError,
+    InvalidEdgeError,
+    ResourceLimitExceededError,
+)
 
 
 def create_graph(
@@ -37,7 +41,7 @@ def add_nodes(
     if graphs is None:
         graphs = {}
     if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
+        raise GraphNotFoundError(graph_name)
     graph = graphs[graph_name]
 
     # Count only new nodes for nodes_added, but return total requested for added
@@ -61,11 +65,11 @@ def add_edges(
     if graphs is None:
         graphs = {}
     if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
+        raise GraphNotFoundError(graph_name)
     graph = graphs[graph_name]
     for e in edges:
         if len(e) < 2:
-            raise ValueError(f"Edge must have at least 2 elements, got {len(e)}: {e}")
+            raise InvalidEdgeError(e, f"must have at least 2 elements, got {len(e)}")
     edge_tuples = [(e[0], e[1]) for e in edges]
     graph.add_edges_from(edge_tuples)
     return {
@@ -128,7 +132,7 @@ def degree_centrality(
     if graphs is None:
         graphs = {}
     if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
+        raise GraphNotFoundError(graph_name)
     graph = graphs[graph_name]
     centrality = nx.degree_centrality(graph)
     # Convert to serializable format and sort by centrality
@@ -146,7 +150,7 @@ def betweenness_centrality(
     if graphs is None:
         graphs = {}
     if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
+        raise GraphNotFoundError(graph_name)
     graph = graphs[graph_name]
     centrality = nx.betweenness_centrality(graph)
     sorted_nodes = sorted(centrality.items(), key=lambda x: x[1], reverse=True)
@@ -163,7 +167,7 @@ def connected_components(
     if graphs is None:
         graphs = {}
     if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
+        raise GraphNotFoundError(graph_name)
     graph = graphs[graph_name]
     if graph.is_directed():
         components = list(nx.weakly_connected_components(graph))
@@ -188,7 +192,7 @@ def pagerank(
     if graphs is None:
         graphs = {}
     if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
+        raise GraphNotFoundError(graph_name)
     graph = graphs[graph_name]
     pr = nx.pagerank(graph)
     sorted_nodes = sorted(pr.items(), key=lambda x: x[1], reverse=True)
@@ -210,7 +214,7 @@ def visualize_graph(
     if graphs is None:
         graphs = {}
     if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
+        raise GraphNotFoundError(graph_name)
     graph = graphs[graph_name]
 
     plt.figure(figsize=(10, 8))
@@ -327,7 +331,7 @@ def community_detection(
     if graphs is None:
         graphs = {}
     if graph_name not in graphs:
-        raise ValueError(f"Graph '{graph_name}' not found")
+        raise GraphNotFoundError(graph_name)
     graph = graphs[graph_name]
 
     # Use Louvain method for community detection

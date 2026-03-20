@@ -19,6 +19,7 @@ from networkx_mcp.core.basic_operations import (
     pagerank,
     visualize_graph,
 )
+from networkx_mcp.errors import GraphNotFoundError
 from networkx_mcp.graph_cache import graphs
 
 
@@ -246,13 +247,13 @@ class TestErrorHandlingNew:
 
     def test_centrality_nonexistent_graph(self):
         """Test centrality operations on non-existent graph."""
-        with pytest.raises(ValueError, match="Graph 'nonexistent' not found"):
+        with pytest.raises(GraphNotFoundError):
             degree_centrality("nonexistent", graphs=graphs)
 
-        with pytest.raises(ValueError, match="Graph 'nonexistent' not found"):
+        with pytest.raises(GraphNotFoundError):
             betweenness_centrality("nonexistent", graphs=graphs)
 
-        with pytest.raises(ValueError, match="Graph 'nonexistent' not found"):
+        with pytest.raises(GraphNotFoundError):
             pagerank("nonexistent", graphs=graphs)
 
     def test_empty_graph_operations(self):

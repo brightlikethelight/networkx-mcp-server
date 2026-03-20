@@ -6,7 +6,7 @@ These tests actually run and verify that the core functionality works.
 
 import pytest
 
-from networkx_mcp.errors import MCPError
+from networkx_mcp.errors import GraphNotFoundError, InvalidEdgeError, MCPError
 from networkx_mcp.core.basic_operations import (
     add_edges,
     add_nodes,
@@ -106,19 +106,19 @@ class TestErrorHandling:
 
     def test_add_nodes_nonexistent_graph(self):
         """Test adding nodes to a non-existent graph."""
-        with pytest.raises(ValueError, match="Graph 'nonexistent' not found"):
+        with pytest.raises(GraphNotFoundError):
             add_nodes("nonexistent", [1, 2, 3], graphs=graphs)
 
     def test_add_edges_malformed_raises(self):
-        """Test that malformed edges raise ValueError instead of silently dropping."""
+        """Test that malformed edges raise InvalidEdgeError instead of silently dropping."""
         create_graph("test_malformed", directed=False, graphs=graphs)
         add_nodes("test_malformed", [1, 2], graphs=graphs)
-        with pytest.raises(ValueError, match="at least 2 elements"):
+        with pytest.raises(InvalidEdgeError):
             add_edges("test_malformed", [[1]], graphs=graphs)  # Too few elements
 
     def test_add_edges_nonexistent_graph(self):
         """Test adding edges to a non-existent graph."""
-        with pytest.raises(ValueError, match="Graph 'nonexistent' not found"):
+        with pytest.raises(GraphNotFoundError):
             add_edges("nonexistent", [[1, 2]], graphs=graphs)
 
     def test_get_info_nonexistent_graph(self):
