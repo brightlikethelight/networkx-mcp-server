@@ -1,5 +1,7 @@
 """Tests for monitoring_health.py HealthMonitor."""
 
+from unittest.mock import patch
+
 from networkx_mcp.monitoring_health import HealthMonitor
 
 
@@ -49,6 +51,14 @@ class TestHealthMonitor:
         assert status["metrics"]["graphs"]["count"] == 1
         assert status["metrics"]["graphs"]["total_nodes"] == 5
         assert status["metrics"]["graphs"]["total_edges"] == 4
+
+    def test_health_status_without_psutil(self):
+        with patch("networkx_mcp.monitoring_health.HAS_PSUTIL", False):
+            monitor = HealthMonitor()
+            assert monitor.process is None
+            status = monitor.get_health_status()
+            assert status["metrics"]["system"]["memory_mb"] == 0
+            assert status["metrics"]["system"]["cpu_percent"] == 0
 
     def test_format_uptime_less_than_minute(self):
         assert self.monitor._format_uptime(30) == "< 1m"

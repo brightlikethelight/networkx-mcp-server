@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, patch
 import networkx as nx
 import pytest
 
-from networkx_mcp.graph_cache import CachedGraph, GraphCache, GraphDict
+from networkx_mcp.graph_cache import CachedGraph, GraphCache, GraphDict, get_graph_cache
 
 
 # ---------------------------------------------------------------------------
@@ -588,3 +588,19 @@ class TestGraphDictDelegation:
         assert len(gdict) == 2
         assert "m" in gdict
         assert "n" in gdict
+
+    def test_update_from_iterable(self, gdict):
+        gdict.update([("k", _make_graph())])
+        assert len(gdict) == 1
+        assert "k" in gdict
+
+    def test_update_from_kwargs(self, gdict):
+        gdict.update(k=_make_graph())
+        assert len(gdict) == 1
+        assert "k" in gdict
+
+
+class TestGetGraphCache:
+    def test_get_graph_cache_returns_cache(self):
+        result = get_graph_cache()
+        assert isinstance(result, GraphCache)

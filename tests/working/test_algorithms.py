@@ -9,6 +9,8 @@ import networkx as nx
 
 from networkx_mcp.core.algorithms import GraphAlgorithms
 from networkx_mcp.errors import (
+    AlgorithmError,
+    ResourceLimitExceededError,
     ValidationError,
 )
 
@@ -717,3 +719,35 @@ class TestGraphStatistics:
     def test_empty_graph_connectivity(self, empty_graph):
         result = GraphAlgorithms.graph_statistics(empty_graph)
         assert result["is_connected"] is False
+
+    def test_empty_digraph_connectivity(self):
+        g = nx.DiGraph()
+        result = GraphAlgorithms.graph_statistics(g)
+        assert result["is_weakly_connected"] is False
+        assert result["is_strongly_connected"] is False
+
+
+# ---------------------------------------------------------------------------
+# all_pairs_shortest_path — resource limit
+# ---------------------------------------------------------------------------
+
+
+class TestAllPairsShortestPathLimit:
+    def test_too_many_nodes_raises(self):
+        g = nx.path_graph(1001)
+        with pytest.raises(ResourceLimitExceededError):
+            GraphAlgorithms.all_pairs_shortest_path(g)
+
+
+# ---------------------------------------------------------------------------
+# community_detection — missing module
+# ---------------------------------------------------------------------------
+
+
+class TestCommunityDetectionNoModule:
+    def test_no_community_module_raises(self, path_graph):
+        from unittest.mock import patch
+
+        with patch("networkx_mcp.core.algorithms.HAS_COMMUNITY", False):
+            with pytest.raises(AlgorithmError):
+                GraphAlgorithms.community_detection(path_graph)
