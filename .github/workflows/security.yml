@@ -219,7 +219,7 @@ jobs:
 
       # Trivy - Container vulnerability scanner
       - name: Trivy Container Scan
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@915b19bbe73b92a6cf82a1bc12b087c9a19a5fe2 # v0.28.0
         with:
           image-ref: ${{ github.repository }}:scan
           format: 'sarif'
@@ -250,7 +250,7 @@ jobs:
 
       # Checkov - IaC scanner (covers Dockerfile, GitHub Actions, K8s)
       - name: Checkov IaC Scan
-        uses: bridgecrewio/checkov-action@12.2.3
+        uses: bridgecrewio/checkov-action@103b7a08e09a635adc100e4dd6cf67e0cc2bd47a # v12.2.0
         with:
           directory: .
           quiet: false
