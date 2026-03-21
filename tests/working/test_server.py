@@ -548,6 +548,8 @@ class TestToolErrorHandling:
         resp = await server.handle_request(_tool_call("create_graph", {}))
         assert "error" in resp
         assert resp["error"]["code"] == ErrorCodes.INVALID_PARAMS
+        # Verify no raw KeyError string leaks — message should reference tool
+        assert "tool" in resp["error"]["message"]
 
     @pytest.mark.asyncio
     async def test_networkx_error_shortest_path_no_path(self, server):
@@ -562,6 +564,8 @@ class TestToolErrorHandling:
         )
         assert "error" in resp
         assert resp["error"]["code"] == ErrorCodes.ALGORITHM_ERROR
+        # Verify no exception class name leaks into client message
+        assert "NetworkX" not in resp["error"]["message"]
 
     @pytest.mark.asyncio
     async def test_add_edges_missing_graph(self, server):

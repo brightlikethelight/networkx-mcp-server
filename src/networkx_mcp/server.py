@@ -336,16 +336,17 @@ class NetworkXMCPServer:
             return {
                 "error": {
                     "code": ErrorCodes.ALGORITHM_ERROR,
-                    "message": f"Graph operation failed: {str(e)}",
+                    "message": f"Graph algorithm error in tool '{tool_name}'",
                 }
             }
 
         except KeyError as e:
             # Missing required parameters
+            logger.warning(f"Missing parameter in tool {tool_name}: {e}")
             return {
                 "error": {
                     "code": ErrorCodes.INVALID_PARAMS,
-                    "message": f"Missing required parameter: {str(e)}",
+                    "message": f"Missing required parameter for tool '{tool_name}'",
                 }
             }
 
