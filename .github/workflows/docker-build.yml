@@ -69,10 +69,12 @@ jobs:
           docker run -i --rm ${{ env.IMAGE_NAME }}:test | \
           jq -e '.result.protocolVersion' || (echo "::error::MCP protocol test failed" && exit 1)
 
-        # Test basic graph operation
-        echo '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"create_graph","arguments":{"name":"test","directed":false}}}' | \
+        # Test basic graph operation (must send initialize first in same session)
+        printf '%s\n%s\n' \
+          '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"1.0.0","capabilities":{}}}' \
+          '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"create_graph","arguments":{"name":"test","directed":false}}}' | \
           docker run -i --rm ${{ env.IMAGE_NAME }}:test | \
-          jq -e '.result' || (echo "::error::Graph creation test failed" && exit 1)
+          tail -1 | jq -e '.result' || (echo "::error::Graph creation test failed" && exit 1)
 
     - name: Push Docker image
       if: github.event_name != 'pull_request'

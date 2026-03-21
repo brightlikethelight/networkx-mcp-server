@@ -219,7 +219,7 @@ jobs:
 
       # Trivy - Container vulnerability scanner
       - name: Trivy Container Scan
-        uses: aquasecurity/trivy-action@915b19bbe73b92a6cf82a1bc12b087c9a19a5fe2 # v0.28.0
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
         with:
           image-ref: ${{ github.repository }}:scan
           format: 'sarif'
@@ -250,7 +250,7 @@ jobs:
 
       # Checkov - IaC scanner (covers Dockerfile, GitHub Actions, K8s)
       - name: Checkov IaC Scan
-        uses: bridgecrewio/checkov-action@103b7a08e09a635adc100e4dd6cf67e0cc2bd47a # v12.2.0
+        uses: bridgecrewio/checkov-action@2fd3901c8feb52417f27f0d9800259a106c1ec1e # v12.3089.0
         with:
           directory: .
           quiet: false
@@ -285,8 +285,8 @@ jobs:
           pip install cyclonedx-bom pip-licenses
           pip install -e ".[dev]"
 
-          # CycloneDX SBOM
-          cyclonedx-py --output-format JSON --output sbom-cyclonedx.json
+          # CycloneDX SBOM (v4+ CLI: subcommand first, then flags)
+          cyclonedx-py environment --of json -o sbom-cyclonedx.json
 
           # License information
           pip-licenses --format=json --output-file=licenses.json

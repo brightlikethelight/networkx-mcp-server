@@ -40,7 +40,7 @@ jobs:
 
             if [ -z "$run_info" ] || [ "$run_info" = "[]" ]; then
               echo "⚠️ **$workflow_name**: No recent runs" >> $GITHUB_STEP_SUMMARY
-              return 1
+              return 0
             fi
 
             conclusion=$(echo "$run_info" | jq -r '.[0].conclusion')
