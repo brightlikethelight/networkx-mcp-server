@@ -6,7 +6,7 @@ repos:
     rev: v5.0.0
     hooks:
       - id: check-added-large-files
-        args: ['--maxkb=1000']
+        args: ["--maxkb=1000"]
       - id: check-case-conflict
       - id: check-merge-conflict
       - id: check-symlinks
@@ -19,7 +19,7 @@ repos:
       - id: check-toml
       - id: check-json
       - id: pretty-format-json
-        args: ['--autofix', '--no-sort-keys']
+        args: ["--autofix", "--no-sort-keys"]
 
   # Python code formatting
   - repo: https://github.com/astral-sh/ruff-pre-commit
@@ -37,11 +37,7 @@ repos:
     hooks:
       - id: mypy
         args: [--config-file=pyproject.toml]
-        additional_dependencies: [
-          types-requests,
-          networkx-stubs,
-          types-pyyaml,
-        ]
+        additional_dependencies: [types-requests, networkx-stubs, types-pyyaml]
         files: ^src/
 
   # Security checks
@@ -49,7 +45,7 @@ repos:
     rev: 1.8.0
     hooks:
       - id: bandit
-        args: ['-r', 'src/', '-ll']
+        args: ["-r", "src/", "-ll"]
         files: ^src/.*\.py$
         pass_filenames: false
 
@@ -58,7 +54,7 @@ repos:
     rev: v0.43.0
     hooks:
       - id: markdownlint
-        args: ['--fix']
+        args: ["--fix"]
 
   # YAML formatting
   - repo: https://github.com/pre-commit/mirrors-prettier

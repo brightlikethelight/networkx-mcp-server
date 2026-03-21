@@ -85,7 +85,7 @@ beyond standard log output.
 
 **Do not** open public GitHub issues for security vulnerabilities.
 
-Email: brightliu@college.harvard.edu
+Email: <brightliu@college.harvard.edu>
 
 Include:
 
@@ -117,4 +117,4 @@ for any compliance standard (SOC 2, HIPAA, PCI-DSS, GDPR, etc.).
 ---
 
 Last updated: 2026-03-15
-Contact: brightliu@college.harvard.edu
+Contact: <brightliu@college.harvard.edu>
