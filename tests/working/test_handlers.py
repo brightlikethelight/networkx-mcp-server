@@ -1095,3 +1095,74 @@ class TestAcademicHandlers:
         ):
             with pytest.raises(GraphOperationError):
                 handle_resolve_doi({"doi": "10.1/bad"})
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# CI/CD handler delegation (covers lines 523, 533, 541, 549, 557, 565)
+# ═══════════════════════════════════════════════════════════════════════
+
+
+class TestCICDHandlerHappyPaths:
+    """Each handler delegates to its mcp_* tool function — verify the plumbing."""
+
+    @pytest.mark.asyncio
+    async def test_trigger_workflow_delegates(self):
+        from unittest.mock import AsyncMock
+
+        mock = AsyncMock(return_value={"status": "dispatched"})
+        with patch("networkx_mcp.tools.mcp_trigger_workflow", mock):
+            result = await handle_trigger_workflow(
+                {"workflow": "ci.yml", "branch": "main"}
+            )
+        assert result == {"status": "dispatched"}
+        mock.assert_awaited_once_with("ci.yml", "main", None)
+
+    @pytest.mark.asyncio
+    async def test_get_workflow_status_delegates(self):
+        from unittest.mock import AsyncMock
+
+        mock = AsyncMock(return_value={"status": "completed"})
+        with patch("networkx_mcp.tools.mcp_get_workflow_status", mock):
+            result = await handle_get_workflow_status({"run_id": 42})
+        assert result == {"status": "completed"}
+        mock.assert_awaited_once_with(42)
+
+    @pytest.mark.asyncio
+    async def test_cancel_workflow_delegates(self):
+        from unittest.mock import AsyncMock
+
+        mock = AsyncMock(return_value={"cancelled": True})
+        with patch("networkx_mcp.tools.mcp_cancel_workflow", mock):
+            result = await handle_cancel_workflow({"run_id": 99})
+        assert result == {"cancelled": True}
+        mock.assert_awaited_once_with(99)
+
+    @pytest.mark.asyncio
+    async def test_rerun_failed_jobs_delegates(self):
+        from unittest.mock import AsyncMock
+
+        mock = AsyncMock(return_value={"rerun": True})
+        with patch("networkx_mcp.tools.mcp_rerun_failed_jobs", mock):
+            result = await handle_rerun_failed_jobs({"run_id": 7})
+        assert result == {"rerun": True}
+        mock.assert_awaited_once_with(7)
+
+    @pytest.mark.asyncio
+    async def test_get_dora_metrics_delegates(self):
+        from unittest.mock import AsyncMock
+
+        mock = AsyncMock(return_value={"lead_time": 1.5})
+        with patch("networkx_mcp.tools.mcp_get_dora_metrics", mock):
+            result = await handle_get_dora_metrics({})
+        assert result == {"lead_time": 1.5}
+        mock.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def test_analyze_workflow_failures_delegates(self):
+        from unittest.mock import AsyncMock
+
+        mock = AsyncMock(return_value={"failures": []})
+        with patch("networkx_mcp.tools.mcp_analyze_failures", mock):
+            result = await handle_analyze_workflow_failures({"run_id": 13})
+        assert result == {"failures": []}
+        mock.assert_awaited_once_with(13)

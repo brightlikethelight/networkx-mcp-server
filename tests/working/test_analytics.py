@@ -327,6 +327,15 @@ class TestDetectResearchTrends:
         assert 2010 in result["trends_by_year"]
         assert result["trends_by_year"][2010]["publications"] == 3
 
+    def test_insufficient_data_trend(self):
+        """With only 2 unique years and time_window=1, each slice has < 2 entries."""
+        g = nx.DiGraph()
+        g.add_node("p1", year=2020, citations=5)
+        g.add_node("p2", year=2021, citations=3)
+        graphs = {"tiny": g}
+        result = detect_research_trends("tiny", time_window=1, graphs=graphs)
+        assert result["trend"] == "insufficient_data"
+
     def test_graph_not_found_raises(self):
         with pytest.raises(GraphNotFoundError):
             detect_research_trends("missing", graphs={})

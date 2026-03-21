@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import networkx as nx
 import pytest
+from requests.exceptions import HTTPError
 
 from networkx_mcp.errors import GraphAlreadyExistsError, GraphNotFoundError
 
@@ -384,3 +385,40 @@ class TestSafeExtractYear:
     def test_none_in_date_parts(self):
         work = {"published-print": {"date-parts": [[None]]}}
         assert _safe_extract_year(work) is None
+
+
+# ===========================================================================
+# resolve_doi — error-path coverage
+# ===========================================================================
+
+
+class TestResolveDOIErrorPaths:
+    """Cover non-429 HTTPError (lines 123-127) and parse error (lines 131-134)."""
+
+    @patch("networkx_mcp.academic.citations._session")
+    def test_http_error_non_429_breaks_retry(self, mock_session):
+        """Non-429 HTTPError should break immediately — no retry."""
+        mock_resp = MagicMock()
+        mock_resp.status_code = 500
+        mock_resp.raise_for_status.side_effect = HTTPError(response=mock_resp)
+        mock_session.get.return_value = mock_resp
+
+        meta, err = resolve_doi("10.1234/test", retry_count=3)
+        assert meta is None
+        assert "500" in err
+        # Only 1 call — non-429 errors must not retry
+        assert mock_session.get.call_count == 1
+
+    @patch("networkx_mcp.academic.citations._session")
+    def test_parse_error_breaks_retry(self, mock_session):
+        """ValueError from response.json() should break immediately — no retry."""
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.raise_for_status.return_value = None
+        mock_resp.json.side_effect = ValueError("No JSON")
+        mock_session.get.return_value = mock_resp
+
+        meta, err = resolve_doi("10.1234/test", retry_count=3)
+        assert meta is None
+        assert "Invalid response" in err
+        assert mock_session.get.call_count == 1
