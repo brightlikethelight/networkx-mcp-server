@@ -3,7 +3,7 @@ name: Dependency Update
 on:
   schedule:
     # Run every Monday at 9 AM UTC
-    - cron: '0 9 * * 1'
+    - cron: "0 9 * * 1"
   workflow_dispatch:
 
 jobs:
@@ -15,68 +15,68 @@ jobs:
       pull-requests: write
 
     steps:
-    - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Set up Python
-      uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
-      with:
-        python-version: '3.12'
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pip-tools uv
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pip-tools uv
 
-    - name: Update requirements
-      run: |
-        # Check if requirements.in exists, if not create it from pyproject.toml
-        if [ ! -f requirements.in ]; then
-          echo "Creating requirements.in from pyproject.toml dependencies..."
-          cat > create_requirements.py << 'EOF'
-        import tomllib
-        with open('pyproject.toml', 'rb') as f:
-            data = tomllib.load(f)
-        deps = data.get('project', {}).get('dependencies', [])
-        with open('requirements.in', 'w') as f:
-            for dep in deps:
-                f.write(dep + '\n')
-        EOF
-          python create_requirements.py
-        fi
+      - name: Update requirements
+        run: |
+          # Check if requirements.in exists, if not create it from pyproject.toml
+          if [ ! -f requirements.in ]; then
+            echo "Creating requirements.in from pyproject.toml dependencies..."
+            cat > create_requirements.py << 'EOF'
+          import tomllib
+          with open('pyproject.toml', 'rb') as f:
+              data = tomllib.load(f)
+          deps = data.get('project', {}).get('dependencies', [])
+          with open('requirements.in', 'w') as f:
+              for dep in deps:
+                  f.write(dep + '\n')
+          EOF
+            python create_requirements.py
+          fi
 
-        # Update requirements.txt from requirements.in
-        pip-compile --upgrade --resolver=backtracking requirements.in
+          # Update requirements.txt from requirements.in
+          pip-compile --upgrade --resolver=backtracking requirements.in
 
-    - name: Run tests after update
-      run: |
-        pip install -e ".[dev]"
-        pytest tests/working/ -v --tb=short
+      - name: Run tests after update
+        run: |
+          pip install -e ".[dev]"
+          pytest tests/working/ -v --tb=short
 
-    - name: Create Pull Request
-      uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        commit-message: "chore: update dependencies"
-        title: "chore: update dependencies"
-        committer: GitHub <noreply@github.com>
-        author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
-        body: |
-          ## Dependency Updates
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update dependencies"
+          title: "chore: update dependencies"
+          committer: GitHub <noreply@github.com>
+          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          body: |
+            ## Dependency Updates
 
-          This PR updates the project dependencies to their latest compatible versions.
+            This PR updates the project dependencies to their latest compatible versions.
 
-          ### Changes
-          - Updated requirements.txt with latest compatible versions
-          - All tests should pass with these updates
+            ### Changes
+            - Updated requirements.txt with latest compatible versions
+            - All tests should pass with these updates
 
-          ### Checklist
-          - [ ] All tests pass
-          - [ ] No breaking changes identified
-          - [ ] Security vulnerabilities addressed
+            ### Checklist
+            - [ ] All tests pass
+            - [ ] No breaking changes identified
+            - [ ] Security vulnerabilities addressed
 
-          ---
-          *This PR was automatically created by the dependency update workflow.*
-        branch: dependency-updates
-        delete-branch: true
+            ---
+            *This PR was automatically created by the dependency update workflow.*
+          branch: dependency-updates
+          delete-branch: true

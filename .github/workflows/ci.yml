@@ -22,56 +22,56 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.11', '3.12']
+        python-version: ["3.11", "3.12"]
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
-      with:
-        python-version: ${{ matrix.python-version }}
-        cache: 'pip'
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
 
-    - name: Install uv (fast Python package manager)
-      run: |
-        python -m pip install --upgrade pip
-        pip install uv
+      - name: Install uv (fast Python package manager)
+        run: |
+          python -m pip install --upgrade pip
+          pip install uv
 
-    - name: Install dependencies
-      run: |
-        uv pip install --system -e ".[dev]"
+      - name: Install dependencies
+        run: |
+          uv pip install --system -e ".[dev]"
 
-    - name: Run linting
-      run: |
-        ruff check . --output-format=github
-        ruff format --check .
+      - name: Run linting
+        run: |
+          ruff check . --output-format=github
+          ruff format --check .
 
-    - name: Run type checking
-      run: |
-        mypy src/networkx_mcp/ --ignore-missing-imports
+      - name: Run type checking
+        run: |
+          mypy src/networkx_mcp/ --ignore-missing-imports
 
-    - name: Run tests with coverage
-      run: pytest tests/working/ -v --cov=src/networkx_mcp --cov-report=xml --cov-report=term-missing --cov-fail-under=85
+      - name: Run tests with coverage
+        run: pytest tests/working/ -v --cov=src/networkx_mcp --cov-report=xml --cov-report=term-missing --cov-fail-under=85
 
-    - name: Run integration tests
-      if: matrix.os == 'ubuntu-latest' && matrix.python-version == env.PYTHON_VERSION_DEFAULT
-      run: |
-        # Test MCP protocol implementation
-        python -c "from networkx_mcp import server; print('✅ MCP server imports successfully')"
+      - name: Run integration tests
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == env.PYTHON_VERSION_DEFAULT
+        run: |
+          # Test MCP protocol implementation
+          python -c "from networkx_mcp import server; print('✅ MCP server imports successfully')"
 
-        # Test CLI entry point
-        networkx-mcp --version || echo "CLI not available in test environment"
+          # Test CLI entry point
+          networkx-mcp --version || echo "CLI not available in test environment"
 
-    - name: Upload coverage to Codecov
-      if: matrix.os == 'ubuntu-latest' && matrix.python-version == env.PYTHON_VERSION_DEFAULT
-      uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238 # v4
-      with:
-        file: ./coverage.xml
-        fail_ci_if_error: false
-        token: ${{ secrets.CODECOV_TOKEN }}
-        verbose: true
+      - name: Upload coverage to Codecov
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == env.PYTHON_VERSION_DEFAULT
+        uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238 # v4
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
 
   # Run pre-commit hooks
   pre-commit:
@@ -79,28 +79,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-    - name: Set up Python
-      uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
-      with:
-        python-version: ${{ env.PYTHON_VERSION_DEFAULT }}
-        cache: 'pip'
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION_DEFAULT }}
+          cache: "pip"
 
-    - name: Install pre-commit
-      run: |
-        python -m pip install --upgrade pip
-        pip install pre-commit
+      - name: Install pre-commit
+        run: |
+          python -m pip install --upgrade pip
+          pip install pre-commit
 
-    - name: Cache pre-commit environments
-      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
-      with:
-        path: ~/.cache/pre-commit
-        key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+      - name: Cache pre-commit environments
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
 
-    - name: Run pre-commit
-      run: pre-commit run --all-files --show-diff-on-failure
+      - name: Run pre-commit
+        run: pre-commit run --all-files --show-diff-on-failure
 
   # Verify documentation builds
   docs:
@@ -108,33 +108,33 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-    - name: Set up Python
-      uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
-      with:
-        python-version: ${{ env.PYTHON_VERSION_DEFAULT }}
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION_DEFAULT }}
 
-    - name: Validate README
-      run: |
-        # Check for broken links in README
-        python -m pip install --upgrade pip
-        pip install requests
-        python -c "
-        import re
-        import requests
-        with open('README.md', 'r') as f:
-            content = f.read()
-        urls = re.findall(r'https?://[^\s\)]+', content)
-        for url in urls:
-            try:
-                response = requests.head(url, timeout=5, allow_redirects=True)
-                if response.status_code >= 400:
-                    print(f'⚠️  Broken link: {url} (status: {response.status_code})')
-            except:
-                print(f'⚠️  Could not check: {url}')
-        "
+      - name: Validate README
+        run: |
+          # Check for broken links in README
+          python -m pip install --upgrade pip
+          pip install requests
+          python -c "
+          import re
+          import requests
+          with open('README.md', 'r') as f:
+              content = f.read()
+          urls = re.findall(r'https?://[^\s\)]+', content)
+          for url in urls:
+              try:
+                  response = requests.head(url, timeout=5, allow_redirects=True)
+                  if response.status_code >= 400:
+                      print(f'⚠️  Broken link: {url} (status: {response.status_code})')
+              except:
+                  print(f'⚠️  Could not check: {url}')
+          "
 
   # Build package to ensure it's installable
   build:
@@ -142,38 +142,38 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-    - name: Set up Python
-      uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
-      with:
-        python-version: ${{ env.PYTHON_VERSION_DEFAULT }}
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION_DEFAULT }}
 
-    - name: Install build tools
-      run: |
-        python -m pip install --upgrade pip
-        pip install build twine
+      - name: Install build tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
 
-    - name: Build package
-      run: python -m build
+      - name: Build package
+        run: python -m build
 
-    - name: Check package
-      run: |
-        twine check dist/*
-        # List package contents
-        python -m zipfile -l dist/*.whl
+      - name: Check package
+        run: |
+          twine check dist/*
+          # List package contents
+          python -m zipfile -l dist/*.whl
 
-    - name: Test installation
-      run: |
-        # Test wheel installation
-        pip install dist/*.whl
-        python -c "from networkx_mcp import server; print('✅ Package imports successfully')"
-        pip uninstall -y networkx-mcp-server
+      - name: Test installation
+        run: |
+          # Test wheel installation
+          pip install dist/*.whl
+          python -c "from networkx_mcp import server; print('✅ Package imports successfully')"
+          pip uninstall -y networkx-mcp-server
 
-        # Test sdist installation
-        pip install dist/*.tar.gz
-        python -c "from networkx_mcp import server; print('✅ Package imports successfully')"
+          # Test sdist installation
+          pip install dist/*.tar.gz
+          python -c "from networkx_mcp import server; print('✅ Package imports successfully')"
 
   # All tests passed
   ci-success:
@@ -183,13 +183,13 @@ jobs:
     if: always()
 
     steps:
-    - name: Check results
-      run: |
-        if [ "${{ needs.test.result }}" != "success" ] || \
-           [ "${{ needs.pre-commit.result }}" != "success" ] || \
-           [ "${{ needs.docs.result }}" != "success" ] || \
-           [ "${{ needs.build.result }}" != "success" ]; then
-          echo "::error::One or more CI jobs failed"
-          exit 1
-        fi
-        echo "✅ All CI checks passed!"
+      - name: Check results
+        run: |
+          if [ "${{ needs.test.result }}" != "success" ] || \
+             [ "${{ needs.pre-commit.result }}" != "success" ] || \
+             [ "${{ needs.docs.result }}" != "success" ] || \
+             [ "${{ needs.build.result }}" != "success" ]; then
+            echo "::error::One or more CI jobs failed"
+            exit 1
+          fi
+          echo "✅ All CI checks passed!"

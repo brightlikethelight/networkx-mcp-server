@@ -4,51 +4,51 @@ on:
   push:
     branches: [main]
     paths:
-      - 'docs/**'
-      - '*.md'
+      - "docs/**"
+      - "*.md"
   pull_request:
     branches: [main]
     paths:
-      - 'docs/**'
-      - '*.md'
+      - "docs/**"
+      - "*.md"
 
 jobs:
   check-docs:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-    - name: Validate documentation
-      run: |
-        echo "## Documentation Check" >> $GITHUB_STEP_SUMMARY
+      - name: Validate documentation
+        run: |
+          echo "## Documentation Check" >> $GITHUB_STEP_SUMMARY
 
-        # Verify essential docs exist
-        for f in README.md CHANGELOG.md CONTRIBUTING.md LICENSE docs/API.md; do
-          if [ -f "$f" ]; then
-            echo "- ✅ $f" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "- ❌ $f missing" >> $GITHUB_STEP_SUMMARY
-            exit 1
-          fi
-        done
-
-        # Check for broken internal doc links (relative .md references)
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### Link Check" >> $GITHUB_STEP_SUMMARY
-        BROKEN=0
-        for md in $(find docs/ -name '*.md' 2>/dev/null); do
-          # Extract relative .md links
-          for link in $(grep -oP '\]\(\K[^)]+\.md' "$md" 2>/dev/null || true); do
-            dir=$(dirname "$md")
-            target="$dir/$link"
-            if [ ! -f "$target" ]; then
-              echo "- ❌ Broken link in $md: $link" >> $GITHUB_STEP_SUMMARY
-              BROKEN=1
+          # Verify essential docs exist
+          for f in README.md CHANGELOG.md CONTRIBUTING.md LICENSE docs/API.md; do
+            if [ -f "$f" ]; then
+              echo "- ✅ $f" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- ❌ $f missing" >> $GITHUB_STEP_SUMMARY
+              exit 1
             fi
           done
-        done
-        if [ $BROKEN -eq 0 ]; then
-          echo "- ✅ No broken internal links" >> $GITHUB_STEP_SUMMARY
-        else
-          exit 1
-        fi
+
+          # Check for broken internal doc links (relative .md references)
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Link Check" >> $GITHUB_STEP_SUMMARY
+          BROKEN=0
+          for md in $(find docs/ -name '*.md' 2>/dev/null); do
+            # Extract relative .md links
+            for link in $(grep -oP '\]\(\K[^)]+\.md' "$md" 2>/dev/null || true); do
+              dir=$(dirname "$md")
+              target="$dir/$link"
+              if [ ! -f "$target" ]; then
+                echo "- ❌ Broken link in $md: $link" >> $GITHUB_STEP_SUMMARY
+                BROKEN=1
+              fi
+            done
+          done
+          if [ $BROKEN -eq 0 ]; then
+            echo "- ✅ No broken internal links" >> $GITHUB_STEP_SUMMARY
+          else
+            exit 1
+          fi
