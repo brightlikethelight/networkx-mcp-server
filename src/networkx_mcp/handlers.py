@@ -365,7 +365,7 @@ def handle_topological_sort(args: Dict[str, Any]) -> Dict[str, Any]:
             graph_name,
             "graph contains cycles; topological sort requires a DAG",
         )
-    order = list(nx.topological_sort(graph))
+    order = list(nx.topological_sort(graph))  # type: ignore[func-returns-value]
     return {"graph": graph_name, "order": order, "count": len(order)}
 
 

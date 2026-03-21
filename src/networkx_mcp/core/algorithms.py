@@ -24,8 +24,8 @@ try:
     HAS_COMMUNITY = True
 except ImportError:
     HAS_COMMUNITY = False
-    nx_comm = None
-    modularity = None
+    nx_comm = None  # type: ignore[assignment]
+    modularity = None  # type: ignore[assignment]
 
 
 class GraphAlgorithms:
@@ -50,8 +50,8 @@ class GraphAlgorithms:
 
         if method == "dijkstra":
             if target:
-                path = nx.dijkstra_path(graph, source, target, weight=weight)
-                length = nx.dijkstra_path_length(graph, source, target, weight=weight)
+                path = nx.dijkstra_path(graph, source, target, weight=weight)  # type: ignore[arg-type]
+                length = nx.dijkstra_path_length(graph, source, target, weight=weight)  # type: ignore[arg-type]
                 result = {
                     "path": path,
                     "length": length,
@@ -59,9 +59,11 @@ class GraphAlgorithms:
                     "target": target,
                 }
             else:
-                paths = nx.single_source_dijkstra_path(graph, source, weight=weight)
+                paths = nx.single_source_dijkstra_path(graph, source, weight=weight)  # type: ignore[arg-type]
                 lengths = nx.single_source_dijkstra_path_length(
-                    graph, source, weight=weight
+                    graph,
+                    source,
+                    weight=weight,  # type: ignore[arg-type]
                 )
                 result = {
                     "paths": dict(paths),
@@ -70,9 +72,12 @@ class GraphAlgorithms:
                 }
         elif method == "bellman-ford":
             if target:
-                path = nx.bellman_ford_path(graph, source, target, weight=weight)
+                path = nx.bellman_ford_path(graph, source, target, weight=weight)  # type: ignore[arg-type]
                 length = nx.bellman_ford_path_length(
-                    graph, source, target, weight=weight
+                    graph,
+                    source,
+                    target,
+                    weight=weight,  # type: ignore[arg-type]
                 )
                 result = {
                     "path": path,
@@ -81,7 +86,7 @@ class GraphAlgorithms:
                     "target": target,
                 }
             else:
-                pred, dist = nx.single_source_bellman_ford(graph, source, weight=weight)
+                pred, dist = nx.single_source_bellman_ford(graph, source, weight=weight)  # type: ignore[arg-type]
                 result = {
                     "predecessors": dict(pred),
                     "distances": dict(dist),
@@ -418,8 +423,8 @@ class GraphAlgorithms:
             }
 
             if graph.is_directed():
-                in_degrees = dict(graph.in_degree())
-                out_degrees = dict(graph.out_degree())
+                in_degrees = dict(graph.in_degree())  # type: ignore[attr-defined]
+                out_degrees = dict(graph.out_degree())  # type: ignore[attr-defined]
                 in_degree_values = list(in_degrees.values())
                 out_degree_values = list(out_degrees.values())
                 stats["in_degree_stats"] = {

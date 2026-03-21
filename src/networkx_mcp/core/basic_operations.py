@@ -314,7 +314,7 @@ def export_json(
     graph = graphs[graph_name]
 
     # Convert to node-link format (explicit edges="links" for NX 3.6+ compatibility)
-    data = nx.node_link_data(graph, edges="links")
+    data = nx.node_link_data(graph, edges="links")  # type: ignore[call-arg]
 
     return {
         "graph_data": data,

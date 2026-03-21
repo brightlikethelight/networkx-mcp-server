@@ -6,22 +6,22 @@ services:
       dockerfile: Dockerfile
     image: networkx-mcp:3.1.0
     container_name: networkx-mcp-server
-    stdin_open: true      # Keep stdin open (-i flag)
-    tty: true             # Allocate pseudo-TTY (-t flag)
-    init: true            # Use init process for signal handling
+    stdin_open: true # Keep stdin open (-i flag)
+    tty: true # Allocate pseudo-TTY (-t flag)
+    init: true # Use init process for signal handling
     # No ports - stdio only
     environment:
       - LOG_LEVEL=INFO
-      - PYTHONUNBUFFERED=1  # Ensure unbuffered output
-      - DOCKER_CONTAINER=true  # Indicate running in container
+      - PYTHONUNBUFFERED=1 # Ensure unbuffered output
+      - DOCKER_CONTAINER=true # Indicate running in container
     # Resource limits for safety
     deploy:
       resources:
         limits:
-          cpus: '1'
+          cpus: "1"
           memory: 512M
         reservations:
-          cpus: '0.25'
+          cpus: "0.25"
           memory: 128M
     # Health check disabled - stdio mode doesn't support HTTP health checks
     # healthcheck:

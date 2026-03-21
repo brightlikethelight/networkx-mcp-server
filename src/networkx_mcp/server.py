@@ -244,7 +244,7 @@ class NetworkXMCPServer:
                     },
                 }
             graph = graphs[graph_id]
-            data = nx.node_link_data(graph, edges="links")
+            data = nx.node_link_data(graph, edges="links")  # type: ignore[call-arg]
             result = {
                 "contents": [
                     {

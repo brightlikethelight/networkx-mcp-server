@@ -316,7 +316,7 @@ class GraphDict(dict):
     def keys(self) -> List[str]:  # type: ignore[override]
         return self._cache.list_graphs()
 
-    def get(self, key: str, default: Optional[nx.Graph] = None) -> Optional[nx.Graph]:
+    def get(self, key: str, default: Optional[nx.Graph] = None) -> Optional[nx.Graph]:  # type: ignore[override]
         graph = self._cache.get(key)
         return graph if graph is not None else default
 
