@@ -50,7 +50,7 @@ dev = [
     "pre-commit>=4.0.0",  # Git hooks
     "uv>=0.5.0",  # Fast package manager
     "pytest-timeout>=2.0.0",  # For --timeout in pytest addopts
-    "hypothesis>=6.0.0",  # For property-based testing
+    "hypothesis>=6.151.12",  # For property-based testing
     "types-requests>=2.28.0",  # Type stubs for requests
     "scipy>=1.7.0",  # Required by NetworkX for pagerank + Kamada-Kawai layout
 ]
