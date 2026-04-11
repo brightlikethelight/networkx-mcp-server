@@ -46,7 +46,7 @@ dev = [
     "coverage>=7.0.0",  # For coverage reporting
     "ruff==0.12.10",  # Pinned to match .pre-commit-config.yaml
     "mypy>=1.13.0",  # Type checking
-    "bandit>=1.8.0",  # Security scanning
+    "bandit>=1.9.4",  # Security scanning
     "pre-commit>=4.0.0",  # Git hooks
     "uv>=0.5.0",  # Fast package manager
     "pytest-timeout>=2.0.0",  # For --timeout in pytest addopts
